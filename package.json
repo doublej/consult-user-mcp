@@ -1,0 +1,14 @@
+{
+  "name": "speak-mcp",
+  "private": true,
+  "description": "Native macOS dialog system for MCP servers",
+  "scripts": {
+    "build": "pnpm --filter mcp-server build",
+    "build:cli": "swiftc -O -o dialog-cli/dialog-cli dialog-cli/dialog-cli.swift -framework AppKit -framework AVFoundation -framework UserNotifications",
+    "build:app": "cd macos-app && swift build -c release",
+    "start": "pnpm --filter mcp-server start"
+  },
+  "workspaces": [
+    "mcp-server"
+  ]
+}

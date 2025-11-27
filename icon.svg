@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2D1B69"/>
+      <stop offset="100%" stop-color="#11001C"/>
+    </linearGradient>
+    <linearGradient id="leftCircle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8A65"/>
+      <stop offset="100%" stop-color="#FF5722"/>
+    </linearGradient>
+    <linearGradient id="rightCircle" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFCCBC"/>
+      <stop offset="100%" stop-color="#FF8A65"/>
+    </linearGradient>
+    <clipPath id="iconClip">
+      <rect width="1024" height="1024" rx="228"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#iconClip)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+
+    <!-- Left circle rings -->
+    <g transform="translate(380, 512)">
+      <circle r="280" fill="none" stroke="url(#leftCircle)" stroke-width="2" opacity="0.15"/>
+      <circle r="230" fill="none" stroke="url(#leftCircle)" stroke-width="3" opacity="0.25"/>
+      <circle r="180" fill="none" stroke="url(#leftCircle)" stroke-width="4" opacity="0.4"/>
+      <circle r="130" fill="none" stroke="url(#leftCircle)" stroke-width="6" opacity="0.6"/>
+      <circle r="80" fill="url(#leftCircle)" opacity="0.9"/>
+    </g>
+
+    <!-- Right circle rings -->
+    <g transform="translate(644, 512)">
+      <circle r="280" fill="none" stroke="url(#rightCircle)" stroke-width="2" opacity="0.15"/>
+      <circle r="230" fill="none" stroke="url(#rightCircle)" stroke-width="3" opacity="0.25"/>
+      <circle r="180" fill="none" stroke="url(#rightCircle)" stroke-width="4" opacity="0.4"/>
+      <circle r="130" fill="none" stroke="url(#rightCircle)" stroke-width="6" opacity="0.6"/>
+      <circle r="80" fill="url(#rightCircle)" opacity="0.9"/>
+    </g>
+
+  </g>
+</svg>

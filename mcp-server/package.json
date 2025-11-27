@@ -1,0 +1,22 @@
+{
+  "name": "speak-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for macOS native dialogs and text-to-speech",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npm run build:swift && tsc",
+    "build:swift": "swiftc -O -o ../dialog-cli/dialog-cli ../dialog-cli/dialog-cli.swift -framework AppKit -framework AVFoundation",
+    "build:ts": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}

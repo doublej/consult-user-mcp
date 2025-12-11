@@ -149,12 +149,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return path
         }
 
-        // Fallback: hardcoded dev path
-        let hardcodedPath = "/Users/jurrejan/Documents/development/mcp/consult-user-mcp/dialog-cli/dialog-cli"
-        if FileManager.default.fileExists(atPath: hardcodedPath) {
-            return hardcodedPath
-        }
-
         return "/usr/local/bin/dialog-cli"
     }
 

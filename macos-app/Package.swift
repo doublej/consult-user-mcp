@@ -2,11 +2,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "SpeakSettings",
+    name: "ConsultUserMCP",
     platforms: [.macOS(.v14)],
     targets: [
         .executableTarget(
-            name: "SpeakSettings",
+            name: "ConsultUserMCP",
             path: "Sources",
             resources: [.process("Resources")]
         )

@@ -428,12 +428,6 @@ args = ["\(actualPath)"]
             }
         }
 
-        // Check common development paths
-        let devPath = "/Users/jurrejan/Documents/development/mcp/consult-user-mcp/mcp-server/dist/index.js"
-        if fm.fileExists(atPath: devPath) {
-            return devPath
-        }
-
         return "/path/to/consult-user-mcp/mcp-server/dist/index.js"
     }
 

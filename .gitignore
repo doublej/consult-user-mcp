@@ -21,7 +21,7 @@ macos-app/.build/
 macos-app/.swiftpm/
 
 # Distribution archive
-Speak MCP.app.zip
+Consult User MCP.app.zip
 
 # Generated icons (keep SVG source)
 *.icns
@@ -29,7 +29,10 @@ icon.iconset/
 icon-v*.svg
 
 # App bundle (distributed via GitHub Releases)
-Speak MCP.app/
+Consult User MCP.app/
+
+# Local dialog-cli binary
+macos-app/dialog-cli/
 
 # Local dev files
 .history-analysis/

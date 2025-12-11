@@ -67,7 +67,7 @@ struct SettingsView: View {
                     endPoint: .bottomTrailing
                 ))
 
-            Text("Speak MCP")
+            Text("Consult User MCP")
                 .font(.system(size: 14, weight: .semibold))
 
             Spacer()

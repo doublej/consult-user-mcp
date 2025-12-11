@@ -132,12 +132,15 @@ struct SwiftUIAccordionDialog: View {
     let questions: [QuestionItem]
     let onComplete: ([String: QuestionAnswer]) -> Void
     let onCancel: () -> Void
+    let onSnooze: (Int) -> Void
+    let onFeedback: (String) -> Void
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
     @State private var expandedId: String?
     @State private var answers: [String: QuestionAnswer] = [:]
     @State private var textInputs: [String: String] = [:]
     @State private var focusedOptionIndex: Int = 0
+    @State private var expandedTool: DialogToolbar.ToolbarTool?
 
     private var answeredCount: Int {
         answers.values.filter { !$0.isEmpty }.count
@@ -212,6 +215,12 @@ struct SwiftUIAccordionDialog: View {
                         }
                     }
                 }
+
+                DialogToolbar(
+                    expandedTool: $expandedTool,
+                    onSnooze: onSnooze,
+                    onFeedback: onFeedback
+                )
 
                 // Footer buttons
                 VStack(spacing: 8) {

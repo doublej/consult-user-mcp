@@ -11,11 +11,14 @@ struct SwiftUIChooseDialog: View {
     let defaultSelection: String?
     let onComplete: (Set<Int>) -> Void
     let onCancel: () -> Void
+    let onSnooze: (Int) -> Void
+    let onFeedback: (String) -> Void
 
     @State private var selectedIndices: Set<Int> = []
     @State private var focusedIndex: Int = 0
+    @State private var expandedTool: DialogToolbar.ToolbarTool?
 
-    init(prompt: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void) {
+    init(prompt: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String) -> Void) {
         self.prompt = prompt
         self.choices = choices
         self.descriptions = descriptions
@@ -23,6 +26,8 @@ struct SwiftUIChooseDialog: View {
         self.defaultSelection = defaultSelection
         self.onComplete = onComplete
         self.onCancel = onCancel
+        self.onSnooze = onSnooze
+        self.onFeedback = onFeedback
 
         if let defaultSel = defaultSelection, let idx = choices.firstIndex(of: defaultSel) {
             _selectedIndices = State(initialValue: [idx])
@@ -35,6 +40,13 @@ struct SwiftUIChooseDialog: View {
             VStack(spacing: 0) {
                 headerView
                 choicesScrollView
+
+                DialogToolbar(
+                    expandedTool: $expandedTool,
+                    onSnooze: onSnooze,
+                    onFeedback: onFeedback
+                )
+
                 footerView
             }
             .accessibilityElement(children: .contain)

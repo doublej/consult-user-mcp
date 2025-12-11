@@ -77,6 +77,11 @@ static func run() {
         manager.setClientName(clientName)
     }
 
+    // Set theme from environment variable
+    if let themeName = ProcessInfo.processInfo.environment["DIALOG_THEME"] {
+        ThemeManager.shared.setTheme(named: themeName)
+    }
+
     guard let jsonData = jsonInput.data(using: .utf8) else {
         fputs("Invalid JSON input\n", stderr)
         exit(1)

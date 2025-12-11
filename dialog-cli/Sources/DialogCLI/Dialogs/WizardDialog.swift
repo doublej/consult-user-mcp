@@ -93,11 +93,14 @@ struct SwiftUIWizardDialog: View {
     let questions: [QuestionItem]
     let onComplete: ([String: QuestionAnswer]) -> Void
     let onCancel: () -> Void
+    let onSnooze: (Int) -> Void
+    let onFeedback: (String) -> Void
 
     @State private var currentIndex = 0
     @State private var answers: [String: QuestionAnswer] = [:]
     @State private var focusedOptionIndex: Int = 0
     @State private var textInputs: [String: String] = [:]
+    @State private var expandedTool: DialogToolbar.ToolbarTool?
 
     private var currentQuestion: QuestionItem { questions[currentIndex] }
     private var currentAnswer: QuestionAnswer { answers[currentQuestion.id] ?? (currentQuestion.type == .text ? .text("") : .choices([])) }
@@ -146,6 +149,12 @@ struct SwiftUIWizardDialog: View {
                         }
                     }
                 }
+
+                DialogToolbar(
+                    expandedTool: $expandedTool,
+                    onSnooze: onSnooze,
+                    onFeedback: onFeedback
+                )
 
                 // Navigation buttons
                 VStack(spacing: 8) {

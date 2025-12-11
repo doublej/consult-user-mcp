@@ -54,4 +54,7 @@ struct QuestionsResponse: Codable {
     let cancelled: Bool
     let dismissed: Bool
     let completedCount: Int
+    let snoozed: Bool?
+    let snoozeMinutes: Int?
+    let feedbackText: String?
 }

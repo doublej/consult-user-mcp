@@ -10,6 +10,10 @@ struct SwiftUIConfirmDialog: View {
     let cancelLabel: String
     let onConfirm: () -> Void
     let onCancel: () -> Void
+    let onSnooze: (Int) -> Void
+    let onFeedback: (String) -> Void
+
+    @State private var expandedTool: DialogToolbar.ToolbarTool?
 
     var body: some View {
         DialogContainer(keyHandler: { keyCode, _ in
@@ -22,6 +26,12 @@ struct SwiftUIConfirmDialog: View {
             VStack(spacing: 0) {
                 DialogHeader(icon: "questionmark", title: title, subtitle: message)
                     .padding(.bottom, 12)
+
+                DialogToolbar(
+                    expandedTool: $expandedTool,
+                    onSnooze: onSnooze,
+                    onFeedback: onFeedback
+                )
 
                 DialogFooter(
                     hints: [

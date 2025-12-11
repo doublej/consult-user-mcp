@@ -31,6 +31,9 @@ struct ConfirmResponse: Codable {
     let dismissed: Bool
     let answer: String?
     let comment: String?
+    let snoozed: Bool?
+    let snoozeMinutes: Int?
+    let feedbackText: String?
 }
 
 struct ChoiceResponse: Codable {
@@ -41,6 +44,9 @@ struct ChoiceResponse: Codable {
     let description: String?
     let descriptions: [String?]?
     let comment: String?
+    let snoozed: Bool?
+    let snoozeMinutes: Int?
+    let feedbackText: String?
 }
 
 struct TextInputResponse: Codable {
@@ -49,6 +55,9 @@ struct TextInputResponse: Codable {
     let cancelled: Bool
     let dismissed: Bool
     let comment: String?
+    let snoozed: Bool?
+    let snoozeMinutes: Int?
+    let feedbackText: String?
 }
 
 struct NotifyResponse: Codable {

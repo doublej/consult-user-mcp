@@ -7,11 +7,14 @@ struct SwiftUIQuestionnaireDialog: View {
     let questions: [QuestionItem]
     let onComplete: ([String: QuestionAnswer]) -> Void
     let onCancel: () -> Void
+    let onSnooze: (Int) -> Void
+    let onFeedback: (String) -> Void
 
     @State private var answers: [String: QuestionAnswer] = [:]
     @State private var textInputs: [String: String] = [:]
     @State private var focusedQuestionIndex: Int = 0
     @State private var focusedOptionIndex: Int = 0
+    @State private var expandedTool: DialogToolbar.ToolbarTool?
 
     private var answeredCount: Int {
         answers.values.filter { !$0.isEmpty }.count
@@ -135,6 +138,12 @@ struct SwiftUIQuestionnaireDialog: View {
                         }
                     }
                 }
+
+                DialogToolbar(
+                    expandedTool: $expandedTool,
+                    onSnooze: onSnooze,
+                    onFeedback: onFeedback
+                )
 
                 // Footer buttons
                 VStack(spacing: 8) {

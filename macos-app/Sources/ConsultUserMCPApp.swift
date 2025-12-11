@@ -40,22 +40,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover?.contentViewController = NSHostingController(rootView: SettingsView())
 
         setupDebugMenu()
-        setupPulseNotificationObserver()
-    }
-
-    private func setupPulseNotificationObserver() {
-        DistributedNotificationCenter.default().addObserver(
-            self,
-            selector: #selector(handlePulseNotification),
-            name: NSNotification.Name("com.consult-user-mcp.pulse"),
-            object: nil
-        )
-    }
-
-    @objc private func handlePulseNotification(_ notification: Notification) {
-        DispatchQueue.main.async { [weak self] in
-            self?.testShader()
-        }
     }
 
     private func setupDebugMenu() {
@@ -85,10 +69,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let ttsItem = NSMenuItem(title: "Test TTS", action: #selector(testTts), keyEquivalent: "5")
         ttsItem.target = self
         debugMenu?.addItem(ttsItem)
-
-        let shaderItem = NSMenuItem(title: "Test Shader Pulse", action: #selector(testShader), keyEquivalent: "6")
-        shaderItem.target = self
-        debugMenu?.addItem(shaderItem)
 
         debugMenu?.addItem(NSMenuItem.separator())
 
@@ -231,20 +211,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         {"text":"Hello! This is a test of the speech synthesis feature.","voice":null,"rate":\(Int(settings.speechRate))}
         """
         runDialogCli(command: "tts", json: json)
-    }
-
-    private var shaderWindow: ShaderOverlayWindow?
-
-    @objc func testShader() {
-        guard let button = statusItem?.button,
-              let screen = NSScreen.main else { return }
-
-        let buttonFrame = button.window?.convertToScreen(button.frame) ?? .zero
-        let originX = (buttonFrame.midX) / screen.frame.width
-        let originY = 1.0 - (buttonFrame.midY / screen.frame.height)
-
-        shaderWindow = ShaderOverlayWindow(origin: CGPoint(x: originX, y: originY))
-        shaderWindow?.makeKeyAndOrderFront(nil)
     }
 
     @objc func testAll() {

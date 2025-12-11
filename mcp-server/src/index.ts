@@ -9,7 +9,7 @@ const provider = new SwiftDialogProvider();
 const pos = z.enum(["left", "right", "center"]).default("left");
 
 server.registerTool("ask_confirmation", {
-  description: "Yes/No dialog. Returns {confirmed, cancelled, response}. 10 min timeout.",
+  description: "Yes/No dialog. Returns {confirmed, cancelled, response}. 10 min timeout. User may snooze (snoozed, snoozeMinutes) or provide feedback (feedbackText) instead.",
   inputSchema: z.object({
     message: z.string().min(1).max(500),
     title: z.string().max(100).default("Confirmation"),
@@ -28,7 +28,7 @@ server.registerTool("ask_confirmation", {
 });
 
 server.registerTool("ask_multiple_choice", {
-  description: "List picker dialog. Returns {selected, cancelled, description}. 10 min timeout.",
+  description: "List picker dialog. Returns {selected, cancelled, description}. 10 min timeout. User may snooze (snoozed, snoozeMinutes) or provide feedback (feedbackText) instead.",
   inputSchema: z.object({
     prompt: z.string().min(1).max(500),
     choices: z.array(z.string().min(1).max(100)).min(2).max(20),
@@ -48,7 +48,7 @@ server.registerTool("ask_multiple_choice", {
 });
 
 server.registerTool("ask_text_input", {
-  description: "Text input dialog. Returns {text, cancelled}. Supports hidden input. 10 min timeout.",
+  description: "Text input dialog. Returns {text, cancelled}. Supports hidden input. 10 min timeout. User may snooze (snoozed, snoozeMinutes) or provide feedback (feedbackText) instead.",
   inputSchema: z.object({
     prompt: z.string().min(1).max(500),
     title: z.string().max(100).default("Input"),
@@ -94,10 +94,10 @@ const questionSchema = z.object({
 });
 
 server.registerTool("ask_questions", {
-  description: "Multi-question dialog. Modes: wizard (prev/next), accordion (collapsible), questionnaire (all visible). Returns {answers, cancelled, completedCount}.",
+  description: "Multi-question dialog. Modes: wizard (prev/next), accordion (collapsible). Returns {answers, cancelled, completedCount}. User may snooze (snoozed, snoozeMinutes) or provide feedback (feedbackText) instead.",
   inputSchema: z.object({
     questions: z.array(questionSchema).min(1).max(10),
-    mode: z.enum(["wizard", "accordion", "questionnaire"]).default("wizard"),
+    mode: z.enum(["wizard", "accordion"]).default("wizard"),
     position: pos,
   }),
 }, async (p) => {

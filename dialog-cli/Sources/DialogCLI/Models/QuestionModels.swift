@@ -57,4 +57,5 @@ struct QuestionsResponse: Codable {
     let snoozed: Bool?
     let snoozeMinutes: Int?
     let feedbackText: String?
+    let instruction: String?
 }

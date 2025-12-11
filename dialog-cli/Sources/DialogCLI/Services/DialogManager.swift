@@ -69,7 +69,7 @@ class DialogManager {
 
         var result: ConfirmResponse?
         let windowWidth: CGFloat = 420
-        let windowHeight: CGFloat = 360
+        let windowHeight: CGFloat = 450  // Extra height for toolbar expansion
 
         let (window, contentView) = createWindow(width: windowWidth, height: windowHeight)
 
@@ -80,19 +80,19 @@ class DialogManager {
             confirmLabel: request.confirmLabel,
             cancelLabel: request.cancelLabel,
             onConfirm: {
-                result = ConfirmResponse(dialogType: "confirm", confirmed: true, cancelled: false, dismissed: false, answer: request.confirmLabel, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+                result = ConfirmResponse(dialogType: "confirm", confirmed: true, cancelled: false, dismissed: false, answer: request.confirmLabel, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
                 NSApp.stopModal()
             },
             onCancel: {
-                result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: request.cancelLabel, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+                result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: request.cancelLabel, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
                 NSApp.stopModal()
             },
             onSnooze: { minutes in
-                result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: nil, comment: nil, snoozed: true, snoozeMinutes: minutes, feedbackText: nil)
+                result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: nil, comment: nil, snoozed: true, snoozeMinutes: minutes, feedbackText: nil, instruction: "Set a timer for \(minutes) minute\(minutes == 1 ? "" : "s") and re-ask this question when it fires.")
                 NSApp.stopModal()
             },
             onFeedback: { feedback in
-                result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: feedback)
+                result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: feedback, instruction: nil)
                 NSApp.stopModal()
             }
         )
@@ -109,7 +109,7 @@ class DialogManager {
         NSApp.runModal(for: window)
         window.close()
 
-        return result ?? ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: true, dismissed: true, answer: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+        return result ?? ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: true, dismissed: true, answer: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
     }
 
     // MARK: - Choose Dialog (SwiftUI)
@@ -132,26 +132,26 @@ class DialogManager {
             defaultSelection: request.defaultSelection,
             onComplete: { selectedIndices in
                 if selectedIndices.isEmpty {
-                    result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+                    result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
                 } else if request.allowMultiple {
                     let selected = selectedIndices.sorted().map { request.choices[$0] }
                     let descs = selectedIndices.sorted().map { request.descriptions?[safe: $0] }
-                    result = ChoiceResponse(dialogType: "choose", answer: .multiple(selected), cancelled: false, dismissed: false, description: nil, descriptions: descs, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+                    result = ChoiceResponse(dialogType: "choose", answer: .multiple(selected), cancelled: false, dismissed: false, description: nil, descriptions: descs, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
                 } else if let idx = selectedIndices.first {
-                    result = ChoiceResponse(dialogType: "choose", answer: .single(request.choices[idx]), cancelled: false, dismissed: false, description: request.descriptions?[safe: idx], descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+                    result = ChoiceResponse(dialogType: "choose", answer: .single(request.choices[idx]), cancelled: false, dismissed: false, description: request.descriptions?[safe: idx], descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
                 }
                 NSApp.stopModal()
             },
             onCancel: {
-                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
                 NSApp.stopModal()
             },
             onSnooze: { minutes in
-                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: true, snoozeMinutes: minutes, feedbackText: nil)
+                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: true, snoozeMinutes: minutes, feedbackText: nil, instruction: "Set a timer for \(minutes) minute\(minutes == 1 ? "" : "s") and re-ask this question when it fires.")
                 NSApp.stopModal()
             },
             onFeedback: { feedback in
-                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: feedback)
+                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: feedback, instruction: nil)
                 NSApp.stopModal()
             }
         )
@@ -168,7 +168,7 @@ class DialogManager {
         NSApp.runModal(for: window)
         window.close()
 
-        return result ?? ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: true, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+        return result ?? ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: true, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
     }
 
     // MARK: - Text Input Dialog (Full AppKit with Modern Design)
@@ -269,12 +269,12 @@ class DialogManager {
         contentView.addSubview(submitButton)
 
         submitButton.onClick = {
-            result = TextInputResponse(dialogType: "textInput", answer: inputField.textField.stringValue, cancelled: false, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+            result = TextInputResponse(dialogType: "textInput", answer: inputField.textField.stringValue, cancelled: false, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
             NSApp.stopModal()
         }
 
         cancelButton.onClick = {
-            result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+            result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
             NSApp.stopModal()
         }
 
@@ -297,11 +297,11 @@ class DialogManager {
         // Handle Enter to submit, Escape to cancel
         let keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             if event.keyCode == 36 { // Enter/Return
-                result = TextInputResponse(dialogType: "textInput", answer: inputField.textField.stringValue, cancelled: false, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+                result = TextInputResponse(dialogType: "textInput", answer: inputField.textField.stringValue, cancelled: false, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
                 NSApp.stopModal()
                 return nil
             } else if event.keyCode == 53 { // Escape
-                result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+                result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
                 NSApp.stopModal()
                 return nil
             }
@@ -312,7 +312,7 @@ class DialogManager {
         if let monitor = keyMonitor { NSEvent.removeMonitor(monitor) }
         window.close()
 
-        return result ?? TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: true, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+        return result ?? TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: true, comment: nil, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
     }
 
     // MARK: - Notify (using osascript for bundle-free notifications)
@@ -411,7 +411,7 @@ class DialogManager {
                 }
             }
 
-            return QuestionsResponse(dialogType: "questions", answers: responseAnswers, cancelled: cancelled, dismissed: dismissed, completedCount: completedCount, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+            return QuestionsResponse(dialogType: "questions", answers: responseAnswers, cancelled: cancelled, dismissed: dismissed, completedCount: completedCount, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
         }
 
         let onComplete: ([String: QuestionAnswer]) -> Void = { answers in
@@ -420,17 +420,17 @@ class DialogManager {
         }
 
         let onCancel: () -> Void = {
-            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: false, completedCount: 0, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: false, completedCount: 0, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
             NSApp.stopModal()
         }
 
         let onSnooze: (Int) -> Void = { minutes in
-            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: true, snoozeMinutes: minutes, feedbackText: nil)
+            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: true, snoozeMinutes: minutes, feedbackText: nil, instruction: "Set a timer for \(minutes) minute\(minutes == 1 ? "" : "s") and re-ask this question when it fires.")
             NSApp.stopModal()
         }
 
         let onFeedback: (String) -> Void = { feedback in
-            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: nil, snoozeMinutes: nil, feedbackText: feedback)
+            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: nil, snoozeMinutes: nil, feedbackText: feedback, instruction: nil)
             NSApp.stopModal()
         }
 
@@ -447,19 +447,9 @@ class DialogManager {
                     onFeedback: onFeedback
                 )
             ))
-        case "accordion":
+        default: // "accordion"
             hostingView = NSHostingView(rootView: AnyView(
                 SwiftUIAccordionDialog(
-                    questions: request.questions,
-                    onComplete: onComplete,
-                    onCancel: onCancel,
-                    onSnooze: onSnooze,
-                    onFeedback: onFeedback
-                )
-            ))
-        default: // "questionnaire"
-            hostingView = NSHostingView(rootView: AnyView(
-                SwiftUIQuestionnaireDialog(
                     questions: request.questions,
                     onComplete: onComplete,
                     onCancel: onCancel,
@@ -479,6 +469,6 @@ class DialogManager {
         NSApp.runModal(for: window)
         window.close()
 
-        return result ?? QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: true, completedCount: 0, snoozed: nil, snoozeMinutes: nil, feedbackText: nil)
+        return result ?? QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: true, completedCount: 0, snoozed: nil, snoozeMinutes: nil, feedbackText: nil, instruction: nil)
     }
 }

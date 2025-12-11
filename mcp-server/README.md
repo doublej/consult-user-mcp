@@ -6,11 +6,13 @@ An MCP server for interacting with users through native macOS dialogs and speech
 
 | Tool | Description |
 |------|-------------|
-| `ask_confirmation` | Display a dialog with custom buttons (Yes/No, Save/Cancel, etc.) |
-| `ask_multiple_choice` | Show a scrollable list picker for selecting from many options |
-| `ask_text_input` | Prompt for free-form text input (with optional password masking) |
-| `notify_user` | Send a macOS notification banner (non-blocking) |
-| `speak_to_user` | Use text-to-speech to speak aloud |
+| `ask_confirmation` | Yes/No dialog with custom buttons |
+| `ask_multiple_choice` | Scrollable list picker (single or multi-select) |
+| `ask_text_input` | Free-form text input (supports password masking) |
+| `ask_questions` | Multi-question dialog (wizard or accordion mode) |
+| `notify_user` | macOS notification banner (non-blocking) |
+
+All interactive dialogs support **snooze** (defer with 1-60 min delay) and **feedback** (user provides text instead of answering).
 
 ## Requirements
 

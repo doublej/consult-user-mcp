@@ -122,6 +122,17 @@ final class FocusManager {
         }
     }
 
+    /// Focus the last content view (bottommost on screen)
+    func focusLast() {
+        let validViews = contentViews
+            .filter { $0.window != nil && $0.canBecomeKeyView }
+            .sorted(by: sortByPosition)
+        if let last = validViews.last {
+            last.window?.makeFirstResponder(last)
+            currentContentIndex = validViews.count - 1
+        }
+    }
+
     // MARK: - Private
 
     private func sortByPosition(_ view1: NSView, _ view2: NSView) -> Bool {

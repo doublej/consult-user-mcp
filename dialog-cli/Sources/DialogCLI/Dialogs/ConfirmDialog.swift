@@ -15,13 +15,31 @@ struct SwiftUIConfirmDialog: View {
 
     @State private var expandedTool: DialogToolbar.ToolbarTool?
 
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+
     var body: some View {
         DialogContainer(keyHandler: { keyCode, _ in
-            if keyCode == 36 { // Enter/Return - confirm
+            switch keyCode {
+            case 53: // Esc - close panel first, then dismiss
+                if expandedTool != nil {
+                    toggleTool(expandedTool!)
+                    return true
+                }
+                return false // Let DialogContainer handle dismiss
+            case 36: // Enter/Return - confirm
+                // Don't intercept Enter if feedback panel is expanded (let text field handle it)
+                if expandedTool == .feedback { return false }
                 onConfirm()
                 return true
+            case 1: // S - toggle snooze
+                toggleTool(.snooze)
+                return true
+            case 3: // F - toggle feedback (only if not already typing)
+                if expandedTool != .feedback { toggleTool(.feedback) }
+                return true
+            default:
+                return false
             }
-            return false
         }) {
             VStack(spacing: 0) {
                 DialogHeader(icon: "questionmark", title: title, subtitle: message)
@@ -36,7 +54,9 @@ struct SwiftUIConfirmDialog: View {
                 DialogFooter(
                     hints: [
                         KeyboardHint(key: "⏎", label: "confirm"),
-                        KeyboardHint(key: "Esc", label: "cancel")
+                        KeyboardHint(key: "Esc", label: "cancel"),
+                        KeyboardHint(key: "S", label: "snooze"),
+                        KeyboardHint(key: "F", label: "feedback")
                     ],
                     buttons: [
                         .init(cancelLabel, action: onCancel),
@@ -46,6 +66,16 @@ struct SwiftUIConfirmDialog: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityLabel(Text("\(title). \(message)"))
+        }
+    }
+
+    private func toggleTool(_ tool: DialogToolbar.ToolbarTool) {
+        if reduceMotion {
+            expandedTool = expandedTool == tool ? nil : tool
+        } else {
+            withAnimation(.easeOut(duration: 0.2)) {
+                expandedTool = expandedTool == tool ? nil : tool
+            }
         }
     }
 }

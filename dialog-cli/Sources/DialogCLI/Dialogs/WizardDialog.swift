@@ -162,7 +162,8 @@ struct SwiftUIWizardDialog: View {
                         KeyboardHint(key: "↑↓", label: "navigate"),
                         KeyboardHint(key: "Space", label: "select"),
                         KeyboardHint(key: "⏎", label: isLast ? "done" : "next"),
-                        KeyboardHint(key: "Esc", label: "cancel")
+                        KeyboardHint(key: "S", label: "snooze"),
+                        KeyboardHint(key: "F", label: "feedback")
                     ])
                     HStack(spacing: 10) {
                         if isFirst {
@@ -200,10 +201,16 @@ struct SwiftUIWizardDialog: View {
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
         // Navigation (Tab, up/down arrows) and Space handled by FocusManager + focused views
         switch keyCode {
-        case 53: // ESC
+        case 53: // Esc - close panel first, then dismiss
+            if expandedTool != nil {
+                toggleTool(expandedTool!)
+                return true
+            }
             onCancel()
             return true
         case 36: // Enter/Return - next or complete
+            // Don't intercept Enter if feedback panel is expanded (let text field handle it)
+            if expandedTool == .feedback { return false }
             if !currentAnswer.isEmpty {
                 if isLast { onComplete(answers) } else { goNext() }
             }
@@ -214,8 +221,20 @@ struct SwiftUIWizardDialog: View {
         case 123: // Left arrow - previous question
             if !isFirst { goBack() }
             return true
+        case 1: // S - toggle snooze
+            toggleTool(.snooze)
+            return true
+        case 3: // F - toggle feedback (only if not already typing)
+            if expandedTool != .feedback { toggleTool(.feedback) }
+            return true
         default:
             return false
+        }
+    }
+
+    private func toggleTool(_ tool: DialogToolbar.ToolbarTool) {
+        withAnimation(.easeOut(duration: 0.2)) {
+            expandedTool = expandedTool == tool ? nil : tool
         }
     }
 

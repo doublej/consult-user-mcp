@@ -66,6 +66,13 @@ struct DialogToolbar: View {
             .padding(.vertical, 8)
         }
         .background(Theme.Colors.cardBackground.opacity(0.5))
+        .onChange(of: expandedTool) { newTool in
+            if newTool == .feedback {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    FocusManager.shared.focusLast()
+                }
+            }
+        }
     }
 
     private func toggleTool(_ tool: ToolbarTool) {

@@ -227,8 +227,9 @@ struct SwiftUIAccordionDialog: View {
                     KeyboardHintsView(hints: [
                         KeyboardHint(key: "↑↓", label: "navigate"),
                         KeyboardHint(key: "Space", label: "select"),
-                        KeyboardHint(key: "Tab", label: "section"),
-                        KeyboardHint(key: "⏎", label: "done")
+                        KeyboardHint(key: "⏎", label: "done"),
+                        KeyboardHint(key: "S", label: "snooze"),
+                        KeyboardHint(key: "F", label: "feedback")
                     ])
                     HStack(spacing: 10) {
                         FocusableButton(title: "Cancel", isPrimary: false, action: onCancel)
@@ -284,13 +285,25 @@ struct SwiftUIAccordionDialog: View {
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
         switch keyCode {
-        case 53: // ESC
+        case 53: // Esc - close panel first, then dismiss
+            if expandedTool != nil {
+                toggleToolbarTool(expandedTool!)
+                return true
+            }
             onCancel()
             return true
         case 36: // Enter/Return - complete if any answers
+            // Don't intercept Enter if feedback panel is expanded (let text field handle it)
+            if expandedTool == .feedback { return false }
             if answeredCount > 0 {
                 onComplete(answers)
             }
+            return true
+        case 1: // S - toggle snooze
+            toggleToolbarTool(.snooze)
+            return true
+        case 3: // F - toggle feedback (only if not already typing)
+            if expandedTool != .feedback { toggleToolbarTool(.feedback) }
             return true
         case 48: // Tab - switch sections, then to buttons
             if modifiers.contains(.shift) {
@@ -332,4 +345,13 @@ struct SwiftUIAccordionDialog: View {
         }
     }
 
+    private func toggleToolbarTool(_ tool: DialogToolbar.ToolbarTool) {
+        if reduceMotion {
+            expandedTool = expandedTool == tool ? nil : tool
+        } else {
+            withAnimation(.easeOut(duration: 0.2)) {
+                expandedTool = expandedTool == tool ? nil : tool
+            }
+        }
+    }
 }

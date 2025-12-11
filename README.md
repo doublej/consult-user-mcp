@@ -4,10 +4,36 @@ Native macOS dialog system for MCP (Model Context Protocol) servers.
 
 ## Install
 
+### Option 1: MCP Server Only
+
+```bash
+git clone https://github.com/doublej/consult-user-mcp.git
+cd consult-user-mcp/mcp-server
+pnpm install && pnpm build
+```
+
+Add to your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "consult-user-mcp": {
+      "command": "node",
+      "args": ["/path/to/consult-user-mcp/mcp-server/dist/index.js"]
+    }
+  }
+}
+```
+
+### Option 2: With macOS App (Optional)
+
+The menu bar app provides a settings UI for dialog position, sounds, and speech rate. It's not required for the MCP server to work.
+
 1. Download **Consult User MCP.app.zip** from [Releases](../../releases)
 2. Unzip and drag to `/Applications`
-3. Launch it - a menu bar icon appears
-4. Add the MCP server to Claude Code:
+3. Launch it - a menu bar icon appears with settings access
+
+Use the bundled MCP server:
 
 ```json
 {
@@ -27,7 +53,7 @@ pnpm install
 pnpm build
 ```
 
-Creates `Consult User MCP.app` in project root.
+Creates `Consult User MCP.app` in project root (optional).
 
 ## Structure
 

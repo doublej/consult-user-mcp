@@ -1996,39 +1996,6 @@ class SpeechCompletionDelegate: NSObject, AVSpeechSynthesizerDelegate {
     }
 }
 
-// MARK: - Settings Reader
-
-struct UserSettings {
-    var position: String = "left"
-    var speechRate: Int = 200
-
-    static func load() -> UserSettings {
-        var settings = UserSettings()
-
-        let fm = FileManager.default
-        guard let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-            return settings
-        }
-
-        let settingsURL = appSupport.appendingPathComponent("SpeakMCP/settings.json")
-        guard let data = fm.contents(atPath: settingsURL.path),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            return settings
-        }
-
-        if let position = json["position"] as? String {
-            settings.position = position
-        }
-        if let rate = json["speechRate"] as? Int {
-            settings.speechRate = rate
-        } else if let rate = json["speechRate"] as? Double {
-            settings.speechRate = Int(rate)
-        }
-
-        return settings
-    }
-}
-
 // MARK: - Dialog Manager
 
 class DialogManager {
@@ -2470,34 +2437,6 @@ class DialogManager {
         window.close()
 
         return result ?? QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: true, completedCount: 0)
-    }
-}
-
-// MARK: - Extensions
-
-extension NSBezierPath {
-    var cgPath: CGPath {
-        let path = CGMutablePath()
-        var points = [CGPoint](repeating: .zero, count: 3)
-        for i in 0..<elementCount {
-            let type = element(at: i, associatedPoints: &points)
-            switch type {
-            case .moveTo: path.move(to: points[0])
-            case .lineTo: path.addLine(to: points[0])
-            case .curveTo: path.addCurve(to: points[2], control1: points[0], control2: points[1])
-            case .closePath: path.closeSubpath()
-            case .cubicCurveTo: path.addCurve(to: points[2], control1: points[0], control2: points[1])
-            case .quadraticCurveTo: path.addQuadCurve(to: points[1], control: points[0])
-            @unknown default: break
-            }
-        }
-        return path
-    }
-}
-
-extension Array {
-    subscript(safe index: Int) -> Element? {
-        return indices.contains(index) ? self[index] : nil
     }
 }
 

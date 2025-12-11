@@ -1,0 +1,290 @@
+[
+  {
+    "timestamp": "2025-11-30T22:07:05.792Z",
+    "session_id": "ccc0cb6c-d4e3-4f36-8721-56c5b1c8eb95",
+    "uuid": "167e192b-699f-4765-b4fa-fbf24db89ca5",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/ccc0cb6c-d4e3-4f36-8721-56c5b1c8eb95.jsonl",
+    "source_line": 56,
+    "preview": "try again",
+    "char_count": 9
+  },
+  {
+    "timestamp": "2025-11-30T22:07:30.417Z",
+    "session_id": "ccc0cb6c-d4e3-4f36-8721-56c5b1c8eb95",
+    "uuid": "6955275e-fe07-40e5-9a95-89f3f56a0de9",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/ccc0cb6c-d4e3-4f36-8721-56c5b1c8eb95.jsonl",
+    "source_line": 69,
+    "preview": "Remove speak text",
+    "char_count": 17
+  },
+  {
+    "timestamp": "2025-11-30T22:08:24.303Z",
+    "session_id": "ccc0cb6c-d4e3-4f36-8721-56c5b1c8eb95",
+    "uuid": "8c07e109-0bc1-4570-904b-e66b26087e01",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/ccc0cb6c-d4e3-4f36-8721-56c5b1c8eb95.jsonl",
+    "source_line": 76,
+    "preview": "Set allow multiple to true by default",
+    "char_count": 37
+  },
+  {
+    "timestamp": "2025-11-30T22:10:53.941Z",
+    "session_id": "11eec941-8694-4a59-9525-2df2d42c0815",
+    "uuid": "d63ace14-440a-4fff-a78a-cc1bfcb5a6c8",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/11eec941-8694-4a59-9525-2df2d42c0815.jsonl",
+    "source_line": 10,
+    "preview": "Remove \"checkpoint\". Make text very short, no need to be well mannered, just robot like",
+    "char_count": 87
+  },
+  {
+    "timestamp": "2025-11-30T22:12:25.076Z",
+    "session_id": "11eec941-8694-4a59-9525-2df2d42c0815",
+    "uuid": "61d8605b-960e-41f4-a147-ce20c4b8347c",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/11eec941-8694-4a59-9525-2df2d42c0815.jsonl",
+    "source_line": 25,
+    "preview": "Check git status and current branch. If $ARGUMENTS provided, use as commit message, otherwise genera",
+    "char_count": 904
+  },
+  {
+    "timestamp": "2025-11-30T22:12:25.076Z",
+    "session_id": "11eec941-8694-4a59-9525-2df2d42c0815",
+    "uuid": "685f56d9-cf51-4cc7-bc4c-565c86de9f2e",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/11eec941-8694-4a59-9525-2df2d42c0815.jsonl",
+    "source_line": 24,
+    "preview": "<command-message>commit is running\u2026</command-message> <command-name>/commit</command-name>",
+    "char_count": 90
+  },
+  {
+    "timestamp": "2025-12-10T20:25:53.195Z",
+    "session_id": "8838dd05-bb84-49a1-b709-ec351cc1b72e",
+    "uuid": "cd2893f2-ea2d-4a6d-a5df-30a7b15f8efb",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/8838dd05-bb84-49a1-b709-ec351cc1b72e.jsonl",
+    "source_line": 11,
+    "preview": "Unknown slash command: rename",
+    "char_count": 29
+  },
+  {
+    "timestamp": "2025-12-10T20:26:26.136Z",
+    "session_id": "8838dd05-bb84-49a1-b709-ec351cc1b72e",
+    "uuid": "53765524-09ac-4f26-8af8-8dfce0da96a7",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/8838dd05-bb84-49a1-b709-ec351cc1b72e.jsonl",
+    "source_line": 20,
+    "preview": "Rename the issue prefix for all issues in the database.  Updates all issue IDs and all text referenc",
+    "char_count": 498
+  },
+  {
+    "timestamp": "2025-12-10T20:26:26.136Z",
+    "session_id": "8838dd05-bb84-49a1-b709-ec351cc1b72e",
+    "uuid": "d9109970-7d7a-48f2-90ce-bbd0b4a60fec",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/8838dd05-bb84-49a1-b709-ec351cc1b72e.jsonl",
+    "source_line": 19,
+    "preview": "<command-message>beads:rename-prefix is running\u2026</command-message> <command-name>/beads:rename-prefi",
+    "char_count": 116
+  },
+  {
+    "timestamp": "2025-12-10T20:26:33.232Z",
+    "session_id": "8838dd05-bb84-49a1-b709-ec351cc1b72e",
+    "uuid": "3fe2521f-3ca9-48ee-8399-ee1f5598492a",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/8838dd05-bb84-49a1-b709-ec351cc1b72e.jsonl",
+    "source_line": 24,
+    "preview": "Unknown slash command: rename",
+    "char_count": 29
+  },
+  {
+    "timestamp": "2025-12-10T20:27:35.590Z",
+    "session_id": "8838dd05-bb84-49a1-b709-ec351cc1b72e",
+    "uuid": "df8d79df-4d55-4125-9a49-77cfaf206beb",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/8838dd05-bb84-49a1-b709-ec351cc1b72e.jsonl",
+    "source_line": 29,
+    "preview": "Rename the issue prefix for all issues in the database.  Updates all issue IDs and all text referenc",
+    "char_count": 498
+  },
+  {
+    "timestamp": "2025-12-10T20:27:35.590Z",
+    "session_id": "8838dd05-bb84-49a1-b709-ec351cc1b72e",
+    "uuid": "3cbfe5f3-63e9-4c6a-91df-15f1047f7c97",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/8838dd05-bb84-49a1-b709-ec351cc1b72e.jsonl",
+    "source_line": 28,
+    "preview": "<command-message>beads:rename-prefix is running\u2026</command-message> <command-name>/beads:rename-prefi",
+    "char_count": 116
+  },
+  {
+    "timestamp": "2025-12-10T20:27:41.876Z",
+    "session_id": "8838dd05-bb84-49a1-b709-ec351cc1b72e",
+    "uuid": "28a57a2f-2081-4a76-a0c3-aaa73c83236a",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/8838dd05-bb84-49a1-b709-ec351cc1b72e.jsonl",
+    "source_line": 33,
+    "preview": "Unknown slash command: name",
+    "char_count": 27
+  },
+  {
+    "timestamp": "2025-12-10T20:28:26.772Z",
+    "session_id": "8838dd05-bb84-49a1-b709-ec351cc1b72e",
+    "uuid": "dd7cb7e3-ee22-41bc-899a-88577f2c8536",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/8838dd05-bb84-49a1-b709-ec351cc1b72e.jsonl",
+    "source_line": 37,
+    "preview": "Unknown slash command: rename",
+    "char_count": 29
+  },
+  {
+    "timestamp": "2025-12-10T20:28:49.748Z",
+    "session_id": "8838dd05-bb84-49a1-b709-ec351cc1b72e",
+    "uuid": "ae5e6be6-8c52-41f7-a477-eb817bba31a5",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/8838dd05-bb84-49a1-b709-ec351cc1b72e.jsonl",
+    "source_line": 39,
+    "preview": "what is this sessions name",
+    "char_count": 26
+  },
+  {
+    "timestamp": "2025-12-10T20:44:16.772Z",
+    "session_id": "dbee262f-b074-43af-beb5-724bfa9a7cf5",
+    "uuid": "8a4a7b34-b6ea-433c-9626-53749f52f113",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/dbee262f-b074-43af-beb5-724bfa9a7cf5.jsonl",
+    "source_line": 2,
+    "preview": "Run session analyzer skill",
+    "char_count": 26
+  },
+  {
+    "timestamp": "2025-12-10T20:45:10.274Z",
+    "session_id": "ffffb91b-b92b-4d56-aa37-d048cb70ba69",
+    "uuid": "ec773b70-04bf-4fb8-a7e5-32861b390d1a",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/ffffb91b-b92b-4d56-aa37-d048cb70ba69.jsonl",
+    "source_line": 2,
+    "preview": "Run session analyzer skill",
+    "char_count": 26
+  },
+  {
+    "timestamp": "2025-12-10T20:45:15.030Z",
+    "session_id": "ffffb91b-b92b-4d56-aa37-d048cb70ba69",
+    "uuid": "8bbff7d4-40e9-4c23-8d9d-c4c5759e3af1",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/ffffb91b-b92b-4d56-aa37-d048cb70ba69.jsonl",
+    "source_line": 6,
+    "preview": "Base directory for this skill: /Users/jurrejan/.claude/skills/session-analyzer  # Session Analyzer  ",
+    "char_count": 6170
+  },
+  {
+    "timestamp": "2025-12-10T20:49:11.182Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "fb3fce34-2ff9-49f0-bdbe-7955db2ef41f",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 6,
+    "preview": "When the agent sends large descriptions, it steals room from the available options and sometimes its",
+    "char_count": 226
+  },
+  {
+    "timestamp": "2025-12-10T20:51:01.869Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "af38375a-872e-4afe-8acc-9105a636c5a7",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 28,
+    "preview": "selecting an option can affect the text width, can make item higher, causes area to become scrollalb",
+    "char_count": 102
+  },
+  {
+    "timestamp": "2025-12-10T20:54:31.835Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "a75ca492-5975-41d9-930a-b4e366dbdad8",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 38,
+    "preview": "Sometimes the agent fires lots of questions at you, i want to allow the agent to basically create a ",
+    "char_count": 317
+  },
+  {
+    "timestamp": "2025-12-10T20:55:55.319Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "738171b7-fb60-4564-9fb3-3fdeb218f7be",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 49,
+    "preview": "Think them all through, fill in all the gaps, present to me asl multiple choice, if i choose more, t",
+    "char_count": 176
+  },
+  {
+    "timestamp": "2025-12-10T20:56:24.396Z",
+    "session_id": "cd218536-8823-4f8e-bfe7-2f9e4f1469d4",
+    "uuid": "24ed6dc5-d1e8-4896-8a27-bb61e76a1d9f",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/cd218536-8823-4f8e-bfe7-2f9e4f1469d4.jsonl",
+    "source_line": 3,
+    "preview": "Run session analyzer skill",
+    "char_count": 26
+  },
+  {
+    "timestamp": "2025-12-10T20:57:14.197Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "0215ce83-6c0d-4a22-bd4a-053a5ea3d094",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 55,
+    "preview": "questionaire, i actually meant all quetsions laid out in 1 ciew",
+    "char_count": 63
+  },
+  {
+    "timestamp": "2025-12-10T20:57:18.638Z",
+    "session_id": "cd218536-8823-4f8e-bfe7-2f9e4f1469d4",
+    "uuid": "33f7ae75-da66-41fe-b30c-1ce6e465d8a4",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/cd218536-8823-4f8e-bfe7-2f9e4f1469d4.jsonl",
+    "source_line": 8,
+    "preview": "Base directory for this skill: /Users/jurrejan/.claude/skills/session-analyzer  # Session Analyzer  ",
+    "char_count": 5353
+  },
+  {
+    "timestamp": "2025-12-10T21:06:17.562Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "45b408b3-d12c-4927-9051-3c44f30aa5e0",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 161,
+    "preview": "Looks great. This project is going to develop further, it shows potential. I want you to brief subag",
+    "char_count": 302
+  },
+  {
+    "timestamp": "2025-12-10T21:07:06.141Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "a403c85f-1b7f-4a7e-8b53-f708bf446cc7",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 178,
+    "preview": "<agent-notification> <agent-id>5f0e6f1a</agent-id> <status>completed</status> <summary>Agent \"Swift ",
+    "char_count": 238
+  },
+  {
+    "timestamp": "2025-12-10T21:07:10.747Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "8ba0514a-f90e-424d-a098-f5d3b4e0b24b",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 186,
+    "preview": "<agent-notification> <agent-id>b41ba036</agent-id> <status>completed</status> <summary>Agent \"Swift ",
+    "char_count": 241
+  },
+  {
+    "timestamp": "2025-12-10T21:07:25.445Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "b49be864-986a-4701-824b-8736905db7fc",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 191,
+    "preview": "<agent-notification> <agent-id>dae2d494</agent-id> <status>completed</status> <summary>Agent \"SwiftU",
+    "char_count": 234
+  },
+  {
+    "timestamp": "2025-12-10T21:08:14.182Z",
+    "session_id": "02986cd6-bd06-4f9d-b7fa-2853664e0e67",
+    "uuid": "38df0c7e-a00d-4df1-98f1-be0268046218",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/02986cd6-bd06-4f9d-b7fa-2853664e0e67.jsonl",
+    "source_line": 236,
+    "preview": "Looks great. This project is going to develop further, it shows potential. I want you to brief subag",
+    "char_count": 410
+  },
+  {
+    "timestamp": "2025-12-10T21:09:34.231Z",
+    "session_id": "5157c23d-3d95-4ee4-9464-c0111c16b25b",
+    "uuid": "e988a7bd-8be8-4389-b6cb-30532ce98331",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/5157c23d-3d95-4ee4-9464-c0111c16b25b.jsonl",
+    "source_line": 3,
+    "preview": "Run session analyzer skill",
+    "char_count": 26
+  },
+  {
+    "timestamp": "2025-12-10T21:09:37.790Z",
+    "session_id": "5157c23d-3d95-4ee4-9464-c0111c16b25b",
+    "uuid": "63ecac1e-bc8a-4290-a50c-3c36033e9655",
+    "source_file": "/Users/jurrejan/.claude/projects/-Users-jurrejan-Documents-development-mcp-speak/5157c23d-3d95-4ee4-9464-c0111c16b25b.jsonl",
+    "source_line": 6,
+    "preview": "Base directory for this skill: /Users/jurrejan/.claude/skills/session-analyzer  # Session Analyzer  ",
+    "char_count": 4943
+  }
+]

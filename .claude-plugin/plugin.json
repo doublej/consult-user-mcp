@@ -1,0 +1,9 @@
+{
+  "name": "speak-mcp",
+  "version": "1.0.0",
+  "description": "Native macOS dialog system for MCP - confirmation dialogs, text input, notifications, and TTS",
+  "author": "jurrejan",
+  "components": {
+    "mcp": "./.mcp.json"
+  }
+}

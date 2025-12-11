@@ -1,0 +1,226 @@
+[
+  {
+    "uuid": "167e192b-699f-4765-b4fa-fbf24db89ca5",
+    "timestamp": "2025-11-30T22:07:05.792Z",
+    "original": "try again",
+    "inferred_context": "Previous implementation attempt failed or encountered issues. User wants to retry.",
+    "clarified_prompt": "Please retry the previous implementation attempt."
+  },
+  {
+    "uuid": "6955275e-fe07-40e5-9a95-89f3f56a0de9",
+    "timestamp": "2025-11-30T22:07:30.417Z",
+    "original": "Remove speak text",
+    "inferred_context": "Text or output from speak MCP that was displayed in the application should be removed.",
+    "clarified_prompt": "Remove the speak MCP text/output from the display."
+  },
+  {
+    "uuid": "8c07e109-0bc1-4570-904b-e66b26087e01",
+    "timestamp": "2025-11-30T22:08:24.303Z",
+    "original": "Set allow multiple to true by default",
+    "inferred_context": "A configuration option or parameter called 'allow multiple' should be enabled by default.",
+    "clarified_prompt": "Set the 'allow multiple' configuration option to true as the default value."
+  },
+  {
+    "uuid": "d63ace14-440a-4fff-a78a-cc1bfcb5a6c8",
+    "timestamp": "2025-11-30T22:10:53.941Z",
+    "original": "Remove \"checkpoint\". Make text very short, no need to be well mannered, just robot like",
+    "inferred_context": "Remove the word 'checkpoint' from text content. Messages should be terse and functional.",
+    "clarified_prompt": "Remove all instances of 'checkpoint' and rewrite messages to be brief and technical rather than user-friendly."
+  },
+  {
+    "uuid": "61d8605b-960e-41f4-a147-ce20c4b8347c",
+    "timestamp": "2025-11-30T22:12:25.076Z",
+    "original": "Check git status and current branch. If $ARGUMENTS provided, use as commit message, otherwise generate from staged changes. If there are unstaged changes, review them and stage appropriate files. If there are staged changes, clean up any pre-commit issues without intervention and commit the changes. If on a feature branch with no changes, check if it should be merged to main.\n\nFor commit messages: keep them straightforward and professional, summarizing only the code changes without extraneous details. Never mention Claude or AI assistance.\n\nWorkflow:\n1. Run git status to check current state\n2. Run git branch to verify current branch\n3. If unstaged changes exist, review and stage them\n4. If staged changes exist, run any available linters/formatters\n5. Create commit with message from $ARGUMENTS or generate descriptive message\n6. If on feature branch and work is complete, suggest merge to main",
+    "inferred_context": "Complete instructions for git workflow automation. This is self-contained with full context.",
+    "clarified_prompt": "Execute the git workflow: check status/branch, stage changes, clean pre-commit issues, and commit with appropriate messages."
+  },
+  {
+    "uuid": "685f56d9-cf51-4cc7-bc4c-565c86de9f2e",
+    "timestamp": "2025-11-30T22:12:25.076Z",
+    "original": "<command-message>commit is running</command-message>\n<command-name>/commit</command-name>",
+    "inferred_context": "System message indicating /commit command execution.",
+    "clarified_prompt": "N/A - System message"
+  },
+  {
+    "uuid": "cd2893f2-ea2d-4a6d-a5df-30a7b15f8efb",
+    "timestamp": "2025-12-10T20:25:53.195Z",
+    "original": "Unknown slash command: rename",
+    "inferred_context": "System error message for unsupported /rename command.",
+    "clarified_prompt": "N/A - System error message"
+  },
+  {
+    "uuid": "53765524-09ac-4f26-8af8-8dfce0da96a7",
+    "timestamp": "2025-12-10T20:26:26.136Z",
+    "original": "Rename the issue prefix for all issues in the database.\n\nUpdates all issue IDs and all text references across all fields.\n\n## Prefix Rules\n\n- Max length: 8 characters\n- Allowed: lowercase letters, numbers, hyphens\n- Must start with a letter\n- Must end with a hyphen (e.g., 'kw-', 'work-')\n\n## Usage\n\n- **Preview**: `bd rename-prefix kw- --dry-run`\n- **Apply**: `bd rename-prefix kw-`\n\nExample: Rename from 'knowledge-work-' to 'kw-'\n\nAll dependencies and text references are automatically updated.",
+    "inferred_context": "Complete documentation for issue prefix renaming tool. Self-contained.",
+    "clarified_prompt": "Execute the rename-prefix command to change issue prefixes according to the provided documentation."
+  },
+  {
+    "uuid": "d9109970-7d7a-48f2-90ce-bbd0b4a60fec",
+    "timestamp": "2025-12-10T20:26:26.136Z",
+    "original": "<command-message>beads:rename-prefix is running</command-message>\n<command-name>/beads:rename-prefix</command-name>",
+    "inferred_context": "System message indicating beads:rename-prefix command execution.",
+    "clarified_prompt": "N/A - System message"
+  },
+  {
+    "uuid": "3fe2521f-3ca9-48ee-8399-ee1f5598492a",
+    "timestamp": "2025-12-10T20:26:33.232Z",
+    "original": "Unknown slash command: rename",
+    "inferred_context": "System error message for unsupported /rename command.",
+    "clarified_prompt": "N/A - System error message"
+  },
+  {
+    "uuid": "df8d79df-4d55-4125-9a49-77cfaf206beb",
+    "timestamp": "2025-12-10T20:27:35.590Z",
+    "original": "Rename the issue prefix for all issues in the database.\n\nUpdates all issue IDs and all text references across all fields.\n\n## Prefix Rules\n\n- Max length: 8 characters\n- Allowed: lowercase letters, numbers, hyphens\n- Must start with a letter\n- Must end with a hyphen (e.g., 'kw-', 'work-')\n\n## Usage\n\n- **Preview**: `bd rename-prefix kw- --dry-run`\n- **Apply**: `bd rename-prefix kw-`\n\nExample: Rename from 'knowledge-work-' to 'kw-'\n\nAll dependencies and text references are automatically updated.",
+    "inferred_context": "Duplicate documentation for issue prefix renaming. Self-contained.",
+    "clarified_prompt": "Execute the rename-prefix command according to the provided documentation."
+  },
+  {
+    "uuid": "3cbfe5f3-63e9-4c6a-91df-15f1047f7c97",
+    "timestamp": "2025-12-10T20:27:35.590Z",
+    "original": "<command-message>beads:rename-prefix is running</command-message>\n<command-name>/beads:rename-prefix</command-name>",
+    "inferred_context": "System message indicating beads:rename-prefix command execution.",
+    "clarified_prompt": "N/A - System message"
+  },
+  {
+    "uuid": "28a57a2f-2081-4a76-a0c3-aaa73c83236a",
+    "timestamp": "2025-12-10T20:27:41.876Z",
+    "original": "Unknown slash command: name",
+    "inferred_context": "System error message for unsupported /name command.",
+    "clarified_prompt": "N/A - System error message"
+  },
+  {
+    "uuid": "dd7cb7e3-ee22-41bc-899a-88577f2c8536",
+    "timestamp": "2025-12-10T20:28:26.772Z",
+    "original": "Unknown slash command: rename",
+    "inferred_context": "System error message for unsupported /rename command.",
+    "clarified_prompt": "N/A - System error message"
+  },
+  {
+    "uuid": "ae5e6be6-8c52-41f7-a477-eb817bba31a5",
+    "timestamp": "2025-12-10T20:28:49.748Z",
+    "original": "what is this sessions name",
+    "inferred_context": "Query about the current session identifier or name. Refers to session 8838dd05-bb84-49a1-b709-ec351cc1b72e.",
+    "clarified_prompt": "What is the name or identifier of the current session?"
+  },
+  {
+    "uuid": "8a4a7b34-b6ea-433c-9626-53749f52f113",
+    "timestamp": "2025-12-10T20:44:16.772Z",
+    "original": "Run session analyzer skill",
+    "inferred_context": "Request to execute the session-analyzer skill to analyze session history.",
+    "clarified_prompt": "Execute the session-analyzer skill."
+  },
+  {
+    "uuid": "ec773b70-04bf-4fb8-a7e5-32861b390d1a",
+    "timestamp": "2025-12-10T20:45:10.274Z",
+    "original": "Run session analyzer skill",
+    "inferred_context": "Another request to execute the session-analyzer skill.",
+    "clarified_prompt": "Execute the session-analyzer skill."
+  },
+  {
+    "uuid": "8bbff7d4-40e9-4c23-8d9d-c4c5759e3af1",
+    "timestamp": "2025-12-10T20:45:15.030Z",
+    "original": "Base directory for this skill: /Users/jurrejan/.claude/skills/session-analyzer\n\n# Session Analyzer\n\n[Extended skill documentation...]",
+    "inferred_context": "Skill definition and configuration for session-analyzer v1.0. Self-contained documentation.",
+    "clarified_prompt": "N/A - Skill configuration documentation"
+  },
+  {
+    "uuid": "fb3fce34-2ff9-49f0-bdbe-7955db2ef41f",
+    "timestamp": "2025-12-10T20:49:11.182Z",
+    "original": "When the agent sends large descriptions, it steals room from the available options and sometimes its just scrolling through a 10px list. Just make a larger window. Keep options laid out clearly without needing to scroll always",
+    "inferred_context": "UI feedback about Speak MCP dialog layout. Large agent descriptions crowd out options, making them scroll in tiny space. User wants larger window and better layout.",
+    "clarified_prompt": "Improve the Speak MCP dialog window: make it larger and adjust layout so agent descriptions don't crowd options. Keep options clearly visible without requiring scrolling."
+  },
+  {
+    "uuid": "af38375a-872e-4afe-8acc-9105a636c5a7",
+    "timestamp": "2025-12-10T20:51:01.869Z",
+    "original": "selecting an option can affect the text width, can make item higher, causes area to become scrollalble",
+    "inferred_context": "Related UI issue: selecting an option causes layout shifts that make the options area scrollable.",
+    "clarified_prompt": "Fix the dialog so selecting an option doesn't cause layout shifts that trigger scrolling."
+  },
+  {
+    "uuid": "a75ca492-5975-41d9-930a-b4e366dbdad8",
+    "timestamp": "2025-12-10T20:54:31.835Z",
+    "original": "Sometimes the agent fires lots of questions at you, i want to allow the agent to basically create a list of multiple questions and that we allow the user to view as:\n- cycle through them using a list navigation\n- create an accordion like layout with all the questions stacked\n- chain them like a large questionairre\n\n",
+    "inferred_context": "Feature request for handling multiple agent questions with three viewing options: list cycling, accordion layout, or questionnaire chain.",
+    "clarified_prompt": "Add support for multiple agent questions in Speak MCP with three viewing options: (1) cycle through list, (2) accordion layout, or (3) questionnaire chain."
+  },
+  {
+    "uuid": "738171b7-fb60-4564-9fb3-3fdeb218f7be",
+    "timestamp": "2025-12-10T20:55:55.319Z",
+    "original": "Think them all through, fill in all the gaps, present to me asl multiple choice, if i choose more, the user gets to cycle through the options by some new ui in the questions ui",
+    "inferred_context": "Request for design help on the multiple questions feature. Agent should synthesize requirements, present as multiple choice options, allow cycling through alternatives in the UI.",
+    "clarified_prompt": "Design the multiple questions feature: synthesize all requirements, present implementation options as multiple choice. Allow cycling through different UI approaches."
+  },
+  {
+    "uuid": "24ed6dc5-d1e8-4896-8a27-bb61e76a1d9f",
+    "timestamp": "2025-12-10T20:56:24.396Z",
+    "original": "Run session analyzer skill",
+    "inferred_context": "Request to execute the session-analyzer skill.",
+    "clarified_prompt": "Execute the session-analyzer skill."
+  },
+  {
+    "uuid": "0215ce83-6c0d-4a22-bd4a-053a5ea3d094",
+    "timestamp": "2025-12-10T20:57:14.197Z",
+    "original": "questionaire, i actually meant all quetsions laid out in 1 ciew",
+    "inferred_context": "Clarification: user wants all questions in ONE view (questionnaire format), not cycled or accordion.",
+    "clarified_prompt": "Clarification: display all questions in a single unified view rather than cycling or accordion layout."
+  },
+  {
+    "uuid": "33f7ae75-da66-41fe-b30c-1ce6e465d8a4",
+    "timestamp": "2025-12-10T20:57:18.638Z",
+    "original": "Base directory for this skill: /Users/jurrejan/.claude/skills/session-analyzer\n\n# Session Analyzer\n\n[Extended skill documentation v2.0...]",
+    "inferred_context": "Updated skill definition for session-analyzer v2.0 with multi-project support. Self-contained documentation.",
+    "clarified_prompt": "N/A - Skill configuration documentation v2.0"
+  },
+  {
+    "uuid": "45b408b3-d12c-4927-9051-3c44f30aa5e0",
+    "timestamp": "2025-12-10T21:06:17.562Z",
+    "original": "Looks great. This project is going to develop further, it shows potential. I want you to brief subagents to use different swift related skills. This is important to mention without any confusion! Those subagents need to review the codebase for optimizations, fixes, best practices and report back toyou",
+    "inferred_context": "Request to brief subagents using Swift skills to review the Speak MCP project codebase. Subagents should identify optimizations, bugs, and best practices.",
+    "clarified_prompt": "Brief subagents with appropriate Swift-related skills to review the Speak MCP codebase for optimizations, bugs, and best practices."
+  },
+  {
+    "uuid": "a403c85f-1b7f-4a7e-8b53-f708bf446cc7",
+    "timestamp": "2025-12-10T21:07:06.141Z",
+    "original": "<agent-notification>\n<agent-id>5f0e6f1a</agent-id>\n<status>completed</status>\n<summary>Agent \"Swift best practices review\" completed.</summary>\nUse AgentOutputTool with agentId=\"5f0e6f1a\" to retrieve the full result.\n</agent-notification>",
+    "inferred_context": "System notification that Swift best practices review agent has completed.",
+    "clarified_prompt": "N/A - System notification"
+  },
+  {
+    "uuid": "8ba0514a-f90e-424d-a098-f5d3b4e0b24b",
+    "timestamp": "2025-12-10T21:07:10.747Z",
+    "original": "<agent-notification>\n<agent-id>b41ba036</agent-id>\n<status>completed</status>\n<summary>Agent \"Swift code optimization review\" completed.</summary>\nUse AgentOutputTool with agentId=\"b41ba036\" to retrieve the full result.\n</agent-notification>",
+    "inferred_context": "System notification that Swift code optimization review agent has completed.",
+    "clarified_prompt": "N/A - System notification"
+  },
+  {
+    "uuid": "b49be864-986a-4701-824b-8736905db7fc",
+    "timestamp": "2025-12-10T21:07:25.445Z",
+    "original": "<agent-notification>\n<agent-id>dae2d494</agent-id>\n<status>completed</status>\n<summary>Agent \"SwiftUI patterns review\" completed.</summary>\nUse AgentOutputTool with agentId=\"dae2d494\" to retrieve the full result.\n</agent-notification>",
+    "inferred_context": "System notification that SwiftUI patterns review agent has completed.",
+    "clarified_prompt": "N/A - System notification"
+  },
+  {
+    "uuid": "38df0c7e-a00d-4df1-98f1-be0268046218",
+    "timestamp": "2025-12-10T21:08:14.182Z",
+    "original": "Looks great. This project is going to develop further, it shows potential. I want you to brief subagents to use different swift related skills. Look at all the available skills first, select the ones you need and sstart your prompt with \"use xx skill\" This is important to mention without any confusion! Those subagents need to review the codebase for optimizations, fixes, best practices and report back toyou",
+    "inferred_context": "Refined request to brief subagents. Key addition: examine available skills first, select appropriate ones, prefix prompts with 'use [skill name]' for clarity.",
+    "clarified_prompt": "Examine available Swift-related skills, select the appropriate ones, and brief subagents with prompts prefixed with 'use [skill name]' to review the codebase for optimizations, bugs, and best practices."
+  },
+  {
+    "uuid": "e988a7bd-8be8-4389-b6cb-30532ce98331",
+    "timestamp": "2025-12-10T21:09:34.231Z",
+    "original": "Run session analyzer skill",
+    "inferred_context": "Request to execute the session-analyzer skill.",
+    "clarified_prompt": "Execute the session-analyzer skill."
+  },
+  {
+    "uuid": "63ecac1e-bc8a-4290-a50c-3c36033e9655",
+    "timestamp": "2025-12-10T21:09:37.790Z",
+    "original": "Base directory for this skill: /Users/jurrejan/.claude/skills/session-analyzer\n\n# Session Analyzer\n\n[Extended skill documentation v2.0 - project-specific variant...]",
+    "inferred_context": "Updated skill definition for session-analyzer v2.0 focused on project-specific history analysis. Self-contained documentation.",
+    "clarified_prompt": "N/A - Skill configuration documentation v2.0 project variant"
+  }
+]

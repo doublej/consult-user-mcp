@@ -1,0 +1,226 @@
+[
+  {
+    "timestamp": "2025-11-30T22:07:05.792Z",
+    "project": "speak",
+    "category": "FEEDBACK",
+    "original": "try again",
+    "one_line_summary": "Request to retry previous operation"
+  },
+  {
+    "timestamp": "2025-11-30T22:07:30.417Z",
+    "project": "speak",
+    "category": "TASK",
+    "original": "Remove speak text",
+    "one_line_summary": "Remove 'speak' text from UI"
+  },
+  {
+    "timestamp": "2025-11-30T22:08:24.303Z",
+    "project": "speak",
+    "category": "TASK",
+    "original": "Set allow multiple to true by default",
+    "one_line_summary": "Change default value for allow multiple option to true"
+  },
+  {
+    "timestamp": "2025-11-30T22:10:53.941Z",
+    "project": "speak",
+    "category": "TASK",
+    "original": "Remove \"checkpoint\". Make text very short, no need to be well mannered, just robot like",
+    "one_line_summary": "Remove checkpoint prefix and simplify descriptions to concise robot-like text"
+  },
+  {
+    "timestamp": "2025-11-30T22:12:25.076Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Check git status and current branch. If $ARGUMENTS provided, use as commit message, otherwise generate from staged changes. If there are unstaged changes, review them and stage appropriate files. If there are staged changes, clean up any pre-commit issues without intervention and commit the changes. If on a feature branch with no changes, check if it should be merged to main.",
+    "one_line_summary": "Custom git workflow command specification"
+  },
+  {
+    "timestamp": "2025-11-30T22:12:25.076Z",
+    "project": "speak",
+    "category": "META",
+    "original": "<command-message>commit is running…</command-message>\n<command-name>/commit</command-name>",
+    "one_line_summary": "Slash command execution for commit"
+  },
+  {
+    "timestamp": "2025-12-10T20:25:53.195Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Unknown slash command: rename",
+    "one_line_summary": "Error: unrecognized slash command"
+  },
+  {
+    "timestamp": "2025-12-10T20:26:26.136Z",
+    "project": "speak",
+    "category": "TASK",
+    "original": "Rename the issue prefix for all issues in the database. Updates all issue IDs and all text references across all fields.",
+    "one_line_summary": "Implement issue prefix rename command with validation rules"
+  },
+  {
+    "timestamp": "2025-12-10T20:26:26.136Z",
+    "project": "speak",
+    "category": "META",
+    "original": "<command-message>beads:rename-prefix is running…</command-message>\n<command-name>/beads:rename-prefix</command-name>",
+    "one_line_summary": "Slash command execution for rename-prefix"
+  },
+  {
+    "timestamp": "2025-12-10T20:26:33.232Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Unknown slash command: rename",
+    "one_line_summary": "Error: unrecognized slash command"
+  },
+  {
+    "timestamp": "2025-12-10T20:27:35.590Z",
+    "project": "speak",
+    "category": "TASK",
+    "original": "Rename the issue prefix for all issues in the database. Updates all issue IDs and all text references across all fields.",
+    "one_line_summary": "Implement issue prefix rename command with validation rules"
+  },
+  {
+    "timestamp": "2025-12-10T20:27:35.590Z",
+    "project": "speak",
+    "category": "META",
+    "original": "<command-message>beads:rename-prefix is running…</command-message>\n<command-name>/beads:rename-prefix</command-name>",
+    "one_line_summary": "Slash command execution for rename-prefix"
+  },
+  {
+    "timestamp": "2025-12-10T20:27:41.876Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Unknown slash command: name",
+    "one_line_summary": "Error: unrecognized slash command"
+  },
+  {
+    "timestamp": "2025-12-10T20:28:26.772Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Unknown slash command: rename",
+    "one_line_summary": "Error: unrecognized slash command"
+  },
+  {
+    "timestamp": "2025-12-10T20:28:49.748Z",
+    "project": "speak",
+    "category": "QUESTION",
+    "original": "what is this sessions name",
+    "one_line_summary": "Query about session name"
+  },
+  {
+    "timestamp": "2025-12-10T20:44:16.772Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Run session analyzer skill",
+    "one_line_summary": "Invoke session analyzer skill"
+  },
+  {
+    "timestamp": "2025-12-10T20:45:10.274Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Run session analyzer skill",
+    "one_line_summary": "Invoke session analyzer skill"
+  },
+  {
+    "timestamp": "2025-12-10T20:45:15.030Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Base directory for this skill: /Users/jurrejan/.claude/skills/session-analyzer\n\n# Session Analyzer",
+    "one_line_summary": "Session analyzer skill definition and phases (v1.0)"
+  },
+  {
+    "timestamp": "2025-12-10T20:49:11.182Z",
+    "project": "speak",
+    "category": "FEEDBACK",
+    "original": "When the agent sends large descriptions, it steals room from the available options and sometimes its just scrolling through a 10px list. Just make a larger window. Keep options laid out clearly without needing to scroll always",
+    "one_line_summary": "UI feedback on dialog window size and scrollability issues"
+  },
+  {
+    "timestamp": "2025-12-10T20:51:01.869Z",
+    "project": "speak",
+    "category": "FEEDBACK",
+    "original": "selecting an option can affect the text width, can make item higher, causes area to become scrollalble",
+    "one_line_summary": "Bug report on dynamic layout causing unwanted scrolling"
+  },
+  {
+    "timestamp": "2025-12-10T20:54:31.835Z",
+    "project": "speak",
+    "category": "TASK",
+    "original": "Sometimes the agent fires lots of questions at you, i want to allow the agent to basically create a list of multiple questions and that we allow the user to view as:\n- cycle through them using a list navigation\n- create an accordion like layout with all the questions stacked\n- chain them like a large questionairre",
+    "one_line_summary": "Add support for multi-question display modes (list, accordion, questionnaire)"
+  },
+  {
+    "timestamp": "2025-12-10T20:55:55.319Z",
+    "project": "speak",
+    "category": "TASK",
+    "original": "Think them all through, fill in all the gaps, present to me asl multiple choice, if i choose more, the user gets to cycle through the options by some new ui in the questions ui",
+    "one_line_summary": "Implement AI-generated multiple choice answers with UI cycling"
+  },
+  {
+    "timestamp": "2025-12-10T20:56:24.396Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Run session analyzer skill",
+    "one_line_summary": "Invoke session analyzer skill"
+  },
+  {
+    "timestamp": "2025-12-10T20:57:14.197Z",
+    "project": "speak",
+    "category": "CORRECTION",
+    "original": "questionaire, i actually meant all quetsions laid out in 1 ciew",
+    "one_line_summary": "Clarification: display all questions in single view, not multiple views"
+  },
+  {
+    "timestamp": "2025-12-10T20:57:18.638Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Base directory for this skill: /Users/jurrejan/.claude/skills/session-analyzer\n\n# Session Analyzer",
+    "one_line_summary": "Updated session analyzer skill definition (v2.0)"
+  },
+  {
+    "timestamp": "2025-12-10T21:06:17.562Z",
+    "project": "speak",
+    "category": "TASK",
+    "original": "Looks great. This project is going to develop further, it shows potential. I want you to brief subagents to use different swift related skills. This is important to mention without any confusion! Those subagents need to review the codebase for optimizations, fixes, best practices and report back toyou",
+    "one_line_summary": "Brief subagents to review Swift codebase for optimizations and best practices"
+  },
+  {
+    "timestamp": "2025-12-10T21:07:06.141Z",
+    "project": "speak",
+    "category": "META",
+    "original": "<agent-notification>\n<agent-id>5f0e6f1a</agent-id>\n<status>completed</status>\n<summary>Agent \"Swift best practices review\" completed.</summary>",
+    "one_line_summary": "Subagent completed: Swift best practices review"
+  },
+  {
+    "timestamp": "2025-12-10T21:07:10.747Z",
+    "project": "speak",
+    "category": "META",
+    "original": "<agent-notification>\n<agent-id>b41ba036</agent-id>\n<status>completed</status>\n<summary>Agent \"Swift code optimization review\" completed.</summary>",
+    "one_line_summary": "Subagent completed: Swift code optimization review"
+  },
+  {
+    "timestamp": "2025-12-10T21:07:25.445Z",
+    "project": "speak",
+    "category": "META",
+    "original": "<agent-notification>\n<agent-id>dae2d494</agent-id>\n<status>completed</status>\n<summary>Agent \"SwiftUI patterns review\" completed.</summary>",
+    "one_line_summary": "Subagent completed: SwiftUI patterns review"
+  },
+  {
+    "timestamp": "2025-12-10T21:08:14.182Z",
+    "project": "speak",
+    "category": "TASK",
+    "original": "Looks great. This project is going to develop further, it shows potential. I want you to brief subagents to use different swift related skills. Look at all the available skills first, select the ones you need and sstart your prompt with \"use xx skill\" This is important to mention without any confusion! Those subagents need to review the codebase for optimizations, fixes, best practices and report back toyou",
+    "one_line_summary": "Brief subagents with explicit skill declarations for Swift code review"
+  },
+  {
+    "timestamp": "2025-12-10T21:09:34.231Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Run session analyzer skill",
+    "one_line_summary": "Invoke session analyzer skill"
+  },
+  {
+    "timestamp": "2025-12-10T21:09:37.790Z",
+    "project": "speak",
+    "category": "META",
+    "original": "Base directory for this skill: /Users/jurrejan/.claude/skills/session-analyzer\n\n# Session Analyzer",
+    "one_line_summary": "Session analyzer skill definition with phases (v2.0)"
+  }
+]

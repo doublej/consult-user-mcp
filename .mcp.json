@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "speak": {
+      "command": "node",
+      "args": ["/Applications/Speak MCP.app/Contents/Resources/mcp-server/dist/index.js"]
+    }
+  }
+}

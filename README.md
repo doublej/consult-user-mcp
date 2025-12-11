@@ -28,6 +28,7 @@ Keep working while your AI agent runs autonomously. When it needs your input, a 
 - [Build from Source](#build-from-source)
 - [Structure](#structure)
 - [MCP Tools](#mcp-tools)
+- [Architecture](#architecture)
 
 ## Install
 
@@ -101,3 +102,71 @@ consult-user-mcp/
 - `ask_questions` - Multi-question dialog (wizard, accordion, or questionnaire mode)
 - `notify_user` - System notification
 - `tts` - Text-to-speech
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Agent["AI Agent (Claude Code, etc.)"]
+        A[Tool Call]
+    end
+
+    subgraph MCP["MCP Server (Node.js)"]
+        B[index.ts]
+        C[SwiftDialogProvider]
+    end
+
+    subgraph CLI["Dialog CLI (Swift)"]
+        D[DialogManager]
+        E[Native AppKit Window]
+    end
+
+    subgraph User["User Interaction"]
+        F{User Response}
+        G[Answer]
+        H[Snooze]
+        I[Feedback]
+    end
+
+    subgraph App["Menu Bar App (Optional)"]
+        J[Settings UI]
+        K[UserDefaults]
+        L[Install Helper]
+    end
+
+    A -->|"stdio (JSON-RPC)"| B
+    B --> C
+    C -->|"execFile + JSON args"| D
+    D --> E
+    E --> F
+    F --> G
+    F --> H
+    F --> I
+    G -->|"JSON stdout"| C
+    H -->|"snoozed: true"| C
+    I -->|"feedbackText: ..."| C
+    C -->|"JSON response"| B
+    B -->|"stdio"| A
+
+    J --> K
+    K -.->|"reads settings"| D
+    L -.->|"configures"| MCP
+
+    style Agent fill:#e1f5fe
+    style MCP fill:#fff3e0
+    style CLI fill:#f3e5f5
+    style User fill:#e8f5e9
+    style App fill:#fce4ec
+```
+
+### Flow
+
+1. **Agent calls tool** - Claude Code (or any MCP client) invokes a tool like `ask_confirmation`
+2. **MCP Server receives** - The TypeScript server validates input with Zod schemas
+3. **CLI spawned** - `SwiftDialogProvider` executes the Swift CLI with JSON arguments
+4. **Dialog shown** - Native AppKit window appears with the question
+5. **User responds** - Three possible paths:
+   - **Answer** - Normal response (yes/no, selection, text)
+   - **Snooze** - Defer for 1-60 minutes, returns `snoozed: true`
+   - **Feedback** - Send text to agent, returns `feedbackText`
+6. **Result returned** - JSON flows back through CLI → MCP Server → Agent

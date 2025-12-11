@@ -12,14 +12,14 @@ struct KeyboardHintsView: View {
     let hints: [KeyboardHint]
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             ForEach(hints) { hint in
-                HStack(spacing: 5) {
+                HStack(spacing: 3) {
                     Text(hint.key)
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .font(.system(size: 10, weight: .medium, design: .rounded))
                         .foregroundColor(Theme.Colors.textSecondary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
                         .background(
                             Capsule()
                                 .fill(Theme.Colors.cardBackground)
@@ -29,11 +29,11 @@ struct KeyboardHintsView: View {
                                 .strokeBorder(Theme.Colors.border.opacity(0.6), lineWidth: 1)
                         )
                     Text(hint.label)
-                        .font(.system(size: 11, weight: .regular))
+                        .font(.system(size: 10, weight: .regular))
                         .foregroundColor(Theme.Colors.textMuted)
                 }
             }
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 4)
     }
 }

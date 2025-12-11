@@ -2,12 +2,23 @@
 
 Native macOS dialog system for MCP (Model Context Protocol) servers.
 
-<p>
-  <img src="screenshots/confirm-dialog.png" width="200" alt="Confirmation dialog">
-  <img src="screenshots/confirm-snooze-panel.png" width="200" alt="Snooze panel">
-  <img src="screenshots/multiselect-features.png" width="200" alt="Multi-select">
-  <img src="screenshots/wizard-step1-framework.png" width="200" alt="Wizard dialog">
-</p>
+Keep working while your AI agent runs autonomously. When it needs your input, a native dialog appears - answer the question, and the agent continues. No need to watch the terminal. Snooze if you're busy, or send feedback to redirect the agent.
+
+<table>
+<tr>
+<td align="center"><img src="screenshots/confirm-dialog.png" width="220"><br><sub>Confirmation dialog</sub></td>
+<td align="center"><img src="screenshots/confirm-snooze-panel.png" width="220"><br><sub>Snooze for later</sub></td>
+<td align="center"><img src="screenshots/confirm-feedback-panel.png" width="220"><br><sub>Send feedback to agent</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="screenshots/multiselect-features.png" width="220"><br><sub>Multi-select options</sub></td>
+<td align="center"><img src="screenshots/wizard-step1-framework.png" width="220"><br><sub>Wizard - step 1</sub></td>
+<td align="center"><img src="screenshots/wizard-step2-styling.png" width="220"><br><sub>Wizard - step 2</sub></td>
+</tr>
+<tr>
+<td align="center" colspan="3"><img src="screenshots/accordion-questions.png" width="280"><br><sub>Accordion - multiple questions at once</sub></td>
+</tr>
+</table>
 
 ## Install
 

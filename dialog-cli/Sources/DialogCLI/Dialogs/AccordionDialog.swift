@@ -303,8 +303,9 @@ struct SwiftUIAccordionDialog: View {
             if expandedTool == .feedback { return false }
             toggleToolbarTool(.snooze)
             return true
-        case 3: // F - toggle feedback (only if not already typing)
-            if expandedTool != .feedback { toggleToolbarTool(.feedback) }
+        case 3: // F - toggle feedback (skip if already typing)
+            if expandedTool == .feedback { return false }
+            toggleToolbarTool(.feedback)
             return true
         case 48: // Tab - switch sections, then to buttons
             if modifiers.contains(.shift) {

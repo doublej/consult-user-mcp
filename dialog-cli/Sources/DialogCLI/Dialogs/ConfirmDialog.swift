@@ -35,8 +35,9 @@ struct SwiftUIConfirmDialog: View {
                 if expandedTool == .feedback { return false }
                 toggleTool(.snooze)
                 return true
-            case 3: // F - toggle feedback (only if not already typing)
-                if expandedTool != .feedback { toggleTool(.feedback) }
+            case 3: // F - toggle feedback (skip if already typing)
+                if expandedTool == .feedback { return false }
+                toggleTool(.feedback)
                 return true
             default:
                 return false

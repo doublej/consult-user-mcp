@@ -7,7 +7,15 @@ struct PulseResponse: Codable {
     let success: Bool
 }
 
-func setupEditMenu() {
+@main
+struct DialogCLIApp {
+    static func main() {
+        DialogCLI.run()
+    }
+}
+
+enum DialogCLI {
+    static func setupEditMenu() {
     let mainMenu = NSMenu()
     let editMenuItem = NSMenuItem()
     editMenuItem.submenu = NSMenu(title: "Edit")
@@ -22,7 +30,7 @@ func setupEditMenu() {
     NSApp.mainMenu = mainMenu
 }
 
-func main() {
+static func run() {
     let app = NSApplication.shared
     app.setActivationPolicy(.accessory)
     setupEditMenu()
@@ -137,5 +145,4 @@ func main() {
         exit(1)
     }
 }
-
-main()
+}

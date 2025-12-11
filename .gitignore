@@ -13,7 +13,15 @@ dist/
 
 # Compiled binaries (keep source, not compiled)
 dialog-cli/dialog-cli
+dialog-cli/dialog-cli-test
+dialog-cli/.build/
 
+# macOS app build artifacts
+macos-app/.build/
+macos-app/.swiftpm/
+
+# Distribution archive
+Speak MCP.app.zip
 
 # Generated icons (keep SVG source)
 *.icns

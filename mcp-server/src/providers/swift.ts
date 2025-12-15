@@ -25,15 +25,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 function findDialogCli(): string {
-  // When inside app bundle: mcp-server/dist/providers -> ../dialog-cli/.build/release/DialogCLI
-  const appBundlePath = join(__dirname, "..", "..", "dialog-cli", ".build", "release", "DialogCLI");
+  // App bundle: Resources/mcp-server/dist/providers -> Resources/dialog-cli/dialog-cli
+  const appBundlePath = join(__dirname, "..", "..", "..", "dialog-cli", "dialog-cli");
   if (existsSync(appBundlePath)) return appBundlePath;
 
-  // Dev: mcp-server/dist/providers -> ../../../dialog-cli/.build/release/DialogCLI
+  // Dev: speak/mcp-server/dist/providers -> speak/dialog-cli/.build/release/DialogCLI
   const devPath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "release", "DialogCLI");
   if (existsSync(devPath)) return devPath;
 
-  return devPath; // fallback
+  return devPath;
 }
 
 const CLI_PATH = findDialogCli();

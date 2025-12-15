@@ -172,13 +172,9 @@ struct InstallGuideView: View {
 
     init(showInstallGuide: Binding<Bool>) {
         self._showInstallGuide = showInstallGuide
-        // Compute server path relative to app bundle
-        if let bundlePath = Bundle.main.bundlePath as String? {
-            let appDir = (bundlePath as NSString).deletingLastPathComponent
-            self.serverPath = "\(appDir)/mcp-server/dist/index.js"
-        } else {
-            self.serverPath = "/path/to/consult-user-mcp/mcp-server/dist/index.js"
-        }
+        // Compute server path inside app bundle
+        let bundlePath = Bundle.main.bundlePath
+        self.serverPath = "\(bundlePath)/Contents/Resources/mcp-server/dist/index.js"
     }
 
     var body: some View {
@@ -200,7 +196,8 @@ struct InstallGuideView: View {
                 .padding(.top, 16)
             }
         }
-        .frame(width: 300, height: 540)
+        .frame(width: 300)
+        .fixedSize(horizontal: false, vertical: true)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
@@ -397,38 +394,21 @@ struct InstallGuideView: View {
     // MARK: - Config Snippet
 
     private var configSnippet: String {
-        let actualPath = resolveServerPath()
         switch selectedTarget.configFormat {
         case .json:
             return """
 "consult-user-mcp": {
   "command": "node",
-  "args": ["\(actualPath)"]
+  "args": ["\(serverPath)"]
 }
 """
         case .toml:
             return """
 [mcp_servers.consult-user-mcp]
 command = "node"
-args = ["\(actualPath)"]
+args = ["\(serverPath)"]
 """
         }
-    }
-
-    private func resolveServerPath() -> String {
-        // Try to find the actual mcp-server path
-        let fm = FileManager.default
-
-        // Check relative to app bundle
-        if let bundlePath = Bundle.main.bundlePath as String? {
-            let appDir = (bundlePath as NSString).deletingLastPathComponent
-            let serverPath = "\(appDir)/mcp-server/dist/index.js"
-            if fm.fileExists(atPath: serverPath) {
-                return serverPath
-            }
-        }
-
-        return "/path/to/consult-user-mcp/mcp-server/dist/index.js"
     }
 
     // MARK: - Actions
@@ -474,13 +454,11 @@ args = ["\(actualPath)"]
         let dir = (path as NSString).deletingLastPathComponent
         try? fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
 
-        let serverPath = resolveServerPath()
-
         switch selectedTarget.configFormat {
         case .json:
-            autoInstallJSON(path: path, serverPath: serverPath)
+            autoInstallJSON(path: path, serverPath: self.serverPath)
         case .toml:
-            autoInstallTOML(path: path, serverPath: serverPath)
+            autoInstallTOML(path: path, serverPath: self.serverPath)
         }
     }
 

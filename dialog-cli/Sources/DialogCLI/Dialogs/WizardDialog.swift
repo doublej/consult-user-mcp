@@ -50,7 +50,7 @@ struct QuestionSection: View {
                     placeholder: question.placeholder ?? "Enter your answer...",
                     text: $textValue
                 )
-                .frame(height: 48)
+                .frame(minHeight: 48)
                 .onChange(of: textValue) { newValue in
                     answer = .text(newValue)
                 }

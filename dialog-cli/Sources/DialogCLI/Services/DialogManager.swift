@@ -2,6 +2,75 @@ import AppKit
 import SwiftUI
 import AVFoundation
 
+// MARK: - Window Size Observer
+
+extension Notification.Name {
+    static let dialogContentSizeChanged = Notification.Name("dialogContentSizeChanged")
+}
+
+class WindowSizeObserver: NSObject {
+    private weak var window: NSWindow?
+    private weak var hostingView: NSView?
+    private weak var bgView: NSView?
+    private let minWidth: CGFloat
+    private let minHeight: CGFloat
+    private let maxHeight: CGFloat
+    private var notificationObserver: NSObjectProtocol?
+
+    init(window: NSWindow, hostingView: NSView, bgView: NSView, minWidth: CGFloat, minHeight: CGFloat, maxHeight: CGFloat) {
+        self.window = window
+        self.hostingView = hostingView
+        self.bgView = bgView
+        self.minWidth = minWidth
+        self.minHeight = minHeight
+        self.maxHeight = maxHeight
+        super.init()
+
+        notificationObserver = NotificationCenter.default.addObserver(
+            forName: .dialogContentSizeChanged,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.updateWindowSize()
+        }
+    }
+
+    private func updateWindowSize() {
+        guard let window = window, let hostingView = hostingView, let bgView = bgView else { return }
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            let fittingSize = hostingView.fittingSize
+            let newWidth = max(self.minWidth, fittingSize.width) + 16
+            let newHeight = min(max(fittingSize.height + 16, self.minHeight), self.maxHeight)
+
+            let currentFrame = window.frame
+            if abs(currentFrame.height - newHeight) < 1 { return }
+
+            let newY = currentFrame.origin.y + currentFrame.height - newHeight
+            let newFrame = NSRect(x: currentFrame.origin.x, y: newY, width: newWidth, height: newHeight)
+            let newHostingFrame = NSRect(x: 8, y: 8, width: newWidth - 16, height: newHeight - 16)
+            let newBgFrame = NSRect(x: 0, y: 0, width: newWidth, height: newHeight)
+
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.2
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                context.allowsImplicitAnimation = true
+                window.animator().setFrame(newFrame, display: true)
+                hostingView.animator().frame = newHostingFrame
+                bgView.animator().frame = newBgFrame
+            }
+        }
+    }
+
+    deinit {
+        if let observer = notificationObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+}
+
 // MARK: - Dialog Manager
 
 class DialogManager {
@@ -42,6 +111,40 @@ class DialogManager {
         return (window, bgView)
     }
 
+    private var sizeObserver: WindowSizeObserver?
+
+    private func createAutoSizedWindow<Content: View>(
+        content: Content,
+        minWidth: CGFloat = 420,
+        minHeight: CGFloat = 300,
+        maxHeightRatio: CGFloat = 0.85
+    ) -> (NSWindow, NSHostingView<Content>, DraggableView) {
+        let hostingView = NSHostingView(rootView: content)
+
+        let screenHeight = NSScreen.main?.visibleFrame.height ?? 800
+        let maxHeight = screenHeight * maxHeightRatio
+
+        let fittingSize = hostingView.fittingSize
+        let width = max(minWidth, fittingSize.width) + 16
+        let height = min(max(fittingSize.height + 16, minHeight), maxHeight)
+
+        let (window, bgView) = createWindow(width: width, height: height)
+
+        hostingView.frame = NSRect(x: 8, y: 8, width: width - 16, height: height - 16)
+        bgView.addSubview(hostingView)
+
+        sizeObserver = WindowSizeObserver(
+            window: window,
+            hostingView: hostingView,
+            bgView: bgView,
+            minWidth: minWidth,
+            minHeight: minHeight,
+            maxHeight: maxHeight
+        )
+
+        return (window, hostingView, bgView)
+    }
+
     private func positionWindow(_ window: NSWindow, position: String) {
         guard let screen = NSScreen.main else { return }
 
@@ -68,12 +171,7 @@ class DialogManager {
         NSApp.setActivationPolicy(.accessory)
 
         var result: ConfirmResponse?
-        let windowWidth: CGFloat = 420
-        let windowHeight: CGFloat = 450  // Extra height for toolbar expansion
 
-        let (window, contentView) = createWindow(width: windowWidth, height: windowHeight)
-
-        // Create SwiftUI dialog
         let swiftUIDialog = SwiftUIConfirmDialog(
             title: request.title,
             message: request.message,
@@ -97,10 +195,7 @@ class DialogManager {
             }
         )
 
-        // Embed SwiftUI in NSHostingView
-        let hostingView = NSHostingView(rootView: swiftUIDialog)
-        hostingView.frame = NSRect(x: 8, y: 8, width: windowWidth - 16, height: windowHeight - 16)
-        contentView.addSubview(hostingView)
+        let (window, _, _) = createAutoSizedWindow(content: swiftUIDialog)
 
         positionWindow(window, position: effectivePosition(request.position))
         window.makeKeyAndOrderFront(nil)
@@ -118,16 +213,7 @@ class DialogManager {
         NSApp.setActivationPolicy(.accessory)
 
         var result: ChoiceResponse?
-        let windowWidth: CGFloat = 420
-        // Dynamic height: base (header + toolbar + footer + padding) + per-choice height
-        let baseHeight: CGFloat = 240
-        let perChoiceHeight: CGFloat = 70
-        let calculatedHeight = baseHeight + CGFloat(request.choices.count) * perChoiceHeight
-        let windowHeight: CGFloat = min(max(calculatedHeight, 400), 700)
 
-        let (window, contentView) = createWindow(width: windowWidth, height: windowHeight)
-
-        // Create SwiftUI dialog
         let swiftUIDialog = SwiftUIChooseDialog(
             prompt: request.prompt,
             choices: request.choices,
@@ -160,10 +246,7 @@ class DialogManager {
             }
         )
 
-        // Embed SwiftUI in NSHostingView
-        let hostingView = NSHostingView(rootView: swiftUIDialog)
-        hostingView.frame = NSRect(x: 8, y: 8, width: windowWidth - 16, height: windowHeight - 16)
-        contentView.addSubview(hostingView)
+        let (window, _, _) = createAutoSizedWindow(content: swiftUIDialog)
 
         positionWindow(window, position: effectivePosition(request.position))
         window.makeKeyAndOrderFront(nil)
@@ -388,19 +471,7 @@ class DialogManager {
         NSApp.setActivationPolicy(.accessory)
 
         var result: QuestionsResponse?
-        let windowWidth: CGFloat = 460
-        // Dynamic height: all question headers + max options expanded + chrome
-        let questionCount = request.questions.count
-        let maxOptions = request.questions.map { $0.options.count }.max() ?? 3
-        let headerHeight: CGFloat = 56  // Each question header
-        let optionHeight: CGFloat = 60  // Each option when expanded
-        let chromeHeight: CGFloat = 260 // Title bar + toolbar + footer + padding
-        let calculatedHeight = chromeHeight + CGFloat(questionCount) * headerHeight + CGFloat(maxOptions) * optionHeight
-        let windowHeight: CGFloat = min(calculatedHeight, 800)
 
-        let (window, contentView) = createWindow(width: windowWidth, height: windowHeight)
-
-        // Convert answers from QuestionAnswer to response format
         func buildResponse(answers: [String: QuestionAnswer], cancelled: Bool, dismissed: Bool) -> QuestionsResponse {
             var responseAnswers: [String: StringOrStrings] = [:]
             var completedCount = 0
@@ -445,33 +516,27 @@ class DialogManager {
             NSApp.stopModal()
         }
 
-        // Create appropriate dialog based on mode
-        let hostingView: NSHostingView<AnyView>
+        let dialogContent: AnyView
         switch request.mode {
         case "wizard":
-            hostingView = NSHostingView(rootView: AnyView(
-                SwiftUIWizardDialog(
-                    questions: request.questions,
-                    onComplete: onComplete,
-                    onCancel: onCancel,
-                    onSnooze: onSnooze,
-                    onFeedback: onFeedback
-                )
+            dialogContent = AnyView(SwiftUIWizardDialog(
+                questions: request.questions,
+                onComplete: onComplete,
+                onCancel: onCancel,
+                onSnooze: onSnooze,
+                onFeedback: onFeedback
             ))
-        default: // "accordion"
-            hostingView = NSHostingView(rootView: AnyView(
-                SwiftUIAccordionDialog(
-                    questions: request.questions,
-                    onComplete: onComplete,
-                    onCancel: onCancel,
-                    onSnooze: onSnooze,
-                    onFeedback: onFeedback
-                )
+        default:
+            dialogContent = AnyView(SwiftUIAccordionDialog(
+                questions: request.questions,
+                onComplete: onComplete,
+                onCancel: onCancel,
+                onSnooze: onSnooze,
+                onFeedback: onFeedback
             ))
         }
 
-        hostingView.frame = NSRect(x: 8, y: 8, width: windowWidth - 16, height: windowHeight - 16)
-        contentView.addSubview(hostingView)
+        let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460)
 
         positionWindow(window, position: effectivePosition(request.position))
         window.makeKeyAndOrderFront(nil)

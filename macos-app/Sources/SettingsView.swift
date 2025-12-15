@@ -23,7 +23,9 @@ struct SettingsView: View {
                 mainSettingsView
             }
         }
-        .frame(width: 300, height: 540)
+        .frame(width: 300)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxHeight: (NSScreen.main?.visibleFrame.height ?? 600) - 100)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 

@@ -14,7 +14,7 @@ struct UserSettings {
             return settings
         }
 
-        let settingsURL = appSupport.appendingPathComponent("SpeakMCP/settings.json")
+        let settingsURL = appSupport.appendingPathComponent("ConsultUserMCP/settings.json")
         guard let data = fm.contents(atPath: settingsURL.path),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return settings

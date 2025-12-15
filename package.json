@@ -4,8 +4,9 @@
   "description": "Native macOS dialog system for MCP servers",
   "scripts": {
     "build": "cd mcp-server && bun run build",
-    "build:cli": "swiftc -O -o dialog-cli/dialog-cli dialog-cli/dialog-cli.swift -framework AppKit -framework AVFoundation -framework UserNotifications",
+    "build:cli": "cd dialog-cli && swift build -c release",
     "build:app": "cd macos-app && swift build -c release",
+    "build:bundle": "bash scripts/build-app.sh",
     "start": "cd mcp-server && bun run start"
   },
   "workspaces": [

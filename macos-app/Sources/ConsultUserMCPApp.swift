@@ -34,10 +34,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         popover = NSPopover()
-        popover?.contentSize = NSSize(width: 300, height: 540)
         popover?.behavior = .transient
         popover?.animates = true
-        popover?.contentViewController = NSHostingController(rootView: SettingsView())
+        let hostingController = NSHostingController(rootView: SettingsView())
+        hostingController.sizingOptions = [.preferredContentSize]
+        popover?.contentViewController = hostingController
 
         setupDebugMenu()
     }
@@ -110,25 +111,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Dialog CLI Path
 
     private func dialogCliPath() -> String {
-        // Get the executable path and navigate to sibling dialog-cli folder
-        let executablePath = Bundle.main.executablePath ?? ""
+        let fm = FileManager.default
+        let execDir = (Bundle.main.executablePath ?? "") as NSString
 
-        // From: /path/to/consult-user-mcp/macos-app/.build/debug/SpeakSettings
-        // To:   /path/to/consult-user-mcp/dialog-cli/dialog-cli
-        var path = (executablePath as NSString).deletingLastPathComponent
+        // 1. Check same folder as executable (bundled app)
+        let bundledPath = execDir.deletingLastPathComponent + "/dialog-cli"
+        if fm.fileExists(atPath: bundledPath) { return bundledPath }
 
-        // Go up from .build/debug or .build/release
-        if path.contains("/.build/") {
-            while !path.hasSuffix("/macos-app") && path.count > 1 {
-                path = (path as NSString).deletingLastPathComponent
+        // 2. Check dev build path (swift build)
+        var devPath = execDir.deletingLastPathComponent as String
+        if devPath.contains("/.build/") {
+            while !devPath.hasSuffix("/macos-app") && devPath.count > 1 {
+                devPath = (devPath as NSString).deletingLastPathComponent
             }
-            path = (path as NSString).deletingLastPathComponent + "/dialog-cli/dialog-cli"
+            devPath = (devPath as NSString).deletingLastPathComponent + "/dialog-cli/dialog-cli"
+            if fm.fileExists(atPath: devPath) { return devPath }
         }
 
-        if FileManager.default.fileExists(atPath: path) {
-            return path
-        }
-
+        // 3. Fallback
         return "/usr/local/bin/dialog-cli"
     }
 

@@ -114,7 +114,7 @@ class DialogSettings: ObservableObject {
 
     private func settingsFileURL() -> URL {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let dir = appSupport.appendingPathComponent("SpeakMCP")
+        let dir = appSupport.appendingPathComponent("ConsultUserMCP")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         return dir.appendingPathComponent("settings.json")
     }

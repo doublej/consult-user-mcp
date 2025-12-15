@@ -164,7 +164,7 @@ async function testNotification() {
   console.log("\n5. Testing: notify_user");
   console.log("   Showing macOS notification...\n");
 
-  const script = `display notification "This is a test notification from the MCP server." with title "Speak MCP" subtitle "Test Complete" sound name "default"`;
+  const script = `display notification "This is a test notification from the MCP server." with title "Consult User MCP" subtitle "Test Complete" sound name "default"`;
   await runOsascript(script);
 
   console.log("   Result: Notification sent (check top-right of screen)");
@@ -174,14 +174,14 @@ async function testSpeak() {
   console.log("\n6. Testing: speak_text");
   console.log("   Speaking text aloud...\n");
 
-  await execAsync(`say -r 200 "Hello! This is the speak MCP server. I can talk to you."`);
+  await execAsync(`say -r 200 "Hello! This is the consult user MCP server. I can talk to you."`);
 
   console.log("   Result: Speech complete");
 }
 
 async function main() {
   console.log("=".repeat(50));
-  console.log("  Speak MCP Server - UI Test");
+  console.log("  Consult User MCP Server - UI Test");
   console.log("=".repeat(50));
   console.log("\nThis will show each dialog type. Interact with each one.\n");
 

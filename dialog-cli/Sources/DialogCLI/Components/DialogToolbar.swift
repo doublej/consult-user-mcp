@@ -67,6 +67,7 @@ struct DialogToolbar: View {
         }
         .background(Theme.Colors.cardBackground)
         .onChange(of: expandedTool) { newTool in
+            NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
             if newTool == .feedback {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                     FocusManager.shared.focusLast()

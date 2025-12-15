@@ -22,8 +22,8 @@ All interactive dialogs support **snooze** (defer with 1-60 min delay) and **fee
 ## Installation
 
 ```bash
-npm install
-npm run build
+bun install
+bun run build
 ```
 
 ## Usage with Claude Desktop

@@ -16,7 +16,7 @@ swift build -c release
 # 2. Build mcp-server
 echo "  Building mcp-server..."
 cd "$ROOT/mcp-server"
-npm run build
+bun run build
 
 # 3. Build macOS app
 echo "  Building macOS app..."
@@ -40,10 +40,10 @@ cp "$ROOT/dialog-cli/.build/release/DialogCLI" "$APP_PATH/Contents/Resources/dia
 cp -r "$ROOT/mcp-server/dist/"* "$APP_PATH/Contents/Resources/mcp-server/dist/"
 cp "$ROOT/mcp-server/package.json" "$APP_PATH/Contents/Resources/mcp-server/"
 
-# Install production dependencies (avoids pnpm symlink issues)
+# Install production dependencies
 echo "  Installing node dependencies..."
 cd "$APP_PATH/Contents/Resources/mcp-server"
-npm install --omit=dev --ignore-scripts 2>/dev/null || npm install --production --ignore-scripts
+bun install --production
 
 # 8. Copy resources (icon)
 cp "$ROOT/macos-app/Sources/Resources/AppIcon.icns" "$APP_PATH/Contents/Resources/"

@@ -30,7 +30,7 @@ MCP protocol server exposing dialog tools to LLMs.
 
 **Tools:** `ask_confirmation`, `ask_multiple_choice`, `ask_text_input`, `ask_questions`, `notify_user`
 
-**Build:** `cd mcp-server && npm run build`
+**Build:** `cd mcp-server && bun run build`
 
 **Entry:** `dist/index.js`
 
@@ -55,12 +55,12 @@ Menu bar app for settings and installation guide.
 
 ```bash
 # Individual builds
-npm run build        # mcp-server only
-npm run build:cli    # dialog-cli only
-npm run build:app    # macos-app only
+bun run build        # mcp-server only
+bun run build:cli    # dialog-cli only
+bun run build:app    # macos-app only
 
 # Full app bundle (builds all + packages to /Applications)
-npm run build:bundle
+bun run build:bundle
 ```
 
 ## App Bundle Structure

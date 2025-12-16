@@ -20,6 +20,12 @@ Keep working while your AI agent runs autonomously. When it needs your input, a 
 </tr>
 </table>
 
+## Quick Install
+
+```bash
+curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/install.sh | bash
+```
+
 ## Contents
 
 - [Install](#install)

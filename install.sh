@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e
+
+APP_NAME="Consult User MCP.app"
+ZIP_NAME="Consult.User.MCP.app.zip"
+INSTALL_DIR="/Applications"
+REPO="doublej/consult-user-mcp"
+
+echo "Downloading latest release..."
+curl -sL "https://github.com/$REPO/releases/latest/download/$ZIP_NAME" -o "/tmp/$ZIP_NAME"
+
+echo "Extracting..."
+unzip -q -o "/tmp/$ZIP_NAME" -d "/tmp"
+
+echo "Installing to $INSTALL_DIR..."
+rm -rf "$INSTALL_DIR/$APP_NAME"
+mv "/tmp/$APP_NAME" "$INSTALL_DIR/"
+
+echo "Removing quarantine flag..."
+xattr -cr "$INSTALL_DIR/$APP_NAME"
+
+rm "/tmp/$ZIP_NAME"
+
+echo "Done! Launch from Applications or run:"
+echo "  open '/Applications/$APP_NAME'"

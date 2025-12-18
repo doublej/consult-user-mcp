@@ -21,5 +21,18 @@ xattr -cr "$INSTALL_DIR/$APP_NAME"
 
 rm "/tmp/$ZIP_NAME"
 
-echo "Done! Launch from Applications or run:"
+MCP_PATH="$INSTALL_DIR/$APP_NAME/Contents/Resources/mcp-server/dist/index.js"
+
+echo "Done! Add to your MCP config:"
+echo ""
+echo '{'
+echo '  "mcpServers": {'
+echo '    "speak": {'
+echo '      "command": "node",'
+echo "      \"args\": [\"$MCP_PATH\"]"
+echo '    }'
+echo '  }'
+echo '}'
+echo ""
+echo "Or launch the app and use 'Install for Claude Code':"
 echo "  open '/Applications/$APP_NAME'"

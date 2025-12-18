@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "npm run build:swift && tsc",
+    "build": "bun run build:swift && tsc",
     "build:swift": "cd ../dialog-cli && swift build -c release",
     "build:ts": "tsc",
     "start": "node dist/index.js",

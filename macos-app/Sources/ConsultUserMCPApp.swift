@@ -29,7 +29,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem?.button {
-            button.image = NSImage(systemSymbolName: "bubble.left.and.bubble.right", accessibilityDescription: "Speak Settings")
+            if let image = NSImage(systemSymbolName: "bubble.left.and.bubble.right", accessibilityDescription: "Speak Settings") {
+                image.isTemplate = true
+                button.image = image
+            }
             button.target = self
             button.action = #selector(handleClick)
             button.sendAction(on: [.leftMouseUp, .rightMouseUp])
@@ -57,12 +60,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func updateStatusIcon(snoozed: Bool) {
         guard let button = statusItem?.button else { return }
         let iconName = snoozed ? "moon.zzz.fill" : "bubble.left.and.bubble.right"
-        button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: snoozed ? "Snooze Active" : "Settings")
-        if snoozed {
-            button.contentTintColor = .orange
-        } else {
-            button.contentTintColor = nil
+        if let image = NSImage(systemSymbolName: iconName, accessibilityDescription: snoozed ? "Snooze Active" : "Settings") {
+            image.isTemplate = !snoozed
+            button.image = image
         }
+        button.contentTintColor = snoozed ? .orange : nil
     }
 
     private func setupDebugMenu() {

@@ -51,7 +51,7 @@ export interface DialogProvider {
 
   /**
    * Display multiple questions in a single dialog.
-   * Supports wizard, accordion, and questionnaire modes.
+   * Supports wizard and accordion modes.
    */
   questions(opts: QuestionsOptions): Promise<QuestionsResult>;
 }

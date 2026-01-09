@@ -44,7 +44,7 @@ enum QuestionAnswer {
 
 struct QuestionsRequest: Codable {
     let questions: [QuestionItem]
-    let mode: String  // "wizard" | "accordion" | "questionnaire"
+    let mode: String  // "wizard" | "accordion"
     let position: String
 }
 
@@ -56,6 +56,7 @@ struct QuestionsResponse: Codable {
     let completedCount: Int
     let snoozed: Bool?
     let snoozeMinutes: Int?
+    let remainingSeconds: Int?
     let feedbackText: String?
     let instruction: String?
 }

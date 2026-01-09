@@ -1,7 +1,7 @@
 import Foundation
 
 struct ConfirmRequest: Codable {
-    let message: String
+    let body: String
     let title: String
     let confirmLabel: String
     let cancelLabel: String
@@ -9,7 +9,7 @@ struct ConfirmRequest: Codable {
 }
 
 struct ChooseRequest: Codable {
-    let prompt: String
+    let body: String
     let choices: [String]
     let descriptions: [String]?
     let allowMultiple: Bool
@@ -18,7 +18,7 @@ struct ChooseRequest: Codable {
 }
 
 struct TextInputRequest: Codable {
-    let prompt: String
+    let body: String
     let title: String
     let defaultValue: String
     let hidden: Bool
@@ -26,9 +26,8 @@ struct TextInputRequest: Codable {
 }
 
 struct NotifyRequest: Codable {
-    let message: String
+    let body: String
     let title: String
-    let subtitle: String?
     let sound: Bool
 }
 

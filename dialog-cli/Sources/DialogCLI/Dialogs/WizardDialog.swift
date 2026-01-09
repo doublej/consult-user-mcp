@@ -43,6 +43,7 @@ struct QuestionSection: View {
             Text(question.question)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(Theme.Colors.textPrimary)
+                .frame(maxWidth: 400, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
 
             if question.type == .text {

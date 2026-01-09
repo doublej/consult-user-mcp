@@ -67,8 +67,3 @@ LLM: "What should I name the project?"
 -> Returns: { text: "my-app" }
 ```
 
-## Available Voices
-
-Run `say -v ?` in Terminal to see all available voices on your system.
-
-Common voices: Samantha, Alex, Daniel, Karen, Moira, Tessa, Veena, Fiona

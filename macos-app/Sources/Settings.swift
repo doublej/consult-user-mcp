@@ -91,7 +91,66 @@ class DialogSettings: ObservableObject {
     @AppStorage("speechRate") var speechRate: Double = 200
     @AppStorage("speechVoice") var speechVoice: String = ""
 
-    private init() {}
+    // Snooze state
+    @Published var snoozeRemaining: Int = 0
+    private var snoozeTimer: Timer?
+
+    private init() {
+        startSnoozeMonitoring()
+    }
+
+    deinit {
+        snoozeTimer?.invalidate()
+    }
+
+    // MARK: - Snooze Monitoring
+
+    func startSnoozeMonitoring() {
+        snoozeTimer?.invalidate()
+        snoozeTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.updateSnoozeState()
+        }
+        updateSnoozeState()
+    }
+
+    private func updateSnoozeState() {
+        let url = settingsFileURL()
+        guard let data = FileManager.default.contents(atPath: url.path),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let snoozeStr = json["snoozeUntil"] as? String else {
+            snoozeRemaining = 0
+            return
+        }
+
+        let formatter = ISO8601DateFormatter()
+        guard let snoozeUntil = formatter.date(from: snoozeStr) else {
+            snoozeRemaining = 0
+            return
+        }
+
+        let remaining = snoozeUntil.timeIntervalSinceNow
+        if remaining > 0 {
+            snoozeRemaining = Int(remaining)
+        } else {
+            snoozeRemaining = 0
+            clearSnooze()
+        }
+    }
+
+    func clearSnooze() {
+        let url = settingsFileURL()
+        guard let data = FileManager.default.contents(atPath: url.path),
+              var json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+
+        json.removeValue(forKey: "snoozeUntil")
+        snoozeRemaining = 0
+
+        if let newData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
+            try? newData.write(to: url)
+        }
+    }
 
     func saveToFile() {
         let settings: [String: Any] = [

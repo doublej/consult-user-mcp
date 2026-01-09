@@ -44,7 +44,7 @@ export interface TtsResult {
 
 // Options for confirmation dialog
 export interface ConfirmOptions {
-  message: string;
+  body: string;
   title: string;
   confirmLabel: string;
   cancelLabel: string;
@@ -53,7 +53,7 @@ export interface ConfirmOptions {
 
 // Options for choice dialog
 export interface ChooseOptions {
-  prompt: string;
+  body: string;
   choices: string[];
   descriptions?: string[];
   allowMultiple: boolean;
@@ -63,7 +63,7 @@ export interface ChooseOptions {
 
 // Options for text input dialog
 export interface TextInputOptions {
-  prompt: string;
+  body: string;
   title: string;
   defaultValue: string;
   hidden: boolean;
@@ -72,9 +72,8 @@ export interface TextInputOptions {
 
 // Options for notification
 export interface NotifyOptions {
-  message: string;
+  body: string;
   title: string;
-  subtitle?: string;
   sound: boolean;
 }
 

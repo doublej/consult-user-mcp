@@ -5,17 +5,18 @@ import Foundation
 struct UserSettings {
     var position: String = "left"
     var speechRate: Int = 200
+    var snoozeUntil: Date?
+
+    private static var settingsURL: URL? {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("ConsultUserMCP/settings.json")
+    }
 
     static func load() -> UserSettings {
         var settings = UserSettings()
 
-        let fm = FileManager.default
-        guard let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-            return settings
-        }
-
-        let settingsURL = appSupport.appendingPathComponent("ConsultUserMCP/settings.json")
-        guard let data = fm.contents(atPath: settingsURL.path),
+        guard let url = settingsURL,
+              let data = FileManager.default.contents(atPath: url.path),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             return settings
         }
@@ -28,7 +29,65 @@ struct UserSettings {
         } else if let rate = json["speechRate"] as? Double {
             settings.speechRate = Int(rate)
         }
+        if let snoozeStr = json["snoozeUntil"] as? String {
+            let formatter = ISO8601DateFormatter()
+            settings.snoozeUntil = formatter.date(from: snoozeStr)
+        }
 
         return settings
+    }
+
+    // MARK: - Snooze Management
+
+    static func setSnooze(minutes: Int) {
+        guard let url = settingsURL else { return }
+        let fm = FileManager.default
+
+        var json: [String: Any] = [:]
+        if let data = fm.contents(atPath: url.path),
+           let existing = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            json = existing
+        }
+
+        let formatter = ISO8601DateFormatter()
+        let expiry = Date().addingTimeInterval(TimeInterval(minutes * 60))
+        json["snoozeUntil"] = formatter.string(from: expiry)
+
+        if let data = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
+            try? fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? data.write(to: url)
+        }
+    }
+
+    static func clearSnooze() {
+        guard let url = settingsURL else { return }
+        let fm = FileManager.default
+
+        guard let data = fm.contents(atPath: url.path),
+              var json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+
+        json.removeValue(forKey: "snoozeUntil")
+
+        if let newData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
+            try? newData.write(to: url)
+        }
+    }
+
+    static func isSnoozeActive() -> (active: Bool, remainingSeconds: Int?) {
+        let settings = load()
+        guard let snoozeUntil = settings.snoozeUntil else {
+            return (false, nil)
+        }
+
+        let remaining = snoozeUntil.timeIntervalSinceNow
+        if remaining > 0 {
+            return (true, Int(remaining))
+        } else {
+            // Snooze expired, clean it up
+            clearSnooze()
+            return (false, nil)
+        }
     }
 }

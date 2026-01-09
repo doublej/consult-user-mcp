@@ -59,7 +59,7 @@ export class SwiftDialogProvider implements DialogProvider {
 
   async confirm(opts: ConfirmOptions): Promise<ConfirmResult> {
     return this.runCli<ConfirmResult>("confirm", {
-      message: opts.message,
+      body: opts.body,
       title: opts.title,
       confirmLabel: opts.confirmLabel,
       cancelLabel: opts.cancelLabel,
@@ -69,7 +69,7 @@ export class SwiftDialogProvider implements DialogProvider {
 
   async choose(opts: ChooseOptions): Promise<ChoiceResult> {
     return this.runCli<ChoiceResult>("choose", {
-      prompt: opts.prompt,
+      body: opts.body,
       choices: opts.choices,
       descriptions: opts.descriptions,
       allowMultiple: opts.allowMultiple,
@@ -80,7 +80,7 @@ export class SwiftDialogProvider implements DialogProvider {
 
   async textInput(opts: TextInputOptions): Promise<TextInputResult> {
     return this.runCli<TextInputResult>("textInput", {
-      prompt: opts.prompt,
+      body: opts.body,
       title: opts.title,
       defaultValue: opts.defaultValue,
       hidden: opts.hidden,
@@ -90,9 +90,8 @@ export class SwiftDialogProvider implements DialogProvider {
 
   async notify(opts: NotifyOptions): Promise<NotifyResult> {
     return this.runCli<NotifyResult>("notify", {
-      message: opts.message,
+      body: opts.body,
       title: opts.title,
-      subtitle: opts.subtitle,
       sound: opts.sound,
     });
   }

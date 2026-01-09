@@ -115,9 +115,8 @@ consult-user-mcp/
 - `ask_confirmation` - Yes/No dialog
 - `ask_multiple_choice` - List picker
 - `ask_text_input` - Text input
-- `ask_questions` - Multi-question dialog (wizard, accordion, or questionnaire mode)
+- `ask_questions` - Multi-question dialog (wizard or accordion mode)
 - `notify_user` - System notification
-- `tts` - Text-to-speech
 
 ## Architecture
 

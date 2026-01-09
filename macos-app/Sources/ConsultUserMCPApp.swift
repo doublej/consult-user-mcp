@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 @main
 struct ConsultUserMCPApp: App {
@@ -15,6 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
     var popover: NSPopover?
     var debugMenu: NSMenu?
+    private var snoozeObserver: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -41,6 +43,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover?.contentViewController = hostingController
 
         setupDebugMenu()
+        setupSnoozeObserver()
+    }
+
+    private func setupSnoozeObserver() {
+        snoozeObserver = DialogSettings.shared.$snoozeRemaining
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] remaining in
+                self?.updateStatusIcon(snoozed: remaining > 0)
+            }
+    }
+
+    private func updateStatusIcon(snoozed: Bool) {
+        guard let button = statusItem?.button else { return }
+        let iconName = snoozed ? "moon.zzz.fill" : "bubble.left.and.bubble.right"
+        button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: snoozed ? "Snooze Active" : "Settings")
+        if snoozed {
+            button.contentTintColor = .orange
+        } else {
+            button.contentTintColor = nil
+        }
     }
 
     private func setupDebugMenu() {

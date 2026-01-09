@@ -35,6 +35,9 @@ struct SettingsView: View {
 
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: Spacing.md) {
+                    if settings.snoozeRemaining > 0 {
+                        snoozeIndicator
+                    }
                     installCard
                     positionSection
                     appearanceSection
@@ -134,6 +137,58 @@ struct SettingsView: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Snooze Indicator
+    private var snoozeIndicator: some View {
+        HStack(spacing: Spacing.sm) {
+            ZStack {
+                Circle()
+                    .fill(Color.orange.opacity(0.15))
+                    .frame(width: 32, height: 32)
+
+                Image(systemName: "moon.zzz.fill")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.orange)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Snooze Active")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.primary)
+                Text(formatSnoozeTime(settings.snoozeRemaining))
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    .foregroundColor(.orange)
+            }
+
+            Spacer()
+
+            Button(action: { settings.clearSnooze() }) {
+                Text("Clear")
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+        }
+        .padding(Spacing.sm)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.orange.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(Color.orange.opacity(0.3), lineWidth: 1)
+                )
+        )
+    }
+
+    private func formatSnoozeTime(_ seconds: Int) -> String {
+        let mins = seconds / 60
+        let secs = seconds % 60
+        if mins > 0 {
+            return String(format: "%d:%02d remaining", mins, secs)
+        } else {
+            return "\(secs)s remaining"
+        }
     }
 
     // MARK: - Position Section

@@ -9,10 +9,10 @@ const provider = new SwiftDialogProvider();
 const pos = z.enum(["left", "right", "center"]).default("left");
 
 server.registerTool("ask_confirmation", {
-  description: "Yes/No dialog. Returns {confirmed, cancelled, response}. 10 min timeout. User may snooze (snoozed, snoozeMinutes) or provide feedback (feedbackText) instead.",
+  description: "Yes/No dialog. Returns {confirmed, cancelled, response}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
   inputSchema: z.object({
-    message: z.string().min(1).max(500),
-    title: z.string().max(100).default("Confirmation"),
+    body: z.string().min(1).max(1000),
+    title: z.string().max(80).default("Confirmation"),
     confirm_label: z.string().max(20).default("Yes"),
     cancel_label: z.string().max(20).default("No"),
     position: pos,
@@ -20,7 +20,7 @@ server.registerTool("ask_confirmation", {
 }, async (p) => {
   provider.pulse();
   const r = await provider.confirm({
-    message: p.message, title: p.title ?? "Confirmation",
+    body: p.body, title: p.title ?? "Confirmation",
     confirmLabel: p.confirm_label ?? "Yes", cancelLabel: p.cancel_label ?? "No",
     position: (p.position ?? "left") as DialogPosition,
   });
@@ -28,9 +28,9 @@ server.registerTool("ask_confirmation", {
 });
 
 server.registerTool("ask_multiple_choice", {
-  description: "List picker dialog. Returns {selected, cancelled, description}. 10 min timeout. User may snooze (snoozed, snoozeMinutes) or provide feedback (feedbackText) instead.",
+  description: "List picker dialog. Returns {selected, cancelled, description}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
   inputSchema: z.object({
-    prompt: z.string().min(1).max(500),
+    body: z.string().min(1).max(1000),
     choices: z.array(z.string().min(1).max(100)).min(2).max(20),
     descriptions: z.array(z.string().max(200)).optional(),
     allow_multiple: z.boolean().default(true),
@@ -40,7 +40,7 @@ server.registerTool("ask_multiple_choice", {
 }, async (p) => {
   provider.pulse();
   const r = await provider.choose({
-    prompt: p.prompt, choices: p.choices, descriptions: p.descriptions,
+    body: p.body, choices: p.choices, descriptions: p.descriptions,
     allowMultiple: p.allow_multiple ?? true, defaultSelection: p.default_selection,
     position: (p.position ?? "left") as DialogPosition,
   });
@@ -48,10 +48,10 @@ server.registerTool("ask_multiple_choice", {
 });
 
 server.registerTool("ask_text_input", {
-  description: "Text input dialog. Returns {text, cancelled}. Supports hidden input. 10 min timeout. User may snooze (snoozed, snoozeMinutes) or provide feedback (feedbackText) instead.",
+  description: "Text input dialog. Returns {text, cancelled}. Supports hidden input. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
   inputSchema: z.object({
-    prompt: z.string().min(1).max(500),
-    title: z.string().max(100).default("Input"),
+    body: z.string().min(1).max(1000),
+    title: z.string().max(80).default("Input"),
     default_value: z.string().max(1000).default(""),
     hidden: z.boolean().default(false),
     position: pos,
@@ -59,7 +59,7 @@ server.registerTool("ask_text_input", {
 }, async (p) => {
   provider.pulse();
   const r = await provider.textInput({
-    prompt: p.prompt, title: p.title ?? "Input",
+    body: p.body, title: p.title ?? "Input",
     defaultValue: p.default_value ?? "", hidden: p.hidden ?? false,
     position: (p.position ?? "left") as DialogPosition,
   });
@@ -69,16 +69,15 @@ server.registerTool("ask_text_input", {
 server.registerTool("notify_user", {
   description: "Show macOS notification banner. Non-blocking, no user response needed. Returns {success}.",
   inputSchema: z.object({
-    message: z.string().min(1).max(500),
-    title: z.string().max(100).default("Notice"),
-    subtitle: z.string().max(200).optional(),
+    body: z.string().min(1).max(1000),
+    title: z.string().max(80).default("Notice"),
     sound: z.boolean().default(true),
   }),
 }, async (p) => {
   provider.pulse();
   const r = await provider.notify({
-    message: p.message, title: p.title ?? "Notice",
-    subtitle: p.subtitle, sound: p.sound ?? true,
+    body: p.body, title: p.title ?? "Notice",
+    sound: p.sound ?? true,
   });
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
@@ -94,7 +93,7 @@ const questionSchema = z.object({
 });
 
 server.registerTool("ask_questions", {
-  description: "Multi-question dialog. Modes: wizard (prev/next), accordion (collapsible). Returns {answers, cancelled, completedCount}. User may snooze (snoozed, snoozeMinutes) or provide feedback (feedbackText) instead.",
+  description: "Multi-question dialog. Modes: wizard (prev/next), accordion (collapsible). Returns {answers, cancelled, completedCount}. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
   inputSchema: z.object({
     questions: z.array(questionSchema).min(1).max(10),
     mode: z.enum(["wizard", "accordion"]).default("wizard"),

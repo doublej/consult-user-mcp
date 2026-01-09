@@ -5,7 +5,7 @@ import SwiftUI
 
 struct SwiftUIConfirmDialog: View {
     let title: String
-    let message: String
+    let bodyText: String
     let confirmLabel: String
     let cancelLabel: String
     let onConfirm: () -> Void
@@ -44,7 +44,7 @@ struct SwiftUIConfirmDialog: View {
             }
         }) {
             VStack(spacing: 0) {
-                DialogHeader(icon: "questionmark", title: title, subtitle: message)
+                DialogHeader(icon: "questionmark", title: title, body: bodyText)
                     .padding(.bottom, 12)
 
                 DialogToolbar(
@@ -67,7 +67,7 @@ struct SwiftUIConfirmDialog: View {
                 )
             }
             .accessibilityElement(children: .contain)
-            .accessibilityLabel(Text("\(title). \(message)"))
+            .accessibilityLabel(Text("\(title). \(bodyText)"))
         }
     }
 

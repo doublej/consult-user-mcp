@@ -33,6 +33,7 @@ struct ConfirmResponse: Codable {
     let comment: String?
     let snoozed: Bool?
     let snoozeMinutes: Int?
+    let remainingSeconds: Int?
     let feedbackText: String?
     let instruction: String?
 }
@@ -47,6 +48,7 @@ struct ChoiceResponse: Codable {
     let comment: String?
     let snoozed: Bool?
     let snoozeMinutes: Int?
+    let remainingSeconds: Int?
     let feedbackText: String?
     let instruction: String?
 }
@@ -59,6 +61,7 @@ struct TextInputResponse: Codable {
     let comment: String?
     let snoozed: Bool?
     let snoozeMinutes: Int?
+    let remainingSeconds: Int?
     let feedbackText: String?
     let instruction: String?
 }

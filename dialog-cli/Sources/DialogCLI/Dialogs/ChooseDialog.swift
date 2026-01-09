@@ -4,7 +4,7 @@ import SwiftUI
 // MARK: - SwiftUI Choose Dialog
 
 struct SwiftUIChooseDialog: View {
-    let prompt: String
+    let bodyText: String
     let choices: [String]
     let descriptions: [String]?
     let allowMultiple: Bool
@@ -18,8 +18,8 @@ struct SwiftUIChooseDialog: View {
     @State private var focusedIndex: Int = 0
     @State private var expandedTool: DialogToolbar.ToolbarTool?
 
-    init(prompt: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String) -> Void) {
-        self.prompt = prompt
+    init(body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String) -> Void) {
+        self.bodyText = body
         self.choices = choices
         self.descriptions = descriptions
         self.allowMultiple = allowMultiple
@@ -50,18 +50,15 @@ struct SwiftUIChooseDialog: View {
                 footerView
             }
             .accessibilityElement(children: .contain)
-            .accessibilityLabel(Text(prompt))
+            .accessibilityLabel(Text(bodyText))
             .accessibilityHint(allowMultiple ? "Select one or more options. Use arrow keys to navigate, Space to select." : "Select one option. Use arrow keys to navigate, Space to select.")
         }
     }
 
     private var headerView: some View {
-        Text(prompt)
-            .font(.system(size: 17, weight: .bold))
-            .foregroundColor(Theme.Colors.textPrimary)
+        MarkdownText(bodyText, font: .system(size: 17, weight: .bold), color: Theme.Colors.textPrimary)
+            .frame(width: 380, alignment: .leading)
             .fixedSize(horizontal: false, vertical: true)
-            .lineLimit(nil)
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 20)
             .padding(.top, 20)
             .padding(.bottom, 16)

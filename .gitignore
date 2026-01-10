@@ -41,3 +41,5 @@ macos-app/dialog-cli/
 .plan.md
 .beads/
 CLAUDE.md
+.vercel
+.env*.local

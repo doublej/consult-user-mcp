@@ -1,4 +1,5 @@
-import webpush from 'web-push';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const webpush = require('web-push');
 
 // VAPID keys - in production, store these in environment variables
 // Generate new keys with: npx web-push generate-vapid-keys
@@ -11,6 +12,14 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 }
 
+interface WebPushSubscription {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+}
+
 export interface PushPayload {
   title: string;
   body: string;
@@ -19,7 +28,7 @@ export interface PushPayload {
 }
 
 export async function sendPushNotification(
-  subscription: webpush.PushSubscription,
+  subscription: WebPushSubscription,
   payload: PushPayload
 ): Promise<boolean> {
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {

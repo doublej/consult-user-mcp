@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "buildCommand": "echo 'No build needed'",
+  "outputDirectory": "public",
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/sw.js", "dest": "/sw.js", "headers": { "Service-Worker-Allowed": "/" } },
+    { "src": "/(.*)", "dest": "/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache" },
+        { "key": "Service-Worker-Allowed", "value": "/" }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 // Service Worker for Consult User PWA
-const CACHE_NAME = 'consult-user-v1';
+const CACHE_NAME = 'consult-user-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -39,13 +39,31 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - network first for JS, cache first for others
 self.addEventListener('fetch', (event) => {
   // Skip API requests
   if (event.request.url.includes('/api/')) {
     return;
   }
 
+  // Network first for JavaScript files (to get updates faster)
+  if (event.request.url.endsWith('.js')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Update cache with new version
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Cache first for other static assets
   event.respondWith(
     caches.match(event.request)
       .then((response) => {

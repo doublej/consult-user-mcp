@@ -584,7 +584,27 @@ function updateConnectionStatus(status) {
 
 function updateSessionInfo() {
   if (elements.sessionInfo && state.sessionId) {
-    elements.sessionInfo.textContent = `Session: ${state.sessionId.slice(0, 8)}...`;
+    elements.sessionInfo.innerHTML = `<span class="session-label">Session:</span> <code class="session-id">${state.sessionId}</code> <button class="copy-btn" onclick="copySessionId()">Copy</button>`;
+  }
+}
+
+function copySessionId() {
+  if (state.sessionId) {
+    navigator.clipboard.writeText(state.sessionId).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      if (btn) {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      }
+    }).catch(() => {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = state.sessionId;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    });
   }
 }
 

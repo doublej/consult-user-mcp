@@ -584,26 +584,35 @@ function updateConnectionStatus(status) {
 
 function updateSessionInfo() {
   if (elements.sessionInfo && state.sessionId) {
-    elements.sessionInfo.innerHTML = `<span class="session-label">Session:</span> <code class="session-id">${state.sessionId}</code> <button class="copy-btn" onclick="copySessionId()">Copy</button>`;
+    elements.sessionInfo.innerHTML = `<span class="session-label">Session:</span> <code class="session-id">${state.sessionId}</code> <button class="copy-btn" data-session="${state.sessionId}">Copy</button>`;
+    // Add click handler directly
+    const btn = elements.sessionInfo.querySelector('.copy-btn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const fullId = localStorage.getItem('consult-user-session') || state.sessionId;
+        navigator.clipboard.writeText(fullId).then(() => {
+          btn.textContent = 'Copied!';
+          setTimeout(() => btn.textContent = 'Copy', 2000);
+        }).catch(() => {
+          // Fallback
+          prompt('Copy this Session ID:', fullId);
+        });
+      });
+    }
   }
 }
 
 function copySessionId() {
-  if (state.sessionId) {
-    navigator.clipboard.writeText(state.sessionId).then(() => {
+  const fullId = localStorage.getItem('consult-user-session') || state.sessionId;
+  if (fullId) {
+    navigator.clipboard.writeText(fullId).then(() => {
       const btn = document.querySelector('.copy-btn');
       if (btn) {
         btn.textContent = 'Copied!';
         setTimeout(() => btn.textContent = 'Copy', 2000);
       }
     }).catch(() => {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = state.sessionId;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
+      prompt('Copy this Session ID:', fullId);
     });
   }
 }

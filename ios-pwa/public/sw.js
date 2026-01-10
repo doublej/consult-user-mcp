@@ -1,5 +1,5 @@
 // Service Worker for Consult User PWA
-const CACHE_NAME = 'consult-user-v3';
+const CACHE_NAME = 'consult-user-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

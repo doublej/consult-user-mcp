@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Consult">
+  <meta name="theme-color" content="#1a1a2e">
+
+  <title>Consult User</title>
+
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Install prompt (shown when not installed) -->
+    <div id="install-prompt" class="screen hidden">
+      <div class="install-container">
+        <div class="install-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+          </svg>
+        </div>
+        <h1>Install Consult User</h1>
+        <p>Add this app to your home screen to receive notifications when Claude needs your input.</p>
+
+        <div class="install-steps">
+          <div class="step">
+            <span class="step-number">1</span>
+            <span>Tap the <strong>Share</strong> button <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg></span>
+          </div>
+          <div class="step">
+            <span class="step-number">2</span>
+            <span>Scroll down and tap <strong>Add to Home Screen</strong></span>
+          </div>
+          <div class="step">
+            <span class="step-number">3</span>
+            <span>Tap <strong>Add</strong> in the top right</span>
+          </div>
+        </div>
+
+        <p class="install-note">After installing, open the app from your home screen to enable notifications.</p>
+      </div>
+    </div>
+
+    <!-- Main screen (shown when installed) -->
+    <div id="main-screen" class="screen hidden">
+      <header>
+        <h1>Consult User</h1>
+        <div id="connection-status" class="status disconnected">
+          <span class="status-dot"></span>
+          <span class="status-text">Connecting...</span>
+        </div>
+      </header>
+
+      <main>
+        <!-- Notification permission prompt -->
+        <div id="notification-prompt" class="card hidden">
+          <h2>Enable Notifications</h2>
+          <p>Get notified instantly when Claude needs your input.</p>
+          <button id="enable-notifications" class="btn primary">Enable Notifications</button>
+        </div>
+
+        <!-- Waiting state -->
+        <div id="waiting-state" class="card">
+          <div class="waiting-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <h2>Waiting for Questions</h2>
+          <p>You'll be notified when Claude needs your input.</p>
+          <p class="session-info" id="session-info"></p>
+        </div>
+
+        <!-- Question dialog container -->
+        <div id="dialog-container" class="hidden"></div>
+      </main>
+
+      <footer>
+        <button id="test-dialog" class="btn secondary">Test Dialog</button>
+        <p class="version">v1.0.0</p>
+      </footer>
+    </div>
+  </div>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

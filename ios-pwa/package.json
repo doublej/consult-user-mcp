@@ -1,0 +1,19 @@
+{
+  "name": "consult-user-pwa",
+  "version": "1.0.0",
+  "description": "PWA companion for consult-user-mcp - works on iOS",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static PWA - no build needed'",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7",
+    "@vercel/kv": "^2.0.0"
+  },
+  "devDependencies": {
+    "@vercel/node": "^3.0.0",
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0"
+  }
+}

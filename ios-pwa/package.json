@@ -8,12 +8,12 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
-    "web-push": "^3.6.7",
     "@vercel/kv": "^2.0.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "@vercel/node": "^3.0.0",
     "typescript": "^5.3.0",
-    "@types/node": "^20.0.0"
+    "web-push": "^3.6.7"
   }
 }

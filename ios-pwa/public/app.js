@@ -59,24 +59,11 @@ async function init() {
 
   showScreen('main');
 
-  // Register service worker
-  await registerServiceWorker();
-
-  // Check notification permission
-  await checkNotificationPermission();
-
-  // Generate or retrieve session ID
+  // Generate or retrieve session ID first (sync operation)
   state.sessionId = getOrCreateSessionId();
   updateSessionInfo();
 
-  // Check for question in URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const questionId = urlParams.get('question');
-  if (questionId) {
-    await fetchAndShowQuestion(questionId);
-  }
-
-  // Start polling for questions
+  // Start polling immediately so we show connected status
   startPolling();
 
   // Setup event listeners
@@ -85,7 +72,17 @@ async function init() {
   // Listen for messages from service worker
   navigator.serviceWorker?.addEventListener('message', handleServiceWorkerMessage);
 
-  updateConnectionStatus('connected');
+  // Register service worker and push in background (don't block UI)
+  registerServiceWorker().then(() => {
+    checkNotificationPermission();
+  }).catch(err => console.error('[App] Service worker setup error:', err));
+
+  // Check for question in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const questionId = urlParams.get('question');
+  if (questionId) {
+    fetchAndShowQuestion(questionId);
+  }
 }
 
 // ============================================================================
@@ -205,7 +202,11 @@ function startPolling() {
 async function pollForQuestions() {
   try {
     const response = await fetch(`${CONFIG.apiBase}/questions?sessionId=${state.sessionId}`);
-    if (!response.ok) return;
+    if (!response.ok) {
+      console.warn('[App] Poll response not OK:', response.status);
+      updateConnectionStatus('disconnected');
+      return;
+    }
 
     const data = await response.json();
 

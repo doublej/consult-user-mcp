@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { store } from './lib/store';
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -12,7 +12,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing sessionId' });
   }
 
-  const question = store.getPendingQuestion(sessionId);
+  const question = await store.getPendingQuestion(sessionId);
 
   if (question) {
     return res.status(200).json({ question });

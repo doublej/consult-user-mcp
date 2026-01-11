@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "web-push": "^3.6.7",
-    "@vercel/kv": "^2.0.0"
+    "@vercel/kv": "^2.0.0",
+    "@upstash/redis": "^1.28.0"
   },
   "devDependencies": {
     "@vercel/node": "^3.0.0",

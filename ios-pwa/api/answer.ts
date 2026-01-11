@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { store } from './lib/store';
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -12,7 +12,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing questionId or response' });
   }
 
-  const question = store.getQuestion(questionId);
+  const question = await store.getQuestion(questionId);
 
   if (!question) {
     return res.status(404).json({ error: 'Question not found' });
@@ -22,7 +22,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(403).json({ error: 'Session mismatch' });
   }
 
-  const success = store.answerQuestion(questionId, response);
+  const success = await store.answerQuestion(questionId, response);
 
   if (!success) {
     return res.status(400).json({ error: 'Question already answered or expired' });

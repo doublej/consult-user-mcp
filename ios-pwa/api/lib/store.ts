@@ -1,5 +1,7 @@
-// In-memory store (for demo - use Vercel KV or Upstash Redis in production)
-// This works for single-instance deployments; for production, use a real database
+// Store implementation with Upstash Redis support
+// Falls back to in-memory for local development
+
+import { Redis } from '@upstash/redis';
 
 interface Question {
   id: string;
@@ -28,31 +30,37 @@ interface PendingRequest {
   timeoutId: NodeJS.Timeout;
 }
 
-// In-memory stores
-const questions = new Map<string, Question>();
-const subscriptions = new Map<string, Subscription>();
+// Redis client (if configured)
+let redis: Redis | null = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL,
+    token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  });
+  console.log('[Store] Using Upstash Redis');
+} else if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+  redis = new Redis({
+    url: process.env.KV_REST_API_URL,
+    token: process.env.KV_REST_API_TOKEN,
+  });
+  console.log('[Store] Using Vercel KV');
+} else {
+  console.warn('[Store] No Redis configured - using in-memory store (won\'t work across serverless instances!)');
+}
+
+// In-memory fallback (only for local dev)
+const localQuestions = new Map<string, Question>();
+const localSubscriptions = new Map<string, Subscription>();
 const pendingRequests = new Map<string, PendingRequest>();
 
-// Cleanup old entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [id, q] of questions) {
-    if (q.expiresAt < now) {
-      questions.delete(id);
-      // Reject any pending request
-      const pending = pendingRequests.get(id);
-      if (pending) {
-        clearTimeout(pending.timeoutId);
-        pending.reject(new Error('Question expired'));
-        pendingRequests.delete(id);
-      }
-    }
-  }
-}, 60000); // Every minute
+// Key prefixes for Redis
+const QUESTION_PREFIX = 'q:';
+const SUBSCRIPTION_PREFIX = 's:';
+const SESSION_QUESTION_PREFIX = 'sq:';
 
 export const store = {
   // Questions
-  createQuestion(question: Omit<Question, 'createdAt' | 'expiresAt' | 'status'>): Question {
+  async createQuestion(question: Omit<Question, 'createdAt' | 'expiresAt' | 'status'>): Promise<Question> {
     const now = Date.now();
     const q: Question = {
       ...question,
@@ -60,16 +68,36 @@ export const store = {
       expiresAt: now + 5 * 60 * 1000, // 5 minute expiry
       status: 'pending',
     };
-    questions.set(q.id, q);
+
+    if (redis) {
+      const ttl = 300; // 5 minutes
+      await redis.set(`${QUESTION_PREFIX}${q.id}`, JSON.stringify(q), { ex: ttl });
+      await redis.set(`${SESSION_QUESTION_PREFIX}${q.sessionId}`, q.id, { ex: ttl });
+    } else {
+      localQuestions.set(q.id, q);
+    }
+
     return q;
   },
 
-  getQuestion(id: string): Question | undefined {
-    return questions.get(id);
+  async getQuestion(id: string): Promise<Question | undefined> {
+    if (redis) {
+      const data = await redis.get(`${QUESTION_PREFIX}${id}`);
+      return data ? (typeof data === 'string' ? JSON.parse(data) : data as Question) : undefined;
+    }
+    return localQuestions.get(id);
   },
 
-  getPendingQuestion(sessionId: string): Question | undefined {
-    for (const q of questions.values()) {
+  async getPendingQuestion(sessionId: string): Promise<Question | undefined> {
+    if (redis) {
+      const questionId = await redis.get(`${SESSION_QUESTION_PREFIX}${sessionId}`);
+      if (questionId) {
+        return this.getQuestion(questionId as string);
+      }
+      return undefined;
+    }
+
+    for (const q of localQuestions.values()) {
       if (q.sessionId === sessionId && q.status === 'pending') {
         return q;
       }
@@ -77,14 +105,21 @@ export const store = {
     return undefined;
   },
 
-  answerQuestion(id: string, response: unknown): boolean {
-    const q = questions.get(id);
+  async answerQuestion(id: string, response: unknown): Promise<boolean> {
+    const q = await this.getQuestion(id);
     if (!q || q.status !== 'pending') return false;
 
     q.status = 'answered';
     q.response = response;
 
-    // Resolve pending request
+    if (redis) {
+      await redis.set(`${QUESTION_PREFIX}${id}`, JSON.stringify(q), { ex: 60 }); // Keep for 1 min after answer
+      await redis.del(`${SESSION_QUESTION_PREFIX}${q.sessionId}`);
+    } else {
+      localQuestions.set(id, q);
+    }
+
+    // Resolve pending request (in-memory, same instance only)
     const pending = pendingRequests.get(id);
     if (pending) {
       clearTimeout(pending.timeoutId);
@@ -95,12 +130,18 @@ export const store = {
     return true;
   },
 
-  snoozeQuestion(id: string, minutes: number): boolean {
-    const q = questions.get(id);
+  async snoozeQuestion(id: string, minutes: number): Promise<boolean> {
+    const q = await this.getQuestion(id);
     if (!q) return false;
 
     q.status = 'snoozed';
     q.expiresAt = Date.now() + minutes * 60 * 1000;
+
+    if (redis) {
+      await redis.set(`${QUESTION_PREFIX}${id}`, JSON.stringify(q), { ex: minutes * 60 });
+    } else {
+      localQuestions.set(id, q);
+    }
 
     // Resolve pending request with snooze
     const pending = pendingRequests.get(id);
@@ -114,23 +155,29 @@ export const store = {
   },
 
   // Subscriptions
-  setSubscription(sessionId: string, subscription: PushSubscription): void {
-    subscriptions.set(sessionId, {
+  async setSubscription(sessionId: string, subscription: PushSubscription): Promise<void> {
+    const sub: Subscription = {
       sessionId,
       subscription,
       createdAt: Date.now(),
-    });
+    };
+
+    if (redis) {
+      await redis.set(`${SUBSCRIPTION_PREFIX}${sessionId}`, JSON.stringify(sub));
+    } else {
+      localSubscriptions.set(sessionId, sub);
+    }
   },
 
-  getSubscription(sessionId: string): Subscription | undefined {
-    return subscriptions.get(sessionId);
+  async getSubscription(sessionId: string): Promise<Subscription | undefined> {
+    if (redis) {
+      const data = await redis.get(`${SUBSCRIPTION_PREFIX}${sessionId}`);
+      return data ? (typeof data === 'string' ? JSON.parse(data) : data as Subscription) : undefined;
+    }
+    return localSubscriptions.get(sessionId);
   },
 
-  getAllSubscriptions(): Subscription[] {
-    return Array.from(subscriptions.values());
-  },
-
-  // Pending requests (for long-polling MCP responses)
+  // Pending requests (always in-memory - same instance only)
   addPendingRequest(
     questionId: string,
     resolve: (value: unknown) => void,
@@ -151,6 +198,11 @@ export const store = {
       clearTimeout(pending.timeoutId);
       pendingRequests.delete(questionId);
     }
+  },
+
+  // Check if using persistent storage
+  isPersistent(): boolean {
+    return redis !== null;
   },
 };
 

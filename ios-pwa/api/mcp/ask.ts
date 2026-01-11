@@ -37,7 +37,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const questionId = `q_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   // Create the question
-  const question = store.createQuestion({
+  const question = await store.createQuestion({
     id: questionId,
     sessionId,
     type,
@@ -47,10 +47,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     options,
   });
 
-  console.log(`[MCP] Created question ${questionId} for session ${sessionId}`);
+  console.log(`[MCP] Created question ${questionId} for session ${sessionId}, persistent: ${store.isPersistent()}`);
 
   // Send push notification if configured
-  const subscription = store.getSubscription(sessionId);
+  const subscription = await store.getSubscription(sessionId);
   if (subscription && isConfigured()) {
     await sendPushNotification(subscription.subscription as any, {
       title: title || 'Claude needs your input',

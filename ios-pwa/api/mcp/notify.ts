@@ -16,7 +16,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Send push notification if configured
-  const subscription = store.getSubscription(sessionId);
+  const subscription = await store.getSubscription(sessionId);
   if (subscription && isConfigured()) {
     await sendPushNotification(subscription.subscription as any, {
       title: title || 'Notification',

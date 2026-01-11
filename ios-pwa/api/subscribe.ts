@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { store } from './lib/store';
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -12,7 +12,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing sessionId or subscription' });
   }
 
-  store.setSubscription(sessionId, subscription);
+  await store.setSubscription(sessionId, subscription);
 
   console.log(`[Subscribe] Session ${sessionId} subscribed to push notifications`);
 

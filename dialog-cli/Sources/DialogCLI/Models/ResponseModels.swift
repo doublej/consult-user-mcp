@@ -70,8 +70,3 @@ struct NotifyResponse: Codable {
     let dialogType: String
     let success: Bool
 }
-
-struct TtsResponse: Codable {
-    let dialogType: String
-    let success: Bool
-}

@@ -7,8 +7,6 @@ import type {
   TextInputResult,
   NotifyOptions,
   NotifyResult,
-  TtsOptions,
-  TtsResult,
   QuestionsOptions,
   QuestionsResult,
 } from "../types.js";
@@ -43,11 +41,6 @@ export interface DialogProvider {
    * Display a notification (non-blocking).
    */
   notify(opts: NotifyOptions): Promise<NotifyResult>;
-
-  /**
-   * Speak text aloud using text-to-speech.
-   */
-  tts(opts: TtsOptions): Promise<TtsResult>;
 
   /**
    * Display multiple questions in a single dialog.

@@ -4,7 +4,6 @@ import Foundation
 
 struct UserSettings {
     var position: String = "left"
-    var speechRate: Int = 200
     var snoozeUntil: Date?
 
     private static var settingsURL: URL? {
@@ -23,11 +22,6 @@ struct UserSettings {
 
         if let position = json["position"] as? String {
             settings.position = position
-        }
-        if let rate = json["speechRate"] as? Int {
-            settings.speechRate = rate
-        } else if let rate = json["speechRate"] as? Double {
-            settings.speechRate = Int(rate)
         }
         if let snoozeStr = json["snoozeUntil"] as? String {
             let formatter = ISO8601DateFormatter()

@@ -38,7 +38,7 @@ static func run() {
     let args = CommandLine.arguments
     guard args.count >= 2 else {
         fputs("Usage: dialog-cli <command> [json]\n", stderr)
-        fputs("Commands: confirm, choose, textInput, notify, tts, questions, pulse\n", stderr)
+        fputs("Commands: confirm, choose, textInput, notify, questions, pulse\n", stderr)
         exit(1)
     }
 
@@ -62,7 +62,7 @@ static func run() {
 
     guard args.count >= 3 else {
         fputs("Usage: dialog-cli <command> <json>\n", stderr)
-        fputs("Commands: confirm, choose, textInput, notify, tts, questions, pulse\n", stderr)
+        fputs("Commands: confirm, choose, textInput, notify, questions, pulse\n", stderr)
         exit(1)
     }
 
@@ -120,14 +120,6 @@ static func run() {
             exit(1)
         }
         let response = manager.notify(request)
-        outputData = try? encoder.encode(response)
-
-    case "tts":
-        guard let request = try? decoder.decode(TtsRequest.self, from: jsonData) else {
-            fputs("Invalid tts request\n", stderr)
-            exit(1)
-        }
-        let response = manager.tts(request)
         outputData = try? encoder.encode(response)
 
     case "questions":

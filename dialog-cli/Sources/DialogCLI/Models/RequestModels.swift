@@ -30,24 +30,3 @@ struct NotifyRequest: Codable {
     let title: String
     let sound: Bool
 }
-
-struct TtsRequest: Codable {
-    let text: String
-    let voice: String?
-    let rate: Int
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        text = try container.decode(String.self, forKey: .text)
-        rate = try container.decode(Int.self, forKey: .rate)
-        if container.contains(.voice) {
-            voice = try? container.decode(String.self, forKey: .voice)
-        } else {
-            voice = nil
-        }
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case text, voice, rate
-    }
-}

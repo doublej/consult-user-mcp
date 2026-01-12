@@ -1,6 +1,5 @@
 import AppKit
 import SwiftUI
-import AVFoundation
 
 // MARK: - Window Size Observer
 
@@ -466,36 +465,6 @@ class DialogManager {
     private func escapeForAppleScript(_ str: String) -> String {
         return str.replacingOccurrences(of: "\\", with: "\\\\")
                   .replacingOccurrences(of: "\"", with: "\\\"")
-    }
-
-    // MARK: - TTS
-
-    func tts(_ request: TtsRequest) -> TtsResponse {
-        let semaphore = DispatchSemaphore(value: 0)
-        let speechDelegate = SpeechCompletionDelegate { semaphore.signal() }
-
-        let synth = AVSpeechSynthesizer()
-        synth.delegate = speechDelegate
-
-        let utterance = AVSpeechUtterance(string: request.text)
-        let normalizedRate = Float(request.rate - 50) / 450.0
-        utterance.rate = max(AVSpeechUtteranceMinimumSpeechRate, min(AVSpeechUtteranceMaximumSpeechRate, normalizedRate))
-
-        if let voiceName = request.voice {
-            let voices = AVSpeechSynthesisVoice.speechVoices()
-            if let voice = voices.first(where: { $0.name.lowercased().contains(voiceName.lowercased()) }) {
-                utterance.voice = voice
-            }
-        }
-
-        synth.speak(utterance)
-        semaphore.wait()
-
-        // Keep references alive until speech completes
-        _ = synth
-        _ = speechDelegate
-
-        return TtsResponse(dialogType: "tts", success: true)
     }
 
     // MARK: - Multi-Question Dialog

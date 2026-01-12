@@ -91,10 +91,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         notifyItem.target = self
         debugMenu?.addItem(notifyItem)
 
-        let ttsItem = NSMenuItem(title: "Test TTS", action: #selector(testTts), keyEquivalent: "5")
-        ttsItem.target = self
-        debugMenu?.addItem(ttsItem)
-
         debugMenu?.addItem(NSMenuItem.separator())
 
         let allItem = NSMenuItem(title: "Run All Tests", action: #selector(testAll), keyEquivalent: "a")
@@ -229,14 +225,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         runDialogCli(command: "notify", json: json)
     }
 
-    @objc func testTts() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"text":"Hello! This is a test of the speech synthesis feature.","voice":null,"rate":\(Int(settings.speechRate))}
-        """
-        runDialogCli(command: "tts", json: json)
-    }
-
     @objc func testAll() {
         testConfirm()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
@@ -247,9 +235,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) {
             self.testNotify()
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-            self.testTts()
         }
     }
 }

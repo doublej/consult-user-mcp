@@ -88,8 +88,6 @@ class DialogSettings: ObservableObject {
     @AppStorage("animationsEnabled") var animationsEnabled: Bool = true
     @AppStorage("alwaysOnTop") var alwaysOnTop: Bool = true
     @AppStorage("showCommentField") var showCommentField: Bool = true
-    @AppStorage("speechRate") var speechRate: Double = 200
-    @AppStorage("speechVoice") var speechVoice: String = ""
 
     // Snooze state
     @Published var snoozeRemaining: Int = 0
@@ -160,9 +158,7 @@ class DialogSettings: ObservableObject {
             "soundOnDismiss": soundOnDismiss.rawValue,
             "animationsEnabled": animationsEnabled,
             "alwaysOnTop": alwaysOnTop,
-            "showCommentField": showCommentField,
-            "speechRate": speechRate,
-            "speechVoice": speechVoice
+            "showCommentField": showCommentField
         ]
 
         let url = settingsFileURL()

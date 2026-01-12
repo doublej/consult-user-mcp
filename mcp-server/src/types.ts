@@ -52,11 +52,6 @@ export interface NotifyResult {
   success: boolean;
 }
 
-// TTS result
-export interface TtsResult {
-  success: boolean;
-}
-
 // Options for confirmation dialog
 export interface ConfirmOptions {
   body: string;
@@ -90,13 +85,6 @@ export interface NotifyOptions {
   body: string;
   title: string;
   sound: boolean;
-}
-
-// Options for TTS
-export interface TtsOptions {
-  text: string;
-  voice?: string;
-  rate: number;
 }
 
 // Question definition for multi-question dialogs

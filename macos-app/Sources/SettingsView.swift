@@ -41,7 +41,6 @@ struct SettingsView: View {
                     installCard
                     positionSection
                     appearanceSection
-                    speechSection
                 }
                 .padding(Spacing.md)
             }
@@ -58,7 +57,6 @@ struct SettingsView: View {
         .onChange(of: settings.animationsEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.alwaysOnTop) { _, _ in settings.saveToFile() }
         .onChange(of: settings.showCommentField) { _, _ in settings.saveToFile() }
-        .onChange(of: settings.speechRate) { _, _ in settings.saveToFile() }
     }
 
     // MARK: - Header
@@ -322,62 +320,6 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Speech Section
-    private var speechSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            sectionHeader("Speech")
-
-            VStack(spacing: Spacing.sm) {
-                // Rate slider
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    HStack {
-                        Image(systemName: "hare")
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
-                            .frame(width: 16)
-
-                        Text("Rate")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-
-                        Spacer()
-
-                        Text("\(Int(settings.speechRate))")
-                            .font(.system(size: 10, weight: .medium, design: .monospaced))
-                            .foregroundColor(.secondary)
-                            .frame(width: 32, alignment: .trailing)
-                    }
-
-                    Slider(value: $settings.speechRate, in: 100...400, step: 25)
-                        .controlSize(.small)
-                }
-
-                // Test button
-                HStack {
-                    Image(systemName: "speaker.wave.2")
-                        .font(.system(size: 10))
-                        .foregroundColor(.secondary)
-                        .frame(width: 16)
-
-                    Text("Test")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-
-                    Spacer()
-
-                    Button(action: testSpeech) {
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 8))
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.mini)
-                }
-            }
-            .padding(Spacing.sm)
-            .background(sectionBackground)
-        }
-    }
-
     // MARK: - Footer
     private var footer: some View {
         HStack {
@@ -455,12 +397,6 @@ struct SettingsView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
             previewPulse = false
         }
-    }
-
-    private func testSpeech() {
-        let synth = NSSpeechSynthesizer()
-        synth.rate = Float(settings.speechRate)
-        synth.startSpeaking("Hello! Testing speech.")
     }
 
     private func openGitHub() {

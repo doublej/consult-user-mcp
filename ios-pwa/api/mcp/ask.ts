@@ -49,7 +49,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   console.log(`[MCP] Created question ${questionId} for session ${sessionId}, persistent: ${store.isPersistent()}`);
 
-  // Send push notification if configured
+  // Send push notification with full question data
   const subscription = await store.getSubscription(sessionId);
   if (subscription && isConfigured()) {
     await sendPushNotification(subscription.subscription as any, {
@@ -57,7 +57,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       body: message || 'Tap to respond',
       questionId,
       type,
+      question: {
+        id: questionId,
+        sessionId,
+        type,
+        title: title || 'Question',
+        message: message || '',
+        choices,
+        options,
+      },
     });
+    console.log(`[MCP] Push notification sent with full question data`);
   } else {
     console.log(`[MCP] No push subscription for session ${sessionId}, relying on polling`);
   }

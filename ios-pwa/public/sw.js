@@ -1,5 +1,5 @@
 // Service Worker for Consult User PWA
-const CACHE_NAME = 'consult-user-v4';
+const CACHE_NAME = 'consult-user-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -83,7 +83,8 @@ self.addEventListener('push', (event) => {
     title: 'Claude needs your input',
     body: 'Tap to respond',
     questionId: null,
-    type: 'confirm'
+    type: 'confirm',
+    question: null
   };
 
   if (event.data) {
@@ -93,6 +94,9 @@ self.addEventListener('push', (event) => {
       data.body = event.data.text();
     }
   }
+
+  // Store question data for when user opens the app
+  const questionData = data.question ? JSON.stringify(data.question) : '';
 
   const options = {
     body: data.body,
@@ -104,7 +108,8 @@ self.addEventListener('push', (event) => {
     data: {
       questionId: data.questionId,
       type: data.type,
-      url: `/?question=${data.questionId}`
+      question: data.question,
+      url: `/?question=${data.questionId}&data=${encodeURIComponent(questionData)}`
     },
     actions: [
       { action: 'open', title: 'Respond' },
@@ -112,8 +117,19 @@ self.addEventListener('push', (event) => {
     ]
   };
 
+  // Also send message to any open clients with the question
   event.waitUntil(
-    self.registration.showNotification(data.title, options)
+    Promise.all([
+      self.registration.showNotification(data.title, options),
+      clients.matchAll({ type: 'window' }).then((clientList) => {
+        for (const client of clientList) {
+          client.postMessage({
+            type: 'QUESTION_RECEIVED',
+            question: data.question
+          });
+        }
+      })
+    ])
   );
 });
 
@@ -140,6 +156,7 @@ self.addEventListener('notificationclick', (event) => {
 
   // Open or focus the app
   const urlToOpen = event.notification.data?.url || '/';
+  const questionData = event.notification.data?.question;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
@@ -147,10 +164,11 @@ self.addEventListener('notificationclick', (event) => {
         // Check if app is already open
         for (const client of clientList) {
           if (client.url.includes(self.location.origin)) {
-            // Send message to existing client
+            // Send full question data to existing client
             client.postMessage({
               type: 'QUESTION_RECEIVED',
-              questionId: event.notification.data?.questionId
+              questionId: event.notification.data?.questionId,
+              question: questionData
             });
             return client.focus();
           }

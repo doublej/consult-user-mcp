@@ -25,6 +25,16 @@ export interface PushPayload {
   body: string;
   questionId: string;
   type: string;
+  // Full question data for stateless operation
+  question?: {
+    id: string;
+    sessionId: string;
+    type: 'confirm' | 'choose' | 'text';
+    title: string;
+    message: string;
+    choices?: Array<{ label: string; value: string; description?: string }>;
+    options?: Record<string, unknown>;
+  };
 }
 
 export async function sendPushNotification(

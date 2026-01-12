@@ -77,10 +77,22 @@ async function init() {
     checkNotificationPermission();
   }).catch(err => console.error('[App] Service worker setup error:', err));
 
-  // Check for question in URL
+  // Check for question in URL (from push notification click)
   const urlParams = new URLSearchParams(window.location.search);
   const questionId = urlParams.get('question');
-  if (questionId) {
+  const questionData = urlParams.get('data');
+
+  if (questionData) {
+    // Question data embedded in URL (stateless mode)
+    try {
+      const question = JSON.parse(decodeURIComponent(questionData));
+      showQuestion(question);
+      // Clean up URL
+      window.history.replaceState({}, '', '/');
+    } catch (e) {
+      console.error('[App] Failed to parse question data from URL:', e);
+    }
+  } else if (questionId) {
     fetchAndShowQuestion(questionId);
   }
 }
@@ -562,7 +574,12 @@ function handleServiceWorkerMessage(event) {
   console.log('[App] Message from SW:', event.data);
 
   if (event.data?.type === 'QUESTION_RECEIVED') {
-    fetchAndShowQuestion(event.data.questionId);
+    // Use full question data if available (stateless mode)
+    if (event.data.question) {
+      showQuestion(event.data.question);
+    } else if (event.data.questionId) {
+      fetchAndShowQuestion(event.data.questionId);
+    }
   }
 }
 

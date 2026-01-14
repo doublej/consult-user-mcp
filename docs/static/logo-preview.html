@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logo Preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background: linear-gradient(135deg, #1a1a1f 0%, #2d2d35 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px;
+    }
+    .logo-main {
+      width: 320px;
+      height: 320px;
+      border-radius: 72px;
+      box-shadow:
+        0 24px 80px rgba(0,0,0,0.4),
+        0 8px 24px rgba(0,0,0,0.2);
+    }
+    .sizes {
+      display: flex;
+      align-items: flex-end;
+      gap: 32px;
+    }
+    .size-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .size-group img {
+      border-radius: 22%;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .size-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      color: rgba(255,255,255,0.9);
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -0.3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>consult-user-mcp</h1>
+    <img src="logo.svg" alt="Logo" class="logo-main">
+    <div class="sizes">
+      <div class="size-group">
+        <img src="logo.svg" width="128" height="128">
+        <span class="size-label">128px</span>
+      </div>
+      <div class="size-group">
+        <img src="logo.svg" width="64" height="64">
+        <span class="size-label">64px</span>
+      </div>
+      <div class="size-group">
+        <img src="logo.svg" width="32" height="32">
+        <span class="size-label">32px</span>
+      </div>
+      <div class="size-group">
+        <img src="logo.svg" width="16" height="16">
+        <span class="size-label">16px</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

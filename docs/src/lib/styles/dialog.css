@@ -1,0 +1,218 @@
+/* Shared dialog window styles used by DialogPreviews and InteractiveDemo */
+
+.dialog-window {
+	width: 100%;
+	max-width: 360px;
+	background: rgba(26, 26, 31, 0.98);
+	border-radius: 16px;
+	border: 1px solid #3a3a3f;
+	box-shadow:
+		0 30px 60px -15px rgba(0, 0, 0, 0.4),
+		0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+	overflow: hidden;
+	font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+}
+
+.window-header {
+	padding: 14px 16px 10px;
+	display: flex;
+	align-items: center;
+}
+
+.traffic-lights {
+	display: flex;
+	gap: 7px;
+}
+
+.light {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	opacity: 0.85;
+}
+
+.light.red { background: #ff5f57; }
+.light.yellow { background: #febc2e; }
+.light.green { background: #28c840; }
+
+.dialog-body {
+	padding: 6px 20px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	position: relative;
+}
+
+/* Progress bar */
+.progress-bar {
+	display: flex;
+	gap: 5px;
+}
+
+.progress-segment {
+	flex: 1;
+	height: 5px;
+	background: #3a3a3f;
+	border-radius: 3px;
+	transition: background 0.3s ease;
+}
+
+.progress-segment.filled {
+	background: #5A8CFF;
+}
+
+.step-label {
+	color: #666666;
+	font-size: 12px;
+	text-align: center;
+	margin-top: -6px;
+}
+
+/* Choice list */
+.choice-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.choice-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	background: #242428;
+	border-radius: 10px;
+	border: 1px solid transparent;
+	transition: all 0.15s ease;
+}
+
+.choice-item.selected {
+	background: #2a2a30;
+	border-color: #5A8CFF;
+}
+
+.choice-label {
+	color: #BFBFBF;
+	font-size: 13px;
+	transition: color 0.2s ease;
+}
+
+.choice-item.selected .choice-label {
+	color: white;
+}
+
+/* Checkbox and radio */
+.checkbox, .radio {
+	width: 16px;
+	height: 16px;
+	border: 1.5px solid #595959;
+	background: transparent;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 10px;
+	color: white;
+	flex-shrink: 0;
+}
+
+.checkbox {
+	border-radius: 4px;
+}
+
+.checkbox.checked {
+	background: #5A8CFF;
+	border-color: #5A8CFF;
+}
+
+.radio {
+	border-radius: 50%;
+	position: relative;
+}
+
+.radio.checked {
+	border-color: #5A8CFF;
+}
+
+.radio.checked::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 8px;
+	height: 8px;
+	background: #5A8CFF;
+	border-radius: 50%;
+}
+
+/* Buttons */
+.button-row {
+	display: flex;
+	gap: 10px;
+	margin-top: 8px;
+}
+
+.btn {
+	flex: 1;
+	padding: 10px 14px;
+	border-radius: 10px;
+	border: none;
+	font-size: 13px;
+	font-weight: 500;
+	font-family: inherit;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.btn.secondary {
+	background: #2a2a30;
+	color: #BFBFBF;
+	border: 1px solid #3a3a3f;
+}
+
+.btn.primary {
+	background: linear-gradient(135deg, #5A8CFF 0%, #4a7cf0 100%);
+	color: white;
+}
+
+.btn:disabled {
+	opacity: 0.5;
+}
+
+.key-hint {
+	font-size: 10px;
+	opacity: 0.7;
+	background: rgba(255, 255, 255, 0.15);
+	padding: 2px 5px;
+	border-radius: 4px;
+}
+
+/* Keyboard hints footer */
+.keyboard-hints {
+	display: flex;
+	justify-content: center;
+	gap: 14px;
+	padding: 12px 14px;
+	background: rgba(0, 0, 0, 0.25);
+	border-top: 1px solid #2a2a2f;
+}
+
+.hint {
+	color: #666666;
+	font-size: 10px;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.hint kbd {
+	background: #2a2a30;
+	padding: 2px 5px;
+	border-radius: 4px;
+	font-family: inherit;
+	font-size: 9px;
+	color: #9a9a9f;
+	border: 1px solid #3a3a3f;
+}

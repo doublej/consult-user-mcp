@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <!-- Soft gradient for depth -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8f8fa"/>
+      <stop offset="100%" stop-color="#e8e8ec"/>
+    </linearGradient>
+
+    <!-- Primary shape gradient - warm to cool -->
+    <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+
+    <!-- Secondary shape - complementary -->
+    <linearGradient id="responseGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6"/>
+      <stop offset="50%" stop-color="#e879f9"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+
+    <!-- Soft glow filter -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="228" fill="url(#bgGrad)"/>
+
+  <!-- Abstract flowing forms representing dialogue/consultation -->
+  <!-- Two organic shapes that interlock, suggesting exchange -->
+
+  <g filter="url(#softGlow)">
+    <!-- Upper flow - the question/inquiry -->
+    <path
+      d="M280 340
+         C280 280, 360 240, 460 260
+         C560 280, 620 340, 620 420
+         C620 500, 540 540, 440 520
+         C340 500, 280 440, 280 340
+         Z"
+      fill="url(#flowGrad)"
+      opacity="0.95"
+    />
+
+    <!-- Lower flow - the response/answer -->
+    <path
+      d="M404 504
+         C404 564, 484 604, 584 584
+         C684 564, 744 504, 744 424
+         C744 344, 664 304, 564 324
+         C464 344, 404 404, 404 504
+         Z"
+      fill="url(#responseGrad)"
+      opacity="0.9"
+    />
+  </g>
+
+  <!-- Central connection point - where dialogue meets -->
+  <circle cx="512" cy="460" r="32" fill="#ffffff" opacity="0.9"/>
+</svg>

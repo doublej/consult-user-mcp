@@ -124,8 +124,9 @@ All dialog tools (except `notify_user`) have a **10-minute timeout**. If the use
 
 **Snooze feature:** Users can snooze a dialog for 1-60 minutes instead of answering immediately. When snoozed:
 
-- The dialog returns `{ snoozed: true, snoozeMinutes: N, remainingSeconds: S }`
-- All subsequent dialog calls return `{ snoozed: true, remainingSeconds: S }` without showing a new dialog
+- The dialog returns `{ snoozed: true, snoozeMinutes: N, remainingSeconds: S, instruction: "..." }`
+- All subsequent dialog calls return `{ snoozed: true, remainingSeconds: S, instruction: "..." }` without showing a new dialog
+- The `instruction` field contains a human-readable hint for the agent (e.g., "Set a timer for 5 minutes and re-ask this question when it fires.")
 - The agent should wait for the snooze period to expire before retrying
 
 **Handling snooze in your agent:**

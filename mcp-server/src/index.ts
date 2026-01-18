@@ -20,7 +20,7 @@ const provider = new SwiftDialogProvider();
 const pos = z.enum(["left", "right", "center"]).default("left");
 
 server.registerTool("ask_confirmation", {
-  description: "Yes/No dialog. Returns {confirmed, cancelled, response}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
+  description: "Yes/No dialog. Returns {confirmed, cancelled, answer}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
   inputSchema: z.object({
     body: z.string().min(1).max(1000),
     title: z.string().max(80).default("Confirmation"),
@@ -39,7 +39,7 @@ server.registerTool("ask_confirmation", {
 });
 
 server.registerTool("ask_multiple_choice", {
-  description: "List picker dialog. Returns {selected, cancelled, description}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
+  description: "List picker dialog. Returns {answer, cancelled, description}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
   inputSchema: z.object({
     body: z.string().min(1).max(1000),
     choices: z.array(z.string().min(1).max(100)).min(2).max(20),
@@ -59,7 +59,7 @@ server.registerTool("ask_multiple_choice", {
 });
 
 server.registerTool("ask_text_input", {
-  description: "Text input dialog. Returns {text, cancelled}. Supports hidden input. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
+  description: "Text input dialog. Returns {answer, cancelled}. Supports hidden input. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
   inputSchema: z.object({
     body: z.string().min(1).max(1000),
     title: z.string().max(80).default("Input"),

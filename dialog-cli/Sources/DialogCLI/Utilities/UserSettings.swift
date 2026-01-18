@@ -47,9 +47,12 @@ struct UserSettings {
         let expiry = Date().addingTimeInterval(TimeInterval(minutes * 60))
         json["snoozeUntil"] = formatter.string(from: expiry)
 
-        if let data = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
-            try? fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-            try? data.write(to: url)
+        do {
+            let data = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+            try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try data.write(to: url)
+        } catch {
+            fputs("Failed to save settings: \(error.localizedDescription)\n", stderr)
         }
     }
 
@@ -64,8 +67,11 @@ struct UserSettings {
 
         json.removeValue(forKey: "snoozeUntil")
 
-        if let newData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
-            try? newData.write(to: url)
+        do {
+            let newData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+            try newData.write(to: url)
+        } catch {
+            fputs("Failed to clear snooze: \(error.localizedDescription)\n", stderr)
         }
     }
 

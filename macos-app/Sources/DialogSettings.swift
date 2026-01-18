@@ -53,7 +53,6 @@ final class DialogSettings: ObservableObject {
             position: position,
             size: size,
             soundOnShow: soundOnShow,
-            soundOnDismiss: soundOnDismiss,
             animationsEnabled: animationsEnabled,
             alwaysOnTop: alwaysOnTop,
             showCommentField: showCommentField,
@@ -79,7 +78,6 @@ final class DialogSettings: ObservableObject {
         position = settings.position
         size = settings.size
         soundOnShow = settings.soundOnShow
-        soundOnDismiss = settings.soundOnDismiss
         animationsEnabled = settings.animationsEnabled
         alwaysOnTop = settings.alwaysOnTop
         showCommentField = settings.showCommentField

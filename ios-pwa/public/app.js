@@ -134,7 +134,6 @@ async function checkNotificationPermission() {
 async function requestNotificationPermission() {
   try {
     const permission = await Notification.requestPermission();
-    console.log('[App] Notification permission:', permission);
 
     if (permission === 'granted') {
       elements.notificationPrompt.classList.add('hidden');

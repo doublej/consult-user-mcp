@@ -2,6 +2,22 @@
 
 A Progressive Web App companion for `consult-user-mcp` that works on iOS, Android, and any modern browser.
 
+> **Security Warning**
+>
+> This iOS PWA has different security characteristics than the native macOS app:
+>
+> - **Cloud-dependent**: All questions and responses pass through a third-party server (Vercel). The native macOS app runs entirely locally.
+> - **No end-to-end encryption**: Data is encrypted in transit (HTTPS) but decrypted on the server. Server operators can see your questions and responses.
+> - **Session IDs are sensitive**: Anyone with your session ID can respond to questions intended for you. Treat it like a password.
+> - **Push notification metadata**: Push services (Apple/Google) can see notification metadata, though not message content.
+> - **In-memory storage**: By default, data is stored in server memory and lost on restart. Production deployments using KV stores persist data on third-party infrastructure.
+>
+> **Recommendations**:
+> - Use the native macOS app when possible for sensitive workflows
+> - Don't use this PWA for security-critical decisions (deployments to production, financial transactions, etc.)
+> - Self-host on your own infrastructure if you need the iOS PWA for sensitive use cases
+> - Rotate session IDs periodically
+
 ## Overview
 
 This PWA receives push notifications when Claude needs user input, displays native-feeling dialog interfaces, and sends responses back to the MCP server. It's designed to work with Claude iOS app's remote MCP support.

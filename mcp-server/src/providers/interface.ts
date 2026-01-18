@@ -23,6 +23,12 @@ export interface DialogProvider {
   setClientName(name: string): void;
 
   /**
+   * Send a pulse to keep the macOS app active.
+   * Called before each dialog to ensure the app is responsive.
+   */
+  pulse(): Promise<void>;
+
+  /**
    * Display a confirmation dialog with Yes/No buttons.
    */
   confirm(opts: ConfirmOptions): Promise<ConfirmResult>;

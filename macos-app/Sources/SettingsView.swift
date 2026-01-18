@@ -1,77 +1,60 @@
 import SwiftUI
 import AppKit
 
-// MARK: - Design System
-enum Spacing {
-    static let xs: CGFloat = 4
-    static let sm: CGFloat = 8
-    static let md: CGFloat = 12
-    static let lg: CGFloat = 16
-    static let xl: CGFloat = 20
-}
-
 struct SettingsView: View {
     @StateObject private var settings = DialogSettings.shared
-    @State private var previewPulse = false
+    @State private var selectedTarget: InstallTarget = .claudeCode
     @State private var showInstallGuide = false
+
+    private let maxHeight: CGFloat = (NSScreen.main?.visibleFrame.height ?? 600) - 100
 
     var body: some View {
         Group {
             if showInstallGuide {
                 InstallGuideView(showInstallGuide: $showInstallGuide)
             } else {
-                mainSettingsView
+                mainView
             }
         }
         .frame(width: 300)
         .fixedSize(horizontal: false, vertical: true)
-        .frame(maxHeight: (NSScreen.main?.visibleFrame.height ?? 600) - 100)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .frame(maxHeight: maxHeight)
+        .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
     }
 
-    private var mainSettingsView: some View {
+    private var mainView: some View {
         VStack(spacing: 0) {
             header
 
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: Spacing.md) {
+                VStack(alignment: .leading, spacing: 12) {
                     if settings.snoozeRemaining > 0 {
-                        snoozeIndicator
+                        SnoozeBanner()
                     }
-                    installCard
-                    positionSection
-                    appearanceSection
+
+                    InstallCard(showInstallGuide: $showInstallGuide)
+
+                    PositionSection()
+
+                    AppearanceSection()
                 }
-                .padding(Spacing.md)
+                .padding(16)
             }
 
             footer
         }
-        .onChange(of: settings.position) { _, _ in
-            triggerPreviewPulse()
-            settings.saveToFile()
-        }
-        .onChange(of: settings.size) { _, _ in settings.saveToFile() }
-        .onChange(of: settings.soundOnShow) { _, _ in settings.saveToFile() }
-        .onChange(of: settings.soundOnDismiss) { _, _ in settings.saveToFile() }
-        .onChange(of: settings.animationsEnabled) { _, _ in settings.saveToFile() }
-        .onChange(of: settings.alwaysOnTop) { _, _ in settings.saveToFile() }
-        .onChange(of: settings.showCommentField) { _, _ in settings.saveToFile() }
     }
 
     // MARK: - Header
+
     private var header: some View {
-        HStack(spacing: Spacing.sm) {
-            Image(systemName: "bubble.left.and.bubble.right.fill")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(.linearGradient(
-                    colors: [.blue, .purple],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+        HStack(spacing: 8) {
+            Image(systemName: "bubble.left.and.bubble.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
 
             Text("Consult User MCP")
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
 
             Spacer()
 
@@ -80,37 +63,92 @@ struct SettingsView: View {
                     .font(.system(size: 10, weight: .medium))
                     .foregroundColor(.secondary)
                     .frame(width: 22, height: 22)
-                    .background(Circle().fill(Color(nsColor: .controlBackgroundColor)))
+                    .background(Circle().fill(Color(.controlBackgroundColor)))
             }
             .buttonStyle(.plain)
             .help("Quit")
         }
-        .padding(.horizontal, Spacing.md)
-        .padding(.vertical, Spacing.sm)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
     }
 
-    // MARK: - Install Card
-    private var installCard: some View {
-        Button(action: { showInstallGuide = true }) {
-            HStack(spacing: Spacing.sm) {
-                ZStack {
-                    Circle()
-                        .fill(LinearGradient(
-                            colors: [.green.opacity(0.2), .blue.opacity(0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                        .frame(width: 32, height: 32)
+    // MARK: - Footer
 
-                    Image(systemName: "plus")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(.linearGradient(
-                            colors: [.green, .blue],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
+    private var footer: some View {
+        HStack {
+            Text("v1.0")
+                .font(.system(size: 9, design: .monospaced))
+                .foregroundColor(Color(.tertiaryLabelColor))
+
+            Spacer()
+
+            Button(action: openGitHub) {
+                Image(systemName: "questionmark.circle")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color(.controlBackgroundColor).opacity(0.5))
+    }
+
+    private func openGitHub() {
+        if let url = URL(string: "https://github.com/doublej/consult-user-mcp") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+}
+
+// MARK: - Snooze Banner
+
+private struct SnoozeBanner: View {
+    @ObservedObject private var settings = DialogSettings.shared
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "moon.zzz.fill")
+                    .foregroundColor(.orange)
+
+                Text(settings.snoozeDisplayTime)
+                    .font(.system(size: 20, weight: .medium, design: .monospaced))
+                    .foregroundColor(.primary)
+
+                Spacer()
+            }
+
+            ProgressView(value: settings.snoozeProgress)
+                .progressViewStyle(.linear)
+                .tint(.orange)
+
+            HStack {
+                Spacer()
+                Button("End Snooze") {
+                    settings.clearSnooze()
                 }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+        }
+        .padding(12)
+        .background(Color.orange.opacity(0.1))
+        .cornerRadius(8)
+    }
+}
+
+// MARK: - Install Card
+
+private struct InstallCard: View {
+    @Binding var showInstallGuide: Bool
+
+    var body: some View {
+        Button(action: { showInstallGuide = true }) {
+            HStack(spacing: 8) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(.accentColor)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Install in Claude or Codex")
@@ -125,188 +163,59 @@ struct SettingsView: View {
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+                    .foregroundColor(Color(.tertiaryLabelColor))
             }
-            .padding(Spacing.sm)
+            .padding(10)
             .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color(nsColor: .controlBackgroundColor))
-                    .shadow(color: .black.opacity(0.04), radius: 2, y: 1)
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.controlBackgroundColor))
             )
         }
         .buttonStyle(.plain)
     }
+}
 
-    // MARK: - Snooze Indicator
-    private var snoozeIndicator: some View {
-        HStack(spacing: Spacing.sm) {
-            ZStack {
-                Circle()
-                    .fill(Color.orange.opacity(0.15))
-                    .frame(width: 32, height: 32)
+// MARK: - Position Section
 
-                Image(systemName: "moon.zzz.fill")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.orange)
-            }
+private struct PositionSection: View {
+    @ObservedObject private var settings = DialogSettings.shared
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Snooze Active")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.primary)
-                Text(formatSnoozeTime(settings.snoozeRemaining))
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-                    .foregroundColor(.orange)
-            }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title: "POSITION")
 
-            Spacer()
-
-            Button(action: { settings.clearSnooze() }) {
-                Text("Clear")
-                    .font(.system(size: 10, weight: .medium))
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-        }
-        .padding(Spacing.sm)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color.orange.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(Color.orange.opacity(0.3), lineWidth: 1)
-                )
-        )
-    }
-
-    private func formatSnoozeTime(_ seconds: Int) -> String {
-        let mins = seconds / 60
-        let secs = seconds % 60
-        if mins > 0 {
-            return String(format: "%d:%02d remaining", mins, secs)
-        } else {
-            return "\(secs)s remaining"
-        }
-    }
-
-    // MARK: - Position Section
-    private var positionSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            sectionHeader("Position")
-
-            VStack(spacing: Spacing.sm) {
-                // Mini preview
-                positionPreview
-
-                // Position buttons
-                HStack(spacing: Spacing.xs) {
-                    ForEach(DialogPosition.allCases, id: \.self) { position in
-                        positionButton(position)
-                    }
+            PositionPicker(selection: $settings.position)
+                .frame(maxWidth: .infinity)
+                .onChange(of: settings.position) { _, _ in
+                    settings.saveToFile()
                 }
-            }
-            .padding(Spacing.sm)
-            .background(sectionBackground)
         }
     }
+}
 
-    private var positionPreview: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color(nsColor: .textBackgroundColor))
-                .frame(height: 50)
+// MARK: - Appearance Section
 
-            // Menu bar indicator
-            VStack(spacing: 0) {
-                Rectangle()
-                    .fill(Color(nsColor: .separatorColor).opacity(0.5))
-                    .frame(height: 6)
-                Spacer()
-            }
+private struct AppearanceSection: View {
+    @ObservedObject private var settings = DialogSettings.shared
 
-            // Dialog indicator
-            GeometryReader { geo in
-                let dialogWidth: CGFloat = 40
-                let xPos: CGFloat = {
-                    switch settings.position {
-                    case .left: return 6
-                    case .center: return (geo.size.width - dialogWidth) / 2
-                    case .right: return geo.size.width - dialogWidth - 6
-                    }
-                }()
-
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color.accentColor)
-                    .frame(width: dialogWidth, height: 24)
-                    .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
-                    .position(x: xPos + dialogWidth / 2, y: 22)
-                    .scaleEffect(previewPulse ? 1.08 : 1.0)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: previewPulse)
-                    .animation(.spring(response: 0.35, dampingFraction: 0.7), value: settings.position)
-            }
-        }
-    }
-
-    private func positionButton(_ position: DialogPosition) -> some View {
-        Button(action: { settings.position = position }) {
-            VStack(spacing: 3) {
-                Image(systemName: position.icon)
-                    .font(.system(size: 12))
-                Text(position.label)
-                    .font(.system(size: 8, weight: .medium))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 6)
-            .contentShape(Rectangle())
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(settings.position == position
-                          ? Color.accentColor.opacity(0.12)
-                          : Color.clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(settings.position == position
-                                  ? Color.accentColor.opacity(0.5)
-                                  : Color(nsColor: .separatorColor).opacity(0.5),
-                                  lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-        .foregroundColor(settings.position == position ? .accentColor : .secondary)
-    }
-
-    // MARK: - Appearance Section
-    private var appearanceSection: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            sectionHeader("Appearance")
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title: "APPEARANCE")
 
             VStack(spacing: 0) {
-                // Size
-                settingRow(icon: "aspectratio", label: "Size") {
+                SettingRow(icon: "aspectratio", label: "Size") {
                     Picker("", selection: $settings.size) {
                         ForEach(DialogSize.allCases, id: \.self) { size in
                             Text(size.shortLabel).tag(size)
                         }
                     }
                     .pickerStyle(.segmented)
-                    .frame(width: 130)
+                    .frame(width: 100)
                 }
 
                 Divider().padding(.leading, 28)
 
-                // Animations
-                compactToggle(icon: "sparkles", label: "Animations", isOn: $settings.animationsEnabled)
-
-                Divider().padding(.leading, 28)
-
-                // Always on top
-                compactToggle(icon: "pin", label: "Always on Top", isOn: $settings.alwaysOnTop)
-
-                Divider().padding(.leading, 28)
-
-                // Sound on show
-                settingRow(icon: "bell", label: "Sound") {
+                SettingRow(icon: "bell", label: "Sound") {
                     Picker("", selection: $settings.soundOnShow) {
                         ForEach(SoundEffect.allCases, id: \.self) { sound in
                             Text(sound.label).tag(sound)
@@ -314,48 +223,48 @@ struct SettingsView: View {
                     }
                     .frame(width: 80)
                 }
+
+                Divider().padding(.leading, 28)
+
+                CompactToggle(icon: "sparkles", label: "Animations", isOn: $settings.animationsEnabled)
+
+                Divider().padding(.leading, 28)
+
+                CompactToggle(icon: "pin", label: "Always on Top", isOn: $settings.alwaysOnTop)
             }
-            .padding(.vertical, Spacing.xs)
-            .background(sectionBackground)
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.controlBackgroundColor))
+            )
         }
+        .onChange(of: settings.size) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.soundOnShow) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.animationsEnabled) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.alwaysOnTop) { _, _ in settings.saveToFile() }
     }
+}
 
-    // MARK: - Footer
-    private var footer: some View {
-        HStack {
-            Text("v1.0")
-                .font(.system(size: 9, design: .monospaced))
-                .foregroundColor(Color(nsColor: .tertiaryLabelColor))
+// MARK: - Helpers
 
-            Spacer()
+private struct SectionHeader: View {
+    let title: String
 
-            Button(action: openGitHub) {
-                Image(systemName: "questionmark.circle")
-                    .font(.system(size: 11))
-                    .foregroundColor(.secondary)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, Spacing.md)
-        .padding(.vertical, Spacing.sm)
-        .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+    var body: some View {
+        Text(title)
+            .font(.system(size: 11, weight: .medium))
+            .tracking(1.0)
+            .foregroundColor(.secondary)
     }
+}
 
-    // MARK: - Helpers
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title.uppercased())
-            .font(.system(size: 10, weight: .semibold))
-            .foregroundColor(Color(nsColor: .tertiaryLabelColor))
-            .tracking(0.5)
-    }
+private struct SettingRow<Content: View>: View {
+    let icon: String
+    let label: String
+    @ViewBuilder let content: () -> Content
 
-    private var sectionBackground: some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(Color(nsColor: .controlBackgroundColor))
-    }
-
-    private func settingRow<Content: View>(icon: String, label: String, @ViewBuilder content: () -> Content) -> some View {
-        HStack(spacing: Spacing.sm) {
+    var body: some View {
+        HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 10))
                 .foregroundColor(.secondary)
@@ -368,12 +277,18 @@ struct SettingsView: View {
 
             content()
         }
-        .padding(.horizontal, Spacing.sm)
-        .padding(.vertical, Spacing.xs)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
     }
+}
 
-    private func compactToggle(icon: String, label: String, isOn: Binding<Bool>) -> some View {
-        HStack(spacing: Spacing.sm) {
+private struct CompactToggle: View {
+    let icon: String
+    let label: String
+    @Binding var isOn: Bool
+
+    var body: some View {
+        HStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 10))
                 .foregroundColor(.secondary)
@@ -384,26 +299,28 @@ struct SettingsView: View {
 
             Spacer()
 
-            Toggle("", isOn: isOn)
+            Toggle("", isOn: $isOn)
                 .toggleStyle(.switch)
                 .controlSize(.mini)
         }
-        .padding(.horizontal, Spacing.sm)
-        .padding(.vertical, Spacing.xs)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+    }
+}
+
+struct VisualEffectView: NSViewRepresentable {
+    let material: NSVisualEffectView.Material
+    let blendingMode: NSVisualEffectView.BlendingMode
+
+    func makeNSView(context: Context) -> NSVisualEffectView {
+        let view = NSVisualEffectView()
+        view.material = material
+        view.blendingMode = blendingMode
+        view.state = .active
+        return view
     }
 
-    private func triggerPreviewPulse() {
-        previewPulse = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            previewPulse = false
-        }
-    }
-
-    private func openGitHub() {
-        if let url = URL(string: "https://github.com/doublej/consult-user-mcp") {
-            NSWorkspace.shared.open(url)
-        }
-    }
+    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
 }
 
 #Preview {

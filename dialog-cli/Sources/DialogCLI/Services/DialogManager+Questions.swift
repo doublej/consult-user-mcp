@@ -88,6 +88,7 @@ extension DialogManager {
         }
 
         NSApp.runModal(for: window)
+        FocusManager.shared.reset()
         window.close()
 
         return result ?? QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: true, completedCount: 0, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)

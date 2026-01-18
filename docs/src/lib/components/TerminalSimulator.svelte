@@ -23,7 +23,7 @@
 	}
 </script>
 
-<div class="terminal" bind:this={terminalEl}>
+<div class="terminal">
 	<div class="terminal-header">
 		<div class="terminal-dots">
 			<span class="dot red"></span>
@@ -32,7 +32,7 @@
 		</div>
 		<span class="terminal-title">Terminal</span>
 	</div>
-	<div class="terminal-body">
+	<div class="terminal-body" bind:this={terminalEl}>
 		{#if lines.length === 0}
 			<div class="terminal-placeholder">
 				<span class="prompt">$</span> Waiting for demo to start...

@@ -175,10 +175,22 @@
 .btn.primary {
 	background: linear-gradient(135deg, #5A8CFF 0%, #4a7cf0 100%);
 	color: white;
+	transition: box-shadow 0.2s ease;
+}
+
+.btn.primary:not(:disabled) {
+	box-shadow: 0 0 16px rgba(90, 140, 255, 0.5);
+	animation: btnPulse 2s ease-in-out infinite;
+}
+
+@keyframes btnPulse {
+	0%, 100% { box-shadow: 0 0 16px rgba(90, 140, 255, 0.5); }
+	50% { box-shadow: 0 0 24px rgba(90, 140, 255, 0.7); }
 }
 
 .btn:disabled {
 	opacity: 0.5;
+	animation: none;
 }
 
 .key-hint {

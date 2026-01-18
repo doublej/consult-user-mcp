@@ -9,6 +9,7 @@ class StyledTextField: NSView {
     private var isFocused = false
     private var focusAnimationProgress: CGFloat = 0.0
     private var animationDisplayLink: CVDisplayLink?
+    private var focusAnimationTimer: Timer?
 
     override var mouseDownCanMoveWindow: Bool { false }
     override var acceptsFirstResponder: Bool { true }
@@ -49,13 +50,14 @@ class StyledTextField: NSView {
     }
 
     private func animateFocusChange(to focused: Bool) {
+        focusAnimationTimer?.invalidate()
+
         let targetProgress: CGFloat = focused ? 1.0 : 0.0
         let duration: TimeInterval = 0.12
         let startProgress = focusAnimationProgress
         let startTime = CACurrentMediaTime()
 
-        // Use NSTimer for simple animation
-        Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { [weak self] timer in
+        focusAnimationTimer = Timer.scheduledTimer(withTimeInterval: 1.0/60.0, repeats: true) { [weak self] timer in
             guard let self = self else {
                 timer.invalidate()
                 return
@@ -71,10 +73,15 @@ class StyledTextField: NSView {
 
             if t >= 1.0 {
                 timer.invalidate()
+                self.focusAnimationTimer = nil
                 self.focusAnimationProgress = targetProgress
                 self.needsDisplay = true
             }
         }
+    }
+
+    deinit {
+        focusAnimationTimer?.invalidate()
     }
 
     override func draw(_ dirtyRect: NSRect) {

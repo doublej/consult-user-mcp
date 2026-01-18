@@ -65,6 +65,7 @@ extension DialogManager {
         }
 
         NSApp.runModal(for: window)
+        FocusManager.shared.reset()
         window.close()
 
         return result ?? ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: true, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)

@@ -18,13 +18,33 @@
 
 	const topics: Topic[] = [
 		{
+			id: 'build',
+			name: 'Build Error',
+			questions: [
+				{ question: 'Found 3 type errors in auth.ts — how to proceed?', options: ['Fix all now', 'Fix critical only', 'Skip with @ts-ignore'], selectedIndex: 0 },
+				{ question: 'Missing return type on loginUser()', options: ['Infer from usage', 'Add Promise<User>', 'Add Promise<void>'], selectedIndex: 1 },
+				{ question: 'Unused import: lodash — remove it?', options: ['Yes, remove', 'Keep for now'], selectedIndex: 0 },
+				{ question: 'Run tests after fixes?', options: ['Full suite', 'Only affected', 'Skip tests'], selectedIndex: 1 },
+				{ question: '2 tests failing — block build?', options: ['Fix before build', 'Build anyway', 'Skip failing tests'], selectedIndex: 0 }
+			]
+		},
+		{
 			id: 'camera',
 			name: 'Camera Debug',
 			questions: [
-				{ question: 'Is the flash raised or closed?', options: ['Flash is raised', 'Flash is closed', 'Stuck/partial'], selectedIndex: 1 },
-				{ question: 'How does the orange lamp blink?', options: ['Steady 1-2/sec', 'Irregular', 'Only after shot'], selectedIndex: 0 },
-				{ question: 'Hard power cycle — result?', options: ['Fixed!', 'Same issue', 'Different behavior'], selectedIndex: 1 },
-				{ question: 'Try disabling flash mode?', options: ['Fixed!', 'Still slow', "Can't find setting"], selectedIndex: 0 }
+				{ question: 'Is the flash raised or closed?', options: ['Raised/up', 'Closed', 'Stuck/partial'], selectedIndex: 1 },
+				{ question: 'Anything connected to camera?', options: ['Nothing', 'Hot shoe flash', 'USB cable'], selectedIndex: 0 },
+				{ question: 'How does the orange lamp blink?', options: ['Steady 1-2/sec', 'Irregular', 'After shot attempt'], selectedIndex: 0 },
+				{ question: 'Any warnings on screen?', options: ['Flash warning', 'MIC/REMOTE msg', 'No warnings'], selectedIndex: 2 },
+				{ question: 'Power cycle — remove battery 60s?', options: ['Done', 'Skip'], selectedIndex: 0 },
+				{ question: 'Result after power cycle?', options: ['Fixed!', 'Same issue', 'Different'], selectedIndex: 1 },
+				{ question: 'Pop-up flash reseat — click it?', options: ['Done', 'Skip'], selectedIndex: 0 },
+				{ question: 'Result after flash reseat?', options: ['Fixed!', 'Same issue'], selectedIndex: 1 },
+				{ question: 'Remove SD card and test?', options: ['Done', 'Skip'], selectedIndex: 0 },
+				{ question: 'Result without SD card?', options: ['Fixed!', 'Same issue', 'Different'], selectedIndex: 2 },
+				{ question: 'How long until controls work?', options: ['Under 30s', '30-60s', 'Over a minute'], selectedIndex: 2 },
+				{ question: 'Try disabling flash mode?', options: ['Testing now', 'Skip'], selectedIndex: 0 },
+				{ question: 'Boot time with flash disabled?', options: ['Much faster!', 'Same ~1-2 min', "Can't find setting"], selectedIndex: 0 }
 			]
 		},
 		{
@@ -80,9 +100,8 @@
 	$: currentQuestion = selectedTopic.questions[currentStep] ?? selectedTopic.questions[0];
 
 	function selectTopic(topicId: string): void {
-		if (isActive && !isComplete) return;
 		selectedTopicId = topicId;
-		reset();
+		startDemo();
 	}
 
 	function startDemo(): void {
@@ -92,6 +111,9 @@
 		terminalLines = [];
 		showInitialTerminalState();
 	}
+
+	// Auto-start on mount
+	$: if (selectedTopicId && !isActive && !isComplete) startDemo();
 
 	function showInitialTerminalState(): void {
 		const q = selectedTopic.questions[0];
@@ -165,7 +187,6 @@
 				class="topic-tab"
 				class:active={selectedTopicId === topic.id}
 				onclick={() => selectTopic(topic.id)}
-				disabled={isActive && !isComplete}
 			>
 				{topic.name}
 			</button>
@@ -228,12 +249,8 @@
 	</div>
 
 	<div class="demo-controls">
-		{#if !isActive}
-			<button class="control-btn primary" onclick={startDemo}>Start</button>
-		{:else if isComplete}
-			<button class="control-btn secondary" onclick={reset}>Restart</button>
-		{:else}
-			<button class="control-btn secondary" onclick={reset}>Reset</button>
+		{#if isComplete}
+			<button class="control-btn primary" onclick={startDemo}>Restart</button>
 		{/if}
 	</div>
 </div>
@@ -290,7 +307,7 @@
 		gap: 32px;
 		max-width: 1000px;
 		margin: 0 auto;
-		min-height: 420px;
+		align-items: start;
 	}
 
 	@media (max-width: 900px) {
@@ -310,6 +327,7 @@
 
 		.demo-terminal {
 			height: 300px;
+			max-height: 300px;
 		}
 	}
 
@@ -333,7 +351,9 @@
 	}
 
 	.demo-terminal {
-		min-height: 400px;
+		height: 400px;
+		max-height: 400px;
+		overflow: hidden;
 	}
 
 	.demo-controls {
@@ -357,11 +377,19 @@
 	.control-btn.primary {
 		background: linear-gradient(135deg, #5A8CFF 0%, #4a7cf0 100%);
 		color: white;
+		box-shadow: 0 0 20px rgba(90, 140, 255, 0.5);
+		animation: pulseGlow 2s ease-in-out infinite;
+	}
+
+	@keyframes pulseGlow {
+		0%, 100% { box-shadow: 0 0 20px rgba(90, 140, 255, 0.5); }
+		50% { box-shadow: 0 0 30px rgba(90, 140, 255, 0.8); }
 	}
 
 	.control-btn.primary:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(90, 140, 255, 0.4);
+		box-shadow: 0 0 35px rgba(90, 140, 255, 0.9);
+		animation: none;
 	}
 
 	.control-btn.secondary {

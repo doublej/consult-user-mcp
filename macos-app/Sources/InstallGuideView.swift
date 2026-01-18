@@ -1,44 +1,7 @@
 import SwiftUI
 import AppKit
 
-enum InstallTarget: String, CaseIterable {
-    case claudeDesktop = "Claude"
-    case claudeCode = "Claude Code"
-    case codex = "Codex"
-
-    var configPath: String {
-        switch self {
-        case .claudeDesktop:
-            return "~/Library/Application Support/Claude/claude_desktop_config.json"
-        case .claudeCode:
-            return "~/.claude.json"
-        case .codex:
-            return "~/.codex/config.toml"
-        }
-    }
-
-    var configFormat: ConfigFormat {
-        switch self {
-        case .claudeDesktop, .claudeCode:
-            return .json
-        case .codex:
-            return .toml
-        }
-    }
-
-    var description: String {
-        switch self {
-        case .claudeDesktop:
-            return "Anthropic's desktop app"
-        case .claudeCode:
-            return "CLI coding assistant"
-        case .codex:
-            return "OpenAI's CLI tool"
-        }
-    }
-}
-
-// MARK: - Brand Logos
+// MARK: - Brand Logos (preserved)
 
 struct ClaudeLogo: View {
     var size: CGFloat = 20
@@ -46,12 +9,11 @@ struct ClaudeLogo: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            // Claude logo - orange rounded square with white starburst
             ZStack {
                 RoundedRectangle(cornerRadius: size * 0.22)
-                    .fill(Color(red: 0.84, green: 0.46, blue: 0.33)) // #D77655
+                    .fill(Color(red: 0.84, green: 0.46, blue: 0.33))
                 ClaudeStarShape()
-                    .fill(Color(red: 0.99, green: 0.95, blue: 0.93)) // #FCF2EE cream
+                    .fill(Color(red: 0.99, green: 0.95, blue: 0.93))
                     .frame(width: size * 0.65, height: size * 0.65)
             }
             .frame(width: size, height: size)
@@ -68,7 +30,6 @@ struct ClaudeLogo: View {
     }
 }
 
-// Claude's starburst/sparkle logo - 8 pointed star
 struct ClaudeStarShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -105,7 +66,6 @@ struct OpenAILogo: View {
     }
 }
 
-// OpenAI's hexagonal knot logo - simplified geometric version
 struct OpenAIKnotShape: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()
@@ -114,25 +74,20 @@ struct OpenAIKnotShape: Shape {
         let innerRadius = radius * 0.45
         let strokeWidth = radius * 0.18
 
-        // Draw 6 curved "petals" forming the knot
         for i in 0..<6 {
             let angle = CGFloat(i) * .pi / 3 - .pi / 2
             let nextAngle = angle + .pi / 3
 
-            // Outer point
             let outerX = center.x + cos(angle) * radius
             let outerY = center.y + sin(angle) * radius
 
-            // Inner curve point
             let midAngle = angle + .pi / 6
             let innerX = center.x + cos(midAngle) * innerRadius
             let innerY = center.y + sin(midAngle) * innerRadius
 
-            // Next outer point
             let nextOuterX = center.x + cos(nextAngle) * radius
             let nextOuterY = center.y + sin(nextAngle) * radius
 
-            // Draw petal as thick stroke
             var petal = Path()
             petal.move(to: CGPoint(x: outerX, y: outerY))
             petal.addQuadCurve(
@@ -157,48 +112,34 @@ struct OpenAIKnotShape: Shape {
     }
 }
 
-enum ConfigFormat {
-    case json
-    case toml
-}
+// MARK: - Install Guide View
 
 struct InstallGuideView: View {
     @State private var selectedTarget: InstallTarget = .claudeCode
-    @State private var installStep: Int = 0
-    @State private var copyFeedback: String? = nil
+    @State private var copyFeedback: String?
     @Binding var showInstallGuide: Bool
 
-    private let serverPath: String
-
-    init(showInstallGuide: Binding<Bool>) {
-        self._showInstallGuide = showInstallGuide
-        // Compute server path inside app bundle
+    private var serverPath: String {
         let bundlePath = Bundle.main.bundlePath
-        self.serverPath = "\(bundlePath)/Contents/Resources/mcp-server/dist/index.js"
+        return "\(bundlePath)/Contents/Resources/mcp-server/dist/index.js"
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             header
 
             ScrollView {
-                VStack(spacing: 20) {
-                    // Target selector
+                VStack(spacing: 16) {
                     targetSelector
-
-                    // Installation steps
                     installSteps
-
-                    Spacer(minLength: 20)
+                    Spacer(minLength: 16)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
+                .padding(16)
             }
         }
         .frame(width: 300)
         .fixedSize(horizontal: false, vertical: true)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(Color(.windowBackgroundColor))
     }
 
     // MARK: - Header
@@ -215,18 +156,16 @@ struct InstallGuideView: View {
             Spacer()
 
             Text("Installation Guide")
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
 
             Spacer()
 
-            // Spacer for symmetry
             Image(systemName: "chevron.left")
                 .font(.system(size: 12, weight: .semibold))
                 .opacity(0)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color(nsColor: .windowBackgroundColor))
     }
 
     // MARK: - Target Selector
@@ -234,12 +173,12 @@ struct InstallGuideView: View {
     private var targetSelector: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("INSTALL FOR")
-                .font(.system(size: 11, weight: .semibold))
+                .font(.system(size: 11, weight: .medium))
+                .tracking(1.0)
                 .foregroundColor(.secondary)
-                .textCase(.uppercase)
 
             HStack(spacing: 8) {
-                ForEach(InstallTarget.allCases, id: \.self) { target in
+                ForEach(InstallTarget.allCases) { target in
                     targetButton(target)
                 }
             }
@@ -250,26 +189,21 @@ struct InstallGuideView: View {
         Button(action: { selectedTarget = target }) {
             VStack(spacing: 4) {
                 targetLogo(for: target)
-                Text(target.rawValue)
+                Text(target.displayName)
                     .font(.system(size: 9, weight: .medium))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .contentShape(Rectangle()) // Makes entire area tappable
+            .contentShape(Rectangle())
             .background(
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(selectedTarget == target
-                          ? Color.accentColor.opacity(0.15)
-                          : Color.clear)
+                    .fill(selectedTarget == target ? Color.accentColor.opacity(0.15) : Color.clear)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(selectedTarget == target
-                                  ? Color.accentColor
-                                  : Color(nsColor: .separatorColor),
-                                  lineWidth: 1)
+                    .strokeBorder(selectedTarget == target ? Color.accentColor : Color(.separatorColor), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -291,57 +225,38 @@ struct InstallGuideView: View {
     // MARK: - Install Steps
 
     private var installSteps: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Step 1: Config location
+        VStack(alignment: .leading, spacing: 12) {
             stepCard(number: 1, title: "Open config file") {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Config location:")
-                        .font(.system(size: 11))
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(selectedTarget.configPath)
+                        .font(.system(size: 10, design: .monospaced))
                         .foregroundColor(.secondary)
+                        .lineLimit(1)
 
-                    HStack {
-                        Text(selectedTarget.configPath)
-                            .font(.system(size: 10, design: .monospaced))
-                            .foregroundColor(.primary)
-                            .lineLimit(1)
-
-                        Spacer()
-
-                        Button(action: openConfigFile) {
-                            Image(systemName: "folder")
-                                .font(.system(size: 11))
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
+                    Button(action: openConfigFile) {
+                        Label("Reveal in Finder", systemImage: "folder")
+                            .font(.system(size: 10))
                     }
-                    .padding(8)
-                    .background(Color(nsColor: .textBackgroundColor))
-                    .cornerRadius(4)
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
             }
 
-            // Step 2: Add config
             stepCard(number: 2, title: "Add MCP configuration") {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(selectedTarget.configFormat == .json ? "Add this to your mcpServers:" : "Add this to your config.toml:")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
-
+                VStack(alignment: .leading, spacing: 6) {
                     ScrollView(.horizontal, showsIndicators: false) {
                         Text(configSnippet)
                             .font(.system(size: 9, design: .monospaced))
-                            .foregroundColor(.primary)
                             .textSelection(.enabled)
                     }
                     .padding(8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(nsColor: .textBackgroundColor))
+                    .background(Color(.textBackgroundColor))
                     .cornerRadius(4)
 
                     HStack {
                         Button(action: copyConfig) {
                             Label(copyFeedback ?? "Copy", systemImage: copyFeedback != nil ? "checkmark" : "doc.on.doc")
-                                .font(.system(size: 11))
+                                .font(.system(size: 10))
                         }
                         .buttonStyle(.bordered)
                         .controlSize(.small)
@@ -350,7 +265,7 @@ struct InstallGuideView: View {
 
                         Button(action: autoInstall) {
                             Label("Auto Install", systemImage: "wand.and.stars")
-                                .font(.system(size: 11))
+                                .font(.system(size: 10))
                         }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.small)
@@ -358,36 +273,35 @@ struct InstallGuideView: View {
                 }
             }
 
-            // Step 3: Restart
-            stepCard(number: 3, title: "Restart \(selectedTarget.rawValue)") {
+            stepCard(number: 3, title: "Restart \(selectedTarget.displayName)") {
                 Text("Restart the application to load the MCP server.")
-                    .font(.system(size: 11))
+                    .font(.system(size: 10))
                     .foregroundColor(.secondary)
             }
         }
     }
 
     private func stepCard<Content: View>(number: Int, title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
                 Text("\(number)")
-                    .font(.system(size: 10, weight: .bold))
+                    .font(.system(size: 9, weight: .bold))
                     .foregroundColor(.white)
-                    .frame(width: 18, height: 18)
+                    .frame(width: 16, height: 16)
                     .background(Circle().fill(Color.accentColor))
 
                 Text(title)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 11, weight: .semibold))
             }
 
             content()
-                .padding(.leading, 26)
+                .padding(.leading, 22)
         }
-        .padding(12)
+        .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color(nsColor: .controlBackgroundColor))
+                .fill(Color(.controlBackgroundColor))
         )
     }
 
@@ -414,14 +328,12 @@ args = ["\(serverPath)"]
     // MARK: - Actions
 
     private func openConfigFile() {
-        let path = (selectedTarget.configPath as NSString).expandingTildeInPath
+        let path = selectedTarget.expandedPath
         let url = URL(fileURLWithPath: path)
         let dir = url.deletingLastPathComponent()
 
-        // Create directory if needed
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
 
-        // Create file if it doesn't exist
         if !FileManager.default.fileExists(atPath: path) {
             let initialContent: String
             switch selectedTarget.configFormat {
@@ -447,62 +359,52 @@ args = ["\(serverPath)"]
     }
 
     private func autoInstall() {
-        let path = (selectedTarget.configPath as NSString).expandingTildeInPath
+        let path = selectedTarget.expandedPath
         let fm = FileManager.default
 
-        // Create directory if needed
         let dir = (path as NSString).deletingLastPathComponent
         try? fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
 
         switch selectedTarget.configFormat {
         case .json:
-            autoInstallJSON(path: path, serverPath: self.serverPath)
+            autoInstallJSON(path: path)
         case .toml:
-            autoInstallTOML(path: path, serverPath: self.serverPath)
+            autoInstallTOML(path: path)
         }
     }
 
-    private func autoInstallJSON(path: String, serverPath: String) {
+    private func autoInstallJSON(path: String) {
         let fm = FileManager.default
         var config: [String: Any] = [:]
 
-        // Read existing config
         if let data = fm.contents(atPath: path),
            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
             config = json
         }
 
-        // Ensure mcpServers exists
         var mcpServers = config["mcpServers"] as? [String: Any] ?? [:]
-
-        // Add consult-user-mcp server
         mcpServers["consult-user-mcp"] = [
             "command": "node",
             "args": [serverPath]
         ]
-
         config["mcpServers"] = mcpServers
 
-        // Write back
         if let data = try? JSONSerialization.data(withJSONObject: config, options: [.prettyPrinted, .sortedKeys]) {
             try? data.write(to: URL(fileURLWithPath: path))
             showInstallSuccess()
         }
     }
 
-    private func autoInstallTOML(path: String, serverPath: String) {
+    private func autoInstallTOML(path: String) {
         let fm = FileManager.default
         var content = ""
 
-        // Read existing config
         if let data = fm.contents(atPath: path),
            let existingContent = String(data: data, encoding: .utf8) {
             content = existingContent
         }
 
-        // Check if consult-user-mcp server already exists
         if content.contains("[mcp_servers.consult-user-mcp]") {
-            // Update existing entry - replace the section
             if let range = content.range(of: #"\[mcp_servers\.consult-user-mcp\][^\[]*"#, options: .regularExpression) {
                 let newSection = """
 [mcp_servers.consult-user-mcp]
@@ -513,7 +415,6 @@ args = ["\(serverPath)"]
                 content.replaceSubrange(range, with: newSection)
             }
         } else {
-            // Add new entry
             let newSection = """
 
 [mcp_servers.consult-user-mcp]
@@ -523,7 +424,6 @@ args = ["\(serverPath)"]
             content += newSection
         }
 
-        // Write back
         try? content.write(toFile: path, atomically: true, encoding: .utf8)
         showInstallSuccess()
     }

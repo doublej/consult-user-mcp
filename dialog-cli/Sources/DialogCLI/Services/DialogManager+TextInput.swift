@@ -140,10 +140,13 @@ extension DialogManager {
             }
             return event
         }
+        defer {
+            if let monitor = keyMonitor { NSEvent.removeMonitor(monitor) }
+            FocusManager.shared.reset()
+            window.close()
+        }
 
         NSApp.runModal(for: window)
-        if let monitor = keyMonitor { NSEvent.removeMonitor(monitor) }
-        window.close()
 
         return result ?? TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: true, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
     }

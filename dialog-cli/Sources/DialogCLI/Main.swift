@@ -18,9 +18,9 @@ enum DialogCLI {
     static func setupEditMenu() {
     let mainMenu = NSMenu()
     let editMenuItem = NSMenuItem()
-    editMenuItem.submenu = NSMenu(title: "Edit")
+    let editMenu = NSMenu(title: "Edit")
+    editMenuItem.submenu = editMenu
 
-    let editMenu = editMenuItem.submenu!
     editMenu.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
     editMenu.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
     editMenu.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")

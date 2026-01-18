@@ -27,7 +27,7 @@ echo "Done! Add to your MCP config:"
 echo ""
 echo '{'
 echo '  "mcpServers": {'
-echo '    "speak": {'
+echo '    "consult-user-mcp": {'
 echo '      "command": "node",'
 echo "      \"args\": [\"$MCP_PATH\"]"
 echo '    }'

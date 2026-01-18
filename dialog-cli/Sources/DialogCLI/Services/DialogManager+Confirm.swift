@@ -47,6 +47,7 @@ extension DialogManager {
         }
 
         NSApp.runModal(for: window)
+        FocusManager.shared.reset()
         window.close()
 
         return result ?? ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: true, dismissed: true, answer: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)

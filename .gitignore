@@ -20,8 +20,9 @@ dialog-cli/.build/
 macos-app/.build/
 macos-app/.swiftpm/
 
-# Distribution archive
-Consult User MCP.app.zip
+# Distribution archives
+*.app.zip
+Consult*.zip
 
 # Generated icons (keep SVG source)
 *.icns

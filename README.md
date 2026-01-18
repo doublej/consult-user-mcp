@@ -118,6 +118,28 @@ consult-user-mcp/
 - `ask_questions` - Multi-question dialog (wizard or accordion mode)
 - `notify_user` - System notification
 
+### Timeout and Snooze Behavior
+
+All dialog tools (except `notify_user`) have a **10-minute timeout**. If the user doesn't respond within this time, the dialog closes and returns a timeout response.
+
+**Snooze feature:** Users can snooze a dialog for 1-60 minutes instead of answering immediately. When snoozed:
+
+- The dialog returns `{ snoozed: true, snoozeMinutes: N, remainingSeconds: S }`
+- All subsequent dialog calls return `{ snoozed: true, remainingSeconds: S }` without showing a new dialog
+- The agent should wait for the snooze period to expire before retrying
+
+**Handling snooze in your agent:**
+
+```
+if (result.snoozed) {
+  // Wait for snooze to expire, then retry
+  await sleep(result.remainingSeconds * 1000);
+  result = await callDialogAgain();
+}
+```
+
+**Feedback feature:** Users can also send text feedback instead of answering. This returns `{ feedbackText: "..." }` which the agent can use to adjust its approach.
+
 ## Architecture
 
 ```mermaid

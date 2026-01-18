@@ -1,18 +1,13 @@
 // Dialog position on screen
 export type DialogPosition = "left" | "right" | "center";
 
-// Base result for all dialogs
-export interface DialogResult<T> {
-  value: T | null;
-  cancelled: boolean;
-  comment: string | null;
-}
-
 // Confirmation dialog result
 export interface ConfirmResult {
+  dialogType: string;
   confirmed: boolean;
   cancelled: boolean;
-  response: string | null;
+  dismissed: boolean;
+  answer: string | null;  // The selected button label
   comment: string | null;
   snoozed?: boolean;
   snoozeMinutes?: number;
@@ -23,8 +18,10 @@ export interface ConfirmResult {
 
 // Choice dialog result
 export interface ChoiceResult {
-  selected: string | string[] | null;
+  dialogType: string;
+  answer: string | string[] | null;  // The selected choice(s)
   cancelled: boolean;
+  dismissed: boolean;
   description: string | null;
   descriptions?: (string | null)[];
   comment: string | null;
@@ -37,8 +34,10 @@ export interface ChoiceResult {
 
 // Text input dialog result
 export interface TextInputResult {
-  text: string | null;
+  dialogType: string;
+  answer: string | null;  // The entered text
   cancelled: boolean;
+  dismissed: boolean;
   comment: string | null;
   snoozed?: boolean;
   snoozeMinutes?: number;
@@ -49,6 +48,7 @@ export interface TextInputResult {
 
 // Notification result
 export interface NotifyResult {
+  dialogType: string;
   success: boolean;
 }
 
@@ -107,8 +107,10 @@ export interface QuestionsOptions {
 
 // Result for multi-question dialog
 export interface QuestionsResult {
+  dialogType: string;
   answers: Record<string, string | string[]>;
   cancelled: boolean;
+  dismissed: boolean;
   completedCount: number;
   snoozed?: boolean;
   snoozeMinutes?: number;

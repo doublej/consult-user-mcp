@@ -105,6 +105,45 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 
 ---
 
+## Accessibility
+
+### Reduce Motion (`System Preferences > Accessibility > Display`)
+
+The dialog system respects macOS "Reduce motion" setting via `@Environment(\.accessibilityReduceMotion)`.
+
+**Components that respect reduce motion:**
+- `ConfirmDialog.swift` - toolbar expand/collapse animations
+- `DialogToolbar.swift` - snooze/feedback panel transitions
+- `AccordionDialog.swift` - section expand/collapse, option selection, button interactions
+
+**When reduce motion is enabled:**
+- State changes happen immediately (no `withAnimation`)
+- Transitions use `.identity` instead of `.opacity` or `.move`
+- No visual glitches or jarring effects
+
+**Testing reduce motion:**
+```bash
+# Check current setting
+defaults read com.apple.universalaccess reduceMotion
+
+# Enable reduce motion
+defaults write com.apple.universalaccess reduceMotion -bool true
+
+# Disable reduce motion
+defaults write com.apple.universalaccess reduceMotion -bool false
+
+# Run test dialogs and verify no animations play
+./test-cases/test-runner.sh
+```
+
+**Verification checklist:**
+- [ ] Toolbar panels appear/disappear instantly (no slide)
+- [ ] Accordion sections expand/collapse without animation
+- [ ] Button hover states change immediately
+- [ ] No motion sickness triggers
+
+---
+
 ## Known Issues
 
 ### Choice Cutoff Bug (001-choice-cutoff.md)

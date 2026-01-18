@@ -1,6 +1,6 @@
 # consult-user-mcp-server
 
-An MCP server for interacting with users through native macOS dialogs and speech.
+An MCP server for interacting with users through native macOS dialogs.
 
 ## Tools
 
@@ -16,7 +16,7 @@ All interactive dialogs support **snooze** (defer with 1-60 min delay) and **fee
 
 ## Requirements
 
-- macOS (uses `osascript` and `say` commands)
+- macOS (uses native Swift dialog CLI)
 - Node.js 18+
 
 ## Installation

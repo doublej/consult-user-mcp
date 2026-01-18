@@ -1,15 +1,34 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { store } from './lib/store';
+import { validateQuestionId, validateSessionId, validateString, isObject, MAX_STRING_LENGTH } from './lib/validate';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  if (!isObject(req.body)) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
   const { questionId, sessionId, response } = req.body;
 
-  if (!questionId || !response) {
-    return res.status(400).json({ error: 'Missing questionId or response' });
+  const qidErr = validateQuestionId(questionId);
+  if (qidErr) return res.status(400).json({ error: qidErr.message });
+
+  if (sessionId !== undefined) {
+    const sidErr = validateSessionId(sessionId);
+    if (sidErr) return res.status(400).json({ error: sidErr.message });
+  }
+
+  if (response === undefined || response === null) {
+    return res.status(400).json({ error: 'Missing response' });
+  }
+
+  // Validate response is string or object with reasonable size
+  const responseStr = typeof response === 'string' ? response : JSON.stringify(response);
+  if (responseStr.length > MAX_STRING_LENGTH) {
+    return res.status(400).json({ error: 'Response exceeds maximum length' });
   }
 
   const question = store.getQuestion(questionId);

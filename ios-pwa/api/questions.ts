@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { store } from './lib/store';
+import { validateSessionId } from './lib/validate';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -8,9 +9,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   const sessionId = req.query.sessionId as string;
 
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Missing sessionId' });
-  }
+  const sidErr = validateSessionId(sessionId);
+  if (sidErr) return res.status(400).json({ error: sidErr.message });
 
   const question = store.getPendingQuestion(sessionId);
 

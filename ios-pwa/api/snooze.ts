@@ -1,18 +1,26 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { store } from './lib/store';
+import { validateQuestionId, isObject, isNumber } from './lib/validate';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { questionId, minutes = 5 } = req.body;
-
-  if (!questionId) {
-    return res.status(400).json({ error: 'Missing questionId' });
+  if (!isObject(req.body)) {
+    return res.status(400).json({ error: 'Invalid request body' });
   }
 
-  const snoozeMinutes = Math.min(Math.max(1, minutes), 60); // Clamp between 1-60 minutes
+  const { questionId, minutes = 5 } = req.body;
+
+  const qidErr = validateQuestionId(questionId);
+  if (qidErr) return res.status(400).json({ error: qidErr.message });
+
+  if (minutes !== undefined && !isNumber(minutes)) {
+    return res.status(400).json({ error: 'minutes must be a number' });
+  }
+
+  const snoozeMinutes = Math.min(Math.max(1, Number(minutes) || 5), 60);
 
   const success = store.snoozeQuestion(questionId, snoozeMinutes);
 

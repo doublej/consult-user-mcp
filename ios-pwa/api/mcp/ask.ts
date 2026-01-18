@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { store } from '../lib/store';
 import { sendPushNotification, isConfigured } from '../lib/push';
+import { validateSessionId, validateOptionalString, validateChoices, isObject, isString, MAX_TITLE_LENGTH, MAX_MESSAGE_LENGTH } from '../lib/validate';
 
 // This endpoint is called by the MCP client (Claude) to ask questions
 // It creates a question, sends a push notification, and waits for the response
@@ -23,14 +24,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { sessionId, type, title, message, choices, options } = req.body as AskRequest;
-
-  if (!sessionId) {
-    return res.status(400).json({ error: 'Missing sessionId' });
+  if (!isObject(req.body)) {
+    return res.status(400).json({ error: 'Invalid request body' });
   }
 
-  if (!type || !['confirm', 'choose', 'text'].includes(type)) {
-    return res.status(400).json({ error: 'Invalid or missing type' });
+  const { sessionId, type, title, message, choices, options } = req.body as AskRequest;
+
+  const sidErr = validateSessionId(sessionId);
+  if (sidErr) return res.status(400).json({ error: sidErr.message });
+
+  if (!isString(type) || !['confirm', 'choose', 'text'].includes(type)) {
+    return res.status(400).json({ error: 'Invalid or missing type (must be confirm, choose, or text)' });
+  }
+
+  const titleErr = validateOptionalString(title, 'title', MAX_TITLE_LENGTH);
+  if (titleErr) return res.status(400).json({ error: titleErr.message });
+
+  const msgErr = validateOptionalString(message, 'message', MAX_MESSAGE_LENGTH);
+  if (msgErr) return res.status(400).json({ error: msgErr.message });
+
+  if (type === 'choose' && choices) {
+    const choicesErr = validateChoices(choices);
+    if (choicesErr) return res.status(400).json({ error: choicesErr.message });
   }
 
   // Generate question ID

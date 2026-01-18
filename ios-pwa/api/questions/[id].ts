@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { store } from '../lib/store';
+import { validateQuestionId } from '../lib/validate';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -8,9 +9,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   const id = req.query.id as string;
 
-  if (!id) {
-    return res.status(400).json({ error: 'Missing question id' });
-  }
+  const idErr = validateQuestionId(id);
+  if (idErr) return res.status(400).json({ error: idErr.message });
 
   const question = store.getQuestion(id);
 

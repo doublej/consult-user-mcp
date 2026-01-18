@@ -4,6 +4,17 @@ import { z } from "zod";
 import { SwiftDialogProvider } from "./providers/swift.js";
 import type { DialogPosition, QuestionsMode } from "./types.js";
 
+const DIALOG_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`Dialog timed out after ${ms / 1000}s`)), ms)
+    ),
+  ]);
+}
+
 const server = new McpServer({ name: "consult-user-mcp-server", version: "1.0.0" });
 const provider = new SwiftDialogProvider();
 const pos = z.enum(["left", "right", "center"]).default("left");
@@ -19,11 +30,11 @@ server.registerTool("ask_confirmation", {
   }),
 }, async (p) => {
   provider.pulse();
-  const r = await provider.confirm({
+  const r = await withTimeout(provider.confirm({
     body: p.body, title: p.title ?? "Confirmation",
     confirmLabel: p.confirm_label ?? "Yes", cancelLabel: p.cancel_label ?? "No",
     position: (p.position ?? "left") as DialogPosition,
-  });
+  }), DIALOG_TIMEOUT_MS);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
 
@@ -39,11 +50,11 @@ server.registerTool("ask_multiple_choice", {
   }),
 }, async (p) => {
   provider.pulse();
-  const r = await provider.choose({
+  const r = await withTimeout(provider.choose({
     body: p.body, choices: p.choices, descriptions: p.descriptions,
     allowMultiple: p.allow_multiple ?? true, defaultSelection: p.default_selection,
     position: (p.position ?? "left") as DialogPosition,
-  });
+  }), DIALOG_TIMEOUT_MS);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
 
@@ -58,11 +69,11 @@ server.registerTool("ask_text_input", {
   }),
 }, async (p) => {
   provider.pulse();
-  const r = await provider.textInput({
+  const r = await withTimeout(provider.textInput({
     body: p.body, title: p.title ?? "Input",
     defaultValue: p.default_value ?? "", hidden: p.hidden ?? false,
     position: (p.position ?? "left") as DialogPosition,
-  });
+  }), DIALOG_TIMEOUT_MS);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
 
@@ -101,7 +112,7 @@ server.registerTool("ask_questions", {
   }),
 }, async (p) => {
   provider.pulse();
-  const r = await provider.questions({
+  const r = await withTimeout(provider.questions({
     questions: p.questions.map(q => ({
       id: q.id,
       question: q.question,
@@ -110,7 +121,7 @@ server.registerTool("ask_questions", {
     })),
     mode: (p.mode ?? "wizard") as QuestionsMode,
     position: (p.position ?? "left") as DialogPosition,
-  });
+  }), DIALOG_TIMEOUT_MS);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
 

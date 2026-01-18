@@ -69,6 +69,13 @@ Public Key: BNx...
 Private Key: abc...
 ```
 
+> **VAPID Key Security**
+>
+> - **Keep your private key secret**: Never commit it to version control or share it publicly. Anyone with your private key can send push notifications to your subscribers.
+> - **Use environment variables**: Store keys in Vercel's encrypted environment variables, not in code.
+> - **Rotate if compromised**: If your private key is exposed, generate new keys and redeploy. Existing subscribers will need to re-subscribe.
+> - **One key pair per deployment**: Don't reuse VAPID keys across different projects or environments.
+
 ### 4. Configure Environment Variables
 
 In Vercel Dashboard → Settings → Environment Variables, add:

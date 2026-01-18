@@ -1,7 +1,7 @@
 {
   "name": "consult-user-mcp-server",
   "version": "1.0.0",
-  "description": "MCP server for macOS native dialogs and text-to-speech",
+  "description": "MCP server for macOS native dialogs",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

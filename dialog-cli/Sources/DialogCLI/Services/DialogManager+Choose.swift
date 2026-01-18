@@ -8,6 +8,15 @@ extension DialogManager {
             return ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: true, snoozeMinutes: nil, remainingSeconds: remaining, feedbackText: nil, instruction: "Snooze active. Wait \(remaining) seconds before re-asking.")
         }
 
+        // Validate descriptions length matches choices
+        let normalizedDescriptions: [String]? = request.descriptions.map { descs in
+            if descs.count == request.choices.count {
+                return descs
+            }
+            // Truncate or pad to match choices length
+            return (0..<request.choices.count).map { descs[safe: $0] ?? "" }
+        }
+
         NSApp.setActivationPolicy(.accessory)
 
         var result: ChoiceResponse?
@@ -15,7 +24,7 @@ extension DialogManager {
         let swiftUIDialog = SwiftUIChooseDialog(
             body: request.body,
             choices: request.choices,
-            descriptions: request.descriptions,
+            descriptions: normalizedDescriptions,
             allowMultiple: request.allowMultiple,
             defaultSelection: request.defaultSelection,
             onComplete: { selectedIndices in

@@ -1,0 +1,56 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is your preferred development environment?",
+      "options": [
+        {"label": "VS Code", "description": "Microsoft's popular editor"},
+        {"label": "JetBrains IDE", "description": "IntelliJ, WebStorm, etc."},
+        {"label": "Vim/Neovim", "description": "Terminal-based editing"},
+        {"label": "Other", "description": "Something else"}
+      ]
+    },
+    {
+      "id": "q2",
+      "question": "How do you manage dependencies?",
+      "options": [
+        {"label": "npm", "description": "Node package manager"},
+        {"label": "yarn", "description": "Facebook's alternative"},
+        {"label": "pnpm", "description": "Efficient disk usage"},
+        {"label": "bun", "description": "All-in-one toolkit"}
+      ]
+    },
+    {
+      "id": "q3",
+      "question": "What testing framework do you use?",
+      "options": [
+        {"label": "Jest", "description": "Facebook's testing framework"},
+        {"label": "Vitest", "description": "Vite-native testing"},
+        {"label": "Mocha", "description": "Flexible test framework"},
+        {"label": "None", "description": "No testing yet"}
+      ]
+    },
+    {
+      "id": "q4",
+      "question": "How do you handle state management?",
+      "options": [
+        {"label": "Redux", "description": "Predictable state container"},
+        {"label": "Zustand", "description": "Minimal state management"},
+        {"label": "Context API", "description": "Built-in React solution"},
+        {"label": "Other", "description": "Different approach"}
+      ]
+    },
+    {
+      "id": "q5",
+      "question": "What's your deployment strategy?",
+      "options": [
+        {"label": "Vercel", "description": "Edge-first platform"},
+        {"label": "AWS", "description": "Amazon Web Services"},
+        {"label": "Docker/K8s", "description": "Container orchestration"},
+        {"label": "Self-hosted", "description": "Own infrastructure"}
+      ]
+    }
+  ],
+  "mode": "wizard",
+  "position": "center"
+}

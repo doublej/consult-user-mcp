@@ -1,0 +1,7 @@
+{
+  "body": "Edit the configuration path:",
+  "title": "Path",
+  "defaultValue": "/Users/username/Documents/projects/my-extremely-long-project-name/config/environments/production/settings.override.local.json",
+  "hidden": false,
+  "position": "center"
+}

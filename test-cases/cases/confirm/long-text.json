@@ -1,0 +1,7 @@
+{
+  "body": "This is an extremely long confirmation message that goes on and on to test how the dialog handles text wrapping and overflow. It contains multiple sentences that describe a complex operation involving database migrations, schema changes, and potential data loss across multiple environments including development, staging, and production servers located in various geographic regions.",
+  "title": "Critical Infrastructure Change Requiring Immediate Attention",
+  "confirmLabel": "I understand the risks and want to proceed anyway",
+  "cancelLabel": "Cancel",
+  "position": "center"
+}

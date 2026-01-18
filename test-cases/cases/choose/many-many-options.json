@@ -1,0 +1,27 @@
+{
+  "body": "Select all applicable programming languages from your technology stack:",
+  "choices": [
+    "JavaScript",
+    "TypeScript",
+    "Python",
+    "Go",
+    "Rust",
+    "Java",
+    "Kotlin",
+    "Swift",
+    "C++",
+    "C#",
+    "Ruby",
+    "PHP",
+    "Scala",
+    "Elixir",
+    "Haskell",
+    "Clojure",
+    "F#",
+    "Dart",
+    "Zig",
+    "Nim"
+  ],
+  "allowMultiple": true,
+  "position": "center"
+}

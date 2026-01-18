@@ -1,0 +1,15 @@
+{
+  "body": "Choose architecture:",
+  "choices": [
+    "Monolith",
+    "Microservices",
+    "Serverless"
+  ],
+  "descriptions": [
+    "A single deployable unit containing all application code, suitable for smaller teams and simpler deployment pipelines, but may become difficult to scale and maintain as the codebase grows larger over time",
+    "Distributed system of independently deployable services communicating via APIs, enabling team autonomy and independent scaling, but introducing complexity in service discovery, distributed transactions, and observability",
+    "Event-driven functions that scale automatically and charge per execution, ideal for sporadic workloads but potentially expensive at scale and challenging for long-running processes"
+  ],
+  "allowMultiple": false,
+  "position": "center"
+}

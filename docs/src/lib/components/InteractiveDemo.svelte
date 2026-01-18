@@ -95,7 +95,7 @@
 	let isComplete = false;
 	let terminalLines: Array<{ text: string; type: LineType }> = [];
 
-	$: selectedTopic = topics.find(t => t.id === selectedTopicId)!;
+	$: selectedTopic = topics.find(t => t.id === selectedTopicId) ?? topics[0];
 	$: totalSteps = selectedTopic.questions.length;
 	$: currentQuestion = selectedTopic.questions[currentStep] ?? selectedTopic.questions[0];
 

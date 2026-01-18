@@ -1,0 +1,7 @@
+{
+  "body": "Please provide a detailed description of the bug you encountered, including the steps to reproduce, expected behavior, actual behavior, and any error messages or stack traces that appeared in the console or logs:",
+  "title": "Bug Report - Additional Context Required for Investigation",
+  "defaultValue": "",
+  "hidden": false,
+  "position": "center"
+}

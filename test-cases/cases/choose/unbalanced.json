@@ -1,0 +1,15 @@
+{
+  "body": "Pick one:",
+  "choices": [
+    "A",
+    "This is a much longer option that contains significantly more text than the others and tests how the UI handles uneven content distribution across choice cards",
+    "B"
+  ],
+  "descriptions": [
+    "Tiny",
+    "",
+    "This description is extremely long while the label above is just a single letter, creating a weird visual imbalance that might cause layout issues"
+  ],
+  "allowMultiple": false,
+  "position": "center"
+}

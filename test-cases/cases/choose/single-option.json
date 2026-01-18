@@ -1,0 +1,11 @@
+{
+  "body": "There is only one option available. This tests the edge case of a choice dialog with minimal choices.",
+  "choices": [
+    "The Only Option"
+  ],
+  "descriptions": [
+    "You must select this because there are no alternatives"
+  ],
+  "allowMultiple": false,
+  "position": "center"
+}

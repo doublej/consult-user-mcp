@@ -302,7 +302,12 @@ function renderChooseDialog(question) {
   const isMulti = options.multiple || false;
 
   const choicesHtml = choices.map((choice, index) => `
-    <div class="choice-card ${isMulti ? 'multi' : ''}" data-index="${index}" data-value="${escapeHtml(choice.value || choice)}">
+    <div class="choice-card ${isMulti ? 'multi' : ''}"
+         data-index="${index}"
+         data-value="${escapeHtml(choice.value || choice)}"
+         tabindex="0"
+         role="option"
+         aria-selected="false">
       <div class="choice-indicator">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
           <polyline points="20 6 9 17 4 12"/>
@@ -330,7 +335,7 @@ function renderChooseDialog(question) {
 
       ${renderToolbar()}
 
-      <div class="choices">
+      <div class="choices" role="listbox" aria-label="${escapeHtml(title || 'Choose an option')}">
         ${choicesHtml}
       </div>
 
@@ -421,16 +426,37 @@ function setupDialogListeners() {
   // Choice cards
   if (type === 'choose') {
     const isMulti = dialog.dataset.multiple === 'true';
-    dialog.querySelectorAll('.choice-card').forEach(card => {
-      card.addEventListener('click', () => {
-        if (isMulti) {
-          card.classList.toggle('selected');
-          const hasSelection = dialog.querySelector('.choice-card.selected');
-          dialog.querySelector('[data-action="submit"]').disabled = !hasSelection;
-        } else {
-          dialog.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
-          card.classList.add('selected');
-          dialog.querySelector('[data-action="submit"]').disabled = false;
+    const cards = dialog.querySelectorAll('.choice-card');
+
+    const selectCard = (card) => {
+      if (isMulti) {
+        card.classList.toggle('selected');
+        card.setAttribute('aria-selected', card.classList.contains('selected'));
+        const hasSelection = dialog.querySelector('.choice-card.selected');
+        dialog.querySelector('[data-action="submit"]').disabled = !hasSelection;
+      } else {
+        cards.forEach(c => {
+          c.classList.remove('selected');
+          c.setAttribute('aria-selected', 'false');
+        });
+        card.classList.add('selected');
+        card.setAttribute('aria-selected', 'true');
+        dialog.querySelector('[data-action="submit"]').disabled = false;
+      }
+    };
+
+    cards.forEach((card, index) => {
+      card.addEventListener('click', () => selectCard(card));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectCard(card);
+        } else if (e.key === 'ArrowDown' && index < cards.length - 1) {
+          e.preventDefault();
+          cards[index + 1].focus();
+        } else if (e.key === 'ArrowUp' && index > 0) {
+          e.preventDefault();
+          cards[index - 1].focus();
         }
       });
     });

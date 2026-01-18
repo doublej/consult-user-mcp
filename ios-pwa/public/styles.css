@@ -389,6 +389,18 @@ footer {
   border-color: var(--accent);
 }
 
+.choice-card:focus {
+  outline: none;
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+}
+
+.choice-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
+}
+
 .choice-card.selected {
   background: var(--accent-muted);
   border-color: var(--accent);

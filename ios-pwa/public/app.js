@@ -175,9 +175,8 @@ async function subscribeToPush() {
 
     state.subscription = subscription;
     state.isSubscribed = true;
-    console.log('[App] Push subscription active');
-  } catch (error) {
-    console.error('[App] Failed to subscribe to push:', error);
+  } catch {
+    // Failed to subscribe to push
   }
 }
 
@@ -563,8 +562,6 @@ function setupEventListeners() {
 }
 
 function handleServiceWorkerMessage(event) {
-  console.log('[App] Message from SW:', event.data);
-
   if (event.data?.type === 'QUESTION_RECEIVED') {
     fetchAndShowQuestion(event.data.questionId);
   }

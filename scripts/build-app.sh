@@ -59,7 +59,7 @@ cat > "$APP_PATH/Contents/Info.plist" << 'EOF'
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
-    <string>com.consult-user-mcp.app</string>
+    <string>com.doublej.ConsultUserMCP</string>
     <key>CFBundleName</key>
     <string>Consult User MCP</string>
     <key>CFBundlePackageType</key>

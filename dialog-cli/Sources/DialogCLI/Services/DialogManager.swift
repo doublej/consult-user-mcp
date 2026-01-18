@@ -15,8 +15,16 @@ class DialogManager {
         return DialogPosition(rawValue: userSettings.position) ?? .center
     }
 
-    func buildTitle(_ baseTitle: String) -> String {
-        "\(clientName)"
+    func buildTitle() -> String {
+        clientName
+    }
+
+    func snoozeInstruction(minutes: Int) -> String {
+        "Set a timer for \(minutes) minute\(minutes == 1 ? "" : "s") and re-ask this question when it fires."
+    }
+
+    func snoozeActiveInstruction(remaining: Int) -> String {
+        "Snooze active. Wait \(remaining) seconds before re-asking."
     }
 
     func createWindow(width: CGFloat, height: CGFloat) -> (NSWindow, DraggableView) {

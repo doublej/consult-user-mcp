@@ -2,7 +2,7 @@ import Foundation
 
 extension DialogManager {
     func notify(_ request: NotifyRequest) -> NotifyResponse {
-        let title = buildTitle(request.title)
+        let title = buildTitle()
         var script = "display notification \"\(escapeForAppleScript(request.body))\" with title \"\(escapeForAppleScript(title))\""
         if request.sound {
             script += " sound name \"default\""

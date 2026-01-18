@@ -72,9 +72,19 @@ export class SwiftDialogProvider implements DialogProvider {
         env: { ...process.env, MCP_CLIENT_NAME: this.clientName },
       });
       stdout = result.stdout;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      throw new Error(`Dialog CLI '${command}' failed: ${msg}`);
+    } catch (err: unknown) {
+      const e = err as { code?: string | number; signal?: string; stderr?: string; message?: string };
+      if (e.code === "ENOENT") {
+        throw new Error(`Dialog CLI not found at: ${cliPath}`);
+      }
+      if (typeof e.code === "number") {
+        const stderr = e.stderr?.trim();
+        throw new Error(`Dialog CLI '${command}' exited with code ${e.code}${stderr ? `: ${stderr}` : ""}`);
+      }
+      if (e.signal) {
+        throw new Error(`Dialog CLI '${command}' killed by signal ${e.signal}`);
+      }
+      throw new Error(`Dialog CLI '${command}' failed: ${e.message ?? String(err)}`);
     }
     try {
       return JSON.parse(stdout.trim()) as T;

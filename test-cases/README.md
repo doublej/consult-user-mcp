@@ -31,9 +31,24 @@ test-cases/
 DIALOG_THEME=sunset ./test-runner.sh
 DIALOG_THEME=midnight ./test-runner.sh
 
-# Slower render for complex dialogs
-RENDER_DELAY=1.5 ./test-runner.sh
+# Slower render (if dialogs aren't captured)
+RENDER_DELAY=2.0 ./test-runner.sh
+
+# Debug mode (shows window detection info)
+DEBUG=1 ./test-runner.sh
 ```
+
+## Troubleshooting
+
+**Screenshots capture wrong window (terminal instead of dialog):**
+1. Run with `DEBUG=1` to see window detection output
+2. Increase delay: `RENDER_DELAY=2.0`
+3. Ensure Screen Recording permission is granted in System Settings > Privacy & Security
+4. The script looks for windows with "dialog" in the owner name
+
+**No screenshots captured:**
+- Check that DialogCLI builds: `cd dialog-cli && swift build -c release`
+- Grant accessibility permissions if prompted
 
 ## Adding Test Cases
 

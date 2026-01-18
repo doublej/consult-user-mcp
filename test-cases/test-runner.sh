@@ -8,11 +8,14 @@ CASES_DIR="$SCRIPT_DIR/cases"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 SCREENSHOT_DIR="$SCRIPT_DIR/screenshots/$TIMESTAMP"
 
-# Render delay in seconds
-RENDER_DELAY="${RENDER_DELAY:-1.0}"
+# Render delay in seconds (increase if dialogs aren't captured)
+RENDER_DELAY="${RENDER_DELAY:-1.2}"
 
 # Theme from environment (default: none, uses system default)
 THEME="${DIALOG_THEME:-}"
+
+# Debug mode
+DEBUG="${DEBUG:-}"
 
 echo "=== Dialog Visual Test Runner ==="
 echo "Timestamp: $TIMESTAMP"
@@ -35,13 +38,22 @@ capture_frontmost_window() {
 
     # Get DialogCLI window ID using Swift
     local window_id
-    window_id=$(swift "$SCRIPT_DIR/capture-dialog.swift" 2>/dev/null)
+    if [ -n "$DEBUG" ]; then
+        window_id=$(swift "$SCRIPT_DIR/capture-dialog.swift" 2>&1)
+        echo "    [debug] window lookup: $window_id" >&2
+    else
+        window_id=$(swift "$SCRIPT_DIR/capture-dialog.swift" 2>/dev/null)
+    fi
+
+    # Extract just the number (first line that's a number)
+    window_id=$(echo "$window_id" | grep -E '^[0-9]+$' | head -1)
 
     if [ -n "$window_id" ]; then
+        [ -n "$DEBUG" ] && echo "    [debug] capturing window $window_id" >&2
         screencapture -o -l "$window_id" "$output_path" 2>/dev/null
     else
-        # Fallback: capture entire screen
-        screencapture -o -x "$output_path" 2>/dev/null
+        [ -n "$DEBUG" ] && echo "    [debug] no window found, skipping capture" >&2
+        return 1
     fi
 }
 
@@ -164,6 +176,7 @@ main() {
     echo "  See: $SCRIPT_DIR/verify-checklist.md"
     echo ""
     echo "Themes: DIALOG_THEME=sunset|midnight $0"
+    echo "Debug:  DEBUG=1 $0"
 }
 
 main "$@"

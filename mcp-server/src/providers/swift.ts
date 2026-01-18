@@ -31,7 +31,9 @@ function findDialogCli(): string {
   const devPath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "release", "DialogCLI");
   if (existsSync(devPath)) return devPath;
 
-  return devPath;
+  throw new Error(
+    `Dialog CLI not found. Searched:\n  - ${appBundlePath}\n  - ${devPath}\nRun 'bun run build' to compile the Swift CLI.`
+  );
 }
 
 const CLI_PATH = findDialogCli();
@@ -49,10 +51,21 @@ export class SwiftDialogProvider implements DialogProvider {
 
   private async runCli<T>(command: string, args: object): Promise<T> {
     const jsonArg = JSON.stringify(args);
-    const { stdout } = await execFileAsync(CLI_PATH, [command, jsonArg], {
-      env: { ...process.env, MCP_CLIENT_NAME: this.clientName },
-    });
-    return JSON.parse(stdout.trim()) as T;
+    let stdout: string;
+    try {
+      const result = await execFileAsync(CLI_PATH, [command, jsonArg], {
+        env: { ...process.env, MCP_CLIENT_NAME: this.clientName },
+      });
+      stdout = result.stdout;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`Dialog CLI '${command}' failed: ${msg}`);
+    }
+    try {
+      return JSON.parse(stdout.trim()) as T;
+    } catch {
+      throw new Error(`Dialog CLI '${command}' returned invalid JSON: ${stdout.slice(0, 200)}`);
+    }
   }
 
   async confirm(opts: ConfirmOptions): Promise<ConfirmResult> {

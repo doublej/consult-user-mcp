@@ -1,0 +1,94 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+### Added
+- Keyboard accessibility to iOS PWA choice cards
+- Automated tests for MCP server
+- PNG icons for iOS PWA compatibility
+- Input validation for iOS PWA API endpoints
+- Test runner with screenshot capture
+
+### Changed
+- Split DialogManager.swift into focused modules
+- Replace magic key codes with KeyCode constants
+
+### Fixed
+- Sync snooze clear from CLI to macOS app
+- Fallback error with setup instructions if Dialog CLI not found
+- Error logging for file write failures in UserSettings
+- Timeout handling for long dialogs in MCP server
+- Validate choice descriptions array length matches choices
+- Remove test dialog button from iOS PWA production UI
+- Error handling for JSON parse and CLI path in swift.ts
+
+### Documentation
+- Add VAPID key security guidance to iOS PWA docs
+- Add prominent security warning for iOS PWA limitations
+- Document instruction field in snooze responses
+- Remove outdated osascript/say references
+
+## [1.2.0] - 2026-01-10
+
+### Changed
+- Refactor dialog system to use native Swift CLI, remove AppleScript provider
+
+### Fixed
+- Snooze crash and menu bar icon theme
+- Install script with MCP config output, use bun consistently
+
+## [1.1.2] - 2025-12-16
+
+### Added
+- Quick install section in README
+
+### Fixed
+- Add execute permission to install.sh
+
+## [1.1.1] - 2025-12-16
+
+### Added
+- Install script with quarantine removal instructions
+- Architecture diagram in README
+- Screenshots with captions in README
+
+### Changed
+- Switch from npm/pnpm to bun
+- Improve README with index and install instructions
+
+### Fixed
+- dialog-cli path resolution
+- GitHub link in macOS app
+
+## [1.1.0] - 2025-12-11
+
+### Changed
+- Rename from "Speak MCP" to "Consult User MCP" across codebase
+- Consolidate dialog types and improve focus handling
+- Make keyboard hints more compact
+
+### Fixed
+- ScrollView clipping and toolbar transparency
+- Allow typing 's' in feedback text field without triggering snooze
+- Allow typing 'f' in feedback text field
+
+### Removed
+- Shader overlay effect
+
+## [1.0.0] - 2025-11-27
+
+Initial release.
+
+### Added
+- Native macOS dialog system for MCP servers
+- Confirmation, multiple choice, text input, and multi-question dialogs
+- Snooze feature (1-60 minutes)
+- Feedback feature for redirecting the agent
+- iOS PWA companion for remote MCP support
+- macOS menu bar app with settings UI
+- Documentation site with GitHub Pages deployment
+
+### Removed
+- Text-to-speech feature

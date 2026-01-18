@@ -33,8 +33,8 @@ struct FocusableChoiceCard: NSViewRepresentable {
 // MARK: - Focusable Choice Card View (AppKit)
 
 class FocusableChoiceCardView: NSView {
-    var title: String = ""
-    var subtitle: String?
+    var title: String = "" { didSet { invalidateCachedSizes() } }
+    var subtitle: String? { didSet { invalidateCachedSizes() } }
     var isSelected: Bool = false
     var isMultiSelect: Bool = false
     var onTap: (() -> Void)?
@@ -42,6 +42,47 @@ class FocusableChoiceCardView: NSView {
     private var isHovered = false
     private var isPressed = false
     private var trackingArea: NSTrackingArea?
+
+    // Cached size calculations
+    private var cachedTitleSize: NSSize?
+    private var cachedSubtitleSize: NSSize?
+    private var cachedContentWidth: CGFloat = 0
+
+    private static let titleFont = NSFont.systemFont(ofSize: 14, weight: .semibold)
+    private static let subtitleFont = NSFont.systemFont(ofSize: 12, weight: .regular)
+
+    private func invalidateCachedSizes() {
+        cachedTitleSize = nil
+        cachedSubtitleSize = nil
+    }
+
+    private func calculateSizes(for width: CGFloat) -> (title: NSSize, subtitle: NSSize?) {
+        let contentWidth = width - 68
+        if cachedContentWidth == contentWidth, let titleSize = cachedTitleSize {
+            return (titleSize, cachedSubtitleSize)
+        }
+
+        cachedContentWidth = contentWidth
+        let titleAttrs: [NSAttributedString.Key: Any] = [.font: Self.titleFont]
+        cachedTitleSize = (title as NSString).boundingRect(
+            with: NSSize(width: contentWidth, height: .greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin],
+            attributes: titleAttrs
+        ).size
+
+        if let sub = subtitle, !sub.isEmpty {
+            let subAttrs: [NSAttributedString.Key: Any] = [.font: Self.subtitleFont]
+            cachedSubtitleSize = (sub as NSString).boundingRect(
+                with: NSSize(width: contentWidth, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin],
+                attributes: subAttrs
+            ).size
+        } else {
+            cachedSubtitleSize = nil
+        }
+
+        return (cachedTitleSize!, cachedSubtitleSize)
+    }
 
     override var acceptsFirstResponder: Bool { true }
     override var canBecomeKeyView: Bool { true }
@@ -131,28 +172,11 @@ class FocusableChoiceCardView: NSView {
     }
 
     override var intrinsicContentSize: NSSize {
-        let titleFont = NSFont.systemFont(ofSize: 14, weight: .semibold)
-        let subtitleFont = NSFont.systemFont(ofSize: 12, weight: .regular)
-
-        let titleAttrs: [NSAttributedString.Key: Any] = [.font: titleFont]
-        let titleSize = (title as NSString).boundingRect(
-            with: NSSize(width: bounds.width - 68, height: .greatestFiniteMagnitude),
-            options: [.usesLineFragmentOrigin],
-            attributes: titleAttrs
-        ).size
-
-        var height = titleSize.height + 24 // padding
-
-        if let sub = subtitle, !sub.isEmpty {
-            let subAttrs: [NSAttributedString.Key: Any] = [.font: subtitleFont]
-            let subSize = (sub as NSString).boundingRect(
-                with: NSSize(width: bounds.width - 68, height: .greatestFiniteMagnitude),
-                options: [.usesLineFragmentOrigin],
-                attributes: subAttrs
-            ).size
+        let (titleSize, subtitleSize) = calculateSizes(for: bounds.width)
+        var height = titleSize.height + 24
+        if let subSize = subtitleSize {
             height += subSize.height + 4
         }
-
         return NSSize(width: NSView.noIntrinsicMetric, height: max(48, height))
     }
 
@@ -187,32 +211,20 @@ class FocusableChoiceCardView: NSView {
         let indicatorX = rect.width - 16 - indicatorSize
         let contentWidth = indicatorX - contentX - 12
 
-        // Draw title
-        let titleFont = NSFont.systemFont(ofSize: 14, weight: .semibold)
+        // Use cached sizes
+        let (titleSize, subtitleSize) = calculateSizes(for: rect.width)
+
         let titleAttrs: [NSAttributedString.Key: Any] = [
-            .font: titleFont,
+            .font: Self.titleFont,
             .foregroundColor: Theme.textPrimary
         ]
 
-        let titleRect = NSRect(x: contentX, y: 0, width: contentWidth, height: rect.height)
-        let titleSize = (title as NSString).boundingRect(
-            with: NSSize(width: contentWidth, height: .greatestFiniteMagnitude),
-            options: [.usesLineFragmentOrigin],
-            attributes: titleAttrs
-        ).size
-
         var textY: CGFloat
-        if let sub = subtitle, !sub.isEmpty {
-            let subtitleFont = NSFont.systemFont(ofSize: 12, weight: .regular)
+        if let sub = subtitle, !sub.isEmpty, let subSize = subtitleSize {
             let subtitleAttrs: [NSAttributedString.Key: Any] = [
-                .font: subtitleFont,
+                .font: Self.subtitleFont,
                 .foregroundColor: Theme.textSecondary
             ]
-            let subSize = (sub as NSString).boundingRect(
-                with: NSSize(width: contentWidth, height: .greatestFiniteMagnitude),
-                options: [.usesLineFragmentOrigin],
-                attributes: subtitleAttrs
-            ).size
 
             let totalHeight = titleSize.height + 4 + subSize.height
             textY = (rect.height - totalHeight) / 2

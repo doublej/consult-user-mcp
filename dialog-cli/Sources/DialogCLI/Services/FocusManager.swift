@@ -10,12 +10,40 @@ final class FocusManager {
     private var buttonViews: [NSView] = []   // Buttons - only reachable via Tab
     private var currentContentIndex: Int = -1
 
+    // Cached sorted views - invalidated on register/unregister
+    private var cachedContentViews: [NSView]?
+    private var cachedAllViews: [NSView]?
+
     private init() {}
+
+    private func invalidateCache() {
+        cachedContentViews = nil
+        cachedAllViews = nil
+    }
+
+    private func validContentViews() -> [NSView] {
+        if let cached = cachedContentViews { return cached }
+        let views = contentViews
+            .filter { $0.window != nil && $0.canBecomeKeyView }
+            .sorted(by: sortByPosition)
+        cachedContentViews = views
+        return views
+    }
+
+    private func validAllViews() -> [NSView] {
+        if let cached = cachedAllViews { return cached }
+        let views = (contentViews + buttonViews)
+            .filter { $0.window != nil && $0.canBecomeKeyView }
+            .sorted(by: sortByPosition)
+        cachedAllViews = views
+        return views
+    }
 
     /// Register a content view (option cards, text fields) - navigable with arrow keys
     func registerContent(_ view: NSView) {
         if !contentViews.contains(where: { $0 === view }) {
             contentViews.append(view)
+            invalidateCache()
         }
     }
 
@@ -23,6 +51,7 @@ final class FocusManager {
     func registerButton(_ view: NSView) {
         if !buttonViews.contains(where: { $0 === view }) {
             buttonViews.append(view)
+            invalidateCache()
         }
     }
 
@@ -35,6 +64,7 @@ final class FocusManager {
     func unregister(_ view: NSView) {
         contentViews.removeAll { $0 === view }
         buttonViews.removeAll { $0 === view }
+        invalidateCache()
         updateCurrentContentIndex()
     }
 
@@ -43,19 +73,18 @@ final class FocusManager {
         contentViews.removeAll()
         buttonViews.removeAll()
         currentContentIndex = -1
+        invalidateCache()
     }
 
     /// Move focus to next content view (arrow keys) - excludes buttons
     func focusNextContent() {
-        let validViews = contentViews
-            .filter { $0.window != nil && $0.canBecomeKeyView }
-            .sorted(by: sortByPosition)
-        guard !validViews.isEmpty else { return }
+        let views = validContentViews()
+        guard !views.isEmpty else { return }
 
         updateCurrentContentIndex()
 
-        let nextIndex = (currentContentIndex + 1) % validViews.count
-        if let view = validViews[safe: nextIndex] {
+        let nextIndex = (currentContentIndex + 1) % views.count
+        if let view = views[safe: nextIndex] {
             view.window?.makeFirstResponder(view)
             currentContentIndex = nextIndex
         }
@@ -63,15 +92,13 @@ final class FocusManager {
 
     /// Move focus to previous content view (arrow keys) - excludes buttons
     func focusPreviousContent() {
-        let validViews = contentViews
-            .filter { $0.window != nil && $0.canBecomeKeyView }
-            .sorted(by: sortByPosition)
-        guard !validViews.isEmpty else { return }
+        let views = validContentViews()
+        guard !views.isEmpty else { return }
 
         updateCurrentContentIndex()
 
-        let prevIndex = currentContentIndex <= 0 ? validViews.count - 1 : currentContentIndex - 1
-        if let view = validViews[safe: prevIndex] {
+        let prevIndex = currentContentIndex <= 0 ? views.count - 1 : currentContentIndex - 1
+        if let view = views[safe: prevIndex] {
             view.window?.makeFirstResponder(view)
             currentContentIndex = prevIndex
         }
@@ -79,28 +106,24 @@ final class FocusManager {
 
     /// Move focus to next view (Tab) - includes all views
     func focusNext() {
-        let allViews = (contentViews + buttonViews)
-            .filter { $0.window != nil && $0.canBecomeKeyView }
-            .sorted(by: sortByPosition)
-        guard !allViews.isEmpty else { return }
+        let views = validAllViews()
+        guard !views.isEmpty else { return }
 
-        let currentIndex = findCurrentIndex(in: allViews)
-        let nextIndex = (currentIndex + 1) % allViews.count
-        if let view = allViews[safe: nextIndex] {
+        let currentIndex = findCurrentIndex(in: views)
+        let nextIndex = (currentIndex + 1) % views.count
+        if let view = views[safe: nextIndex] {
             view.window?.makeFirstResponder(view)
         }
     }
 
     /// Move focus to previous view (Shift+Tab) - includes all views
     func focusPrevious() {
-        let allViews = (contentViews + buttonViews)
-            .filter { $0.window != nil && $0.canBecomeKeyView }
-            .sorted(by: sortByPosition)
-        guard !allViews.isEmpty else { return }
+        let views = validAllViews()
+        guard !views.isEmpty else { return }
 
-        let currentIndex = findCurrentIndex(in: allViews)
-        let prevIndex = currentIndex <= 0 ? allViews.count - 1 : currentIndex - 1
-        if let view = allViews[safe: prevIndex] {
+        let currentIndex = findCurrentIndex(in: views)
+        let prevIndex = currentIndex <= 0 ? views.count - 1 : currentIndex - 1
+        if let view = views[safe: prevIndex] {
             view.window?.makeFirstResponder(view)
         }
     }
@@ -113,10 +136,8 @@ final class FocusManager {
 
     /// Focus the first content view (sorted by screen position - top to bottom)
     func focusFirst() {
-        let validViews = contentViews
-            .filter { $0.window != nil && $0.canBecomeKeyView }
-            .sorted(by: sortByPosition)
-        if let first = validViews.first {
+        let views = validContentViews()
+        if let first = views.first {
             first.window?.makeFirstResponder(first)
             currentContentIndex = 0
         }
@@ -124,12 +145,10 @@ final class FocusManager {
 
     /// Focus the last content view (bottommost on screen)
     func focusLast() {
-        let validViews = contentViews
-            .filter { $0.window != nil && $0.canBecomeKeyView }
-            .sorted(by: sortByPosition)
-        if let last = validViews.last {
+        let views = validContentViews()
+        if let last = views.last {
             last.window?.makeFirstResponder(last)
-            currentContentIndex = validViews.count - 1
+            currentContentIndex = views.count - 1
         }
     }
 
@@ -152,10 +171,7 @@ final class FocusManager {
     }
 
     private func updateCurrentContentIndex() {
-        let validViews = contentViews
-            .filter { $0.window != nil && $0.canBecomeKeyView }
-            .sorted(by: sortByPosition)
-        currentContentIndex = findCurrentIndex(in: validViews)
+        currentContentIndex = findCurrentIndex(in: validContentViews())
     }
 }
 

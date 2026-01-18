@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+        working-directory: mcp-server
+
+      - name: Build TypeScript
+        run: bun run build:ts
+        working-directory: mcp-server
+
+      - name: Run tests
+        run: bun test
+        working-directory: mcp-server
+
+      - name: Build Swift CLI
+        run: swift build -c release
+        working-directory: dialog-cli

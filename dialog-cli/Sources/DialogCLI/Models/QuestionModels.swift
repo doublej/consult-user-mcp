@@ -45,7 +45,7 @@ enum QuestionAnswer {
 struct QuestionsRequest: Codable {
     let questions: [QuestionItem]
     let mode: String  // "wizard" | "accordion"
-    let position: String
+    let position: DialogPosition
 }
 
 struct QuestionsResponse: Codable {

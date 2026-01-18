@@ -54,8 +54,6 @@ self.addEventListener('fetch', (event) => {
 
 // Push event - handle incoming push notifications
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received');
-
   let data = {
     title: 'Claude needs your input',
     body: 'Tap to respond',
@@ -96,8 +94,6 @@ self.addEventListener('push', (event) => {
 
 // Notification click event
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked:', event.action);
-
   event.notification.close();
 
   if (event.action === 'snooze') {
@@ -140,8 +136,6 @@ self.addEventListener('notificationclick', (event) => {
 
 // Message event - handle messages from main app
 self.addEventListener('message', (event) => {
-  console.log('[SW] Message received:', event.data);
-
   if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }

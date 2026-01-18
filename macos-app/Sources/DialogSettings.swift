@@ -12,7 +12,6 @@ final class DialogSettings: ObservableObject {
     @AppStorage("dialogPosition") var position: DialogPosition = .left
     @AppStorage("dialogSize") var size: DialogSize = .regular
     @AppStorage("soundOnShow") var soundOnShow: SoundEffect = .subtle
-    @AppStorage("soundOnDismiss") var soundOnDismiss: SoundEffect = .none
     @AppStorage("animationsEnabled") var animationsEnabled: Bool = true
     @AppStorage("alwaysOnTop") var alwaysOnTop: Bool = true
     @AppStorage("showCommentField") var showCommentField: Bool = true
@@ -43,7 +42,6 @@ final class DialogSettings: ObservableObject {
         var position: DialogPosition
         var size: DialogSize
         var soundOnShow: SoundEffect
-        var soundOnDismiss: SoundEffect
         var animationsEnabled: Bool
         var alwaysOnTop: Bool
         var showCommentField: Bool

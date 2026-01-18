@@ -11,8 +11,8 @@ class DialogManager {
         clientName = name
     }
 
-    func effectivePosition(_ requestedPosition: String) -> String {
-        return userSettings.position
+    func effectivePosition(_ requestedPosition: DialogPosition) -> DialogPosition {
+        return DialogPosition(rawValue: userSettings.position) ?? .center
     }
 
     func buildTitle(_ baseTitle: String) -> String {
@@ -72,7 +72,7 @@ class DialogManager {
         return (window, hostingView, bgView)
     }
 
-    func positionWindow(_ window: NSWindow, position: String) {
+    func positionWindow(_ window: NSWindow, position: DialogPosition) {
         guard let screen = NSScreen.main else { return }
 
         let screenFrame = screen.visibleFrame
@@ -80,11 +80,11 @@ class DialogManager {
 
         let x: CGFloat
         switch position {
-        case "left":
+        case .left:
             x = screenFrame.minX + 40
-        case "right":
+        case .right:
             x = screenFrame.maxX - windowFrame.width - 40
-        default:
+        case .center:
             x = screenFrame.midX - windowFrame.width / 2
         }
 

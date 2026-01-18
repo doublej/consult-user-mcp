@@ -43,13 +43,9 @@ const elements = {
 // ============================================================================
 
 async function init() {
-  console.log('[App] Initializing...');
-
   // Check if running as installed PWA
   state.isInstalled = window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
-
-  console.log('[App] Is installed:', state.isInstalled);
 
   if (!state.isInstalled) {
     showScreen('install');
@@ -99,20 +95,18 @@ async function registerServiceWorker() {
 
   try {
     const registration = await navigator.serviceWorker.register('/sw.js');
-    console.log('[App] Service worker registered:', registration.scope);
 
     // Handle updates
     registration.addEventListener('updatefound', () => {
       const newWorker = registration.installing;
       newWorker?.addEventListener('statechange', () => {
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          console.log('[App] New service worker available');
           newWorker.postMessage({ type: 'SKIP_WAITING' });
         }
       });
     });
-  } catch (error) {
-    console.error('[App] Service worker registration failed:', error);
+  } catch {
+    // Service worker registration failed
   }
 }
 

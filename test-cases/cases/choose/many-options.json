@@ -1,0 +1,21 @@
+{
+  "body": "Which frameworks should I consider for your frontend?",
+  "choices": [
+    "React",
+    "Vue.js",
+    "Svelte",
+    "Angular",
+    "Solid.js",
+    "All of them"
+  ],
+  "descriptions": [
+    "Component-based UI library with large ecosystem",
+    "Progressive framework with gentle learning curve",
+    "Compiler-based approach with minimal bundle size",
+    "Full-featured framework with TypeScript support",
+    "Fine-grained reactivity with React-like API",
+    "Evaluate all options comprehensively"
+  ],
+  "allowMultiple": true,
+  "position": "center"
+}

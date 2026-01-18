@@ -1,0 +1,6 @@
+{
+  "body": "Select features to enable:",
+  "choices": ["Authentication", "Database", "API Endpoints", "Logging"],
+  "allowMultiple": true,
+  "position": "center"
+}

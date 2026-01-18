@@ -1,0 +1,7 @@
+{
+  "body": "Do you want to proceed with this operation?",
+  "title": "Confirmation",
+  "confirmLabel": "Yes",
+  "cancelLabel": "No",
+  "position": "center"
+}

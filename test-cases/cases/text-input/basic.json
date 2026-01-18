@@ -1,0 +1,7 @@
+{
+  "body": "Enter your project name:",
+  "title": "Project Setup",
+  "defaultValue": "",
+  "hidden": false,
+  "position": "center"
+}

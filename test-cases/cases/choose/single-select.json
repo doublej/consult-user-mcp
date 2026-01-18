@@ -1,0 +1,6 @@
+{
+  "body": "Select a database type:",
+  "choices": ["PostgreSQL", "MySQL", "SQLite"],
+  "allowMultiple": false,
+  "position": "center"
+}

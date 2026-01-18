@@ -1,0 +1,24 @@
+{
+  "questions": [
+    {
+      "id": "language",
+      "question": "What programming language?",
+      "options": [
+        {"label": "TypeScript", "description": "Strongly typed JavaScript"},
+        {"label": "Python", "description": "Dynamic scripting language"},
+        {"label": "Go", "description": "Fast compiled language"}
+      ]
+    },
+    {
+      "id": "framework",
+      "question": "Which framework?",
+      "options": [
+        {"label": "Express", "description": "Minimal Node.js framework"},
+        {"label": "FastAPI", "description": "Modern Python API framework"},
+        {"label": "Gin", "description": "High-performance Go framework"}
+      ]
+    }
+  ],
+  "mode": "wizard",
+  "position": "center"
+}

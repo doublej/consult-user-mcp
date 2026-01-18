@@ -1,0 +1,7 @@
+{
+  "body": "This action will permanently delete 47 files from your project. This cannot be undone.",
+  "title": "Delete Files",
+  "confirmLabel": "Delete All",
+  "cancelLabel": "Keep Files",
+  "position": "center"
+}

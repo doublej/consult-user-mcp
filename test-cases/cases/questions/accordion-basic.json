@@ -1,0 +1,34 @@
+{
+  "questions": [
+    {
+      "id": "database",
+      "question": "Select database type:",
+      "options": [
+        {"label": "PostgreSQL", "description": "Advanced relational database"},
+        {"label": "MongoDB", "description": "Document-oriented NoSQL"},
+        {"label": "Redis", "description": "In-memory key-value store"}
+      ]
+    },
+    {
+      "id": "auth",
+      "question": "Authentication method:",
+      "multiSelect": true,
+      "options": [
+        {"label": "OAuth 2.0", "description": "Third-party providers"},
+        {"label": "JWT", "description": "Stateless tokens"},
+        {"label": "Session", "description": "Server-side sessions"}
+      ]
+    },
+    {
+      "id": "hosting",
+      "question": "Deployment platform:",
+      "options": [
+        {"label": "AWS", "description": "Amazon Web Services"},
+        {"label": "Vercel", "description": "Edge-first platform"},
+        {"label": "Self-hosted", "description": "Your own infrastructure"}
+      ]
+    }
+  ],
+  "mode": "accordion",
+  "position": "center"
+}

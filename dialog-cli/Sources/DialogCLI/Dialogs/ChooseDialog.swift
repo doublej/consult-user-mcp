@@ -40,6 +40,7 @@ struct SwiftUIChooseDialog: View {
             VStack(spacing: 0) {
                 headerView
                 choicesScrollView
+                    .clipped()
 
                 DialogToolbar(
                     expandedTool: $expandedTool,
@@ -84,7 +85,6 @@ struct SwiftUIChooseDialog: View {
                 .padding(.top, 4)
                 .padding(.bottom, 8)
             }
-            .scrollClipDisabled()
             .onChange(of: focusedIndex) { newIndex in
                 withAnimation(.easeOut(duration: 0.15)) {
                     proxy.scrollTo(newIndex, anchor: .center)

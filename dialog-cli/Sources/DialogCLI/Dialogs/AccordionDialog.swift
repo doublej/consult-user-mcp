@@ -286,29 +286,28 @@ struct SwiftUIAccordionDialog: View {
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
         switch keyCode {
-        case 53: // Esc - close panel first, then dismiss
+        case KeyCode.escape:
             if expandedTool != nil {
                 toggleToolbarTool(expandedTool!)
                 return true
             }
             onCancel()
             return true
-        case 36: // Enter/Return - complete if any answers
-            // Don't intercept Enter if feedback panel is expanded (let text field handle it)
+        case KeyCode.returnKey:
             if expandedTool == .feedback { return false }
             if answeredCount > 0 {
                 onComplete(answers)
             }
             return true
-        case 1: // S - toggle snooze (skip if typing in feedback)
+        case KeyCode.s:
             if expandedTool == .feedback { return false }
             toggleToolbarTool(.snooze)
             return true
-        case 3: // F - toggle feedback (skip if already typing)
+        case KeyCode.f:
             if expandedTool == .feedback { return false }
             toggleToolbarTool(.feedback)
             return true
-        case 48: // Tab - switch sections, then to buttons
+        case KeyCode.tab:
             if modifiers.contains(.shift) {
                 // Shift+Tab: go to previous section
                 if let currentId = expandedId,

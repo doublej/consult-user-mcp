@@ -20,22 +20,21 @@ struct SwiftUIConfirmDialog: View {
     var body: some View {
         DialogContainer(keyHandler: { keyCode, _ in
             switch keyCode {
-            case 53: // Esc - close panel first, then dismiss
+            case KeyCode.escape:
                 if expandedTool != nil {
                     toggleTool(expandedTool!)
                     return true
                 }
-                return false // Let DialogContainer handle dismiss
-            case 36: // Enter/Return - confirm
-                // Don't intercept Enter if feedback panel is expanded (let text field handle it)
+                return false
+            case KeyCode.returnKey:
                 if expandedTool == .feedback { return false }
                 onConfirm()
                 return true
-            case 1: // S - toggle snooze (skip if typing in feedback)
+            case KeyCode.s:
                 if expandedTool == .feedback { return false }
                 toggleTool(.snooze)
                 return true
-            case 3: // F - toggle feedback (skip if already typing)
+            case KeyCode.f:
                 if expandedTool == .feedback { return false }
                 toggleTool(.feedback)
                 return true

@@ -227,17 +227,17 @@ struct DialogContainer<Content: View>: View {
 
             // Default navigation via FocusManager
             switch keyCode {
-            case 48: // Tab - navigate all elements (content + buttons)
+            case KeyCode.tab:
                 if modifiers.contains(.shift) {
                     FocusManager.shared.focusPrevious()
                 } else {
                     FocusManager.shared.focusNext()
                 }
                 return true
-            case 125: // Down arrow - content only (excludes buttons)
+            case KeyCode.downArrow:
                 FocusManager.shared.focusNextContent()
                 return true
-            case 126: // Up arrow - content only (excludes buttons)
+            case KeyCode.upArrow:
                 FocusManager.shared.focusPreviousContent()
                 return true
             default:

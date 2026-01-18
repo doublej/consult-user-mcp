@@ -13,7 +13,7 @@ class BorderlessWindow: NSWindow {
     }
 
     override func keyDown(with event: NSEvent) {
-        if event.keyCode == 53 { // ESC key
+        if event.keyCode == KeyCode.escape {
             NSApp.stopModal(withCode: .cancel)
         } else {
             super.keyDown(with: event)

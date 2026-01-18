@@ -123,8 +123,7 @@ class FocusableChoiceCardView: NSView {
     }
 
     override func keyDown(with event: NSEvent) {
-        // Space (49) toggles selection
-        if event.keyCode == 49 {
+        if event.keyCode == KeyCode.space {
             onTap?()
         } else {
             super.keyDown(with: event)

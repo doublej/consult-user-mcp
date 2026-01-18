@@ -143,8 +143,7 @@ class FocusableButtonView: NSView {
             super.keyDown(with: event)
             return
         }
-        // Space (49) or Enter (36) activates button
-        if event.keyCode == 49 || event.keyCode == 36 {
+        if event.keyCode == KeyCode.space || event.keyCode == KeyCode.returnKey {
             onClick?()
         } else {
             super.keyDown(with: event)

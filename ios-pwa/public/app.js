@@ -36,7 +36,6 @@ const elements = {
   dialogContainer: document.getElementById('dialog-container'),
   connectionStatus: document.getElementById('connection-status'),
   sessionInfo: document.getElementById('session-info'),
-  testDialog: document.getElementById('test-dialog'),
 };
 
 // ============================================================================
@@ -542,19 +541,6 @@ async function submitResponse(response) {
 
 function setupEventListeners() {
   elements.enableNotifications?.addEventListener('click', requestNotificationPermission);
-
-  elements.testDialog?.addEventListener('click', () => {
-    showQuestion({
-      id: 'test-' + Date.now(),
-      type: 'confirm',
-      title: 'Test Dialog',
-      message: 'This is a test confirmation dialog. Does everything look good?',
-      options: {
-        yesText: 'Looks Great',
-        noText: 'Not Really'
-      }
-    });
-  });
 }
 
 function handleServiceWorkerMessage(event) {

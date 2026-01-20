@@ -1,6 +1,44 @@
 import SwiftUI
 import AppKit
 
+// MARK: - Version Info
+
+private enum VersionInfo {
+    static var app: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+    }
+
+    static var cli: String {
+        guard let url = Bundle.main.url(
+            forResource: "VERSION",
+            withExtension: nil,
+            subdirectory: "dialog-cli"
+        ),
+        let content = try? String(contentsOf: url, encoding: .utf8) else {
+            return "?"
+        }
+        return content.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    static var mcp: String {
+        guard let url = Bundle.main.url(
+            forResource: "package",
+            withExtension: "json",
+            subdirectory: "mcp-server"
+        ),
+        let data = try? Data(contentsOf: url),
+        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+        let version = json["version"] as? String else {
+            return "?"
+        }
+        return version
+    }
+
+    static var displayString: String {
+        "App \(app) · MCP \(mcp) · CLI \(cli)"
+    }
+}
+
 struct SettingsView: View {
     @StateObject private var settings = DialogSettings.shared
     @State private var selectedTarget: InstallTarget = .claudeCode
@@ -76,7 +114,7 @@ struct SettingsView: View {
 
     private var footer: some View {
         HStack {
-            Text("v1.0")
+            Text(VersionInfo.displayString)
                 .font(.system(size: 9, design: .monospaced))
                 .foregroundColor(Color(.tertiaryLabelColor))
 

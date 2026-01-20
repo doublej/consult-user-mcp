@@ -15,6 +15,25 @@ struct DialogCLIApp {
 }
 
 enum DialogCLI {
+    static func readVersion() -> String {
+        // Try bundled VERSION file first (when running from app bundle)
+        if let bundleURL = Bundle.main.resourceURL?.appendingPathComponent("VERSION"),
+           let content = try? String(contentsOf: bundleURL, encoding: .utf8) {
+            return content.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        // Fallback: read from source directory (development mode)
+        let executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
+        let sourceVersionURL = executableURL
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("VERSION")
+        if let content = try? String(contentsOf: sourceVersionURL, encoding: .utf8) {
+            return content.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        return "unknown"
+    }
+
     static func setupEditMenu() {
     let mainMenu = NSMenu()
     let editMenuItem = NSMenuItem()
@@ -31,14 +50,23 @@ enum DialogCLI {
 }
 
 static func run() {
+    let args = CommandLine.arguments
+
+    // Handle --version flag before NSApplication setup
+    if args.contains("--version") || args.contains("-v") {
+        let version = readVersion()
+        print("dialog-cli \(version)")
+        exit(0)
+    }
+
     let app = NSApplication.shared
     app.setActivationPolicy(.accessory)
     setupEditMenu()
 
-    let args = CommandLine.arguments
     guard args.count >= 2 else {
         fputs("Usage: dialog-cli <command> [json]\n", stderr)
         fputs("Commands: confirm, choose, textInput, notify, questions, pulse\n", stderr)
+        fputs("Options: --version, -v\n", stderr)
         exit(1)
     }
 

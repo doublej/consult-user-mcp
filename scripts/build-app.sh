@@ -6,7 +6,11 @@ ROOT="$(pwd)"
 APP_NAME="Consult User MCP"
 APP_PATH="/Applications/${APP_NAME}.app"
 
-echo "Building ${APP_NAME}..."
+# Read version from VERSION files
+APP_VERSION=$(cat "$ROOT/macos-app/VERSION" | tr -d '[:space:]')
+CLI_VERSION=$(cat "$ROOT/dialog-cli/VERSION" | tr -d '[:space:]')
+
+echo "Building ${APP_NAME} v${APP_VERSION}..."
 
 # 1. Build dialog-cli
 echo "  Building dialog-cli..."
@@ -33,8 +37,9 @@ mkdir -p "$APP_PATH/Contents/Resources/mcp-server/dist"
 # 5. Copy executable
 cp "$ROOT/macos-app/.build/release/ConsultUserMCP" "$APP_PATH/Contents/MacOS/"
 
-# 6. Copy dialog-cli binary
+# 6. Copy dialog-cli binary and VERSION
 cp "$ROOT/dialog-cli/.build/release/DialogCLI" "$APP_PATH/Contents/Resources/dialog-cli/dialog-cli"
+cp "$ROOT/dialog-cli/VERSION" "$APP_PATH/Contents/Resources/dialog-cli/VERSION"
 
 # 7. Copy mcp-server dist and dependencies
 cp -r "$ROOT/mcp-server/dist/"* "$APP_PATH/Contents/Resources/mcp-server/dist/"
@@ -48,8 +53,8 @@ bun install --production
 # 8. Copy resources (icon)
 cp "$ROOT/macos-app/Sources/Resources/AppIcon.icns" "$APP_PATH/Contents/Resources/"
 
-# 9. Create Info.plist
-cat > "$APP_PATH/Contents/Info.plist" << 'EOF'
+# 9. Create Info.plist (with dynamic version)
+cat > "$APP_PATH/Contents/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -65,7 +70,7 @@ cat > "$APP_PATH/Contents/Info.plist" << 'EOF'
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>${APP_VERSION}</string>
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>LSMinimumSystemVersion</key>

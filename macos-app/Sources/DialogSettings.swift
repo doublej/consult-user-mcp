@@ -6,6 +6,7 @@ final class DialogSettings: ObservableObject {
 
     private let settingsURL: URL
     private var snoozeTimer: Timer?
+    private var fileMonitor: DispatchSourceFileSystemObject?
 
     // MARK: - Persisted Settings
 
@@ -33,7 +34,12 @@ final class DialogSettings: ObservableObject {
         settingsURL = folder.appendingPathComponent("settings.json")
 
         loadFromFile()
-        startSnoozeMonitoring()
+        startFileMonitoring()
+
+        // Start countdown timer if snooze is already active from file
+        if isSnoozed {
+            startCountdownTimer()
+        }
     }
 
     // MARK: - File Persistence
@@ -99,40 +105,30 @@ final class DialogSettings: ObservableObject {
         snoozeTotalSeconds = minutes * 60
         snoozeUntilDate = Date().addingTimeInterval(TimeInterval(snoozeTotalSeconds))
         saveToFile()
+        startCountdownTimer()
     }
 
     func clearSnooze() {
+        stopCountdownTimer()
         snoozeUntilDate = nil
         snoozeRemaining = 0
         snoozeTotalSeconds = 0
         saveToFile()
     }
 
-    private func startSnoozeMonitoring() {
+    // MARK: - Countdown Timer (on-demand)
+
+    private func startCountdownTimer() {
+        stopCountdownTimer()
         snoozeTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.pollSnoozeFile()
             self?.updateSnoozeRemaining()
         }
         updateSnoozeRemaining()
     }
 
-    private func pollSnoozeFile() {
-        guard let data = try? Data(contentsOf: settingsURL),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            return
-        }
-
-        // If snoozeUntil is missing or invalid, clear snooze state
-        guard let snoozeString = json["snoozeUntil"] as? String else {
-            if snoozeUntilDate != nil {
-                snoozeUntilDate = nil
-                snoozeTotalSeconds = 0
-            }
-            return
-        }
-
-        let formatter = ISO8601DateFormatter()
-        snoozeUntilDate = formatter.date(from: snoozeString)
+    private func stopCountdownTimer() {
+        snoozeTimer?.invalidate()
+        snoozeTimer = nil
     }
 
     private func updateSnoozeRemaining() {
@@ -150,10 +146,63 @@ final class DialogSettings: ObservableObject {
         }
 
         if remaining <= 0 {
+            stopCountdownTimer()
             snoozeUntilDate = nil
             snoozeTotalSeconds = 0
             saveToFile()
         }
+    }
+
+    // MARK: - File Monitoring (for external changes)
+
+    private func startFileMonitoring() {
+        let fd = open(settingsURL.path, O_EVTONLY)
+        guard fd >= 0 else { return }
+
+        fileMonitor = DispatchSource.makeFileSystemObjectSource(
+            fileDescriptor: fd,
+            eventMask: [.write, .rename],
+            queue: .main
+        )
+
+        fileMonitor?.setEventHandler { [weak self] in
+            self?.handleExternalFileChange()
+        }
+
+        fileMonitor?.setCancelHandler {
+            close(fd)
+        }
+
+        fileMonitor?.resume()
+    }
+
+    private func handleExternalFileChange() {
+        loadSnoozeFromFile()
+
+        // Start countdown if snooze became active from external change
+        if isSnoozed && snoozeTimer == nil {
+            startCountdownTimer()
+        }
+    }
+
+    private func loadSnoozeFromFile() {
+        guard let data = try? Data(contentsOf: settingsURL),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+
+        // If snoozeUntil is missing or invalid, clear snooze state
+        guard let snoozeString = json["snoozeUntil"] as? String else {
+            if snoozeUntilDate != nil {
+                stopCountdownTimer()
+                snoozeUntilDate = nil
+                snoozeTotalSeconds = 0
+            }
+            return
+        }
+
+        let formatter = ISO8601DateFormatter()
+        snoozeUntilDate = formatter.date(from: snoozeString)
     }
 
     var snoozeDisplayTime: String {

@@ -121,6 +121,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         debugMenu.addItem(NSMenuItem.separator())
 
+        let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "u")
+        updateItem.target = self
+        debugMenu.addItem(updateItem)
+
+        debugMenu.addItem(NSMenuItem.separator())
+
         let quitItem = NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         debugMenu.addItem(quitItem)
     }
@@ -182,7 +188,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testConfirm() {
         let settings = DialogSettings.shared
         let json = """
-        {"message":"This is a test confirmation dialog.\\n\\nDo you want to proceed with the test?","title":"Confirmation Test","confirmLabel":"Yes, proceed","cancelLabel":"Cancel","position":"\(settings.position.rawValue)"}
+        {"body":"This is a test confirmation dialog.\\n\\nDo you want to proceed with the test?","title":"Confirmation Test","confirmLabel":"Yes, proceed","cancelLabel":"Cancel","position":"\(settings.position.rawValue)"}
         """
         runDialogCli(command: "confirm", json: json)
     }
@@ -190,7 +196,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testChoose() {
         let settings = DialogSettings.shared
         let json = """
-        {"prompt":"Select your preferred option from the list below:","choices":["Option Alpha","Option Beta","Option Gamma","Option Delta"],"descriptions":["First choice with description","Second choice - recommended","Third alternative option","Fourth fallback option"],"allowMultiple":false,"position":"\(settings.position.rawValue)"}
+        {"body":"Select your preferred option from the list below:","choices":["Option Alpha","Option Beta","Option Gamma","Option Delta"],"descriptions":["First choice with description","Second choice - recommended","Third alternative option","Fourth fallback option"],"allowMultiple":false,"position":"\(settings.position.rawValue)"}
         """
         runDialogCli(command: "choose", json: json)
     }
@@ -198,14 +204,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testTextInput() {
         let settings = DialogSettings.shared
         let json = """
-        {"prompt":"Enter your feedback or comments:","title":"Text Input Test","defaultValue":"Sample text...","hidden":false,"position":"\(settings.position.rawValue)"}
+        {"body":"Enter your feedback or comments:","title":"Text Input Test","defaultValue":"Sample text...","hidden":false,"position":"\(settings.position.rawValue)"}
         """
         runDialogCli(command: "textInput", json: json)
     }
 
     @objc private func testNotify() {
         let json = """
-        {"message":"This is a test notification from Consult User MCP.","title":"Notification Test","subtitle":"Debug Mode","sound":true}
+        {"body":"This is a test notification from Consult User MCP.","title":"Notification Test","sound":true}
         """
         runDialogCli(command: "notify", json: json)
     }
@@ -215,6 +221,87 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { self.testChoose() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { self.testTextInput() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) { self.testNotify() }
+    }
+
+    // MARK: - Update
+
+    @objc private func checkForUpdates() {
+        UpdateManager.shared.checkForUpdates { [weak self] result in
+            DispatchQueue.main.async {
+                self?.handleUpdateResult(result)
+            }
+        }
+    }
+
+    private func handleUpdateResult(_ result: Result<UpdateManager.Release?, Error>) {
+        switch result {
+        case .success(let release):
+            if let release = release {
+                showUpdateAvailableAlert(release)
+            } else {
+                showUpToDateAlert()
+            }
+        case .failure(let error):
+            showAlert(title: "Update Check Failed", message: error.localizedDescription)
+        }
+    }
+
+    private func showUpdateAvailableAlert(_ release: UpdateManager.Release) {
+        let alert = NSAlert()
+        alert.messageText = "Update Available"
+        alert.informativeText = "Version \(release.version) is available. You have \(UpdateManager.shared.currentVersion)."
+        alert.addButton(withTitle: "Update")
+        alert.addButton(withTitle: "Later")
+        alert.alertStyle = .informational
+
+        if alert.runModal() == .alertFirstButtonReturn {
+            downloadAndInstall(release)
+        }
+    }
+
+    private func showUpToDateAlert() {
+        showAlert(title: "Up to Date", message: "You're running the latest version (\(UpdateManager.shared.currentVersion)).")
+    }
+
+    private func downloadAndInstall(_ release: UpdateManager.Release) {
+        let alert = NSAlert()
+        alert.messageText = "Downloading Update..."
+        alert.informativeText = "Please wait while the update downloads."
+        alert.addButton(withTitle: "Cancel")
+        alert.alertStyle = .informational
+        alert.buttons.first?.isHidden = true
+
+        let window = alert.window
+        alert.beginSheetModal(for: NSApp.keyWindow ?? window) { _ in }
+
+        UpdateManager.shared.downloadUpdate(from: release.zipURL) { [weak self] result in
+            DispatchQueue.main.async {
+                NSApp.keyWindow?.endSheet(window)
+                self?.handleDownloadResult(result)
+            }
+        }
+    }
+
+    private func handleDownloadResult(_ result: Result<URL, Error>) {
+        switch result {
+        case .success(let zipPath):
+            do {
+                try UpdateManager.shared.installUpdate(zipPath: zipPath)
+            } catch {
+                showAlert(title: "Install Failed", message: error.localizedDescription)
+            }
+        case .failure(let error):
+            showAlert(title: "Download Failed", message: error.localizedDescription)
+        }
+    }
+
+    private func showAlert(title: String, message: String) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.addButton(withTitle: "OK")
+        alert.alertStyle = .informational
+        alert.runModal()
     }
 
     // MARK: - Snooze Observer

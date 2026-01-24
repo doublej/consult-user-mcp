@@ -111,29 +111,23 @@ final class UpdateManager {
 
     // MARK: - Download
 
-    func downloadUpdate(from url: URL, completion: @escaping (Result<URL, Error>) -> Void) {
-        let task = URLSession.shared.downloadTask(with: url) { tempURL, _, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
+    private var downloadDelegate: DownloadDelegate?
 
-            guard let tempURL = tempURL else {
-                completion(.failure(UpdateError.downloadFailed))
-                return
-            }
+    func downloadUpdate(
+        from url: URL,
+        progress: @escaping (Double) -> Void,
+        completion: @escaping (Result<URL, Error>) -> Void
+    ) {
+        let delegate = DownloadDelegate(progress: progress, completion: completion)
+        self.downloadDelegate = delegate
 
-            let destURL = FileManager.default.temporaryDirectory.appendingPathComponent("update.zip")
-            try? FileManager.default.removeItem(at: destURL)
-
-            do {
-                try FileManager.default.moveItem(at: tempURL, to: destURL)
-                completion(.success(destURL))
-            } catch {
-                completion(.failure(error))
-            }
-        }
+        let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: .main)
+        let task = session.downloadTask(with: url)
         task.resume()
+    }
+
+    func downloadUpdate(from url: URL, completion: @escaping (Result<URL, Error>) -> Void) {
+        downloadUpdate(from: url, progress: { _ in }, completion: completion)
     }
 
     // MARK: - Install
@@ -171,5 +165,47 @@ final class UpdateManager {
             if r < c { return false }
         }
         return false
+    }
+}
+
+// MARK: - Download Delegate
+
+private class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
+    private let progressHandler: (Double) -> Void
+    private let completionHandler: (Result<URL, Error>) -> Void
+
+    init(progress: @escaping (Double) -> Void, completion: @escaping (Result<URL, Error>) -> Void) {
+        self.progressHandler = progress
+        self.completionHandler = completion
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        let destURL = FileManager.default.temporaryDirectory.appendingPathComponent("update.zip")
+        try? FileManager.default.removeItem(at: destURL)
+
+        do {
+            try FileManager.default.moveItem(at: location, to: destURL)
+            completionHandler(.success(destURL))
+        } catch {
+            completionHandler(.failure(error))
+        }
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        downloadTask: URLSessionDownloadTask,
+        didWriteData bytesWritten: Int64,
+        totalBytesWritten: Int64,
+        totalBytesExpectedToWrite: Int64
+    ) {
+        guard totalBytesExpectedToWrite > 0 else { return }
+        let progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+        progressHandler(progress)
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let error = error {
+            completionHandler(.failure(error))
+        }
     }
 }

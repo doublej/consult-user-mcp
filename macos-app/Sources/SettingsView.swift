@@ -291,11 +291,15 @@ private struct UpdatesSection: View {
     @ObservedObject private var settings = DialogSettings.shared
     @State private var showingUpdateAlert = false
 
+    private var isDownloading: Bool {
+        settings.updateDownloadProgress != nil
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             SectionHeader(title: "UPDATES")
 
-            VStack(spacing: 0) {
+            VStack(spacing: 4) {
                 HStack(spacing: 8) {
                     statusIcon
                         .frame(width: 16)
@@ -310,26 +314,26 @@ private struct UpdatesSection: View {
                     actionButton
                 }
                 .padding(.horizontal, 8)
-                .padding(.vertical, 8)
+                .padding(.top, 8)
+                .padding(.bottom, isDownloading ? 4 : 8)
+
+                if let progress = settings.updateDownloadProgress {
+                    ProgressView(value: progress)
+                        .progressViewStyle(.linear)
+                        .padding(.horizontal, 8)
+                        .padding(.bottom, 8)
+                }
             }
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color(.controlBackgroundColor))
             )
         }
-        .alert("Update Available", isPresented: $showingUpdateAlert) {
-            Button("Update") { performUpdate() }
-            Button("Later", role: .cancel) {}
-        } message: {
-            if let release = settings.updateAvailable {
-                Text("Version \(release.version) is available. You have \(UpdateManager.shared.currentVersion).")
-            }
-        }
     }
 
     @ViewBuilder
     private var statusIcon: some View {
-        if settings.updateCheckInProgress {
+        if settings.updateCheckInProgress || isDownloading {
             ProgressView()
                 .controlSize(.small)
                 .scaleEffect(0.7)
@@ -346,7 +350,10 @@ private struct UpdatesSection: View {
 
     @ViewBuilder
     private var statusText: some View {
-        if settings.updateCheckInProgress {
+        if isDownloading {
+            Text(settings.updateStatus ?? "Downloading...")
+                .font(.system(size: 11, weight: .medium))
+        } else if settings.updateCheckInProgress {
             Text("Checking...")
                 .font(.system(size: 11, weight: .medium))
         } else if let release = settings.updateAvailable {
@@ -360,7 +367,11 @@ private struct UpdatesSection: View {
 
     @ViewBuilder
     private var versionInfo: some View {
-        if settings.updateCheckInProgress {
+        if let progress = settings.updateDownloadProgress {
+            Text("\(Int(progress * 100))% complete")
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
+        } else if settings.updateCheckInProgress {
             Text("v\(VersionInfo.app)")
                 .font(.system(size: 9))
                 .foregroundColor(.secondary)
@@ -398,9 +409,11 @@ private struct UpdatesSection: View {
 
     @ViewBuilder
     private var actionButton: some View {
-        if settings.updateAvailable != nil {
+        if isDownloading {
+            EmptyView()
+        } else if settings.updateAvailable != nil {
             Button("Update") {
-                showingUpdateAlert = true
+                performUpdate()
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
@@ -435,16 +448,27 @@ private struct UpdatesSection: View {
     private func performUpdate() {
         guard let release = settings.updateAvailable else { return }
 
-        UpdateManager.shared.downloadUpdate(from: release.zipURL) { result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let zipPath):
-                    try? UpdateManager.shared.installUpdate(zipPath: zipPath)
-                case .failure:
-                    break // Error handling could be added here
+        settings.updateDownloadProgress = 0
+        settings.updateStatus = "Downloading..."
+
+        UpdateManager.shared.downloadUpdate(
+            from: release.zipURL,
+            progress: { progress in
+                settings.updateDownloadProgress = progress
+            },
+            completion: { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let zipPath):
+                        settings.updateStatus = "Installing..."
+                        try? UpdateManager.shared.installUpdate(zipPath: zipPath)
+                    case .failure:
+                        settings.updateDownloadProgress = nil
+                        settings.updateStatus = nil
+                    }
                 }
             }
-        }
+        )
     }
 }
 

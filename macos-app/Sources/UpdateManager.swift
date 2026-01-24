@@ -1,15 +1,24 @@
 import Foundation
 import AppKit
+import os.log
 
 final class UpdateManager {
     static let shared = UpdateManager()
 
     private let repoOwner = "doublej"
     private let repoName = "consult-user-mcp"
+    private let logger = Logger(subsystem: "com.consultuser.mcp", category: "UpdateManager")
 
     struct Release {
         let version: String
         let zipURL: URL
+    }
+
+    struct CheckResult {
+        let currentVersion: String
+        let remoteVersion: String?
+        let release: Release?
+        let isUpdateAvailable: Bool
     }
 
     enum UpdateError: LocalizedError {
@@ -36,6 +45,20 @@ final class UpdateManager {
     // MARK: - Check for Updates
 
     func checkForUpdates(completion: @escaping (Result<Release?, Error>) -> Void) {
+        checkForUpdatesWithDetails { result in
+            switch result {
+            case .success(let checkResult):
+                completion(.success(checkResult.release))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func checkForUpdatesWithDetails(completion: @escaping (Result<CheckResult, Error>) -> Void) {
+        let current = currentVersion
+        logger.info("Checking for updates. Current version: \(current)")
+
         let url = URL(string: "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases/latest")!
 
         var request = URLRequest(url: url)
@@ -43,6 +66,7 @@ final class UpdateManager {
 
         URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
             if let error = error {
+                self?.logger.error("Update check failed: \(error.localizedDescription)")
                 completion(.failure(error))
                 return
             }
@@ -50,20 +74,37 @@ final class UpdateManager {
             guard let self = self, let data = data,
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let tagName = json["tag_name"] as? String else {
+                self?.logger.error("Failed to parse release info from GitHub")
                 completion(.failure(UpdateError.noRelease))
                 return
             }
 
             let remoteVersion = tagName.hasPrefix("v") ? String(tagName.dropFirst()) : tagName
+            let isNewer = self.isNewer(remote: remoteVersion, current: current)
 
-            if self.isNewer(remote: remoteVersion, current: self.currentVersion),
+            self.logger.info("Remote version: \(remoteVersion), Current: \(current), Update available: \(isNewer)")
+
+            if isNewer,
                let assets = json["assets"] as? [[String: Any]],
                let zipAsset = assets.first(where: { ($0["name"] as? String)?.hasSuffix(".zip") == true }),
                let downloadURL = zipAsset["browser_download_url"] as? String,
                let url = URL(string: downloadURL) {
-                completion(.success(Release(version: remoteVersion, zipURL: url)))
+                let release = Release(version: remoteVersion, zipURL: url)
+                let result = CheckResult(
+                    currentVersion: current,
+                    remoteVersion: remoteVersion,
+                    release: release,
+                    isUpdateAvailable: true
+                )
+                completion(.success(result))
             } else {
-                completion(.success(nil))
+                let result = CheckResult(
+                    currentVersion: current,
+                    remoteVersion: remoteVersion,
+                    release: nil,
+                    isUpdateAvailable: false
+                )
+                completion(.success(result))
             }
         }.resume()
     }

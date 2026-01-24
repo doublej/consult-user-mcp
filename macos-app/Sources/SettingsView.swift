@@ -75,6 +75,8 @@ struct SettingsView: View {
                     PositionSection()
 
                     AppearanceSection()
+
+                    UpdatesSection()
                 }
                 .padding(16)
             }
@@ -280,6 +282,169 @@ private struct AppearanceSection: View {
         .onChange(of: settings.soundOnShow) { _, _ in settings.saveToFile() }
         .onChange(of: settings.animationsEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.alwaysOnTop) { _, _ in settings.saveToFile() }
+    }
+}
+
+// MARK: - Updates Section
+
+private struct UpdatesSection: View {
+    @ObservedObject private var settings = DialogSettings.shared
+    @State private var showingUpdateAlert = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title: "UPDATES")
+
+            VStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    statusIcon
+                        .frame(width: 16)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        statusText
+                        versionInfo
+                    }
+
+                    Spacer()
+
+                    actionButton
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 8)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.controlBackgroundColor))
+            )
+        }
+        .alert("Update Available", isPresented: $showingUpdateAlert) {
+            Button("Update") { performUpdate() }
+            Button("Later", role: .cancel) {}
+        } message: {
+            if let release = settings.updateAvailable {
+                Text("Version \(release.version) is available. You have \(UpdateManager.shared.currentVersion).")
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var statusIcon: some View {
+        if settings.updateCheckInProgress {
+            ProgressView()
+                .controlSize(.small)
+                .scaleEffect(0.7)
+        } else if settings.updateAvailable != nil {
+            Image(systemName: "arrow.up.circle.fill")
+                .font(.system(size: 12))
+                .foregroundColor(.blue)
+        } else {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 12))
+                .foregroundColor(.green)
+        }
+    }
+
+    @ViewBuilder
+    private var statusText: some View {
+        if settings.updateCheckInProgress {
+            Text("Checking...")
+                .font(.system(size: 11, weight: .medium))
+        } else if let release = settings.updateAvailable {
+            Text("Update available: v\(release.version)")
+                .font(.system(size: 11, weight: .medium))
+        } else {
+            Text("Up to date")
+                .font(.system(size: 11, weight: .medium))
+        }
+    }
+
+    @ViewBuilder
+    private var versionInfo: some View {
+        if settings.updateCheckInProgress {
+            Text("v\(VersionInfo.app)")
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
+        } else if settings.updateAvailable != nil {
+            Text("You have v\(VersionInfo.app)")
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
+        } else {
+            Text("v\(VersionInfo.app) · \(lastCheckText)")
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private var lastCheckText: String {
+        guard let lastCheck = settings.lastUpdateCheck else {
+            return "Never checked"
+        }
+
+        let interval = Date().timeIntervalSince(lastCheck)
+
+        if interval < 60 {
+            return "Just now"
+        } else if interval < 3600 {
+            let minutes = Int(interval / 60)
+            return "Checked \(minutes)m ago"
+        } else if interval < 86400 {
+            let hours = Int(interval / 3600)
+            return "Checked \(hours)h ago"
+        } else {
+            let days = Int(interval / 86400)
+            return "Checked \(days)d ago"
+        }
+    }
+
+    @ViewBuilder
+    private var actionButton: some View {
+        if settings.updateAvailable != nil {
+            Button("Update") {
+                showingUpdateAlert = true
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+        } else {
+            Button("Check Now") {
+                checkForUpdates()
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .disabled(settings.updateCheckInProgress)
+        }
+    }
+
+    private func checkForUpdates() {
+        settings.updateCheckInProgress = true
+
+        UpdateManager.shared.checkForUpdatesWithDetails { result in
+            DispatchQueue.main.async {
+                settings.updateCheckInProgress = false
+
+                switch result {
+                case .success(let checkResult):
+                    settings.recordUpdateCheck(latestVersion: checkResult.remoteVersion)
+                    settings.updateAvailable = checkResult.release
+                case .failure:
+                    settings.updateAvailable = nil
+                }
+            }
+        }
+    }
+
+    private func performUpdate() {
+        guard let release = settings.updateAvailable else { return }
+
+        UpdateManager.shared.downloadUpdate(from: release.zipURL) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let zipPath):
+                    try? UpdateManager.shared.installUpdate(zipPath: zipPath)
+                case .failure:
+                    break // Error handling could be added here
+                }
+            }
+        }
     }
 }
 

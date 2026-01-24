@@ -17,10 +17,36 @@ final class DialogSettings: ObservableObject {
     @AppStorage("alwaysOnTop") var alwaysOnTop: Bool = true
     @AppStorage("showCommentField") var showCommentField: Bool = true
 
+    // MARK: - Update Settings (persisted via AppStorage)
+
+    @AppStorage("lastUpdateCheckTime") private var lastUpdateCheckTime: Double = 0
+    @AppStorage("latestKnownVersion") var latestKnownVersion: String = ""
+
     // MARK: - Runtime State
 
     @Published private(set) var snoozeRemaining: Int = 0
     private var snoozeTotalSeconds: Int = 0
+
+    @Published var updateCheckInProgress: Bool = false
+    @Published var updateAvailable: UpdateManager.Release? = nil
+
+    // MARK: - Update Computed Properties
+
+    var lastUpdateCheck: Date? {
+        lastUpdateCheckTime > 0 ? Date(timeIntervalSince1970: lastUpdateCheckTime) : nil
+    }
+
+    func recordUpdateCheck(latestVersion: String?) {
+        lastUpdateCheckTime = Date().timeIntervalSince1970
+        if let version = latestVersion {
+            latestKnownVersion = version
+        }
+    }
+
+    var shouldAutoCheckForUpdates: Bool {
+        guard let lastCheck = lastUpdateCheck else { return true }
+        return Date().timeIntervalSince(lastCheck) > 4 * 60 * 60 // 4 hours
+    }
 
     // MARK: - Init
 
@@ -52,6 +78,8 @@ final class DialogSettings: ObservableObject {
         var alwaysOnTop: Bool
         var showCommentField: Bool
         var snoozeUntil: Date?
+        var lastUpdateCheckTime: Double?
+        var latestKnownVersion: String?
     }
 
     func saveToFile() {
@@ -62,7 +90,9 @@ final class DialogSettings: ObservableObject {
             animationsEnabled: animationsEnabled,
             alwaysOnTop: alwaysOnTop,
             showCommentField: showCommentField,
-            snoozeUntil: snoozeUntilDate
+            snoozeUntil: snoozeUntilDate,
+            lastUpdateCheckTime: lastUpdateCheckTime > 0 ? lastUpdateCheckTime : nil,
+            latestKnownVersion: latestKnownVersion.isEmpty ? nil : latestKnownVersion
         )
 
         let encoder = JSONEncoder()
@@ -88,6 +118,12 @@ final class DialogSettings: ObservableObject {
         alwaysOnTop = settings.alwaysOnTop
         showCommentField = settings.showCommentField
         snoozeUntilDate = settings.snoozeUntil
+        if let checkTime = settings.lastUpdateCheckTime {
+            lastUpdateCheckTime = checkTime
+        }
+        if let version = settings.latestKnownVersion {
+            latestKnownVersion = version
+        }
     }
 
     // MARK: - Snooze

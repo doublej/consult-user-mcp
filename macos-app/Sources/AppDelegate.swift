@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import Combine
+import UserNotifications
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
@@ -15,6 +16,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupPopover()
         setupDebugMenu()
         observeSnooze()
+        setupNotifications()
+        checkForUpdatesAutomatically()
     }
 
     // MARK: - App Icon
@@ -304,6 +307,44 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         alert.runModal()
     }
 
+    // MARK: - Auto Update Check
+
+    private func setupNotifications() {
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+    }
+
+    private func checkForUpdatesAutomatically() {
+        guard DialogSettings.shared.shouldAutoCheckForUpdates else { return }
+
+        UpdateManager.shared.checkForUpdatesWithDetails { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let checkResult):
+                    DialogSettings.shared.recordUpdateCheck(latestVersion: checkResult.remoteVersion)
+                    DialogSettings.shared.updateAvailable = checkResult.release
+
+                    if let release = checkResult.release {
+                        self?.showUpdateNotification(version: release.version)
+                    }
+                case .failure:
+                    break
+                }
+            }
+        }
+    }
+
+    private func showUpdateNotification(version: String) {
+        let content = UNMutableNotificationContent()
+        content.title = "Update Available"
+        content.body = "Consult User MCP v\(version) is available. Click to update."
+        content.sound = .default
+        content.categoryIdentifier = "UPDATE_AVAILABLE"
+
+        let request = UNNotificationRequest(identifier: "update-available", content: content, trigger: nil)
+        UNUserNotificationCenter.current().add(request)
+    }
+
     // MARK: - Snooze Observer
 
     private func observeSnooze() {
@@ -312,5 +353,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .sink { [weak self] _ in
                 self?.updateStatusIcon()
             }
+    }
+}
+
+// MARK: - Notification Delegate
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        if response.notification.request.identifier == "update-available" {
+            DispatchQueue.main.async { [weak self] in
+                if let release = DialogSettings.shared.updateAvailable {
+                    self?.showUpdateAvailableAlert(release)
+                }
+            }
+        }
+        completionHandler()
+    }
+
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound])
     }
 }

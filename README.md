@@ -107,7 +107,7 @@ consult-user-mcp/
 ├── dialog-cli/          # Native Swift CLI for dialogs
 ├── mcp-server/          # MCP server (TypeScript)
 ├── macos-app/           # SwiftUI menu bar app source
-└── Consult User MCP.app # Built app bundle
+└── scripts/             # Build scripts
 ```
 
 ## MCP Tools

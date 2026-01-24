@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-// MARK: - Brand Logos (preserved)
+// MARK: - Brand Logos
 
 struct ClaudeLogo: View {
     var size: CGFloat = 20
@@ -9,14 +9,11 @@ struct ClaudeLogo: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            ZStack {
-                RoundedRectangle(cornerRadius: size * 0.22)
-                    .fill(Color(red: 0.84, green: 0.46, blue: 0.33))
-                ClaudeStarShape()
-                    .fill(Color(red: 0.99, green: 0.95, blue: 0.93))
-                    .frame(width: size * 0.65, height: size * 0.65)
-            }
-            .frame(width: size, height: size)
+            logoImage
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: size * 0.22))
 
             if showTerminalBadge {
                 Image(systemName: "terminal.fill")
@@ -28,31 +25,14 @@ struct ClaudeLogo: View {
             }
         }
     }
-}
 
-struct ClaudeStarShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let outerRadius = min(rect.width, rect.height) / 2
-        let innerRadius = outerRadius * 0.38
-        let points = 8
-
-        for i in 0..<(points * 2) {
-            let radius = i.isMultiple(of: 2) ? outerRadius : innerRadius
-            let angle = (CGFloat(i) / CGFloat(points * 2)) * 2 * .pi - .pi / 2
-            let point = CGPoint(
-                x: center.x + cos(angle) * radius,
-                y: center.y + sin(angle) * radius
-            )
-            if i == 0 {
-                path.move(to: point)
-            } else {
-                path.addLine(to: point)
-            }
+    private var logoImage: Image {
+        if let url = Bundle.main.url(forResource: "claude-logo", withExtension: "png"),
+           let nsImage = NSImage(contentsOf: url) {
+            return Image(nsImage: nsImage)
         }
-        path.closeSubpath()
-        return path
+        // Fallback to SF Symbol
+        return Image(systemName: "sparkle")
     }
 }
 
@@ -60,55 +40,19 @@ struct OpenAILogo: View {
     var size: CGFloat = 20
 
     var body: some View {
-        OpenAIKnotShape()
-            .fill(Color.primary)
+        logoImage
+            .resizable()
+            .aspectRatio(contentMode: .fit)
             .frame(width: size, height: size)
     }
-}
 
-struct OpenAIKnotShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        let radius = min(rect.width, rect.height) / 2 * 0.9
-        let innerRadius = radius * 0.45
-        let strokeWidth = radius * 0.18
-
-        for i in 0..<6 {
-            let angle = CGFloat(i) * .pi / 3 - .pi / 2
-            let nextAngle = angle + .pi / 3
-
-            let outerX = center.x + cos(angle) * radius
-            let outerY = center.y + sin(angle) * radius
-
-            let midAngle = angle + .pi / 6
-            let innerX = center.x + cos(midAngle) * innerRadius
-            let innerY = center.y + sin(midAngle) * innerRadius
-
-            let nextOuterX = center.x + cos(nextAngle) * radius
-            let nextOuterY = center.y + sin(nextAngle) * radius
-
-            var petal = Path()
-            petal.move(to: CGPoint(x: outerX, y: outerY))
-            petal.addQuadCurve(
-                to: CGPoint(x: innerX, y: innerY),
-                control: CGPoint(
-                    x: center.x + cos(angle + .pi/12) * (radius * 0.75),
-                    y: center.y + sin(angle + .pi/12) * (radius * 0.75)
-                )
-            )
-            petal.addQuadCurve(
-                to: CGPoint(x: nextOuterX, y: nextOuterY),
-                control: CGPoint(
-                    x: center.x + cos(nextAngle - .pi/12) * (radius * 0.75),
-                    y: center.y + sin(nextAngle - .pi/12) * (radius * 0.75)
-                )
-            )
-
-            path.addPath(petal.strokedPath(StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round)))
+    private var logoImage: Image {
+        if let url = Bundle.main.url(forResource: "openai-logo", withExtension: "png"),
+           let nsImage = NSImage(contentsOf: url) {
+            return Image(nsImage: nsImage)
         }
-
-        return path
+        // Fallback to SF Symbol
+        return Image(systemName: "brain")
     }
 }
 

@@ -50,9 +50,11 @@ echo "  Installing node dependencies..."
 cd "$APP_PATH/Contents/Resources/mcp-server"
 bun install --production
 
-# 8. Copy resources (icon, update script)
+# 8. Copy resources (icon, update script, logos)
 cp "$ROOT/macos-app/Sources/Resources/AppIcon.icns" "$APP_PATH/Contents/Resources/"
 cp "$ROOT/macos-app/Sources/Resources/update.sh" "$APP_PATH/Contents/Resources/"
+cp "$ROOT/macos-app/Sources/Resources/claude-logo.png" "$APP_PATH/Contents/Resources/"
+cp "$ROOT/macos-app/Sources/Resources/openai-logo.png" "$APP_PATH/Contents/Resources/"
 chmod +x "$APP_PATH/Contents/Resources/update.sh"
 
 # 9. Create Info.plist (with dynamic version)

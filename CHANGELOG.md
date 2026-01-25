@@ -24,12 +24,6 @@ All notable changes to this project will be documented in this file.
 - Remove test dialog button from iOS PWA production UI
 - Error handling for JSON parse and CLI path in swift.ts
 
-### Documentation
-- Add VAPID key security guidance to iOS PWA docs
-- Add prominent security warning for iOS PWA limitations
-- Document instruction field in snooze responses
-- Remove outdated osascript/say references
-
 ## [1.2.0] - 2026-01-10
 
 ### Changed
@@ -41,9 +35,6 @@ All notable changes to this project will be documented in this file.
 
 ## [1.1.2] - 2025-12-16
 
-### Added
-- Quick install section in README
-
 ### Fixed
 - Add execute permission to install.sh
 
@@ -51,12 +42,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Install script with quarantine removal instructions
-- Architecture diagram in README
-- Screenshots with captions in README
 
 ### Changed
 - Switch from npm/pnpm to bun
-- Improve README with index and install instructions
 
 ### Fixed
 - dialog-cli path resolution
@@ -88,7 +76,6 @@ Initial release.
 - Feedback feature for redirecting the agent
 - iOS PWA companion for remote MCP support
 - macOS menu bar app with settings UI
-- Documentation site with GitHub Pages deployment
 
 ### Removed
 - Text-to-speech feature

@@ -43,12 +43,15 @@ struct SettingsView: View {
     @StateObject private var settings = DialogSettings.shared
     @State private var selectedTarget: InstallTarget = .claudeCode
     @State private var showInstallGuide = false
+    @State private var showHistory = false
 
     private let maxHeight: CGFloat = (NSScreen.main?.visibleFrame.height ?? 600) - 100
 
     var body: some View {
         Group {
-            if showInstallGuide {
+            if showHistory {
+                HistoryView(isPresented: $showHistory)
+            } else if showInstallGuide {
                 InstallGuideView(showInstallGuide: $showInstallGuide)
             } else {
                 mainView
@@ -77,6 +80,8 @@ struct SettingsView: View {
                     AppearanceSection()
 
                     BehaviorSection()
+
+                    HistorySection(showHistory: $showHistory)
 
                     UpdatesSection()
                 }
@@ -339,6 +344,49 @@ private struct BehaviorSection: View {
         }
         .onChange(of: settings.buttonCooldownEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.buttonCooldownDuration) { _, _ in settings.saveToFile() }
+    }
+}
+
+// MARK: - History Section
+
+private struct HistorySection: View {
+    @ObservedObject private var historyManager = HistoryManager.shared
+    @Binding var showHistory: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title: "HISTORY")
+
+            Button(action: { showHistory = true }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .frame(width: 16)
+
+                    Text("Dialog History")
+                        .font(.system(size: 11))
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Text("\(historyManager.entries.count)")
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(.secondary)
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(Color(.tertiaryLabelColor))
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 8)
+            }
+            .buttonStyle(.plain)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.controlBackgroundColor))
+            )
+        }
     }
 }
 

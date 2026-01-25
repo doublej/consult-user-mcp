@@ -13,12 +13,22 @@
 
 	const releases: Release[] = [
 		{
-			version: '1.3.0',
+			version: '1.4.0',
 			date: '2026-01-25',
+			highlight: 'History detail view',
+			changes: [
+				{ text: 'History detail view with full question and answer', type: 'added' },
+				{ text: 'History entry navigation with back button', type: 'added' },
+				{ text: 'Hover states on history rows', type: 'added' }
+			]
+		},
+		{
+			version: '1.3.0',
+			date: '2026-01-20',
 			highlight: 'Dialog history tracking',
 			changes: [
 				{ text: 'Dialog history tracking with viewer in settings', type: 'added' },
-				{ text: 'Claude and OpenAI logo assets', type: 'added' }
+				{ text: 'Auto-update via GitHub releases', type: 'added' }
 			]
 		},
 		{

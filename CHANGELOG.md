@@ -4,12 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-01-25
+
 ### Added
+- History detail view with full question, answer, and metadata
+- History entry navigation with back button
+- Hover states and chevron indicators on history rows
+
+## [1.3.0] - 2026-01-20
+
+### Added
+- Dialog history tracking with viewer in settings
 - Keyboard accessibility to iOS PWA choice cards
 - Automated tests for MCP server
 - PNG icons for iOS PWA compatibility
 - Input validation for iOS PWA API endpoints
-- Test runner with screenshot capture
+- Auto-update via GitHub releases
 
 ### Changed
 - Split DialogManager.swift into focused modules
@@ -21,7 +31,6 @@ All notable changes to this project will be documented in this file.
 - Error logging for file write failures in UserSettings
 - Timeout handling for long dialogs in MCP server
 - Validate choice descriptions array length matches choices
-- Remove test dialog button from iOS PWA production UI
 - Error handling for JSON parse and CLI path in swift.ts
 
 ## [1.2.0] - 2026-01-10

@@ -148,6 +148,23 @@ extension DialogManager {
 
         NSApp.runModal(for: window)
 
-        return result ?? TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: true, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+        let response = result ?? TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: true, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+
+        // Record to history (skip if snoozed)
+        if response.snoozed != true {
+            let entry = HistoryEntry(
+                id: UUID(),
+                timestamp: Date(),
+                clientName: getClientName(),
+                dialogType: "textInput",
+                questionSummary: request.body,
+                answer: response.answer,
+                cancelled: response.cancelled,
+                snoozed: false
+            )
+            HistoryManager.append(entry: entry)
+        }
+
+        return response
     }
 }

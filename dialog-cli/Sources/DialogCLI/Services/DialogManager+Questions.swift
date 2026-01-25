@@ -91,6 +91,30 @@ extension DialogManager {
         FocusManager.shared.reset()
         window.close()
 
-        return result ?? QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: true, completedCount: 0, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+        let response = result ?? QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: true, completedCount: 0, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+
+        // Record to history (skip if snoozed)
+        if response.snoozed != true {
+            let questionSummary = request.questions.first?.question ?? "Multiple questions"
+            let answerStrings = response.answers.map { key, value -> String in
+                switch value {
+                case .single(let s): return "\(key): \(s)"
+                case .multiple(let arr): return "\(key): \(arr.joined(separator: ", "))"
+                }
+            }
+            let entry = HistoryEntry(
+                id: UUID(),
+                timestamp: Date(),
+                clientName: getClientName(),
+                dialogType: "questions",
+                questionSummary: questionSummary,
+                answer: answerStrings.isEmpty ? nil : answerStrings.joined(separator: "; "),
+                cancelled: response.cancelled,
+                snoozed: false
+            )
+            HistoryManager.append(entry: entry)
+        }
+
+        return response
     }
 }

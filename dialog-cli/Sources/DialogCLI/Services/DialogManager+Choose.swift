@@ -68,6 +68,29 @@ extension DialogManager {
         FocusManager.shared.reset()
         window.close()
 
-        return result ?? ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: true, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+        let response = result ?? ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: true, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+
+        // Record to history (skip if snoozed)
+        if response.snoozed != true {
+            let answerString: String?
+            switch response.answer {
+            case .single(let s): answerString = s
+            case .multiple(let arr): answerString = arr.joined(separator: ", ")
+            case nil: answerString = nil
+            }
+            let entry = HistoryEntry(
+                id: UUID(),
+                timestamp: Date(),
+                clientName: getClientName(),
+                dialogType: "choose",
+                questionSummary: request.body,
+                answer: answerString,
+                cancelled: response.cancelled,
+                snoozed: false
+            )
+            HistoryManager.append(entry: entry)
+        }
+
+        return response
     }
 }

@@ -11,6 +11,10 @@ class DialogManager {
         clientName = name
     }
 
+    func getClientName() -> String {
+        clientName
+    }
+
     func effectivePosition(_ requestedPosition: DialogPosition) -> DialogPosition {
         return DialogPosition(rawValue: userSettings.position) ?? .center
     }

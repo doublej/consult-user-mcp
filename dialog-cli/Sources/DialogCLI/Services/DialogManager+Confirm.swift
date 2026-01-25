@@ -50,6 +50,23 @@ extension DialogManager {
         FocusManager.shared.reset()
         window.close()
 
-        return result ?? ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: true, dismissed: true, answer: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+        let response = result ?? ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: true, dismissed: true, answer: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+
+        // Record to history (skip if snoozed)
+        if response.snoozed != true {
+            let entry = HistoryEntry(
+                id: UUID(),
+                timestamp: Date(),
+                clientName: getClientName(),
+                dialogType: "confirm",
+                questionSummary: request.body,
+                answer: response.answer,
+                cancelled: response.cancelled,
+                snoozed: false
+            )
+            HistoryManager.append(entry: entry)
+        }
+
+        return response
     }
 }

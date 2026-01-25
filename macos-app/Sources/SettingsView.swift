@@ -380,12 +380,13 @@ private struct HistorySection: View {
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(.controlBackgroundColor))
+                )
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(.controlBackgroundColor))
-            )
         }
     }
 }

@@ -37,7 +37,7 @@ struct HistoryView: View {
 
             footer
         }
-        .frame(width: 340)
+        .frame(width: 300)
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxHeight: maxHeight)
         .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))

@@ -95,10 +95,10 @@ Or configure manually:
 
 ```bash
 bun install
-bun run build
+bun run build:bundle   # Builds and installs to /Applications
 ```
 
-Creates `Consult User MCP.app` in project root (optional).
+Builds all components and installs `Consult User MCP.app` to `/Applications`.
 
 ## Structure
 

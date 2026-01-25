@@ -46,24 +46,24 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 **Confirmation:**
 ```
 LLM: "Should I proceed with deleting these files?"
--> ask_confirmation with buttons ["Delete", "Cancel"]
+-> ask_confirmation with confirm_label="Delete", cancel_label="Cancel"
 -> User clicks "Delete"
--> Returns: { selection: "Delete" }
+-> Returns: { confirmed: true, cancelled: false, answer: "Delete" }
 ```
 
 **Multiple choice:**
 ```
 LLM: "Which deployment target?"
--> ask_multiple_choice with options ["staging", "production", "dev"]
+-> ask_multiple_choice with choices ["staging", "production", "dev"]
 -> User selects "staging"
--> Returns: { selection: "staging" }
+-> Returns: { answer: "staging", cancelled: false }
 ```
 
 **Text input:**
 ```
 LLM: "What should I name the project?"
--> ask_text_input with prompt "Enter project name"
+-> ask_text_input with body "Enter project name"
 -> User types "my-app"
--> Returns: { text: "my-app" }
+-> Returns: { answer: "my-app", cancelled: false }
 ```
 

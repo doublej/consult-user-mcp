@@ -8,7 +8,7 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 
 - [ ] Dialog renders without clipping or overflow
 - [ ] Text is readable and properly wrapped
-- [ ] Dialog is positioned correctly (center by default)
+- [ ] Dialog is positioned correctly (left by default)
 - [ ] Window shadow and border render properly
 - [ ] Theme colors are consistent (if testing themed)
 - [ ] No visual artifacts or rendering glitches

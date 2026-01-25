@@ -140,6 +140,22 @@ enum InstallTarget: String, CaseIterable, Identifiable {
     var isInstalled: Bool {
         FileManager.default.fileExists(atPath: expandedPath)
     }
+
+    var claudeMdPath: String? {
+        switch self {
+        case .claudeDesktop: return nil
+        case .claudeCode: return "~/.claude/CLAUDE.md"
+        case .codex: return "~/.codex/AGENTS.md"
+        }
+    }
+
+    var claudeMdExpandedPath: String? {
+        claudeMdPath.map { ($0 as NSString).expandingTildeInPath }
+    }
+
+    var supportsBasePrompt: Bool {
+        claudeMdPath != nil
+    }
 }
 
 enum ConfigFormat {

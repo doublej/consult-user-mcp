@@ -31,7 +31,6 @@ struct ClaudeLogo: View {
            let nsImage = NSImage(contentsOf: url) {
             return Image(nsImage: nsImage)
         }
-        // Fallback to SF Symbol
         return Image(systemName: "sparkle")
     }
 }
@@ -51,16 +50,40 @@ struct OpenAILogo: View {
            let nsImage = NSImage(contentsOf: url) {
             return Image(nsImage: nsImage)
         }
-        // Fallback to SF Symbol
         return Image(systemName: "brain")
     }
+}
+
+// MARK: - Wizard Steps
+
+enum InstallWizardStep: Int, WizardStep, CaseIterable {
+    case targetSelection
+    case basePromptChoice
+    case confirmation
+
+    var title: String {
+        switch self {
+        case .targetSelection: return "Target"
+        case .basePromptChoice: return "Prompts"
+        case .confirmation: return "Install"
+        }
+    }
+}
+
+// MARK: - Install Answers
+
+struct InstallAnswers {
+    var target: InstallTarget = .claudeCode
+    var includeBasePrompt: Bool = true
+    var basePromptMode: BasePromptInstallMode = .createNew
 }
 
 // MARK: - Install Guide View
 
 struct InstallGuideView: View {
-    @State private var selectedTarget: InstallTarget = .claudeCode
-    @State private var copyFeedback: String?
+    @State private var step: InstallWizardStep = .targetSelection
+    @State private var answers = InstallAnswers()
+    @State private var installResult: InstallResult?
     @Binding var showInstallGuide: Bool
 
     private var serverPath: String {
@@ -69,255 +92,106 @@ struct InstallGuideView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-
-            ScrollView {
-                VStack(spacing: 16) {
-                    targetSelector
-                    installSteps
-                    Spacer(minLength: 16)
-                }
-                .padding(16)
+        WizardContainer(
+            title: "Installation Guide",
+            currentStep: step,
+            onBack: goBack,
+            onClose: { showInstallGuide = false }
+        ) {
+            switch step {
+            case .targetSelection:
+                TargetSelectionStep(answers: $answers, onNext: goToNextStep)
+            case .basePromptChoice:
+                BasePromptStep(answers: $answers, onBack: goBack, onNext: goToNextStep)
+            case .confirmation:
+                ConfirmationStep(
+                    answers: answers,
+                    serverPath: serverPath,
+                    installResult: $installResult,
+                    onBack: goBack,
+                    onInstall: performInstall
+                )
             }
         }
-        .frame(width: 300)
-        .fixedSize(horizontal: false, vertical: true)
-        .background(Color(.windowBackgroundColor))
     }
 
-    // MARK: - Header
-
-    private var header: some View {
-        HStack {
-            Button(action: { showInstallGuide = false }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 12, weight: .semibold))
-            }
-            .buttonStyle(.plain)
-            .foregroundColor(.accentColor)
-
-            Spacer()
-
-            Text("Installation Guide")
-                .font(.system(size: 13, weight: .semibold))
-
-            Spacer()
-
-            Image(systemName: "chevron.left")
-                .font(.system(size: 12, weight: .semibold))
-                .opacity(0)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-    }
-
-    // MARK: - Target Selector
-
-    private var targetSelector: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("INSTALL FOR")
-                .font(.system(size: 11, weight: .medium))
-                .tracking(1.0)
-                .foregroundColor(.secondary)
-
-            HStack(spacing: 8) {
-                ForEach(InstallTarget.allCases) { target in
-                    targetButton(target)
+    private func goBack() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            switch step {
+            case .targetSelection:
+                showInstallGuide = false
+            case .basePromptChoice:
+                step = .targetSelection
+            case .confirmation:
+                if answers.target.supportsBasePrompt {
+                    step = .basePromptChoice
+                } else {
+                    step = .targetSelection
                 }
             }
         }
     }
 
-    private func targetButton(_ target: InstallTarget) -> some View {
-        Button(action: { selectedTarget = target }) {
-            VStack(spacing: 4) {
-                targetLogo(for: target)
-                Text(target.displayName)
-                    .font(.system(size: 9, weight: .medium))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .contentShape(Rectangle())
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(selectedTarget == target ? Color.accentColor.opacity(0.15) : Color.clear)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(selectedTarget == target ? Color.accentColor : Color(.separatorColor), lineWidth: 1)
-            )
-        }
-        .buttonStyle(.plain)
-        .foregroundColor(selectedTarget == target ? .accentColor : .secondary)
-    }
-
-    @ViewBuilder
-    private func targetLogo(for target: InstallTarget) -> some View {
-        switch target {
-        case .claudeDesktop:
-            ClaudeLogo(size: 20)
-        case .claudeCode:
-            ClaudeLogo(size: 20, showTerminalBadge: true)
-        case .codex:
-            OpenAILogo(size: 20)
-        }
-    }
-
-    // MARK: - Install Steps
-
-    private var installSteps: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            stepCard(number: 1, title: "Open config file") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(selectedTarget.configPath)
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-
-                    Button(action: openConfigFile) {
-                        Label("Reveal in Finder", systemImage: "folder")
-                            .font(.system(size: 10))
+    private func goToNextStep() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            switch step {
+            case .targetSelection:
+                if answers.target.supportsBasePrompt {
+                    // Update mode based on existing file
+                    if ClaudeMdInstaller.detectExisting(for: answers.target) {
+                        answers.basePromptMode = .appendSection
+                    } else {
+                        answers.basePromptMode = .createNew
                     }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                    step = .basePromptChoice
+                } else {
+                    step = .confirmation
                 }
-            }
-
-            stepCard(number: 2, title: "Add MCP configuration") {
-                VStack(alignment: .leading, spacing: 6) {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        Text(configSnippet)
-                            .font(.system(size: 9, design: .monospaced))
-                            .textSelection(.enabled)
-                    }
-                    .padding(8)
-                    .background(Color(.textBackgroundColor))
-                    .cornerRadius(4)
-
-                    HStack {
-                        Button(action: copyConfig) {
-                            Label(copyFeedback ?? "Copy", systemImage: copyFeedback != nil ? "checkmark" : "doc.on.doc")
-                                .font(.system(size: 10))
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-
-                        Spacer()
-
-                        Button(action: autoInstall) {
-                            Label("Auto Install", systemImage: "wand.and.stars")
-                                .font(.system(size: 10))
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.small)
-                    }
-                }
-            }
-
-            stepCard(number: 3, title: "Restart \(selectedTarget.displayName)") {
-                Text("Restart the application to load the MCP server.")
-                    .font(.system(size: 10))
-                    .foregroundColor(.secondary)
+            case .basePromptChoice:
+                step = .confirmation
+            case .confirmation:
+                break
             }
         }
     }
 
-    private func stepCard<Content: View>(number: Int, title: String, @ViewBuilder content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Text("\(number)")
-                    .font(.system(size: 9, weight: .bold))
-                    .foregroundColor(.white)
-                    .frame(width: 16, height: 16)
-                    .background(Circle().fill(Color.accentColor))
-
-                Text(title)
-                    .font(.system(size: 11, weight: .semibold))
-            }
-
-            content()
-                .padding(.leading, 22)
-        }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(.controlBackgroundColor))
-        )
-    }
-
-    // MARK: - Config Snippet
-
-    private var configSnippet: String {
-        switch selectedTarget.configFormat {
-        case .json:
-            return """
-"consult-user-mcp": {
-  "command": "node",
-  "args": ["\(serverPath)"]
-}
-"""
-        case .toml:
-            return """
-[mcp_servers.consult-user-mcp]
-command = "node"
-args = ["\(serverPath)"]
-"""
-        }
-    }
-
-    // MARK: - Actions
-
-    private func openConfigFile() {
-        let path = selectedTarget.expandedPath
-        let url = URL(fileURLWithPath: path)
-        let dir = url.deletingLastPathComponent()
-
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-
-        if !FileManager.default.fileExists(atPath: path) {
-            let initialContent: String
-            switch selectedTarget.configFormat {
-            case .json:
-                initialContent = "{\n  \"mcpServers\": {}\n}"
-            case .toml:
-                initialContent = "# Codex configuration\n"
-            }
-            try? initialContent.write(toFile: path, atomically: true, encoding: .utf8)
-        }
-
-        NSWorkspace.shared.selectFile(path, inFileViewerRootedAtPath: dir.path)
-    }
-
-    private func copyConfig() {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(configSnippet, forType: .string)
-
-        copyFeedback = "Copied!"
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            copyFeedback = nil
-        }
-    }
-
-    private func autoInstall() {
-        let path = selectedTarget.expandedPath
+    private func performInstall() {
+        let target = answers.target
+        let path = target.expandedPath
         let fm = FileManager.default
 
         let dir = (path as NSString).deletingLastPathComponent
         try? fm.createDirectory(atPath: dir, withIntermediateDirectories: true)
 
-        switch selectedTarget.configFormat {
+        // Install MCP config
+        var mcpSuccess = false
+        switch target.configFormat {
         case .json:
-            autoInstallJSON(path: path)
+            mcpSuccess = installJSON(path: path)
         case .toml:
-            autoInstallTOML(path: path)
+            mcpSuccess = installTOML(path: path)
         }
+
+        // Install base prompt if applicable
+        var promptSuccess = true
+        var promptError: String?
+        if answers.includeBasePrompt && answers.basePromptMode != .skip {
+            do {
+                try ClaudeMdInstaller.install(for: target, mode: answers.basePromptMode)
+            } catch {
+                promptSuccess = false
+                promptError = error.localizedDescription
+            }
+        }
+
+        installResult = InstallResult(
+            mcpConfigSuccess: mcpSuccess,
+            basePromptSuccess: promptSuccess,
+            basePromptError: promptError
+        )
     }
 
-    private func autoInstallJSON(path: String) {
+    private func installJSON(path: String) -> Bool {
         let fm = FileManager.default
         var config: [String: Any] = [:]
 
@@ -334,12 +208,12 @@ args = ["\(serverPath)"]
         config["mcpServers"] = mcpServers
 
         if let data = try? JSONSerialization.data(withJSONObject: config, options: [.prettyPrinted, .sortedKeys]) {
-            try? data.write(to: URL(fileURLWithPath: path))
-            showInstallSuccess()
+            return (try? data.write(to: URL(fileURLWithPath: path))) != nil
         }
+        return false
     }
 
-    private func autoInstallTOML(path: String) {
+    private func installTOML(path: String) -> Bool {
         let fm = FileManager.default
         var content = ""
 
@@ -349,33 +223,412 @@ args = ["\(serverPath)"]
         }
 
         if content.contains("[mcp_servers.consult-user-mcp]") {
-            if let range = content.range(of: #"\[mcp_servers\.consult-user-mcp\][^\[]*"#, options: .regularExpression) {
+            if let range = content.range(
+                of: #"\[mcp_servers\.consult-user-mcp\][^\[]*"#,
+                options: .regularExpression
+            ) {
                 let newSection = """
-[mcp_servers.consult-user-mcp]
-command = "node"
-args = ["\(serverPath)"]
+                [mcp_servers.consult-user-mcp]
+                command = "node"
+                args = ["\(serverPath)"]
 
-"""
+                """
                 content.replaceSubrange(range, with: newSection)
             }
         } else {
             let newSection = """
 
-[mcp_servers.consult-user-mcp]
-command = "node"
-args = ["\(serverPath)"]
-"""
+            [mcp_servers.consult-user-mcp]
+            command = "node"
+            args = ["\(serverPath)"]
+            """
             content += newSection
         }
 
-        try? content.write(toFile: path, atomically: true, encoding: .utf8)
-        showInstallSuccess()
+        return (try? content.write(toFile: path, atomically: true, encoding: .utf8)) != nil
+    }
+}
+
+// MARK: - Install Result
+
+struct InstallResult {
+    let mcpConfigSuccess: Bool
+    let basePromptSuccess: Bool
+    let basePromptError: String?
+
+    var isFullySuccessful: Bool {
+        mcpConfigSuccess && basePromptSuccess
+    }
+}
+
+// MARK: - Target Selection Step
+
+private struct TargetSelectionStep: View {
+    @Binding var answers: InstallAnswers
+    let onNext: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Choose where to install the MCP server.")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+
+            VStack(spacing: 8) {
+                ForEach(InstallTarget.allCases) { target in
+                    targetCard(target)
+                }
+            }
+
+            WizardNavigationButtons(
+                showBack: false,
+                nextLabel: "Next",
+                nextEnabled: true,
+                onBack: {},
+                onNext: onNext
+            )
+        }
     }
 
-    private func showInstallSuccess() {
-        copyFeedback = "Installed!"
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            copyFeedback = nil
+    private func targetCard(_ target: InstallTarget) -> some View {
+        WizardOptionCard(
+            value: target,
+            title: target.displayName,
+            subtitle: target.description,
+            icon: AnyView(targetLogo(for: target)),
+            selection: $answers.target
+        )
+    }
+
+    @ViewBuilder
+    private func targetLogo(for target: InstallTarget) -> some View {
+        switch target {
+        case .claudeDesktop:
+            ClaudeLogo(size: 24)
+        case .claudeCode:
+            ClaudeLogo(size: 24, showTerminalBadge: true)
+        case .codex:
+            OpenAILogo(size: 24)
+        }
+    }
+}
+
+// MARK: - Base Prompt Step
+
+private struct BasePromptStep: View {
+    @Binding var answers: InstallAnswers
+    let onBack: () -> Void
+    let onNext: () -> Void
+
+    private var fileExists: Bool {
+        ClaudeMdInstaller.detectExisting(for: answers.target)
+    }
+
+    private var fileName: String {
+        answers.target.claudeMdPath?.components(separatedBy: "/").last ?? "CLAUDE.md"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            promptExplanation
+
+            Toggle(isOn: $answers.includeBasePrompt) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Include usage hints")
+                        .font(.system(size: 12, weight: .medium))
+                    Text("Helps Claude use the MCP tools correctly")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .toggleStyle(.switch)
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.controlBackgroundColor))
+            )
+
+            if answers.includeBasePrompt && fileExists {
+                existingFileOptions
+            }
+
+            WizardNavigationButtons(
+                showBack: true,
+                nextLabel: "Next",
+                nextEnabled: true,
+                onBack: onBack,
+                onNext: onNext
+            )
+        }
+    }
+
+    private var promptExplanation: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Add usage hints to \(fileName)?")
+                .font(.system(size: 12, weight: .medium))
+
+            Text("This teaches Claude when to use the dialog tools instead of asking questions in text.")
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+
+            if fileExists {
+                HStack(spacing: 6) {
+                    Image(systemName: "doc.text.fill")
+                        .foregroundColor(.orange)
+                    Text("\(fileName) already exists")
+                        .font(.system(size: 10))
+                        .foregroundColor(.orange)
+                }
+                .padding(.top, 4)
+            }
+        }
+    }
+
+    private var existingFileOptions: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("EXISTING FILE")
+                .font(.system(size: 10, weight: .medium))
+                .tracking(1.0)
+                .foregroundColor(.secondary)
+
+            VStack(spacing: 6) {
+                modeOption(.appendSection, icon: "text.append")
+                modeOption(.skip, icon: "xmark.circle")
+            }
+        }
+    }
+
+    private func modeOption(_ mode: BasePromptInstallMode, icon: String) -> some View {
+        Button(action: { answers.basePromptMode = mode }) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 12))
+                    .foregroundColor(answers.basePromptMode == mode ? .accentColor : .secondary)
+                    .frame(width: 20)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(mode.title)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(.primary)
+                    Text(mode.description)
+                        .font(.system(size: 9))
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: answers.basePromptMode == mode ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 14))
+                    .foregroundColor(answers.basePromptMode == mode ? .accentColor : Color(.separatorColor))
+            }
+            .padding(10)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(answers.basePromptMode == mode ? Color.accentColor.opacity(0.08) : Color.clear)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(
+                        answers.basePromptMode == mode ? Color.accentColor.opacity(0.3) : Color(.separatorColor),
+                        lineWidth: 1
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Confirmation Step
+
+private struct ConfirmationStep: View {
+    let answers: InstallAnswers
+    let serverPath: String
+    @Binding var installResult: InstallResult?
+    let onBack: () -> Void
+    let onInstall: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if let result = installResult {
+                resultView(result)
+            } else {
+                summaryView
+            }
+        }
+    }
+
+    private var summaryView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Ready to install")
+                .font(.system(size: 12, weight: .medium))
+
+            VStack(alignment: .leading, spacing: 10) {
+                summaryItem(
+                    icon: "doc.text",
+                    title: "MCP configuration",
+                    detail: answers.target.configPath
+                )
+
+                if answers.target.supportsBasePrompt && answers.includeBasePrompt && answers.basePromptMode != .skip {
+                    summaryItem(
+                        icon: "text.bubble",
+                        title: "Usage hints",
+                        detail: answers.target.claudeMdPath ?? ""
+                    )
+                }
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.controlBackgroundColor))
+            )
+
+            WizardNavigationButtons(
+                showBack: true,
+                nextLabel: "Install",
+                nextEnabled: true,
+                onBack: onBack,
+                onNext: onInstall
+            )
+        }
+    }
+
+    private func summaryItem(icon: String, title: String, detail: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundColor(.accentColor)
+                .frame(width: 20)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 11, weight: .medium))
+                Text(detail)
+                    .font(.system(size: 9, design: .monospaced))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    private func resultView(_ result: InstallResult) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if result.isFullySuccessful {
+                successBanner
+            } else {
+                partialSuccessBanner(result)
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                resultItem(
+                    success: result.mcpConfigSuccess,
+                    title: "MCP configuration",
+                    detail: result.mcpConfigSuccess ? "Installed" : "Failed"
+                )
+
+                if answers.target.supportsBasePrompt && answers.includeBasePrompt && answers.basePromptMode != .skip {
+                    resultItem(
+                        success: result.basePromptSuccess,
+                        title: "Usage hints",
+                        detail: result.basePromptSuccess ? "Installed" : (result.basePromptError ?? "Failed")
+                    )
+                }
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.controlBackgroundColor))
+            )
+
+            restartInstructions
+        }
+    }
+
+    private var successBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 24))
+                .foregroundColor(.green)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Installation complete")
+                    .font(.system(size: 13, weight: .semibold))
+                Text("Restart \(answers.target.displayName) to activate")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.green.opacity(0.1))
+        )
+    }
+
+    private func partialSuccessBanner(_ result: InstallResult) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 24))
+                .foregroundColor(.orange)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Partial installation")
+                    .font(.system(size: 13, weight: .semibold))
+                Text("Some items could not be installed")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.orange.opacity(0.1))
+        )
+    }
+
+    private func resultItem(success: Bool, title: String, detail: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: success ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .font(.system(size: 12))
+                .foregroundColor(success ? .green : .red)
+                .frame(width: 20)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 11, weight: .medium))
+                Text(detail)
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+        }
+    }
+
+    private var restartInstructions: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("NEXT STEPS")
+                .font(.system(size: 10, weight: .medium))
+                .tracking(1.0)
+                .foregroundColor(.secondary)
+
+            HStack(spacing: 10) {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+                    .frame(width: 20)
+
+                Text("Restart \(answers.target.displayName) to load the MCP server")
+                    .font(.system(size: 11))
+                    .foregroundColor(.primary)
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color(.controlBackgroundColor))
+            )
         }
     }
 }

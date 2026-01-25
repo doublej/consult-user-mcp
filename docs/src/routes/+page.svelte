@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import Changelist from '$lib/components/Changelist.svelte';
 	import DialogPreviews from '$lib/components/DialogPreviews.svelte';
 	import InteractiveDemo from '$lib/components/InteractiveDemo.svelte';
+	import PerspectiveDialog from '$lib/components/PerspectiveDialog.svelte';
 	import ScreenshotGallery from '$lib/components/ScreenshotGallery.svelte';
 
 	let copied = false;
@@ -33,7 +35,7 @@
 </svelte:head>
 
 <main>
-	<header>
+	<header class="animate-in">
 		<nav>
 			<a href="{base}/" class="nav-logo">
 				<img src="{base}/icon.svg" alt="" />
@@ -45,38 +47,43 @@
 		</nav>
 	</header>
 
-	<section class="hero">
-		<h1>Native macOS dialogs for MCP agents</h1>
-		<p class="lead">
-			An MCP server that surfaces agent checkpoints as native macOS dialogs.
-			Respond to questions, snooze for later, or redirect the agent without switching windows.
-		</p>
-		<div class="install-block">
-			<div class="code-line">
-				<code>{installCommand}</code>
-				<button onclick={copyInstall} class="copy-btn" aria-label="Copy install command">
-					{copied ? 'Copied' : 'Copy'}
-				</button>
-			</div>
-			<p class="install-note">
-				Requires macOS and <a href="https://bun.sh" target="_blank" rel="noopener">Bun</a>
+	<section class="hero-row">
+		<div class="hero">
+			<h1 class="animate-in">Native macOS dialogs for <span class="nowrap">MCP agents</span></h1>
+			<p class="lead animate-in" style="animation-delay: 200ms;">
+				An MCP server that surfaces agent checkpoints as native macOS dialogs.
+				Respond to questions, snooze for later, or redirect the agent without switching windows.
 			</p>
+			<div class="install-block animate-in" style="animation-delay: 400ms;">
+				<div class="code-line">
+					<code>{installCommand}</code>
+					<button onclick={copyInstall} class="copy-btn" aria-label="Copy install command">
+						{copied ? 'Copied' : 'Copy'}
+					</button>
+				</div>
+				<p class="install-note">
+					Requires macOS and <a href="https://bun.sh" target="_blank" rel="noopener">Bun</a>
+				</p>
+			</div>
 		</div>
+		<aside class="hero-visual-sidebar">
+			<PerspectiveDialog />
+		</aside>
 	</section>
 
-	<section class="section demo-section">
+	<section class="section demo-section animate-in" style="animation-delay: 600ms;">
 		<h2>See It In Action</h2>
 		<p class="section-desc">Click through scenarios to see how agents guide users through decisions—from cooking to coding to troubleshooting.</p>
 		<InteractiveDemo />
 	</section>
 
-	<section class="section dialog-types-section">
+	<section class="section dialog-types-section animate-in" style="animation-delay: 700ms;">
 		<h2>Dialog Types</h2>
 		<p class="section-desc">Multiple tool types for different interaction patterns.</p>
 		<DialogPreviews />
 	</section>
 
-	<section class="section">
+	<section class="section animate-in" style="animation-delay: 800ms;">
 		<h2>Snooze and Feedback</h2>
 		<p class="section-desc">Every dialog includes options beyond simple yes/no responses.</p>
 		<div class="feature-row">
@@ -93,7 +100,7 @@
 		</div>
 	</section>
 
-	<section class="section">
+	<section class="section animate-in" style="animation-delay: 900ms;">
 		<h2>Comparison</h2>
 		<p class="section-desc">How this compares to Claude's built-in AskUserQuestion tool.</p>
 		<div class="table-wrap">
@@ -118,7 +125,7 @@
 		</div>
 	</section>
 
-	<section class="section screenshots-section">
+	<section class="section screenshots-section animate-in" style="animation-delay: 1000ms;">
 		<div class="screenshots-layout">
 			<div class="screenshots-header">
 				<h2>Screenshots</h2>
@@ -130,7 +137,7 @@
 		</div>
 	</section>
 
-	<section class="section" id="install">
+	<section class="section animate-in" style="animation-delay: 1100ms;" id="install">
 		<h2>Installation</h2>
 		<p class="section-desc">One command installs the server and configures Claude Code automatically.</p>
 		<div class="install-block standalone">
@@ -152,13 +159,29 @@
 		</div>
 	</section>
 
-	<footer>
+	<footer class="animate-in" style="animation-delay: 1200ms;">
 		<p>Built for <a href="https://claude.ai/claude-code" target="_blank" rel="noopener">Claude Code</a> and MCP-compatible agents</p>
 		<p><a href="https://github.com/doublej/consult-user-mcp" target="_blank" rel="noopener">GitHub</a></p>
 	</footer>
 </main>
 
 <style>
+	/* Entrance animation keyframes */
+	@keyframes fadeSlideUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-in {
+		animation: fadeSlideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+	}
+
 	:global(*) {
 		box-sizing: border-box;
 	}
@@ -174,7 +197,7 @@
 	}
 
 	main {
-		max-width: 900px;
+		max-width: 1200px;
 		margin: 0 auto;
 		padding: 0 24px;
 	}
@@ -183,7 +206,7 @@
 	header {
 		padding: 20px 0;
 		border-bottom: 1px solid #e0e0e0;
-		margin-bottom: 80px;
+		margin-bottom: 60px;
 	}
 
 	nav {
@@ -218,9 +241,26 @@
 		color: #1a1a1a;
 	}
 
+	/* Hero row - two column layout */
+	.hero-row {
+		display: grid;
+		grid-template-columns: 1fr 480px;
+		gap: 40px;
+		padding-bottom: 60px;
+		align-items: center;
+		max-width: 100%;
+	}
+
 	/* Hero */
 	.hero {
-		padding: 0 0 60px;
+		padding: 0;
+		min-width: 0;
+	}
+
+	/* Hero visual sidebar */
+	.hero-visual-sidebar {
+		min-width: 0;
+		overflow: visible;
 	}
 
 	h1 {
@@ -230,6 +270,10 @@
 		margin: 0 0 20px;
 		letter-spacing: -0.03em;
 		line-height: 1.15;
+	}
+
+	.nowrap {
+		white-space: nowrap;
 	}
 
 	.lead {
@@ -514,6 +558,18 @@
 	}
 
 	/* Responsive */
+	@media (max-width: 1000px) {
+		.hero-row {
+			grid-template-columns: 1fr;
+			gap: 40px;
+		}
+
+		.hero-visual-sidebar {
+			margin: 0;
+			order: -1;
+		}
+	}
+
 	@media (max-width: 700px) {
 		header {
 			margin-bottom: 48px;

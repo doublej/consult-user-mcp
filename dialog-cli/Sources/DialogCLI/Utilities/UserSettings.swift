@@ -5,6 +5,8 @@ import Foundation
 struct UserSettings {
     var position: String = "left"
     var snoozeUntil: Date?
+    var buttonCooldownEnabled: Bool = true
+    var buttonCooldownDuration: Double = 2.0
 
     private static var settingsURL: URL? {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
@@ -26,6 +28,12 @@ struct UserSettings {
         if let snoozeStr = json["snoozeUntil"] as? String {
             let formatter = ISO8601DateFormatter()
             settings.snoozeUntil = formatter.date(from: snoozeStr)
+        }
+        if let cooldownEnabled = json["buttonCooldownEnabled"] as? Bool {
+            settings.buttonCooldownEnabled = cooldownEnabled
+        }
+        if let cooldownDuration = json["buttonCooldownDuration"] as? Double {
+            settings.buttonCooldownDuration = cooldownDuration
         }
 
         return settings

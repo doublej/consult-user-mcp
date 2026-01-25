@@ -56,6 +56,11 @@ class FocusableButtonView: NSView {
     private var isPressed = false
     private var trackingArea: NSTrackingArea?
 
+    // Cooldown state to prevent accidental activation
+    private var cooldownProgress: CGFloat = 0  // 0 to 1
+    private var cooldownTimer: Timer?
+    private var isCoolingDown: Bool { cooldownProgress < 1 }
+
     override var acceptsFirstResponder: Bool { !isDisabled }
     override var canBecomeKeyView: Bool { !isDisabled }
     override var mouseDownCanMoveWindow: Bool { false }
@@ -84,8 +89,11 @@ class FocusableButtonView: NSView {
         super.viewDidMoveToWindow()
         if window != nil {
             FocusManager.shared.registerButton(self)
+            startCooldown()
         } else {
             FocusManager.shared.unregister(self)
+            cooldownTimer?.invalidate()
+            cooldownTimer = nil
         }
     }
 
@@ -101,6 +109,34 @@ class FocusableButtonView: NSView {
             userInfo: nil
         )
         addTrackingArea(trackingArea!)
+    }
+
+    private func startCooldown() {
+        let settings = UserSettings.load()
+
+        // Skip cooldown if disabled
+        guard settings.buttonCooldownEnabled else {
+            cooldownProgress = 1
+            return
+        }
+
+        cooldownProgress = 0
+        cooldownTimer?.invalidate()
+        let startTime = CACurrentMediaTime()
+        let duration = settings.buttonCooldownDuration
+
+        let timer = Timer(timeInterval: 1/60, repeats: true) { [weak self] timer in
+            guard let self = self else { timer.invalidate(); return }
+            let elapsed = CACurrentMediaTime() - startTime
+            self.cooldownProgress = min(1, CGFloat(elapsed / duration))
+            self.needsDisplay = true
+            if self.cooldownProgress >= 1 {
+                timer.invalidate()
+                self.cooldownTimer = nil
+            }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        cooldownTimer = timer
     }
 
     override func updateTrackingAreas() {
@@ -131,6 +167,11 @@ class FocusableButtonView: NSView {
 
     override func mouseUp(with event: NSEvent) {
         guard !isDisabled else { return }
+        guard !isCoolingDown else {
+            isPressed = false
+            needsDisplay = true
+            return
+        }
         if isPressed && isHovered {
             onClick?()
         }
@@ -143,6 +184,7 @@ class FocusableButtonView: NSView {
             super.keyDown(with: event)
             return
         }
+        guard !isCoolingDown else { return }
         if event.keyCode == KeyCode.space || event.keyCode == KeyCode.returnKey {
             onClick?()
         } else {
@@ -159,7 +201,7 @@ class FocusableButtonView: NSView {
         let path = NSBezierPath(roundedRect: rect, xRadius: 12, yRadius: 12)
 
         // Background
-        let bgColor: NSColor
+        var bgColor: NSColor
         if isDisabled {
             bgColor = Theme.cardBackground.withAlphaComponent(0.5)
         } else if isPrimary {
@@ -188,6 +230,11 @@ class FocusableButtonView: NSView {
             }
         }
 
+        // Grey out during cooldown
+        if isCoolingDown {
+            bgColor = bgColor.withAlphaComponent(0.4)
+        }
+
         bgColor.setFill()
         path.fill()
 
@@ -198,8 +245,28 @@ class FocusableButtonView: NSView {
             path.stroke()
         }
 
+        // Cooldown progress bar
+        if isCoolingDown {
+            let barHeight: CGFloat = 3
+            let barInset: CGFloat = 8
+            let barY = rect.minY + 6
+            let maxWidth = rect.width - (barInset * 2)
+            let barWidth = maxWidth * cooldownProgress
+
+            let barRect = NSRect(
+                x: rect.minX + barInset,
+                y: barY,
+                width: barWidth,
+                height: barHeight
+            )
+            let barPath = NSBezierPath(roundedRect: barRect, xRadius: 1.5, yRadius: 1.5)
+            let barColor = isPrimary ? NSColor.white.withAlphaComponent(0.7) : Theme.accentBlue.withAlphaComponent(0.6)
+            barColor.setFill()
+            barPath.fill()
+        }
+
         // Text
-        let textColor: NSColor
+        var textColor: NSColor
         if isDisabled {
             textColor = Theme.textMuted
         } else if isPrimary {
@@ -208,6 +275,11 @@ class FocusableButtonView: NSView {
             textColor = Theme.accentRed
         } else {
             textColor = Theme.textPrimary
+        }
+
+        // Dim text during cooldown
+        if isCoolingDown {
+            textColor = textColor.withAlphaComponent(0.5)
         }
 
         let font = NSFont.systemFont(ofSize: 15, weight: isPrimary ? .semibold : .medium)

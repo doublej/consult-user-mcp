@@ -16,6 +16,8 @@ final class DialogSettings: ObservableObject {
     @AppStorage("animationsEnabled") var animationsEnabled: Bool = true
     @AppStorage("alwaysOnTop") var alwaysOnTop: Bool = true
     @AppStorage("showCommentField") var showCommentField: Bool = true
+    @AppStorage("buttonCooldownEnabled") var buttonCooldownEnabled: Bool = true
+    @AppStorage("buttonCooldownDuration") var buttonCooldownDuration: Double = 2.0
 
     // MARK: - Update Settings (persisted via AppStorage)
 
@@ -82,6 +84,8 @@ final class DialogSettings: ObservableObject {
         var snoozeUntil: Date?
         var lastUpdateCheckTime: Double?
         var latestKnownVersion: String?
+        var buttonCooldownEnabled: Bool?
+        var buttonCooldownDuration: Double?
     }
 
     func saveToFile() {
@@ -94,7 +98,9 @@ final class DialogSettings: ObservableObject {
             showCommentField: showCommentField,
             snoozeUntil: snoozeUntilDate,
             lastUpdateCheckTime: lastUpdateCheckTime > 0 ? lastUpdateCheckTime : nil,
-            latestKnownVersion: latestKnownVersion.isEmpty ? nil : latestKnownVersion
+            latestKnownVersion: latestKnownVersion.isEmpty ? nil : latestKnownVersion,
+            buttonCooldownEnabled: buttonCooldownEnabled,
+            buttonCooldownDuration: buttonCooldownDuration
         )
 
         let encoder = JSONEncoder()
@@ -125,6 +131,12 @@ final class DialogSettings: ObservableObject {
         }
         if let version = settings.latestKnownVersion {
             latestKnownVersion = version
+        }
+        if let cooldownEnabled = settings.buttonCooldownEnabled {
+            buttonCooldownEnabled = cooldownEnabled
+        }
+        if let cooldownDuration = settings.buttonCooldownDuration {
+            buttonCooldownDuration = cooldownDuration
         }
     }
 

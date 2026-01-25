@@ -76,6 +76,8 @@ struct SettingsView: View {
 
                     AppearanceSection()
 
+                    BehaviorSection()
+
                     UpdatesSection()
                 }
                 .padding(16)
@@ -282,6 +284,61 @@ private struct AppearanceSection: View {
         .onChange(of: settings.soundOnShow) { _, _ in settings.saveToFile() }
         .onChange(of: settings.animationsEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.alwaysOnTop) { _, _ in settings.saveToFile() }
+    }
+}
+
+// MARK: - Behavior Section
+
+private struct BehaviorSection: View {
+    @ObservedObject private var settings = DialogSettings.shared
+
+    private var cooldownMs: Int {
+        Int(settings.buttonCooldownDuration * 1000)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title: "BEHAVIOR")
+
+            VStack(spacing: 0) {
+                CompactToggle(
+                    icon: "timer",
+                    label: "Button activation delay",
+                    isOn: $settings.buttonCooldownEnabled
+                )
+
+                if settings.buttonCooldownEnabled {
+                    Divider().padding(.leading, 28)
+
+                    HStack(spacing: 8) {
+                        Image(systemName: "hourglass")
+                            .font(.system(size: 10))
+                            .foregroundColor(.secondary)
+                            .frame(width: 16)
+
+                        Slider(
+                            value: $settings.buttonCooldownDuration,
+                            in: 0.1...3.0,
+                            step: 0.1
+                        )
+
+                        Text("\(cooldownMs) ms")
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundColor(.secondary)
+                            .frame(width: 50, alignment: .trailing)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                }
+            }
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(.controlBackgroundColor))
+            )
+        }
+        .onChange(of: settings.buttonCooldownEnabled) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.buttonCooldownDuration) { _, _ in settings.saveToFile() }
     }
 }
 

@@ -55,6 +55,7 @@ cp "$ROOT/macos-app/Sources/Resources/AppIcon.icns" "$APP_PATH/Contents/Resource
 cp "$ROOT/macos-app/Sources/Resources/update.sh" "$APP_PATH/Contents/Resources/"
 cp "$ROOT/macos-app/Sources/Resources/claude-logo.png" "$APP_PATH/Contents/Resources/"
 cp "$ROOT/macos-app/Sources/Resources/openai-logo.png" "$APP_PATH/Contents/Resources/"
+cp "$ROOT/macos-app/Sources/Resources/base-prompt.md" "$APP_PATH/Contents/Resources/"
 chmod +x "$APP_PATH/Contents/Resources/update.sh"
 
 # 9. Create Info.plist (with dynamic version)

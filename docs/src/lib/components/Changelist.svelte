@@ -13,8 +13,19 @@
 
 	const releases: Release[] = [
 		{
-			version: '1.2.4',
+			version: '1.3.0',
 			date: '2026-01-25',
+			highlight: 'Dialog history & homepage redesign',
+			changes: [
+				{ text: 'Dialog history tracking with viewer in settings', type: 'added' },
+				{ text: 'Homepage redesign with animations', type: 'added' },
+				{ text: 'Perspective 3D dialog component', type: 'added' },
+				{ text: 'Claude and OpenAI logo assets', type: 'added' }
+			]
+		},
+		{
+			version: '1.2.4',
+			date: '2026-01-24',
 			highlight: 'Auto-update & cooldown settings',
 			changes: [
 				{ text: 'Configurable button cooldown settings', type: 'added' },

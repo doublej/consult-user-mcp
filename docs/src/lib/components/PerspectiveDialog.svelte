@@ -2,10 +2,10 @@
 	import '../styles/dialog.css';
 
 	const changes = [
-		{ text: 'Configurable button cooldown settings', type: 'added' },
-		{ text: 'Auto-update via GitHub releases', type: 'added' },
-		{ text: 'Download progress bar in update UI', type: 'added' },
-		{ text: 'High energy usage from continuous polling', type: 'fixed' }
+		{ text: 'Dialog history tracking with viewer', type: 'added' },
+		{ text: 'Homepage redesign with animations', type: 'added' },
+		{ text: 'Perspective 3D dialog component', type: 'added' },
+		{ text: 'Claude and OpenAI logo assets', type: 'added' }
 	];
 
 	const typeLabels: Record<string, string> = {
@@ -32,7 +32,7 @@
 						<span class="icon">↑</span>
 					</div>
 					<div class="dialog-title">Update Consult User MCP?</div>
-					<div class="dialog-text">Version 1.2.4 is now available</div>
+					<div class="dialog-text">Version 1.3.0 is now available</div>
 
 					<div class="changelog">
 						{#each changes as change}

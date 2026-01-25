@@ -57,10 +57,13 @@ struct HistoryView: View {
         HStack(spacing: 8) {
             Button(action: { isPresented = false }) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.system(size: 10, weight: .semibold))
                     .foregroundColor(.secondary)
+                    .frame(width: 22, height: 22)
+                    .background(Circle().fill(Color(.controlBackgroundColor)))
             }
             .buttonStyle(.plain)
+            .help("Back")
 
             Text("Dialog History")
                 .font(.system(size: 13, weight: .semibold))

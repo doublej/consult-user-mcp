@@ -11,6 +11,7 @@
 	type Topic = {
 		id: string;
 		name: string;
+		description: string;
 		questions: Question[];
 	};
 
@@ -20,6 +21,7 @@
 		{
 			id: 'build',
 			name: 'Build Error',
+			description: 'Fix type errors step by step',
 			questions: [
 				{ question: 'Found 3 type errors in auth.ts — how to proceed?', options: ['Fix all now', 'Fix critical only', 'Skip with @ts-ignore'], selectedIndex: 0 },
 				{ question: 'Missing return type on loginUser()', options: ['Infer from usage', 'Add Promise<User>', 'Add Promise<void>'], selectedIndex: 1 },
@@ -31,6 +33,7 @@
 		{
 			id: 'camera',
 			name: 'Camera Debug',
+			description: 'Troubleshoot hardware issues',
 			questions: [
 				{ question: 'Is the flash raised or closed?', options: ['Raised/up', 'Closed', 'Stuck/partial'], selectedIndex: 1 },
 				{ question: 'Anything connected to camera?', options: ['Nothing', 'Hot shoe flash', 'USB cable'], selectedIndex: 0 },
@@ -50,6 +53,7 @@
 		{
 			id: 'recipe',
 			name: 'Recipe',
+			description: 'Customize dietary preferences',
 			questions: [
 				{ question: "What's your dietary restriction?", options: ['Vegetarian', 'Vegan', 'Gluten-free', 'None'], selectedIndex: 0 },
 				{ question: 'Substitute for cream?', options: ['Coconut milk', 'Cashew cream', 'Silken tofu'], selectedIndex: 0 },
@@ -60,6 +64,7 @@
 		{
 			id: 'network',
 			name: 'Network',
+			description: 'Diagnose connectivity problems',
 			questions: [
 				{ question: 'Which devices affected?', options: ['All devices', 'Just one', 'Some devices'], selectedIndex: 2 },
 				{ question: 'When did issues start?', options: ['Today', 'This week', 'Gradual'], selectedIndex: 0 },
@@ -70,6 +75,7 @@
 		{
 			id: 'merge',
 			name: 'Git Merge',
+			description: 'Resolve conflicts interactively',
 			questions: [
 				{ question: 'Conflict in auth.ts — keep?', options: ['Ours', 'Theirs', 'Manual'], selectedIndex: 0 },
 				{ question: 'Conflict in config.json — keep?', options: ['Ours', 'Theirs', 'Manual'], selectedIndex: 1 },
@@ -80,6 +86,7 @@
 		{
 			id: 'deploy',
 			name: 'Deploy',
+			description: 'Configure deployment options',
 			questions: [
 				{ question: 'Target environment', options: ['Production', 'Staging', 'Preview'], selectedIndex: 1 },
 				{ question: 'Run tests first?', options: ['Yes', 'No', 'Only if changed'], selectedIndex: 0 },
@@ -181,6 +188,10 @@
 </script>
 
 <div class="demo-container">
+	<div class="demo-header">
+		<p class="demo-instruction">Click a scenario to see how Claude asks for your input</p>
+	</div>
+
 	<div class="topic-tabs">
 		{#each topics as topic}
 			<button
@@ -188,7 +199,8 @@
 				class:active={selectedTopicId === topic.id}
 				onclick={() => selectTopic(topic.id)}
 			>
-				{topic.name}
+				<span class="topic-name">{topic.name}</span>
+				<span class="topic-description">{topic.description}</span>
 			</button>
 		{/each}
 	</div>
@@ -263,37 +275,81 @@
 		padding: 48px 24px;
 	}
 
+	.demo-header {
+		text-align: center;
+		margin-bottom: 24px;
+	}
+
+	.demo-instruction {
+		color: #9a9a9f;
+		font-size: 15px;
+		margin: 0;
+	}
+
 	.topic-tabs {
 		display: flex;
 		justify-content: center;
-		gap: 8px;
+		gap: 12px;
 		margin-bottom: 32px;
 		flex-wrap: wrap;
 		padding: 0 16px;
 	}
 
 	.topic-tab {
-		padding: 10px 20px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4px;
+		padding: 16px 20px;
+		min-width: 140px;
 		background: #242428;
 		border: 1px solid #3a3a3f;
-		border-radius: 8px;
-		color: #9a9a9f;
-		font-size: 14px;
-		font-weight: 500;
-		font-family: inherit;
+		border-radius: 12px;
 		cursor: pointer;
 		transition: all 0.15s ease;
+		font-family: inherit;
+	}
+
+	.topic-name {
+		color: #e0e0e0;
+		font-size: 14px;
+		font-weight: 600;
+	}
+
+	.topic-description {
+		color: #6a6a6f;
+		font-size: 11px;
+		font-weight: 400;
+		text-align: center;
+		line-height: 1.3;
 	}
 
 	.topic-tab:hover:not(:disabled) {
 		background: #2a2a30;
+		border-color: #4a4a4f;
+		transform: translateY(-2px);
+	}
+
+	.topic-tab:hover:not(:disabled) .topic-name {
 		color: white;
 	}
 
+	.topic-tab:hover:not(:disabled) .topic-description {
+		color: #8a8a8f;
+	}
+
 	.topic-tab.active {
-		background: #5A8CFF;
+		background: linear-gradient(135deg, #3a5a9f 0%, #2a4a8f 100%);
 		border-color: #5A8CFF;
+		box-shadow: 0 0 20px rgba(90, 140, 255, 0.3);
+	}
+
+	.topic-tab.active .topic-name {
 		color: white;
+	}
+
+	.topic-tab.active .topic-description {
+		color: rgba(255, 255, 255, 0.7);
 	}
 
 	.topic-tab:disabled {
@@ -312,12 +368,20 @@
 
 	@media (max-width: 900px) {
 		.topic-tabs {
-			gap: 6px;
+			gap: 8px;
 		}
 
 		.topic-tab {
-			padding: 8px 12px;
-			font-size: 13px;
+			padding: 12px 14px;
+			min-width: 100px;
+		}
+
+		.topic-name {
+			font-size: 12px;
+		}
+
+		.topic-description {
+			font-size: 10px;
 		}
 
 		.demo-split {

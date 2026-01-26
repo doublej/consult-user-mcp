@@ -61,6 +61,10 @@ class FocusableButtonView: NSView {
     private var cooldownTimer: Timer?
     private var isCoolingDown: Bool { cooldownProgress < 1 }
 
+    // Track windows that have already started cooldown (prevents restart on SwiftUI state changes)
+    private static var windowsWithCooldownStarted: Set<ObjectIdentifier> = []
+    private var trackedWindowId: ObjectIdentifier?
+
     override var acceptsFirstResponder: Bool { !isDisabled }
     override var canBecomeKeyView: Bool { !isDisabled }
     override var mouseDownCanMoveWindow: Bool { false }
@@ -87,9 +91,14 @@ class FocusableButtonView: NSView {
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        if window != nil {
+        if let window = window {
             FocusManager.shared.registerButton(self)
-            startCooldown()
+            let windowId = ObjectIdentifier(window)
+            trackedWindowId = windowId
+            if !Self.windowsWithCooldownStarted.contains(windowId) {
+                Self.windowsWithCooldownStarted.insert(windowId)
+                startCooldown()
+            }
         } else {
             FocusManager.shared.unregister(self)
             cooldownTimer?.invalidate()
@@ -99,6 +108,9 @@ class FocusableButtonView: NSView {
 
     deinit {
         FocusManager.shared.unregister(self)
+        if let windowId = trackedWindowId {
+            Self.windowsWithCooldownStarted.remove(windowId)
+        }
     }
 
     private func setupTracking() {

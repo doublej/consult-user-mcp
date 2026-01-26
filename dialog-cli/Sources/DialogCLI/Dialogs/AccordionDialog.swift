@@ -97,6 +97,7 @@ struct AccordionSection: View {
                                 isMultiSelect: question.multiSelect,
                                 onTap: { toggleSelection(at: index) }
                             )
+                            .fixedSize(horizontal: false, vertical: true)
                             .frame(minHeight: 48)
                             .id(index)
                         }

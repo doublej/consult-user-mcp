@@ -42,6 +42,7 @@ class FocusableChoiceCardView: NSView {
     private var isHovered = false
     private var isPressed = false
     private var trackingArea: NSTrackingArea?
+    private var lastBoundsWidth: CGFloat = 0
 
     // Cached size calculations
     private var cachedTitleSize: NSSize?
@@ -139,6 +140,14 @@ class FocusableChoiceCardView: NSView {
         setupTracking()
     }
 
+    override func layout() {
+        super.layout()
+        if lastBoundsWidth != bounds.width {
+            lastBoundsWidth = bounds.width
+            invalidateIntrinsicContentSize()
+        }
+    }
+
     override func mouseEntered(with event: NSEvent) {
         isHovered = true
         needsDisplay = true
@@ -172,7 +181,9 @@ class FocusableChoiceCardView: NSView {
     }
 
     override var intrinsicContentSize: NSSize {
-        let (titleSize, subtitleSize) = calculateSizes(for: bounds.width)
+        // Use a reasonable default width if bounds.width is 0
+        let width = bounds.width > 0 ? bounds.width : 300
+        let (titleSize, subtitleSize) = calculateSizes(for: width)
         var height = titleSize.height + 24
         if let subSize = subtitleSize {
             height += subSize.height + 4

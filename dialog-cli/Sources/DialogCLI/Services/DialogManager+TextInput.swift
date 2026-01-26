@@ -61,13 +61,15 @@ extension DialogManager {
         titleLabel.alignment = .center
         contentView.addSubview(titleLabel)
 
-        // Body
+        // Body (with markdown support)
         yPos -= titleToBody + bodyHeight
-        let bodyLabel = NSTextField(wrappingLabelWithString: request.body)
+        let bodyLabel = NSTextField(labelWithAttributedString: MarkdownParser.parse(
+            request.body,
+            font: bodyFont,
+            color: Theme.textSecondary,
+            alignment: .center
+        ))
         bodyLabel.frame = NSRect(x: 24, y: yPos, width: bodyMaxWidth, height: bodyHeight)
-        bodyLabel.font = bodyFont
-        bodyLabel.textColor = Theme.textSecondary
-        bodyLabel.alignment = .center
         bodyLabel.maximumNumberOfLines = 0
         bodyLabel.lineBreakMode = .byWordWrapping
         contentView.addSubview(bodyLabel)

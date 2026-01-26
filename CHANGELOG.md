@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+<!-- Auto-generated from docs/src/lib/data/releases.json -->
+<!-- Run: bun run scripts/generate-changelog.ts -->
+
 ## [Unreleased]
 
 ## [1.4.0] - 2026-01-25
@@ -75,8 +78,6 @@ All notable changes to this project will be documented in this file.
 - Shader overlay effect
 
 ## [1.0.0] - 2025-11-27
-
-Initial release.
 
 ### Added
 - Native macOS dialog system for MCP servers

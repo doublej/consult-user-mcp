@@ -7,7 +7,8 @@
     "build:cli": "cd dialog-cli && swift build -c release",
     "build:app": "cd macos-app && swift build -c release",
     "build:bundle": "bash scripts/build-app.sh",
-    "start": "cd mcp-server && bun run start"
+    "start": "cd mcp-server && bun run start",
+    "changelog": "bun run scripts/generate-changelog.ts"
   },
   "workspaces": [
     "mcp-server"

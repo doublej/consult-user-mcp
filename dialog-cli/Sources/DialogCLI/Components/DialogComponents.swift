@@ -84,6 +84,26 @@ struct MarkdownText: View {
             }
         }
 
+        // Inline code: `code` - use monospace font
+        if let codeRegex = try? NSRegularExpression(pattern: "`([^`]+)`") {
+            var currentStr = String(result.characters)
+            var matches = codeRegex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
+            while !matches.isEmpty {
+                let match = matches[0]
+                guard let fullRange = Range(match.range, in: currentStr),
+                      let textRange = Range(match.range(at: 1), in: currentStr) else { break }
+                let codeText = String(currentStr[textRange])
+                if let attrRange = result.range(of: String(currentStr[fullRange])) {
+                    var replacement = AttributedString(codeText)
+                    replacement.font = .system(size: 12, design: .monospaced)
+                    replacement.backgroundColor = Theme.Colors.inputBackground
+                    result.replaceSubrange(attrRange, with: replacement)
+                }
+                currentStr = String(result.characters)
+                matches = codeRegex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
+            }
+        }
+
         return result
     }
 }

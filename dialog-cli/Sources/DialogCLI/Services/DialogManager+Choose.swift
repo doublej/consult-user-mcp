@@ -48,8 +48,31 @@ extension DialogManager {
                 result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, instruction: self.snoozeInstruction(minutes: minutes))
                 NSApp.stopModal()
             },
-            onFeedback: { feedback in
-                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, instruction: nil)
+            onFeedback: { feedback, selectedIndices in
+                // Build answer from current selections
+                let answer: StringOrStrings?
+                let desc: String?
+                let descs: [String?]?
+                if selectedIndices.isEmpty {
+                    answer = nil
+                    desc = nil
+                    descs = nil
+                } else if request.allowMultiple {
+                    let selected = selectedIndices.sorted().map { request.choices[$0] }
+                    let selectedDescs = selectedIndices.sorted().map { request.descriptions?[safe: $0] }
+                    answer = .multiple(selected)
+                    desc = nil
+                    descs = selectedDescs
+                } else if let idx = selectedIndices.first {
+                    answer = .single(request.choices[idx])
+                    desc = request.descriptions?[safe: idx]
+                    descs = nil
+                } else {
+                    answer = nil
+                    desc = nil
+                    descs = nil
+                }
+                result = ChoiceResponse(dialogType: "choose", answer: answer, cancelled: false, dismissed: false, description: desc, descriptions: descs, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, instruction: nil)
                 NSApp.stopModal()
             }
         )

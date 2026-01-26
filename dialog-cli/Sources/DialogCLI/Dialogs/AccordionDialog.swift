@@ -134,7 +134,7 @@ struct SwiftUIAccordionDialog: View {
     let onComplete: ([String: QuestionAnswer]) -> Void
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String) -> Void
+    let onFeedback: (String, [String: QuestionAnswer]) -> Void
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
     @State private var expandedId: String?
@@ -219,7 +219,7 @@ struct SwiftUIAccordionDialog: View {
                     DialogToolbar(
                         expandedTool: $expandedTool,
                         onSnooze: onSnooze,
-                        onFeedback: onFeedback
+                        onFeedback: { feedback in onFeedback(feedback, answers) }
                     )
 
                     // Footer buttons

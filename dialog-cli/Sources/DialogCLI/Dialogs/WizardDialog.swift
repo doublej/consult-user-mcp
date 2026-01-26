@@ -96,7 +96,7 @@ struct SwiftUIWizardDialog: View {
     let onComplete: ([String: QuestionAnswer]) -> Void
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String) -> Void
+    let onFeedback: (String, [String: QuestionAnswer]) -> Void
 
     @State private var currentIndex = 0
     @State private var answers: [String: QuestionAnswer] = [:]
@@ -154,7 +154,7 @@ struct SwiftUIWizardDialog: View {
                     DialogToolbar(
                         expandedTool: $expandedTool,
                         onSnooze: onSnooze,
-                        onFeedback: onFeedback
+                        onFeedback: { feedback in onFeedback(feedback, answers) }
                     )
 
                     // Navigation buttons

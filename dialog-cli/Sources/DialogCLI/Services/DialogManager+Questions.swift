@@ -52,8 +52,9 @@ extension DialogManager {
             NSApp.stopModal()
         }
 
-        let onFeedback: (String) -> Void = { feedback in
-            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, instruction: nil)
+        let onFeedback: (String, [String: QuestionAnswer]) -> Void = { feedback, currentAnswers in
+            let response = buildResponse(answers: currentAnswers, cancelled: false, dismissed: false)
+            result = QuestionsResponse(dialogType: "questions", answers: response.answers, cancelled: false, dismissed: false, completedCount: response.completedCount, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, instruction: nil)
             NSApp.stopModal()
         }
 

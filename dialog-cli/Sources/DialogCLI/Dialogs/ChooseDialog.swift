@@ -12,13 +12,13 @@ struct SwiftUIChooseDialog: View {
     let onComplete: (Set<Int>) -> Void
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String) -> Void
+    let onFeedback: (String, Set<Int>) -> Void
 
     @State private var selectedIndices: Set<Int> = []
     @State private var focusedIndex: Int = 0
     @State private var expandedTool: DialogToolbar.ToolbarTool?
 
-    init(body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String) -> Void) {
+    init(body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String, Set<Int>) -> Void) {
         self.bodyText = body
         self.choices = choices
         self.descriptions = descriptions
@@ -45,7 +45,7 @@ struct SwiftUIChooseDialog: View {
                 DialogToolbar(
                     expandedTool: $expandedTool,
                     onSnooze: onSnooze,
-                    onFeedback: onFeedback
+                    onFeedback: { feedback in onFeedback(feedback, selectedIndices) }
                 )
 
                 footerView

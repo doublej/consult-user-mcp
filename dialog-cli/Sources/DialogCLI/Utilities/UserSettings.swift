@@ -5,21 +5,12 @@ import AppKit
 
 struct UserSettings {
     var position: String = "left"
-    var size: String = "regular"
     var soundOnShow: String = "subtle"
     var animationsEnabled: Bool = true
     var alwaysOnTop: Bool = true
     var snoozeUntil: Date?
     var buttonCooldownEnabled: Bool = true
     var buttonCooldownDuration: Double = 2.0
-
-    var sizeScale: CGFloat {
-        switch size {
-        case "compact": return 0.85
-        case "large": return 1.2
-        default: return 1.0
-        }
-    }
 
     func playSound() {
         let soundName: String?
@@ -49,9 +40,6 @@ struct UserSettings {
 
         if let position = json["position"] as? String {
             settings.position = position
-        }
-        if let size = json["size"] as? String {
-            settings.size = size
         }
         if let sound = json["soundOnShow"] as? String {
             settings.soundOnShow = sound

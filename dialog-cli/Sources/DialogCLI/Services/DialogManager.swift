@@ -65,7 +65,6 @@ class DialogManager {
         minHeight: CGFloat = 300,
         maxHeightRatio: CGFloat = 0.85
     ) -> (NSWindow, NSHostingView<Content>, DraggableView) {
-        let scale = userSettings.sizeScale
         let hostingView = NSHostingView(rootView: content)
 
         let screenHeight = NSScreen.main?.visibleFrame.height ?? 800
@@ -73,8 +72,8 @@ class DialogManager {
 
         hostingView.layout()
         let fittingSize = hostingView.fittingSize
-        let width = (max(minWidth, fittingSize.width) + 16) * scale
-        let height = min(max(fittingSize.height + 16, minHeight), maxHeight) * scale
+        let width = max(minWidth, fittingSize.width) + 16
+        let height = min(max(fittingSize.height + 16, minHeight), maxHeight)
 
         let (window, bgView) = createWindow(width: width, height: height)
 

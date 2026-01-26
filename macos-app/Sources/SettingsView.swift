@@ -251,22 +251,6 @@ private struct AppearanceSection: View {
 
             VStack(spacing: 0) {
                 SettingRowWithHint(
-                    icon: "aspectratio",
-                    label: "Size",
-                    hint: "Scale dialog windows"
-                ) {
-                    Picker("", selection: $settings.size) {
-                        ForEach(DialogSize.allCases, id: \.self) { size in
-                            Text(size.shortLabel).tag(size)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(width: 100)
-                }
-
-                Divider().padding(.leading, 28)
-
-                SettingRowWithHint(
                     icon: "bell",
                     label: "Sound",
                     hint: "Play when dialog appears"
@@ -303,7 +287,6 @@ private struct AppearanceSection: View {
                     .fill(Color(.controlBackgroundColor))
             )
         }
-        .onChange(of: settings.size) { _, _ in settings.saveToFile() }
         .onChange(of: settings.soundOnShow) { _, _ in settings.saveToFile() }
         .onChange(of: settings.animationsEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.alwaysOnTop) { _, _ in settings.saveToFile() }

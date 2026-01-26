@@ -45,7 +45,7 @@
 
 					<div class="button-row">
 						<button class="btn secondary">Later</button>
-						<button class="btn primary">Update <span class="key-hint">&#x23CE;</span></button>
+						<a href="https://github.com/doublej/consult-user-mcp/releases/tag/v{latestRelease.version}" class="btn primary" target="_blank" rel="noopener">Update <span class="key-hint">&#x23CE;</span></a>
 					</div>
 				</div>
 
@@ -191,7 +191,17 @@
 	}
 
 	/* Non-interactive buttons */
-	:global(.btn) {
+	:global(.btn.secondary) {
 		cursor: default;
+	}
+
+	/* Make primary button clickable */
+	a.btn.primary {
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	a.btn.primary:hover {
+		filter: brightness(1.1);
 	}
 </style>

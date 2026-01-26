@@ -27,7 +27,7 @@
 	{#each releases as release, i}
 		<div class="release" class:latest={i === 0} class:compact={i > 0}>
 			<div class="release-header">
-				<span class="version">v{release.version}</span>
+				<a href="https://github.com/doublej/consult-user-mcp/releases/tag/v{release.version}" class="version" target="_blank" rel="noopener">v{release.version}</a>
 				{#if i === 0}
 					<span class="badge">Latest</span>
 				{/if}
@@ -95,6 +95,11 @@
 		font-size: 0.95rem;
 		font-weight: 500;
 		color: #1a1a1a;
+		text-decoration: none;
+	}
+
+	.version:hover {
+		text-decoration: underline;
 	}
 
 	.badge {

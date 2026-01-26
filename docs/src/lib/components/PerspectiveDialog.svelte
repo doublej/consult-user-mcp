@@ -1,17 +1,17 @@
 <script lang="ts">
 	import '../styles/dialog.css';
+	import releasesData from '$lib/data/releases.json';
 
-	const changes = [
-		{ text: 'Dialog history tracking with viewer', type: 'added' },
-		{ text: 'Homepage redesign with animations', type: 'added' },
-		{ text: 'Perspective 3D dialog component', type: 'added' },
-		{ text: 'Claude and OpenAI logo assets', type: 'added' }
-	];
+	// Get latest release from JSON
+	const latestRelease = releasesData.releases[0];
+	// Show max 4 changes for the hero preview
+	const changes = latestRelease.changes.slice(0, 4);
 
 	const typeLabels: Record<string, string> = {
 		added: 'New',
 		changed: 'Updated',
-		fixed: 'Fixed'
+		fixed: 'Fixed',
+		removed: 'Removed'
 	};
 </script>
 
@@ -32,7 +32,7 @@
 						<span class="icon">↑</span>
 					</div>
 					<div class="dialog-title">Update Consult User MCP?</div>
-					<div class="dialog-text">Version 1.3.0 is now available</div>
+					<div class="dialog-text">Version {latestRelease.version} is now available</div>
 
 					<div class="changelog">
 						{#each changes as change}

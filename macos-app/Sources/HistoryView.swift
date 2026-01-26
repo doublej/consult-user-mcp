@@ -17,8 +17,7 @@ struct HistoryView: View {
             }
         }
         .frame(width: 300)
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(maxHeight: maxHeight)
+        .frame(minHeight: 200, maxHeight: maxHeight)
         .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
         .alert("Clear History", isPresented: $showClearConfirmation) {
             Button("Cancel", role: .cancel) {}
@@ -37,7 +36,7 @@ struct HistoryView: View {
             if historyManager.entries.isEmpty {
                 emptyState
             } else {
-                ScrollView(.vertical, showsIndicators: false) {
+                ScrollView(.vertical, showsIndicators: true) {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(groupedEntries.keys.sorted().reversed(), id: \.self) { group in
                             if let entries = groupedEntries[group] {
@@ -201,7 +200,7 @@ private struct HistoryDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            ScrollView(.vertical, showsIndicators: false) {
+            ScrollView(.vertical, showsIndicators: true) {
                 VStack(alignment: .leading, spacing: 16) {
                     typeAndStatus
                     questionSection

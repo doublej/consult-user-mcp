@@ -41,6 +41,7 @@ extension DialogManager {
         positionWindow(window, position: effectivePosition(request.position))
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        playShowSound()
 
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)

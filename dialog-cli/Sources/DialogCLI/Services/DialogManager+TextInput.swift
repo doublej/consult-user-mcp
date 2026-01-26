@@ -122,6 +122,7 @@ extension DialogManager {
         positionWindow(window, position: effectivePosition(request.position))
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        playShowSound()
 
         let modes: [RunLoop.Mode] = [.default, .modalPanel]
         RunLoop.current.perform(inModes: modes) {

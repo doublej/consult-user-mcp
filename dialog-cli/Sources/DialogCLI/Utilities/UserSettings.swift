@@ -1,12 +1,37 @@
 import Foundation
+import AppKit
 
 // MARK: - Settings Reader
 
 struct UserSettings {
     var position: String = "left"
+    var size: String = "regular"
+    var soundOnShow: String = "subtle"
+    var animationsEnabled: Bool = true
+    var alwaysOnTop: Bool = true
     var snoozeUntil: Date?
     var buttonCooldownEnabled: Bool = true
     var buttonCooldownDuration: Double = 2.0
+
+    var sizeScale: CGFloat {
+        switch size {
+        case "compact": return 0.85
+        case "large": return 1.2
+        default: return 1.0
+        }
+    }
+
+    func playSound() {
+        let soundName: String?
+        switch soundOnShow {
+        case "subtle": soundName = "Tink"
+        case "pop": soundName = "Pop"
+        case "chime": soundName = "Glass"
+        default: soundName = nil
+        }
+        guard let name = soundName else { return }
+        NSSound(named: NSSound.Name(name))?.play()
+    }
 
     private static var settingsURL: URL? {
         FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
@@ -24,6 +49,18 @@ struct UserSettings {
 
         if let position = json["position"] as? String {
             settings.position = position
+        }
+        if let size = json["size"] as? String {
+            settings.size = size
+        }
+        if let sound = json["soundOnShow"] as? String {
+            settings.soundOnShow = sound
+        }
+        if let animations = json["animationsEnabled"] as? Bool {
+            settings.animationsEnabled = animations
+        }
+        if let onTop = json["alwaysOnTop"] as? Bool {
+            settings.alwaysOnTop = onTop
         }
         if let snoozeStr = json["snoozeUntil"] as? String {
             let formatter = ISO8601DateFormatter()

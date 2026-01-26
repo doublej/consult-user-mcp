@@ -250,7 +250,11 @@ private struct AppearanceSection: View {
             SectionHeader(title: "APPEARANCE")
 
             VStack(spacing: 0) {
-                SettingRow(icon: "aspectratio", label: "Size") {
+                SettingRowWithHint(
+                    icon: "aspectratio",
+                    label: "Size",
+                    hint: "Scale dialog windows"
+                ) {
                     Picker("", selection: $settings.size) {
                         ForEach(DialogSize.allCases, id: \.self) { size in
                             Text(size.shortLabel).tag(size)
@@ -262,7 +266,11 @@ private struct AppearanceSection: View {
 
                 Divider().padding(.leading, 28)
 
-                SettingRow(icon: "bell", label: "Sound") {
+                SettingRowWithHint(
+                    icon: "bell",
+                    label: "Sound",
+                    hint: "Play when dialog appears"
+                ) {
                     Picker("", selection: $settings.soundOnShow) {
                         ForEach(SoundEffect.allCases, id: \.self) { sound in
                             Text(sound.label).tag(sound)
@@ -273,11 +281,21 @@ private struct AppearanceSection: View {
 
                 Divider().padding(.leading, 28)
 
-                CompactToggle(icon: "sparkles", label: "Animations", isOn: $settings.animationsEnabled)
+                CompactToggleWithHint(
+                    icon: "sparkles",
+                    label: "Animations",
+                    hint: "Smooth transitions",
+                    isOn: $settings.animationsEnabled
+                )
 
                 Divider().padding(.leading, 28)
 
-                CompactToggle(icon: "pin", label: "Always on Top", isOn: $settings.alwaysOnTop)
+                CompactToggleWithHint(
+                    icon: "pin",
+                    label: "Always on Top",
+                    hint: "Keep dialogs above other windows",
+                    isOn: $settings.alwaysOnTop
+                )
             }
             .padding(.vertical, 4)
             .background(
@@ -306,9 +324,10 @@ private struct BehaviorSection: View {
             SectionHeader(title: "BEHAVIOR")
 
             VStack(spacing: 0) {
-                CompactToggle(
+                CompactToggleWithHint(
                     icon: "timer",
                     label: "Button activation delay",
+                    hint: "Prevent accidental clicks",
                     isOn: $settings.buttonCooldownEnabled
                 )
 
@@ -615,6 +634,36 @@ private struct SettingRow<Content: View>: View {
     }
 }
 
+private struct SettingRowWithHint<Content: View>: View {
+    let icon: String
+    let label: String
+    let hint: String
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 10))
+                .foregroundColor(.secondary)
+                .frame(width: 16)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(label)
+                    .font(.system(size: 11))
+                Text(hint)
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            content()
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+    }
+}
+
 private struct CompactToggle: View {
     let icon: String
     let label: String
@@ -629,6 +678,38 @@ private struct CompactToggle: View {
 
             Text(label)
                 .font(.system(size: 11))
+
+            Spacer()
+
+            Toggle("", isOn: $isOn)
+                .toggleStyle(.switch)
+                .controlSize(.mini)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+    }
+}
+
+private struct CompactToggleWithHint: View {
+    let icon: String
+    let label: String
+    let hint: String
+    @Binding var isOn: Bool
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 10))
+                .foregroundColor(.secondary)
+                .frame(width: 16)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(label)
+                    .font(.system(size: 11))
+                Text(hint)
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+            }
 
             Spacer()
 

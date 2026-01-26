@@ -1,7 +1,9 @@
 <script lang="ts">
+	import releasesData from '$lib/data/releases.json';
+
 	type ChangeItem = {
 		text: string;
-		type: 'added' | 'changed' | 'fixed';
+		type: 'added' | 'changed' | 'fixed' | 'removed';
 	};
 
 	type Release = {
@@ -11,63 +13,13 @@
 		changes: ChangeItem[];
 	};
 
-	const releases: Release[] = [
-		{
-			version: '1.4.0',
-			date: '2026-01-25',
-			highlight: 'History detail view',
-			changes: [
-				{ text: 'History detail view with full question and answer', type: 'added' },
-				{ text: 'History entry navigation with back button', type: 'added' },
-				{ text: 'Hover states on history rows', type: 'added' }
-			]
-		},
-		{
-			version: '1.3.0',
-			date: '2026-01-20',
-			highlight: 'Dialog history tracking',
-			changes: [
-				{ text: 'Dialog history tracking with viewer in settings', type: 'added' },
-				{ text: 'Auto-update via GitHub releases', type: 'added' }
-			]
-		},
-		{
-			version: '1.2.4',
-			date: '2026-01-24',
-			highlight: 'Auto-update & cooldown settings',
-			changes: [
-				{ text: 'Configurable button cooldown settings', type: 'added' },
-				{ text: 'Auto-update via GitHub releases', type: 'added' },
-				{ text: 'Download progress bar in update UI', type: 'added' },
-				{ text: 'High energy usage from continuous polling', type: 'fixed' }
-			]
-		},
-		{
-			version: '1.2.0',
-			date: '2026-01-10',
-			highlight: 'Native Swift dialogs',
-			changes: [
-				{ text: 'Refactor to native Swift CLI dialogs', type: 'changed' },
-				{ text: 'Snooze crash and menu bar icon theme', type: 'fixed' },
-				{ text: 'Install script improvements', type: 'fixed' }
-			]
-		},
-		{
-			version: '1.1.0',
-			date: '2025-12-11',
-			highlight: 'Renamed to Consult User MCP',
-			changes: [
-				{ text: 'Rename from "Speak MCP" to "Consult User MCP"', type: 'changed' },
-				{ text: 'Improved focus handling', type: 'changed' },
-				{ text: 'Keyboard input fixes in feedback field', type: 'fixed' }
-			]
-		}
-	];
+	const releases: Release[] = releasesData.releases as Release[];
 
-	const typeLabels = {
+	const typeLabels: Record<string, string> = {
 		added: 'New',
 		changed: 'Updated',
-		fixed: 'Fixed'
+		fixed: 'Fixed',
+		removed: 'Removed'
 	};
 </script>
 
@@ -208,6 +160,11 @@
 	.change.fixed .type-badge {
 		background: #fce4ec;
 		color: #c2185b;
+	}
+
+	.change.removed .type-badge {
+		background: #f3e5f5;
+		color: #7b1fa2;
 	}
 
 	.change-text {

@@ -1,0 +1,94 @@
+{
+  "$schema": "./releases.schema.json",
+  "_comment": "Single source of truth for app releases. Used by /docs and GitHub releases. Never include docs-only changes.",
+  "releases": [
+    {
+      "version": "1.4.0",
+      "date": "2026-01-25",
+      "highlight": "History detail view",
+      "changes": [
+        { "text": "History detail view with full question, answer, and metadata", "type": "added" },
+        { "text": "History entry navigation with back button", "type": "added" },
+        { "text": "Hover states and chevron indicators on history rows", "type": "added" }
+      ]
+    },
+    {
+      "version": "1.3.0",
+      "date": "2026-01-20",
+      "highlight": "Dialog history tracking",
+      "changes": [
+        { "text": "Dialog history tracking with viewer in settings", "type": "added" },
+        { "text": "Keyboard accessibility to iOS PWA choice cards", "type": "added" },
+        { "text": "Automated tests for MCP server", "type": "added" },
+        { "text": "PNG icons for iOS PWA compatibility", "type": "added" },
+        { "text": "Input validation for iOS PWA API endpoints", "type": "added" },
+        { "text": "Auto-update via GitHub releases", "type": "added" },
+        { "text": "Split DialogManager.swift into focused modules", "type": "changed" },
+        { "text": "Replace magic key codes with KeyCode constants", "type": "changed" },
+        { "text": "Sync snooze clear from CLI to macOS app", "type": "fixed" },
+        { "text": "Fallback error with setup instructions if Dialog CLI not found", "type": "fixed" },
+        { "text": "Error logging for file write failures in UserSettings", "type": "fixed" },
+        { "text": "Timeout handling for long dialogs in MCP server", "type": "fixed" },
+        { "text": "Validate choice descriptions array length matches choices", "type": "fixed" },
+        { "text": "Error handling for JSON parse and CLI path in swift.ts", "type": "fixed" }
+      ]
+    },
+    {
+      "version": "1.2.0",
+      "date": "2026-01-10",
+      "highlight": "Native Swift dialogs",
+      "changes": [
+        { "text": "Refactor dialog system to use native Swift CLI, remove AppleScript provider", "type": "changed" },
+        { "text": "Snooze crash and menu bar icon theme", "type": "fixed" },
+        { "text": "Install script with MCP config output, use bun consistently", "type": "fixed" }
+      ]
+    },
+    {
+      "version": "1.1.2",
+      "date": "2025-12-16",
+      "highlight": "Install script fix",
+      "changes": [
+        { "text": "Add execute permission to install.sh", "type": "fixed" }
+      ]
+    },
+    {
+      "version": "1.1.1",
+      "date": "2025-12-16",
+      "highlight": "Install script and bun",
+      "changes": [
+        { "text": "Install script with quarantine removal instructions", "type": "added" },
+        { "text": "Switch from npm/pnpm to bun", "type": "changed" },
+        { "text": "dialog-cli path resolution", "type": "fixed" },
+        { "text": "GitHub link in macOS app", "type": "fixed" }
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "date": "2025-12-11",
+      "highlight": "Renamed to Consult User MCP",
+      "changes": [
+        { "text": "Rename from \"Speak MCP\" to \"Consult User MCP\" across codebase", "type": "changed" },
+        { "text": "Consolidate dialog types and improve focus handling", "type": "changed" },
+        { "text": "Make keyboard hints more compact", "type": "changed" },
+        { "text": "ScrollView clipping and toolbar transparency", "type": "fixed" },
+        { "text": "Allow typing 's' in feedback text field without triggering snooze", "type": "fixed" },
+        { "text": "Allow typing 'f' in feedback text field", "type": "fixed" },
+        { "text": "Shader overlay effect", "type": "removed" }
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2025-11-27",
+      "highlight": "Initial release",
+      "changes": [
+        { "text": "Native macOS dialog system for MCP servers", "type": "added" },
+        { "text": "Confirmation, multiple choice, text input, and multi-question dialogs", "type": "added" },
+        { "text": "Snooze feature (1-60 minutes)", "type": "added" },
+        { "text": "Feedback feature for redirecting the agent", "type": "added" },
+        { "text": "iOS PWA companion for remote MCP support", "type": "added" },
+        { "text": "macOS menu bar app with settings UI", "type": "added" },
+        { "text": "Text-to-speech feature", "type": "removed" }
+      ]
+    }
+  ]
+}

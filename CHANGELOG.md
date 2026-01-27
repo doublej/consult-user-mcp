@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-01-27
+
+### Added
+- Markdown support in text input body
+- Inline code markdown parsing
+- Include partial answers in feedback responses
+
+### Fixed
+- Button cooldown only triggers once per dialog window
+
 ## [1.4.0] - 2026-01-25
 
 ### Added

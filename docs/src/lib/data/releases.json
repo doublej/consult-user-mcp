@@ -3,6 +3,17 @@
   "_comment": "Single source of truth for app releases. Used by /docs and GitHub releases. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.4.1",
+      "date": "2026-01-27",
+      "highlight": "Markdown support",
+      "changes": [
+        { "text": "Markdown support in text input body", "type": "added" },
+        { "text": "Inline code markdown parsing", "type": "added" },
+        { "text": "Include partial answers in feedback responses", "type": "added" },
+        { "text": "Button cooldown only triggers once per dialog window", "type": "fixed" }
+      ]
+    },
+    {
       "version": "1.4.0",
       "date": "2026-01-25",
       "highlight": "History detail view",

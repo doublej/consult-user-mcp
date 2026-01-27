@@ -138,20 +138,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func dialogCliPath() -> String {
         let fm = FileManager.default
-        let execDir = (Bundle.main.executablePath ?? "") as NSString
 
-        // 1. Check same folder as executable (bundled app)
-        let bundledPath = execDir.deletingLastPathComponent + "/dialog-cli"
-        if fm.fileExists(atPath: bundledPath) { return bundledPath }
+        // 1. Check Resources folder (bundled app)
+        if let resourcePath = Bundle.main.resourcePath {
+            let bundledPath = (resourcePath as NSString).appendingPathComponent("dialog-cli/dialog-cli")
+            if fm.fileExists(atPath: bundledPath) { return bundledPath }
+        }
 
         // 2. Check dev build path (swift build)
-        var devPath = execDir.deletingLastPathComponent as String
-        if devPath.contains("/.build/") {
-            while !devPath.hasSuffix("/macos-app") && devPath.count > 1 {
-                devPath = (devPath as NSString).deletingLastPathComponent
+        if let execPath = Bundle.main.executablePath {
+            var devPath = (execPath as NSString).deletingLastPathComponent
+            if devPath.contains("/.build/") {
+                while !devPath.hasSuffix("/macos-app") && devPath.count > 1 {
+                    devPath = (devPath as NSString).deletingLastPathComponent
+                }
+                let cliPath = (devPath as NSString)
+                    .deletingLastPathComponent
+                    .appending("/dialog-cli/.build/debug/DialogCLI")
+                if fm.fileExists(atPath: cliPath) { return cliPath }
             }
-            devPath = (devPath as NSString).deletingLastPathComponent + "/dialog-cli/dialog-cli"
-            if fm.fileExists(atPath: devPath) { return devPath }
         }
 
         // 3. Fallback

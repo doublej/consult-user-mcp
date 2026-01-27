@@ -58,12 +58,9 @@ class FocusableButtonView: NSView {
 
     // Cooldown state to prevent accidental activation
     private var cooldownProgress: CGFloat = 0  // 0 to 1
-    private var cooldownTimer: Timer?
+    private var cooldownTimer: DispatchSourceTimer?
     private var isCoolingDown: Bool { cooldownProgress < 1 }
-
-    // Track windows that have already started cooldown (prevents restart on SwiftUI state changes)
-    private static var windowsWithCooldownStarted: Set<ObjectIdentifier> = []
-    private var trackedWindowId: ObjectIdentifier?
+    private var cooldownStarted = false  // Prevents restart on SwiftUI state changes
 
     override var acceptsFirstResponder: Bool { !isDisabled }
     override var canBecomeKeyView: Bool { !isDisabled }
@@ -91,26 +88,22 @@ class FocusableButtonView: NSView {
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        if let window = window {
+        if window != nil {
             FocusManager.shared.registerButton(self)
-            let windowId = ObjectIdentifier(window)
-            trackedWindowId = windowId
-            if !Self.windowsWithCooldownStarted.contains(windowId) {
-                Self.windowsWithCooldownStarted.insert(windowId)
+            if !cooldownStarted {
+                cooldownStarted = true
                 startCooldown()
             }
         } else {
             FocusManager.shared.unregister(self)
-            cooldownTimer?.invalidate()
+            cooldownTimer?.cancel()
             cooldownTimer = nil
         }
     }
 
     deinit {
         FocusManager.shared.unregister(self)
-        if let windowId = trackedWindowId {
-            Self.windowsWithCooldownStarted.remove(windowId)
-        }
+        cooldownTimer?.cancel()
     }
 
     private func setupTracking() {
@@ -125,29 +118,29 @@ class FocusableButtonView: NSView {
 
     private func startCooldown() {
         let settings = UserSettings.load()
-
-        // Skip cooldown if disabled
         guard settings.buttonCooldownEnabled else {
             cooldownProgress = 1
             return
         }
 
         cooldownProgress = 0
-        cooldownTimer?.invalidate()
         let startTime = CACurrentMediaTime()
         let duration = settings.buttonCooldownDuration
 
-        let timer = Timer(timeInterval: 1/60, repeats: true) { [weak self] timer in
-            guard let self = self else { timer.invalidate(); return }
+        cooldownTimer?.cancel()
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now(), repeating: 1.0 / 60.0)
+        timer.setEventHandler { [weak self] in
+            guard let self else { return }
             let elapsed = CACurrentMediaTime() - startTime
             self.cooldownProgress = min(1, CGFloat(elapsed / duration))
             self.needsDisplay = true
             if self.cooldownProgress >= 1 {
-                timer.invalidate()
+                self.cooldownTimer?.cancel()
                 self.cooldownTimer = nil
             }
         }
-        RunLoop.main.add(timer, forMode: .common)
+        timer.resume()
         cooldownTimer = timer
     }
 

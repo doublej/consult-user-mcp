@@ -49,7 +49,7 @@ final class DialogSettings: ObservableObject {
 
     var shouldAutoCheckForUpdates: Bool {
         guard let lastCheck = lastUpdateCheck else { return true }
-        return Date().timeIntervalSince(lastCheck) > 4 * 60 * 60 // 4 hours
+        return Date().timeIntervalSince(lastCheck) > 60 // 1 minute
     }
 
     // MARK: - Init

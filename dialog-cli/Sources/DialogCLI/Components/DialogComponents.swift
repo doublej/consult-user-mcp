@@ -1,6 +1,40 @@
 import SwiftUI
 import AppKit
 
+// MARK: - Project Badge
+
+struct ProjectBadge: View {
+    let projectName: String
+    let projectPath: String
+
+    @State private var isHovered = false
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "folder.fill")
+                .font(.system(size: 9))
+            Text(projectName)
+                .font(.system(size: 10, weight: .medium))
+                .lineLimit(1)
+        }
+        .foregroundColor(Theme.Colors.textMuted)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(
+            Capsule()
+                .fill(Theme.Colors.cardBackground)
+                .overlay(
+                    Capsule()
+                        .strokeBorder(Theme.Colors.border.opacity(0.5), lineWidth: 1)
+                )
+        )
+        .help(projectPath)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
 // MARK: - Markdown Text
 
 struct MarkdownText: View {
@@ -123,8 +157,26 @@ struct DialogHeader: View {
         self.bodyText = body
     }
 
+    private var projectName: String? {
+        DialogManager.shared.getProjectName()
+    }
+
+    private var projectPath: String? {
+        DialogManager.shared.getProjectPath()
+    }
+
     var body: some View {
         VStack(spacing: 0) {
+            // Project badge in top-right
+            if let name = projectName, let path = projectPath {
+                HStack {
+                    Spacer()
+                    ProjectBadge(projectName: name, projectPath: path)
+                }
+                .padding(.top, 12)
+                .padding(.trailing, 12)
+            }
+
             ZStack {
                 Circle()
                     .fill(iconColor.opacity(0.15))
@@ -134,7 +186,7 @@ struct DialogHeader: View {
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(iconColor)
             }
-            .padding(.top, 28)
+            .padding(.top, projectName != nil ? 8 : 28)
             .padding(.bottom, 16)
 
             Text(title)

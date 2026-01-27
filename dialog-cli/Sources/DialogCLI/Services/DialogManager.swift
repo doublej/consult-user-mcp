@@ -4,6 +4,7 @@ import SwiftUI
 class DialogManager {
     static let shared = DialogManager()
     private var clientName = "MCP"
+    private var projectPath: String?
     private var userSettings = UserSettings.load()
     var sizeObserver: WindowSizeObserver?
 
@@ -13,6 +14,19 @@ class DialogManager {
 
     func getClientName() -> String {
         clientName
+    }
+
+    func setProjectPath(_ path: String?) {
+        projectPath = path
+    }
+
+    func getProjectPath() -> String? {
+        projectPath
+    }
+
+    func getProjectName() -> String? {
+        guard let path = projectPath else { return nil }
+        return URL(fileURLWithPath: path).lastPathComponent
     }
 
     func getSettings() -> UserSettings {

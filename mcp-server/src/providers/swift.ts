@@ -69,7 +69,11 @@ export class SwiftDialogProvider implements DialogProvider {
     let stdout: string;
     try {
       const result = await execFileAsync(cliPath, [command, jsonArg], {
-        env: { ...process.env, MCP_CLIENT_NAME: this.clientName },
+        env: {
+          ...process.env,
+          MCP_CLIENT_NAME: this.clientName,
+          MCP_PROJECT_PATH: process.cwd(),
+        },
       });
       stdout = result.stdout;
     } catch (err: unknown) {

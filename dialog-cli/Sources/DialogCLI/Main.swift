@@ -105,6 +105,18 @@ static func run() {
         manager.setClientName(clientName)
     }
 
+    // Set project path from environment variable and notify macOS app
+    if let projectPath = ProcessInfo.processInfo.environment["MCP_PROJECT_PATH"] {
+        manager.setProjectPath(projectPath)
+        // Notify macOS app about the project for discovery tracking
+        DistributedNotificationCenter.default().postNotificationName(
+            NSNotification.Name("com.consult-user-mcp.project"),
+            object: nil,
+            userInfo: ["path": projectPath],
+            deliverImmediately: true
+        )
+    }
+
     // Set theme from environment variable
     if let themeName = ProcessInfo.processInfo.environment["DIALOG_THEME"] {
         ThemeManager.shared.setTheme(named: themeName)

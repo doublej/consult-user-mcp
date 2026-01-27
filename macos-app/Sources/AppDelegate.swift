@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var popover: NSPopover!
     private var debugMenu: NSMenu!
     private var snoozeObserver: AnyCancellable?
+    private var projectsWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -17,6 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupDebugMenu()
         observeSnooze()
         setupNotifications()
+        observeProjectNotifications()
         checkForUpdatesAutomatically()
     }
 
@@ -125,6 +127,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         debugMenu.addItem(NSMenuItem.separator())
 
+        let projectsItem = NSMenuItem(title: "Discovered Projects...", action: #selector(showProjects), keyEquivalent: "p")
+        projectsItem.target = self
+        debugMenu.addItem(projectsItem)
+
+        debugMenu.addItem(NSMenuItem.separator())
+
         let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "u")
         updateItem.target = self
         debugMenu.addItem(updateItem)
@@ -133,6 +141,46 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let quitItem = NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         debugMenu.addItem(quitItem)
+    }
+
+    // MARK: - Projects Window
+
+    @objc private func showProjects() {
+        if let window = projectsWindow {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        let projectsView = ProjectsView()
+        let hostingController = NSHostingController(rootView: projectsView)
+
+        let window = NSWindow(contentViewController: hostingController)
+        window.title = "Discovered Projects"
+        window.styleMask = [.titled, .closable, .miniaturizable]
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+
+        projectsWindow = window
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    // MARK: - Project Notifications
+
+    private func observeProjectNotifications() {
+        DistributedNotificationCenter.default().addObserver(
+            self,
+            selector: #selector(handleProjectNotification(_:)),
+            name: NSNotification.Name("com.consult-user-mcp.project"),
+            object: nil
+        )
+    }
+
+    @objc private func handleProjectNotification(_ notification: Notification) {
+        guard let path = notification.userInfo?["path"] as? String else { return }
+        DispatchQueue.main.async {
+            ProjectManager.shared.addOrUpdate(path: path)
+        }
     }
 
     // MARK: - Dialog CLI (preserved logic)

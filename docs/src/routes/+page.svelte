@@ -150,49 +150,38 @@
 		</div>
 
 		<div class="install-steps">
-			<h3>What the installer does</h3>
+			<h3>Setup steps</h3>
 			<ol class="steps-list">
 				<li>
 					<span class="step-num">1</span>
 					<div class="step-content">
-						<strong>Downloads the app</strong>
-						<p>Fetches the latest release from GitHub and extracts it to <code>/Applications</code></p>
+						<strong>Run the install command</strong>
+						<p>Downloads the app from GitHub and moves it to <code>/Applications</code></p>
 					</div>
 				</li>
 				<li>
 					<span class="step-num">2</span>
-					<div class="step-content">
-						<strong>Configures Claude Code</strong>
-						<p>Adds the MCP server to <code>~/.claude/claude_desktop_config.json</code></p>
-					</div>
-				</li>
-				<li>
-					<span class="step-num">3</span>
-					<div class="step-content">
-						<strong>Adds usage hints</strong>
-						<p>Appends instructions to <code>~/.claude/CLAUDE.md</code> so Claude knows when to use the dialog tools</p>
-					</div>
-				</li>
-			</ol>
-
-			<h3>After installation</h3>
-			<ol class="steps-list">
-				<li>
-					<span class="step-num">1</span>
 					<div class="step-content">
 						<strong>Launch the app</strong>
 						<p>Open "Consult User MCP" from Applications. A menu bar icon will appear.</p>
 					</div>
 				</li>
 				<li>
-					<span class="step-num">2</span>
+					<span class="step-num">3</span>
 					<div class="step-content">
-						<strong>Restart Claude Code</strong>
-						<p>Quit and reopen Claude Code to load the MCP server</p>
+						<strong>Run the install wizard</strong>
+						<p>Click the menu bar icon and select "Install Guide". Follow the steps to configure Claude Code or Claude Desktop.</p>
 					</div>
 				</li>
 				<li>
-					<span class="step-num">3</span>
+					<span class="step-num">4</span>
+					<div class="step-content">
+						<strong>Restart your MCP client</strong>
+						<p>Quit and reopen Claude Code (or Claude Desktop) to load the MCP server</p>
+					</div>
+				</li>
+				<li>
+					<span class="step-num">5</span>
 					<div class="step-content">
 						<strong>Test it</strong>
 						<p>Ask Claude a question that requires your input—a dialog should appear</p>

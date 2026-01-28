@@ -37,13 +37,13 @@
 <main>
 	<header class="animate-in">
 		<nav>
-			<a href="{base}/" class="nav-logo">
-				<img src="{base}/icon.svg" alt="" />
-				<span>consult-user-mcp</span>
-			</a>
-			<a href="https://github.com/doublej/consult-user-mcp" class="nav-link" target="_blank" rel="noopener">
-				GitHub
-			</a>
+			<a href="{base}/" class="nav-logo">consult-user-mcp</a>
+			<div class="nav-links">
+				<a href="#demo" class="nav-link">Demo</a>
+				<a href="#dialogs" class="nav-link">Dialogs</a>
+				<a href="#install" class="nav-link">Install</a>
+				<a href="https://github.com/doublej/consult-user-mcp" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+			</div>
 		</nav>
 	</header>
 
@@ -71,13 +71,13 @@
 		</aside>
 	</section>
 
-	<section class="section demo-section animate-in" style="animation-delay: 600ms;">
+	<section class="section demo-section animate-in" style="animation-delay: 600ms;" id="demo">
 		<h2>See It In Action</h2>
 		<p class="section-desc">Click through scenarios to see how agents guide users through decisions—from cooking to coding to troubleshooting.</p>
 		<InteractiveDemo />
 	</section>
 
-	<section class="section dialog-types-section animate-in" style="animation-delay: 700ms;">
+	<section class="section dialog-types-section animate-in" style="animation-delay: 700ms;" id="dialogs">
 		<h2>Dialog Types</h2>
 		<p class="section-desc">Multiple tool types for different interaction patterns.</p>
 		<DialogPreviews />
@@ -258,18 +258,16 @@
 	}
 
 	.nav-logo {
-		display: flex;
-		align-items: center;
-		gap: 10px;
 		text-decoration: none;
 		color: #1a1a1a;
 		font-weight: 600;
 		font-size: 0.95rem;
 	}
 
-	.nav-logo img {
-		width: 24px;
-		height: 24px;
+	.nav-links {
+		display: flex;
+		align-items: center;
+		gap: 24px;
 	}
 
 	.nav-link {

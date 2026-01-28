@@ -137,9 +137,15 @@ struct InstallGuideView: View {
             switch step {
             case .targetSelection:
                 if answers.target.supportsBasePrompt {
-                    // Update mode based on existing file
+                    // Set default mode based on existing file state
                     if ClaudeMdInstaller.detectExisting(for: answers.target) {
-                        answers.basePromptMode = .appendSection
+                        if ClaudeMdInstaller.isUpdateAvailable(for: answers.target) {
+                            answers.basePromptMode = .update
+                        } else if ClaudeMdInstaller.detectInstalledInfo(for: answers.target) != nil {
+                            answers.basePromptMode = .skip
+                        } else {
+                            answers.basePromptMode = .appendSection
+                        }
                     } else {
                         answers.basePromptMode = .createNew
                     }
@@ -323,6 +329,14 @@ private struct BasePromptStep: View {
         ClaudeMdInstaller.detectExisting(for: answers.target)
     }
 
+    private var installedInfo: BasePromptInfo? {
+        ClaudeMdInstaller.detectInstalledInfo(for: answers.target)
+    }
+
+    private var isUpdateAvailable: Bool {
+        ClaudeMdInstaller.isUpdateAvailable(for: answers.target)
+    }
+
     private var fileName: String {
         answers.target.claudeMdPath?.components(separatedBy: "/").last ?? "CLAUDE.md"
     }
@@ -371,33 +385,74 @@ private struct BasePromptStep: View {
                 .foregroundColor(.secondary)
 
             if fileExists {
-                HStack(spacing: 6) {
-                    Image(systemName: "doc.text.fill")
-                        .foregroundColor(.orange)
-                    Text("\(fileName) already exists")
-                        .font(.system(size: 10))
-                        .foregroundColor(.orange)
+                if let info = installedInfo, isUpdateAvailable {
+                    updateAvailableBanner(installedVersion: info.version)
+                } else if installedInfo != nil {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                        Text("Usage hints installed (v\(ClaudeMdInstaller.bundledVersion))")
+                            .font(.system(size: 10))
+                            .foregroundColor(.green)
+                    }
+                    .padding(.top, 4)
+                } else {
+                    HStack(spacing: 6) {
+                        Image(systemName: "doc.text.fill")
+                            .foregroundColor(.orange)
+                        Text("\(fileName) already exists")
+                            .font(.system(size: 10))
+                            .foregroundColor(.orange)
+                    }
+                    .padding(.top, 4)
                 }
-                .padding(.top, 4)
             }
         }
     }
 
+    private func updateAvailableBanner(installedVersion: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "arrow.up.circle.fill")
+                .foregroundColor(.orange)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Update available")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundColor(.orange)
+                Text("v\(installedVersion) → v\(ClaudeMdInstaller.bundledVersion)")
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.top, 4)
+    }
+
     private var existingFileOptions: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("EXISTING FILE")
+            Text(isUpdateAvailable ? "UPDATE OPTIONS" : "EXISTING FILE")
                 .font(.system(size: 10, weight: .medium))
                 .tracking(1.0)
                 .foregroundColor(.secondary)
 
             VStack(spacing: 6) {
-                modeOption(.appendSection, icon: "text.append")
-                modeOption(.skip, icon: "xmark.circle")
+                if isUpdateAvailable {
+                    modeOption(.update, icon: "arrow.up.circle")
+                    modeOption(.skip, icon: "xmark.circle", title: "Keep existing", description: "Don't update usage hints")
+                } else if installedInfo != nil {
+                    modeOption(.skip, icon: "checkmark.circle", title: "Already installed", description: "Usage hints are up to date")
+                } else {
+                    modeOption(.appendSection, icon: "text.append")
+                    modeOption(.skip, icon: "xmark.circle")
+                }
             }
         }
     }
 
-    private func modeOption(_ mode: BasePromptInstallMode, icon: String) -> some View {
+    private func modeOption(
+        _ mode: BasePromptInstallMode,
+        icon: String,
+        title: String? = nil,
+        description: String? = nil
+    ) -> some View {
         Button(action: { answers.basePromptMode = mode }) {
             HStack(spacing: 10) {
                 Image(systemName: icon)
@@ -406,10 +461,10 @@ private struct BasePromptStep: View {
                     .frame(width: 20)
 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(mode.title)
+                    Text(title ?? mode.title)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(.primary)
-                    Text(mode.description)
+                    Text(description ?? mode.description)
                         .font(.system(size: 9))
                         .foregroundColor(.secondary)
                 }

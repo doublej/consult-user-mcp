@@ -19,6 +19,11 @@ struct SwiftUIConfirmDialog: View {
 
     var body: some View {
         DialogContainer(keyHandler: { keyCode, _ in
+            // Block action keys during cooldown
+            if CooldownManager.shared.shouldBlockKey(keyCode) {
+                return true
+            }
+
             switch keyCode {
             case KeyCode.escape:
                 if expandedTool != nil {

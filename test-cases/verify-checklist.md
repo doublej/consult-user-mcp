@@ -29,6 +29,12 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 - [ ] Custom labels "Delete All" / "Keep Files" render
 - [ ] Destructive action styling (if applicable)
 
+### `confirm/with-project.json`
+- [ ] Project badge visible in top-right corner
+- [ ] Badge shows folder icon and project name ("my-app")
+- [ ] Badge has tooltip showing full path on hover
+- [ ] Badge styling is subtle (muted colors, capsule shape)
+
 ---
 
 ## Choose Dialogs
@@ -69,6 +75,13 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 - [ ] Title "API Configuration" displayed
 - [ ] Text field shows password masking indicator
 - [ ] Input would be hidden (bullets/dots when typing)
+
+### `text-input/markdown.json`
+- [ ] **Bold text** renders with heavier weight
+- [ ] *Italic text* renders with italic style
+- [ ] `Inline code` renders with monospace font and background
+- [ ] [Links](url) render as clickable blue text
+- [ ] All markdown elements render correctly together
 
 ---
 
@@ -141,6 +154,22 @@ defaults write com.apple.universalaccess reduceMotion -bool false
 - [ ] Accordion sections expand/collapse without animation
 - [ ] Button hover states change immediately
 - [ ] No motion sickness triggers
+
+---
+
+## Interaction Testing
+
+Visual screenshots don't capture interaction behavior. Test these manually:
+
+### Click Reliability (ChoiceCard)
+- [ ] Single clicks reliably select choice options
+- [ ] No need for double-clicking to register selection
+- [ ] Mouse drag within card still triggers selection on release
+- [ ] Mouse drag outside card does not trigger selection
+
+### Button Cooldown
+- [ ] Rapid clicks on buttons don't trigger multiple actions
+- [ ] Visual feedback shows button is temporarily disabled after click
 
 ---
 

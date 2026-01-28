@@ -286,6 +286,11 @@ struct SwiftUIAccordionDialog: View {
     }
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
+        // Block action keys during cooldown
+        if CooldownManager.shared.shouldBlockKey(keyCode) {
+            return true
+        }
+
         switch keyCode {
         case KeyCode.escape:
             if expandedTool != nil {

@@ -56,10 +56,10 @@ Create a JSON file in the appropriate `cases/` subdirectory matching the request
 
 | Directory | CLI Command | Model |
 |-----------|-------------|-------|
-| confirm/ | `confirm` | `{body, title, confirmLabel, cancelLabel, position}` |
-| choose/ | `choose` | `{body, choices, descriptions?, allowMultiple, defaultSelection?, position}` |
-| text-input/ | `textInput` | `{body, title, defaultValue, hidden, position}` |
-| questions/ | `questions` | `{questions[], mode, position}` |
+| confirm/ | `confirm` | `{body, title, confirmLabel, cancelLabel, position, projectPath?}` |
+| choose/ | `choose` | `{body, choices, descriptions?, allowMultiple, defaultSelection?, position, projectPath?}` |
+| text-input/ | `textInput` | `{body, title, defaultValue, hidden, position, projectPath?}` |
+| questions/ | `questions` | `{questions[], mode, position, projectPath?}` |
 
 ## Known Issues
 

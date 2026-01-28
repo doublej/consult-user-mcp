@@ -35,7 +35,7 @@
               "properties": {
                 "text": {
                   "type": "string",
-                  "description": "Change description"
+                  "description": "User-facing change description. Write as a feature or benefit, not a commit message. Good: 'Dialogs now support markdown formatting' Bad: 'Add markdown support to dialogs'. Focus on what users can do or what's improved."
                 },
                 "type": {
                   "type": "string",

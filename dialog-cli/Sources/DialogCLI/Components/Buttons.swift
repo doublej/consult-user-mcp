@@ -57,14 +57,15 @@ class FocusableButtonView: NSView {
     private var trackingArea: NSTrackingArea?
 
     // Cooldown state to prevent accidental activation
-    private var cooldownProgress: CGFloat = 0  // 0 to 1
+    private var cooldownProgress: CGFloat = 1  // 0 to 1
     private var cooldownTimer: DispatchSourceTimer?
-    private var isCoolingDown: Bool { cooldownProgress < 1 }
-    private var cooldownStarted = false  // Prevents restart on SwiftUI state changes
+    private var cooldownObserver: NSObjectProtocol?
+    private var isCoolingDown: Bool { CooldownManager.shared.isCoolingDown }
 
     override var acceptsFirstResponder: Bool { !isDisabled }
     override var canBecomeKeyView: Bool { !isDisabled }
     override var mouseDownCanMoveWindow: Bool { false }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
     // System focus ring support
     override var focusRingType: NSFocusRingType {
@@ -90,20 +91,20 @@ class FocusableButtonView: NSView {
         super.viewDidMoveToWindow()
         if window != nil {
             FocusManager.shared.registerButton(self)
-            if !cooldownStarted {
-                cooldownStarted = true
-                startCooldown()
-            }
+            startObservingCooldown()
+            syncCooldown()
         } else {
             FocusManager.shared.unregister(self)
-            cooldownTimer?.cancel()
-            cooldownTimer = nil
+            stopObservingCooldown()
+            stopCooldownUpdates()
+            cooldownProgress = 1
         }
     }
 
     deinit {
         FocusManager.shared.unregister(self)
-        cooldownTimer?.cancel()
+        stopObservingCooldown()
+        stopCooldownUpdates()
     }
 
     private func setupTracking() {
@@ -116,32 +117,55 @@ class FocusableButtonView: NSView {
         addTrackingArea(trackingArea!)
     }
 
-    private func startCooldown() {
-        let settings = UserSettings.load()
-        guard settings.buttonCooldownEnabled else {
-            cooldownProgress = 1
-            return
+    private func startObservingCooldown() {
+        guard cooldownObserver == nil else { return }
+        cooldownObserver = NotificationCenter.default.addObserver(
+            forName: .cooldownDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.syncCooldown()
         }
+    }
 
-        cooldownProgress = 0
-        let startTime = CACurrentMediaTime()
-        let duration = settings.buttonCooldownDuration
+    private func stopObservingCooldown() {
+        if let observer = cooldownObserver {
+            NotificationCenter.default.removeObserver(observer)
+            cooldownObserver = nil
+        }
+    }
 
-        cooldownTimer?.cancel()
+    private func syncCooldown() {
+        if CooldownManager.shared.isCoolingDown {
+            cooldownProgress = CGFloat(CooldownManager.shared.progress)
+            startCooldownUpdates()
+        } else {
+            cooldownProgress = 1
+            stopCooldownUpdates()
+        }
+        needsDisplay = true
+    }
+
+    private func startCooldownUpdates() {
+        guard cooldownTimer == nil else { return }
         let timer = DispatchSource.makeTimerSource(queue: .main)
         timer.schedule(deadline: .now(), repeating: 1.0 / 60.0)
         timer.setEventHandler { [weak self] in
             guard let self else { return }
-            let elapsed = CACurrentMediaTime() - startTime
-            self.cooldownProgress = min(1, CGFloat(elapsed / duration))
+            let progress = CooldownManager.shared.progress
+            self.cooldownProgress = CGFloat(progress)
             self.needsDisplay = true
-            if self.cooldownProgress >= 1 {
-                self.cooldownTimer?.cancel()
-                self.cooldownTimer = nil
+            if progress >= 1 {
+                self.stopCooldownUpdates()
             }
         }
         timer.resume()
         cooldownTimer = timer
+    }
+
+    private func stopCooldownUpdates() {
+        cooldownTimer?.cancel()
+        cooldownTimer = nil
     }
 
     override func updateTrackingAreas() {
@@ -369,6 +393,7 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
     override var acceptsFirstResponder: Bool { true }
     override var canBecomeKeyView: Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
     // System focus ring support
     override var focusRingType: NSFocusRingType {
@@ -475,4 +500,3 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
         return false
     }
 }
-

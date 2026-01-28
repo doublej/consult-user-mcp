@@ -1,0 +1,8 @@
+{
+  "body": "Are you sure you want to deploy to production?",
+  "title": "Deploy Confirmation",
+  "confirmLabel": "Deploy",
+  "cancelLabel": "Cancel",
+  "position": "center",
+  "projectPath": "/Users/example/projects/my-app"
+}

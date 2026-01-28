@@ -63,7 +63,7 @@ export class SwiftDialogProvider implements DialogProvider {
     this.clientName = name;
   }
 
-  private async runCli<T>(command: string, args: object): Promise<T> {
+  private async runCli<T>(command: string, args: object, projectPath?: string): Promise<T> {
     if (!cliPath) cliPath = getCliPath();
     const jsonArg = JSON.stringify(args);
     let stdout: string;
@@ -72,7 +72,7 @@ export class SwiftDialogProvider implements DialogProvider {
         env: {
           ...process.env,
           MCP_CLIENT_NAME: this.clientName,
-          MCP_PROJECT_PATH: process.cwd(),
+          ...(projectPath ? { MCP_PROJECT_PATH: projectPath } : {}),
         },
       });
       stdout = result.stdout;
@@ -98,50 +98,27 @@ export class SwiftDialogProvider implements DialogProvider {
   }
 
   async confirm(opts: ConfirmOptions): Promise<ConfirmResult> {
-    return this.runCli<ConfirmResult>("confirm", {
-      body: opts.body,
-      title: opts.title,
-      confirmLabel: opts.confirmLabel,
-      cancelLabel: opts.cancelLabel,
-      position: opts.position,
-    });
+    const { projectPath, ...args } = opts;
+    return this.runCli<ConfirmResult>("confirm", args, projectPath);
   }
 
   async choose(opts: ChooseOptions): Promise<ChoiceResult> {
-    return this.runCli<ChoiceResult>("choose", {
-      body: opts.body,
-      choices: opts.choices,
-      descriptions: opts.descriptions,
-      allowMultiple: opts.allowMultiple,
-      defaultSelection: opts.defaultSelection,
-      position: opts.position,
-    });
+    const { projectPath, ...args } = opts;
+    return this.runCli<ChoiceResult>("choose", args, projectPath);
   }
 
   async textInput(opts: TextInputOptions): Promise<TextInputResult> {
-    return this.runCli<TextInputResult>("textInput", {
-      body: opts.body,
-      title: opts.title,
-      defaultValue: opts.defaultValue,
-      hidden: opts.hidden,
-      position: opts.position,
-    });
+    const { projectPath, ...args } = opts;
+    return this.runCli<TextInputResult>("textInput", args, projectPath);
   }
 
   async notify(opts: NotifyOptions): Promise<NotifyResult> {
-    return this.runCli<NotifyResult>("notify", {
-      body: opts.body,
-      title: opts.title,
-      sound: opts.sound,
-    });
+    return this.runCli<NotifyResult>("notify", opts);
   }
 
   async questions(opts: QuestionsOptions): Promise<QuestionsResult> {
-    return this.runCli<QuestionsResult>("questions", {
-      questions: opts.questions,
-      mode: opts.mode,
-      position: opts.position,
-    });
+    const { projectPath, ...args } = opts;
+    return this.runCli<QuestionsResult>("questions", args, projectPath);
   }
 
   async pulse(): Promise<void> {

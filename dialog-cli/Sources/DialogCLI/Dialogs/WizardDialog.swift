@@ -202,6 +202,11 @@ struct SwiftUIWizardDialog: View {
     }
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
+        // Block action keys during cooldown
+        if CooldownManager.shared.shouldBlockKey(keyCode) {
+            return true
+        }
+
         // Navigation (Tab, up/down arrows) and Space handled by FocusManager + focused views
         switch keyCode {
         case KeyCode.escape:

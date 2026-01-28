@@ -44,6 +44,7 @@ struct SettingsView: View {
     @State private var selectedTarget: InstallTarget = .claudeCode
     @State private var showInstallGuide = false
     @State private var showHistory = false
+    @State private var showProjects = false
 
     private let maxHeight: CGFloat = (NSScreen.main?.visibleFrame.height ?? 600) - 100
 
@@ -51,6 +52,8 @@ struct SettingsView: View {
         Group {
             if showHistory {
                 HistoryView(isPresented: $showHistory)
+            } else if showProjects {
+                ProjectsSettingsView(isPresented: $showProjects)
             } else if showInstallGuide {
                 InstallGuideView(showInstallGuide: $showInstallGuide)
             } else {
@@ -73,7 +76,11 @@ struct SettingsView: View {
                         SnoozeBanner()
                     }
 
-                    InstallCard(showInstallGuide: $showInstallGuide)
+                    UpdatesSection()
+
+                    HistorySection(showHistory: $showHistory)
+
+                    ProjectsSection(showProjects: $showProjects)
 
                     PositionSection()
 
@@ -81,9 +88,7 @@ struct SettingsView: View {
 
                     BehaviorSection()
 
-                    HistorySection(showHistory: $showHistory)
-
-                    UpdatesSection()
+                    InstallCard(showInstallGuide: $showInstallGuide)
                 }
                 .padding(16)
             }
@@ -255,12 +260,26 @@ private struct AppearanceSection: View {
                     label: "Sound",
                     hint: "Play when dialog appears"
                 ) {
-                    Picker("", selection: $settings.soundOnShow) {
-                        ForEach(SoundEffect.allCases, id: \.self) { sound in
-                            Text(sound.label).tag(sound)
+                    HStack(spacing: 4) {
+                        if settings.soundOnShow != .none {
+                            Button(action: { settings.soundOnShow.play() }) {
+                                Image(systemName: "play.fill")
+                                    .font(.system(size: 8))
+                                    .foregroundColor(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .frame(width: 20, height: 20)
+                            .background(Circle().fill(Color(.controlBackgroundColor)))
+                            .help("Preview sound")
                         }
+
+                        Picker("", selection: $settings.soundOnShow) {
+                            ForEach(SoundEffect.allCases, id: \.self) { sound in
+                                Text(sound.label).tag(sound)
+                            }
+                        }
+                        .frame(width: 80)
                     }
-                    .frame(width: 80)
                 }
 
                 Divider().padding(.leading, 28)
@@ -390,6 +409,223 @@ private struct HistorySection: View {
             }
             .buttonStyle(.plain)
         }
+    }
+}
+
+// MARK: - Projects Section
+
+private struct ProjectsSection: View {
+    @ObservedObject private var projectManager = ProjectManager.shared
+    @Binding var showProjects: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title: "PROJECTS")
+
+            Button(action: { showProjects = true }) {
+                HStack(spacing: 8) {
+                    Image(systemName: "folder.badge.gearshape")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .frame(width: 16)
+
+                    Text("Discovered Projects")
+                        .font(.system(size: 11))
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    Text("\(projectManager.projects.count)")
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundColor(.secondary)
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(Color(.tertiaryLabelColor))
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(.controlBackgroundColor))
+                )
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+    }
+}
+
+// MARK: - Projects Settings View
+
+private struct ProjectsSettingsView: View {
+    @Binding var isPresented: Bool
+    @ObservedObject private var projectManager = ProjectManager.shared
+
+    var body: some View {
+        VStack(spacing: 0) {
+            header
+            content
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 8) {
+            Button(action: { isPresented = false }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(.plain)
+
+            Image(systemName: "folder.badge.gearshape")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
+
+            Text("Projects")
+                .font(.system(size: 13, weight: .semibold))
+
+            Spacer()
+
+            if !projectManager.projects.isEmpty {
+                Button(action: { projectManager.removeAll() }) {
+                    Text("Clear All")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+    }
+
+    private var content: some View {
+        Group {
+            if projectManager.projects.isEmpty {
+                emptyState
+            } else {
+                projectList
+            }
+        }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "folder.badge.questionmark")
+                .font(.system(size: 32))
+                .foregroundColor(.secondary)
+
+            Text("No Projects Yet")
+                .font(.system(size: 13, weight: .medium))
+
+            Text("Projects are discovered automatically\nwhen dialogs appear from a project directory.")
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+        .padding(.horizontal, 16)
+    }
+
+    private var projectList: some View {
+        ScrollView(.vertical, showsIndicators: false) {
+            LazyVStack(spacing: 8) {
+                ForEach(projectManager.projects) { project in
+                    ProjectRowCompact(project: project)
+                }
+            }
+            .padding(16)
+        }
+    }
+}
+
+// MARK: - Project Row Compact
+
+private struct ProjectRowCompact: View {
+    let project: Project
+
+    @State private var isEditing = false
+    @State private var editedName = ""
+    @State private var isHovered = false
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "folder.fill")
+                .font(.system(size: 16))
+                .foregroundColor(.accentColor)
+
+            VStack(alignment: .leading, spacing: 2) {
+                if isEditing {
+                    TextField("Name", text: $editedName, onCommit: saveEdit)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 11, weight: .medium))
+                        .onAppear { editedName = project.displayName }
+                } else {
+                    Text(project.displayName)
+                        .font(.system(size: 11, weight: .medium))
+                        .lineLimit(1)
+                }
+
+                Text(project.path)
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+
+            Spacer()
+
+            HStack(spacing: 2) {
+                if isEditing {
+                    compactButton("checkmark", action: saveEdit)
+                    compactButton("xmark", action: cancelEdit)
+                } else {
+                    compactButton("pencil", action: startEdit)
+                    compactButton("folder", action: openInFinder)
+                    compactButton("trash", isDestructive: true, action: remove)
+                }
+            }
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isHovered ? Color(.controlBackgroundColor) : Color(.controlBackgroundColor).opacity(0.6))
+        )
+        .onHover { isHovered = $0 }
+    }
+
+    private func compactButton(_ icon: String, isDestructive: Bool = false, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(isDestructive ? .red.opacity(0.8) : .secondary)
+                .frame(width: 20, height: 20)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func startEdit() {
+        editedName = project.displayName
+        isEditing = true
+    }
+
+    private func saveEdit() {
+        ProjectManager.shared.rename(path: project.path, to: editedName)
+        isEditing = false
+    }
+
+    private func cancelEdit() {
+        isEditing = false
+    }
+
+    private func openInFinder() {
+        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: project.path)
+    }
+
+    private func remove() {
+        ProjectManager.shared.remove(path: project.path)
     }
 }
 

@@ -88,6 +88,7 @@ class FocusableChoiceCardView: NSView {
     override var acceptsFirstResponder: Bool { true }
     override var canBecomeKeyView: Bool { true }
     override var mouseDownCanMoveWindow: Bool { false }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
     // System focus ring support
     override var focusRingType: NSFocusRingType {
@@ -165,8 +166,11 @@ class FocusableChoiceCardView: NSView {
     }
 
     override func mouseUp(with event: NSEvent) {
-        if isPressed && isHovered {
-            onTap?()
+        if isPressed {
+            let location = convert(event.locationInWindow, from: nil)
+            if bounds.contains(location) {
+                onTap?()
+            }
         }
         isPressed = false
         needsDisplay = true

@@ -59,6 +59,7 @@ export interface ConfirmOptions {
   confirmLabel: string;
   cancelLabel: string;
   position: DialogPosition;
+  projectPath?: string;
 }
 
 // Options for choice dialog
@@ -69,6 +70,7 @@ export interface ChooseOptions {
   allowMultiple: boolean;
   defaultSelection?: string;
   position: DialogPosition;
+  projectPath?: string;
 }
 
 // Options for text input dialog
@@ -78,6 +80,7 @@ export interface TextInputOptions {
   defaultValue: string;
   hidden: boolean;
   position: DialogPosition;
+  projectPath?: string;
 }
 
 // Options for notification
@@ -103,6 +106,7 @@ export interface QuestionsOptions {
   questions: Question[];
   mode: QuestionsMode;
   position: DialogPosition;
+  projectPath?: string;
 }
 
 // Result for multi-question dialog

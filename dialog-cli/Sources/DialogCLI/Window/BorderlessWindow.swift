@@ -13,6 +13,11 @@ class BorderlessWindow: NSWindow {
     }
 
     override func keyDown(with event: NSEvent) {
+        // Block action keys during cooldown
+        if CooldownManager.shared.shouldBlockKey(event.keyCode) {
+            return
+        }
+
         if event.keyCode == KeyCode.escape {
             NSApp.stopModal(withCode: .cancel)
         } else {
@@ -21,6 +26,10 @@ class BorderlessWindow: NSWindow {
     }
 
     override func cancelOperation(_ sender: Any?) {
+        // Block ESC via cancelOperation during cooldown
+        if CooldownManager.shared.isCoolingDown {
+            return
+        }
         NSApp.stopModal(withCode: .cancel)
     }
 }

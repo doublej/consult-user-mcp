@@ -1,0 +1,7 @@
+{
+  "body": "Enter the **API key** for `production` environment.\n\nSee [documentation](https://docs.example.com) for details.\n\n*This field is required.*",
+  "title": "API Configuration",
+  "defaultValue": "",
+  "hidden": false,
+  "position": "center"
+}

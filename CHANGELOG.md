@@ -7,95 +7,90 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-01-28
+
+### Added
+- Dialogs now show which project they belong to via project_path parameter
+- Usage hints now include version info for detecting when updates are available
+- Install wizard shows update option when newer usage hints are bundled
+
+### Fixed
+- Button cooldown now prevents accidental rapid clicks across all dialogs
+
 ## [1.4.1] - 2026-01-27
 
 ### Added
-- Markdown support in text input body
-- Inline code markdown parsing
-- Include partial answers in feedback responses
+- Text input dialogs now support markdown formatting in the body text
+- Inline code blocks are now properly rendered in dialog text
+- Partial answers are now preserved when providing feedback mid-dialog
 
 ### Fixed
-- Button cooldown only triggers once per dialog window
+- Button cooldown now works correctly across multiple interactions
 
 ## [1.4.0] - 2026-01-25
 
 ### Added
-- History detail view with full question, answer, and metadata
-- History entry navigation with back button
-- Hover states and chevron indicators on history rows
+- View full question details, answers, and metadata in history
+- Navigate through history entries with back button support
+- History rows now show hover states and navigation indicators
 
 ## [1.3.0] - 2026-01-20
 
 ### Added
-- Dialog history tracking with viewer in settings
-- Keyboard accessibility to iOS PWA choice cards
-- Automated tests for MCP server
-- PNG icons for iOS PWA compatibility
-- Input validation for iOS PWA API endpoints
-- Auto-update via GitHub releases
-
-### Changed
-- Split DialogManager.swift into focused modules
-- Replace magic key codes with KeyCode constants
+- All dialog interactions are now tracked and viewable in settings
+- iOS PWA now supports full keyboard navigation
+- App now checks for updates automatically via GitHub
+- iOS PWA now works on home screen with proper icons
 
 ### Fixed
-- Sync snooze clear from CLI to macOS app
-- Fallback error with setup instructions if Dialog CLI not found
-- Error logging for file write failures in UserSettings
-- Timeout handling for long dialogs in MCP server
-- Validate choice descriptions array length matches choices
-- Error handling for JSON parse and CLI path in swift.ts
+- Snooze state now syncs properly between CLI and menu bar
+- Better error messages when Dialog CLI isn't found
+- Long-running dialogs no longer timeout unexpectedly
 
 ## [1.2.0] - 2026-01-10
 
 ### Changed
-- Refactor dialog system to use native Swift CLI, remove AppleScript provider
+- Dialogs are now native Swift for better performance and reliability
 
 ### Fixed
-- Snooze crash and menu bar icon theme
-- Install script with MCP config output, use bun consistently
+- Snooze feature now works reliably without crashes
+- Menu bar icon now matches your system theme
 
 ## [1.1.2] - 2025-12-16
 
 ### Fixed
-- Add execute permission to install.sh
+- Installation script now runs without permission errors
 
 ## [1.1.1] - 2025-12-16
 
 ### Added
-- Install script with quarantine removal instructions
+- One-line install script with clear setup instructions
 
 ### Changed
-- Switch from npm/pnpm to bun
+- Faster builds using bun instead of npm
 
 ### Fixed
-- dialog-cli path resolution
-- GitHub link in macOS app
+- Dialog CLI now works correctly regardless of install location
 
 ## [1.1.0] - 2025-12-11
 
 ### Changed
-- Rename from "Speak MCP" to "Consult User MCP" across codebase
-- Consolidate dialog types and improve focus handling
-- Make keyboard hints more compact
+- Renamed from 'Speak MCP' to 'Consult User MCP'
+- Dialogs now focus correctly when switching between apps
+- Keyboard hints are now more compact and less intrusive
 
 ### Fixed
-- ScrollView clipping and toolbar transparency
-- Allow typing 's' in feedback text field without triggering snooze
-- Allow typing 'f' in feedback text field
+- Typing 's' or 'f' in feedback fields no longer triggers shortcuts
 
 ### Removed
-- Shader overlay effect
+- Removed experimental shader overlay effect
 
 ## [1.0.0] - 2025-11-27
 
 ### Added
-- Native macOS dialog system for MCP servers
-- Confirmation, multiple choice, text input, and multi-question dialogs
-- Snooze feature (1-60 minutes)
-- Feedback feature for redirecting the agent
-- iOS PWA companion for remote MCP support
-- macOS menu bar app with settings UI
-
-### Removed
-- Text-to-speech feature
+- Native macOS dialogs that let AI agents ask you questions
+- Four dialog types: yes/no, multiple choice, text input, and multi-question wizards
+- Snooze dialogs for 1-60 minutes when you're busy
+- Provide feedback to redirect the agent mid-conversation
+- iOS companion app for answering dialogs remotely
+- Menu bar app with settings and status display

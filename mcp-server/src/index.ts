@@ -18,6 +18,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 const server = new McpServer({ name: "consult-user-mcp-server", version: "1.0.0" });
 const provider = new SwiftDialogProvider();
 const pos = z.enum(["left", "right", "center"]).default("left");
+const projectPath = z.string().optional().describe("Project path for context badge");
 
 server.registerTool("ask_confirmation", {
   description: "Yes/No dialog. Returns {confirmed, cancelled, answer}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
@@ -27,6 +28,7 @@ server.registerTool("ask_confirmation", {
     confirm_label: z.string().max(20).default("Yes"),
     cancel_label: z.string().max(20).default("No"),
     position: pos,
+    project_path: projectPath,
   }),
 }, async (p) => {
   provider.pulse();
@@ -34,6 +36,7 @@ server.registerTool("ask_confirmation", {
     body: p.body, title: p.title ?? "Confirmation",
     confirmLabel: p.confirm_label ?? "Yes", cancelLabel: p.cancel_label ?? "No",
     position: (p.position ?? "left") as DialogPosition,
+    projectPath: p.project_path,
   }), DIALOG_TIMEOUT_MS);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
@@ -47,6 +50,7 @@ server.registerTool("ask_multiple_choice", {
     allow_multiple: z.boolean().default(true),
     default_selection: z.string().optional(),
     position: pos,
+    project_path: projectPath,
   }),
 }, async (p) => {
   provider.pulse();
@@ -54,6 +58,7 @@ server.registerTool("ask_multiple_choice", {
     body: p.body, choices: p.choices, descriptions: p.descriptions,
     allowMultiple: p.allow_multiple ?? true, defaultSelection: p.default_selection,
     position: (p.position ?? "left") as DialogPosition,
+    projectPath: p.project_path,
   }), DIALOG_TIMEOUT_MS);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
@@ -66,6 +71,7 @@ server.registerTool("ask_text_input", {
     default_value: z.string().max(1000).default(""),
     hidden: z.boolean().default(false),
     position: pos,
+    project_path: projectPath,
   }),
 }, async (p) => {
   provider.pulse();
@@ -73,6 +79,7 @@ server.registerTool("ask_text_input", {
     body: p.body, title: p.title ?? "Input",
     defaultValue: p.default_value ?? "", hidden: p.hidden ?? false,
     position: (p.position ?? "left") as DialogPosition,
+    projectPath: p.project_path,
   }), DIALOG_TIMEOUT_MS);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
@@ -109,6 +116,7 @@ server.registerTool("ask_questions", {
     questions: z.array(questionSchema).min(1).max(10),
     mode: z.enum(["wizard", "accordion"]).default("wizard"),
     position: pos,
+    project_path: projectPath,
   }),
 }, async (p) => {
   provider.pulse();
@@ -121,6 +129,7 @@ server.registerTool("ask_questions", {
     })),
     mode: (p.mode ?? "wizard") as QuestionsMode,
     position: (p.position ?? "left") as DialogPosition,
+    projectPath: p.project_path,
   }), DIALOG_TIMEOUT_MS);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });

@@ -35,6 +35,7 @@ class DialogManager {
 
     func playShowSound() {
         userSettings.playSound()
+        CooldownManager.shared.startCooldown()
     }
 
     func effectivePosition(_ requestedPosition: DialogPosition) -> DialogPosition {

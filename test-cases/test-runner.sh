@@ -91,9 +91,14 @@ run_test_case() {
     local json
     json=$(cat "$json_file")
 
+    # Extract projectPath from JSON (if present)
+    local project_path
+    project_path=$(echo "$json" | jq -r '.projectPath // empty')
+
     # Build environment
     local env_vars=()
     [ -n "$THEME" ] && env_vars+=("DIALOG_THEME=$THEME")
+    [ -n "$project_path" ] && env_vars+=("MCP_PROJECT_PATH=$project_path")
 
     # Launch dialog in background
     if [ ${#env_vars[@]} -gt 0 ]; then

@@ -148,6 +148,59 @@
 				</button>
 			</div>
 		</div>
+
+		<div class="install-steps">
+			<h3>What the installer does</h3>
+			<ol class="steps-list">
+				<li>
+					<span class="step-num">1</span>
+					<div class="step-content">
+						<strong>Downloads the app</strong>
+						<p>Fetches the latest release from GitHub and extracts it to <code>/Applications</code></p>
+					</div>
+				</li>
+				<li>
+					<span class="step-num">2</span>
+					<div class="step-content">
+						<strong>Configures Claude Code</strong>
+						<p>Adds the MCP server to <code>~/.claude/claude_desktop_config.json</code></p>
+					</div>
+				</li>
+				<li>
+					<span class="step-num">3</span>
+					<div class="step-content">
+						<strong>Adds usage hints</strong>
+						<p>Appends instructions to <code>~/.claude/CLAUDE.md</code> so Claude knows when to use the dialog tools</p>
+					</div>
+				</li>
+			</ol>
+
+			<h3>After installation</h3>
+			<ol class="steps-list">
+				<li>
+					<span class="step-num">1</span>
+					<div class="step-content">
+						<strong>Launch the app</strong>
+						<p>Open "Consult User MCP" from Applications. A menu bar icon will appear.</p>
+					</div>
+				</li>
+				<li>
+					<span class="step-num">2</span>
+					<div class="step-content">
+						<strong>Restart Claude Code</strong>
+						<p>Quit and reopen Claude Code to load the MCP server</p>
+					</div>
+				</li>
+				<li>
+					<span class="step-num">3</span>
+					<div class="step-content">
+						<strong>Test it</strong>
+						<p>Ask Claude a question that requires your input—a dialog should appear</p>
+					</div>
+				</li>
+			</ol>
+		</div>
+
 		<p class="manual-note">
 			For manual installation or other MCP clients, see the <a href="https://github.com/doublej/consult-user-mcp#readme" target="_blank" rel="noopener">README</a>.
 		</p>
@@ -511,6 +564,79 @@
 
 	.manual-note a:hover {
 		color: #1a1a1a;
+	}
+
+	/* Install steps */
+	.install-steps {
+		margin: 40px 0;
+	}
+
+	.install-steps h3 {
+		font-size: 1rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin: 32px 0 16px;
+	}
+
+	.install-steps h3:first-child {
+		margin-top: 0;
+	}
+
+	.steps-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.steps-list li {
+		display: flex;
+		gap: 16px;
+		background: #fff;
+		border: 1px solid #e0e0e0;
+		padding: 16px;
+	}
+
+	.step-num {
+		width: 28px;
+		height: 28px;
+		background: #f0f0f0;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: #606060;
+		flex-shrink: 0;
+	}
+
+	.step-content {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.step-content strong {
+		display: block;
+		color: #1a1a1a;
+		font-size: 0.95rem;
+		margin-bottom: 4px;
+	}
+
+	.step-content p {
+		margin: 0;
+		font-size: 0.85rem;
+		color: #606060;
+		line-height: 1.5;
+	}
+
+	.step-content code {
+		background: #f5f5f5;
+		padding: 2px 6px;
+		font-size: 0.8rem;
+		color: #505050;
 	}
 
 	/* Unsigned note */

@@ -1,4 +1,4 @@
-<!-- version: 1.3.0 -->
+<!-- version: 1.3.1 -->
 # Consult User MCP - Required Usage
 
 ## Critical Rules
@@ -8,6 +8,8 @@
 **BATCH questions when you have 2+ questions.** Asking sequentially creates friction and interrupts user flow. Use `ask_questions` to ask multiple questions at once.
 
 **CONTINUE smoothly after getting answers.** Don't check back in or ask "should I proceed?" - just use the answers and keep working.
+
+**ALWAYS pass `project_path`** on every dialog tool call (except `notify_user`). This shows which project the dialog belongs to. Use the current working directory or project root path.
 
 ## Tool Selection
 

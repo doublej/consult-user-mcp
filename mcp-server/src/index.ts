@@ -18,7 +18,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 const server = new McpServer({ name: "consult-user-mcp-server", version: "1.0.0" });
 const provider = new SwiftDialogProvider();
 const pos = z.enum(["left", "right", "center"]).default("left");
-const projectPath = z.string().optional().describe("Project path for context badge");
+const projectPath = z.string().describe("Project path for context badge");
 
 server.registerTool("ask_confirmation", {
   description: "Yes/No dialog. Returns {confirmed, cancelled, answer}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",

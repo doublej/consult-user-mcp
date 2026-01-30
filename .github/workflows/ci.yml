@@ -13,6 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate baseprompt version
+        run: bash scripts/validate-baseprompt-version.sh
+
+      - name: Check baseprompt version bump (PR only)
+        if: github.event_name == 'pull_request'
+        run: bash scripts/check-baseprompt-version-bump.sh origin/${{ github.base_ref }}
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:

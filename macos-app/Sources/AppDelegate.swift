@@ -5,17 +5,16 @@ import UserNotifications
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
-    private var popover: NSPopover!
     private var debugMenu: NSMenu!
+    private var contextMenu: NSMenu!
     private var snoozeObserver: AnyCancellable?
-    private var projectsWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         loadAppIcon()
         setupStatusItem()
-        setupPopover()
         setupDebugMenu()
+        setupContextMenu()
         observeSnooze()
         setupNotifications()
         observeProjectNotifications()
@@ -60,37 +59,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func handleClick(_ sender: NSStatusBarButton) {
         guard let event = NSApp.currentEvent else { return }
 
-        if event.type == .rightMouseUp {
+        let isOptionClick = event.modifierFlags.contains(.option)
+
+        if isOptionClick {
             statusItem.menu = debugMenu
             statusItem.button?.performClick(nil)
             statusItem.menu = nil
+        } else if event.type == .rightMouseUp {
+            statusItem.menu = contextMenu
+            statusItem.button?.performClick(nil)
+            statusItem.menu = nil
         } else {
-            togglePopover()
+            showSettingsWindow()
         }
     }
 
-    // MARK: - Popover
+    // MARK: - Settings Window
 
-    private func setupPopover() {
-        popover = NSPopover()
-        popover.behavior = .transient
-        popover.animates = DialogSettings.shared.animationsEnabled
-
-        let hostingController = NSHostingController(rootView: SettingsView())
-        hostingController.sizingOptions = [.preferredContentSize]
-        popover.contentViewController = hostingController
-    }
-
-    private func togglePopover() {
-        guard let button = statusItem.button else { return }
-
-        if popover.isShown {
-            popover.performClose(nil)
-        } else {
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            NSApp.activate(ignoringOtherApps: true)
-            checkForUpdatesAutomatically()
-        }
+    private func showSettingsWindow() {
+        SettingsWindowController.shared.showWindow()
+        checkForUpdatesAutomatically()
     }
 
     // MARK: - Debug Menu
@@ -124,45 +112,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let allItem = NSMenuItem(title: "Run All Tests", action: #selector(testAll), keyEquivalent: "a")
         allItem.target = self
         debugMenu.addItem(allItem)
+    }
 
-        debugMenu.addItem(NSMenuItem.separator())
+    private func setupContextMenu() {
+        contextMenu = NSMenu()
 
-        let projectsItem = NSMenuItem(title: "Discovered Projects...", action: #selector(showProjects), keyEquivalent: "p")
-        projectsItem.target = self
-        debugMenu.addItem(projectsItem)
-
-        debugMenu.addItem(NSMenuItem.separator())
+        let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        contextMenu.addItem(settingsItem)
 
         let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "u")
         updateItem.target = self
-        debugMenu.addItem(updateItem)
+        contextMenu.addItem(updateItem)
 
-        debugMenu.addItem(NSMenuItem.separator())
+        contextMenu.addItem(NSMenuItem.separator())
 
         let quitItem = NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
-        debugMenu.addItem(quitItem)
+        contextMenu.addItem(quitItem)
     }
 
-    // MARK: - Projects Window
+    // MARK: - Open Settings
 
-    @objc private func showProjects() {
-        if let window = projectsWindow {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-            return
-        }
-
-        let projectsView = ProjectsView()
-        let hostingController = NSHostingController(rootView: projectsView)
-
-        let window = NSWindow(contentViewController: hostingController)
-        window.title = "Discovered Projects"
-        window.styleMask = [.titled, .closable, .miniaturizable]
-        window.center()
-        window.makeKeyAndOrderFront(nil)
-
-        projectsWindow = window
-        NSApp.activate(ignoringOtherApps: true)
+    @objc private func openSettings() {
+        showSettingsWindow()
     }
 
     // MARK: - Project Notifications

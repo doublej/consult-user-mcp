@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-01-31
+
+### Added
+- Text input dialog now supports snooze and feedback, matching all other dialogs
+- Dev build workflow now installs directly to the running app with one command
+
+### Changed
+- Test dialogs are now hidden behind option+click on the tray icon
+- Right-click tray menu now shows settings, updates, and quit only
+- Settings window split into modular views for better maintainability
+- Text input dialog migrated from AppKit to SwiftUI for consistency
+
 ## [1.7.0] - 2026-01-30
 
 ### Added

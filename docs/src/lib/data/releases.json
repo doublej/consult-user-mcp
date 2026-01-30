@@ -3,6 +3,19 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.8.0",
+      "date": "2026-01-31",
+      "highlight": "SwiftUI text input & settings overhaul",
+      "changes": [
+        { "text": "Text input dialog now supports snooze and feedback, matching all other dialogs", "type": "added" },
+        { "text": "Dev build workflow now installs directly to the running app with one command", "type": "added" },
+        { "text": "Test dialogs are now hidden behind option+click on the tray icon", "type": "changed" },
+        { "text": "Right-click tray menu now shows settings, updates, and quit only", "type": "changed" },
+        { "text": "Settings window split into modular views for better maintainability", "type": "changed" },
+        { "text": "Text input dialog migrated from AppKit to SwiftUI for consistency", "type": "changed" }
+      ]
+    },
+    {
       "version": "1.7.0",
       "date": "2026-01-30",
       "highlight": "Enhanced documentation site",

@@ -66,14 +66,16 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 ## Text Input Dialogs
 
 ### `text-input/basic.json`
-- [ ] Title "Project Setup" in toolbar
+- [ ] Title "Project Setup" displayed
 - [ ] Prompt text visible
 - [ ] Text field present and empty
 - [ ] Text field has focus indicator
+- [ ] Snooze/Feedback toolbar present
+- [ ] Keyboard hints show submit, cancel, snooze, feedback
 
 ### `text-input/password.json`
 - [ ] Title "API Configuration" displayed
-- [ ] Text field shows password masking indicator
+- [ ] Text field shows password masking (NSSecureTextField)
 - [ ] Input would be hidden (bullets/dots when typing)
 
 ### `text-input/markdown.json`
@@ -126,6 +128,7 @@ The dialog system respects macOS "Reduce motion" setting via `@Environment(\.acc
 
 **Components that respect reduce motion:**
 - `ConfirmDialog.swift` - toolbar expand/collapse animations
+- `TextInputDialog.swift` - toolbar expand/collapse animations
 - `DialogToolbar.swift` - snooze/feedback panel transitions
 - `AccordionDialog.swift` - section expand/collapse, option selection, button interactions
 

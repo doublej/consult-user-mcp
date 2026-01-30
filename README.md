@@ -156,7 +156,7 @@ flowchart TB
 
     subgraph CLI["Dialog CLI (Swift)"]
         D[DialogManager]
-        E[Native AppKit Window]
+        E[Native SwiftUI Window]
     end
 
     subgraph User["User Interaction"]
@@ -202,7 +202,7 @@ flowchart TB
 1. **Agent calls tool** - Claude Code (or any MCP client) invokes a tool like `ask_confirmation`
 2. **MCP Server receives** - The TypeScript server validates input with Zod schemas
 3. **CLI spawned** - `SwiftDialogProvider` executes the Swift CLI with JSON arguments
-4. **Dialog shown** - Native AppKit window appears with the question
+4. **Dialog shown** - Native SwiftUI window appears with the question
 5. **User responds** - Three possible paths:
    - **Answer** - Normal response (yes/no, selection, text)
    - **Snooze** - Defer for 1-60 minutes, returns `snoozed: true`

@@ -338,17 +338,19 @@ class FocusableButtonView: NSView {
 
 struct FocusableTextField: NSViewRepresentable {
     let placeholder: String
+    let isSecure: Bool
     @Binding var text: String
     let onSubmit: (() -> Void)?
 
-    init(placeholder: String = "", text: Binding<String>, onSubmit: (() -> Void)? = nil) {
+    init(placeholder: String = "", isSecure: Bool = false, text: Binding<String>, onSubmit: (() -> Void)? = nil) {
         self.placeholder = placeholder
+        self.isSecure = isSecure
         self._text = text
         self.onSubmit = onSubmit
     }
 
     func makeNSView(context: Context) -> FocusableTextFieldView {
-        let view = FocusableTextFieldView()
+        let view = FocusableTextFieldView(isSecure: isSecure)
         view.placeholder = placeholder
         view.text = text
         view.onTextChange = { newText in
@@ -387,7 +389,7 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
     var onTextChange: ((String) -> Void)?
     var onSubmit: (() -> Void)?
 
-    private let textField = NSTextField()
+    private let textField: NSTextField
     private var trackingArea: NSTrackingArea?
 
     override var acceptsFirstResponder: Bool { true }
@@ -408,7 +410,14 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
 
     override var focusRingMaskBounds: NSRect { bounds }
 
+    init(isSecure: Bool = false) {
+        textField = isSecure ? NSSecureTextField() : NSTextField()
+        super.init(frame: .zero)
+        setupTextField()
+    }
+
     override init(frame frameRect: NSRect) {
+        textField = NSTextField()
         super.init(frame: frameRect)
         setupTextField()
     }

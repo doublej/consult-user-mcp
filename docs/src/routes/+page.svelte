@@ -4,7 +4,7 @@
 	import DialogPreviews from '$lib/components/DialogPreviews.svelte';
 	import InteractiveDemo from '$lib/components/InteractiveDemo.svelte';
 	import PerspectiveDialog from '$lib/components/PerspectiveDialog.svelte';
-	import ScreenshotGallery from '$lib/components/ScreenshotGallery.svelte';
+	import QuestionHistory from '$lib/components/QuestionHistory.svelte';
 
 	let copied = false;
 	const installCommand = 'curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/install.sh | bash';
@@ -125,16 +125,10 @@
 		</div>
 	</section>
 
-	<section class="section screenshots-section animate-in" style="animation-delay: 1000ms;">
-		<div class="screenshots-layout">
-			<div class="screenshots-header">
-				<h2>Screenshots</h2>
-				<p class="section-desc">See the dialogs in context on a desktop.</p>
-			</div>
-			<div class="screenshots-gallery">
-				<ScreenshotGallery />
-			</div>
-		</div>
+	<section class="section animate-in" style="animation-delay: 1000ms;">
+		<h2>Real Questions from Development</h2>
+		<p class="section-desc">28 actual questions from building this MCP server and other projects. Scroll to see how Claude Code uses these dialogs during real development.</p>
+		<QuestionHistory />
 	</section>
 
 	<section class="section animate-in" style="animation-delay: 1100ms;" id="install">
@@ -497,45 +491,6 @@
 		border-bottom: none;
 	}
 
-	/* Screenshots section */
-	.screenshots-section {
-		overflow: visible;
-	}
-
-	.screenshots-layout {
-		display: grid;
-		grid-template-columns: 200px 1fr;
-		gap: 40px;
-		align-items: start;
-	}
-
-	.screenshots-header {
-		position: sticky;
-		top: 40px;
-	}
-
-	.screenshots-header h2 {
-		margin-bottom: 12px;
-	}
-
-	.screenshots-header .section-desc {
-		margin-bottom: 0;
-	}
-
-	.screenshots-gallery {
-		min-width: 0;
-	}
-
-	@media (max-width: 800px) {
-		.screenshots-layout {
-			grid-template-columns: 1fr;
-			gap: 24px;
-		}
-
-		.screenshots-header {
-			position: static;
-		}
-	}
 
 	/* Manual note */
 	.manual-note {

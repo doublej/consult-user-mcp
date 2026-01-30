@@ -1,24 +1,21 @@
 import SwiftUI
 
-struct HistoryView: View {
+// MARK: - History Detail View (for NavigationSplitView)
+
+struct HistoryDetailView: View {
     @ObservedObject private var historyManager = HistoryManager.shared
     @State private var showClearConfirmation = false
     @State private var selectedEntry: HistoryEntry?
-    @Binding var isPresented: Bool
-
-    private let maxHeight: CGFloat = (NSScreen.main?.visibleFrame.height ?? 600) - 100
 
     var body: some View {
         VStack(spacing: 0) {
             if let entry = selectedEntry {
-                HistoryDetailView(entry: entry, onBack: { selectedEntry = nil })
+                HistoryEntryDetailView(entry: entry, onBack: { selectedEntry = nil })
             } else {
                 listView
             }
         }
-        .frame(width: 300)
-        .frame(minHeight: 200, maxHeight: maxHeight)
-        .background(VisualEffectView(material: .popover, blendingMode: .behindWindow))
+        .background(Color(.windowBackgroundColor))
         .alert("Clear History", isPresented: $showClearConfirmation) {
             Button("Cancel", role: .cancel) {}
             Button("Clear All", role: .destructive) {
@@ -37,26 +34,29 @@ struct HistoryView: View {
                 emptyState
             } else {
                 ScrollView(.vertical, showsIndicators: true) {
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 16) {
                         ForEach(groupedEntries.keys.sorted().reversed(), id: \.self) { group in
                             if let entries = groupedEntries[group] {
-                                Section {
-                                    ForEach(entries.reversed()) { entry in
-                                        Button { selectedEntry = entry } label: {
-                                            HistoryEntryRow(entry: entry)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                } header: {
+                                VStack(alignment: .leading, spacing: 8) {
                                     Text(group)
                                         .font(.system(size: 11, weight: .medium))
                                         .foregroundColor(.secondary)
-                                        .padding(.top, 8)
+                                        .textCase(.uppercase)
+                                        .tracking(0.5)
+
+                                    VStack(spacing: 6) {
+                                        ForEach(Array(entries.reversed().enumerated()), id: \.element.id) { index, entry in
+                                            Button { selectedEntry = entry } label: {
+                                                HistoryEntryRow(entry: entry, isAlternate: index % 2 == 1)
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                    .padding(16)
+                    .padding(24)
                 }
             }
 
@@ -67,34 +67,25 @@ struct HistoryView: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack(spacing: 8) {
-            Button(action: { isPresented = false }) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.secondary)
-                    .frame(width: 22, height: 22)
-                    .background(Circle().fill(Color(.controlBackgroundColor)))
-            }
-            .buttonStyle(.plain)
-            .help("Back")
-
-            Text("Dialog History")
-                .font(.system(size: 13, weight: .semibold))
-
-            Spacer()
+        HStack(spacing: 16) {
+            SettingsPageHeader(
+                icon: "clock.arrow.circlepath",
+                title: "History",
+                description: "View past dialog interactions"
+            )
 
             if !historyManager.entries.isEmpty {
                 Button(action: { showClearConfirmation = true }) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 11))
-                        .foregroundColor(.secondary)
+                    Label("Clear All", systemImage: "trash")
+                        .font(.system(size: 12))
                 }
-                .buttonStyle(.plain)
-                .help("Clear History")
+                .buttonStyle(.bordered)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 24)
+        .padding(.top, 24)
+        .padding(.bottom, 8)
+        .background(Color(.windowBackgroundColor))
     }
 
     // MARK: - Footer
@@ -102,32 +93,35 @@ struct HistoryView: View {
     private var footer: some View {
         HStack {
             Text("\(historyManager.entries.count) entries")
-                .font(.system(size: 9, design: .monospaced))
+                .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(Color(.tertiaryLabelColor))
 
             Spacer()
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(Color(.controlBackgroundColor).opacity(0.5))
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 14)
+        .background(Color(.controlBackgroundColor).opacity(0.4))
     }
 
     // MARK: - Empty State
 
     private var emptyState: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 20) {
             Spacer()
             Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 32))
+                .font(.system(size: 52))
                 .foregroundColor(.secondary)
-            Text("No History")
-                .font(.system(size: 13, weight: .medium))
-            Text("Dialog interactions will appear here")
-                .font(.system(size: 11))
-                .foregroundColor(.secondary)
+            VStack(spacing: 8) {
+                Text("No History")
+                    .font(.system(size: 17, weight: .medium))
+                Text("Dialog interactions will appear here")
+                    .font(.system(size: 13))
+                    .foregroundColor(.secondary)
+            }
             Spacer()
         }
-        .frame(maxWidth: .infinity, minHeight: 200)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - Grouping
@@ -150,9 +144,9 @@ struct HistoryView: View {
     }
 }
 
-// MARK: - History Detail View
+// MARK: - History Entry Detail View
 
-private struct HistoryDetailView: View {
+private struct HistoryEntryDetailView: View {
     let entry: HistoryEntry
     let onBack: () -> Void
 
@@ -199,9 +193,9 @@ private struct HistoryDetailView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            header
+            entryHeader
             ScrollView(.vertical, showsIndicators: true) {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 20) {
                     typeAndStatus
                     questionSection
                     if entry.answer != nil || entry.cancelled {
@@ -209,30 +203,36 @@ private struct HistoryDetailView: View {
                     }
                     metadataSection
                 }
-                .padding(16)
+                .padding(24)
             }
         }
+        .background(Color(.windowBackgroundColor))
     }
 
-    private var header: some View {
-        HStack(spacing: 8) {
+    private var entryHeader: some View {
+        HStack(spacing: 12) {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(.secondary)
-                    .frame(width: 22, height: 22)
-                    .background(Circle().fill(Color(.controlBackgroundColor)))
+                Label("Back", systemImage: "chevron.left")
+                    .font(.system(size: 12))
             }
-            .buttonStyle(.plain)
-            .help("Back to History")
-
-            Text("Details")
-                .font(.system(size: 13, weight: .semibold))
+            .buttonStyle(.bordered)
 
             Spacer()
+
+            Text("Entry Details")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
+
+            Spacer()
+
+            // Balance spacer
+            Button("Back") {}
+                .buttonStyle(.bordered)
+                .opacity(0)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 16)
+        .background(Color(.windowBackgroundColor))
     }
 
     private var typeAndStatus: some View {
@@ -336,17 +336,18 @@ private struct HistoryDetailView: View {
     private func metadataRow(label: String, value: String) -> some View {
         HStack {
             Text(label)
-                .font(.system(size: 11))
+                .font(.system(size: 12))
                 .foregroundColor(.secondary)
-                .frame(width: 50, alignment: .leading)
+                .frame(width: 70, alignment: .leading)
             Text(value)
-                .font(.system(size: 11))
+                .font(.system(size: 12))
                 .foregroundColor(.primary)
                 .textSelection(.enabled)
             Spacer()
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
     }
 }
 
@@ -354,7 +355,13 @@ private struct HistoryDetailView: View {
 
 private struct HistoryEntryRow: View {
     let entry: HistoryEntry
+    let isAlternate: Bool
     @State private var isHovered = false
+
+    init(entry: HistoryEntry, isAlternate: Bool = false) {
+        self.entry = entry
+        self.isAlternate = isAlternate
+    }
 
     private var icon: String {
         switch entry.dialogType {
@@ -379,31 +386,30 @@ private struct HistoryEntryRow: View {
     }
 
     var body: some View {
-        HStack(alignment: .center, spacing: 10) {
+        HStack(spacing: 16) {
+            // Icon column
             Image(systemName: icon)
-                .font(.system(size: 12))
+                .font(.system(size: 14))
                 .foregroundColor(.secondary)
-                .frame(width: 20)
+                .frame(width: 28)
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Text(entry.clientName)
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.secondary)
+            // Client & time column
+            VStack(alignment: .leading, spacing: 2) {
+                Text(entry.clientName)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
 
-                    Text(timeFormatter.string(from: entry.timestamp))
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundColor(Color(.tertiaryLabelColor))
+                Text(timeFormatter.string(from: entry.timestamp))
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundColor(Color(.tertiaryLabelColor))
+            }
+            .frame(width: 80, alignment: .leading)
 
-                    Spacer()
-
-                    Circle()
-                        .fill(statusColor)
-                        .frame(width: 6, height: 6)
-                }
-
+            // Question column
+            VStack(alignment: .leading, spacing: 3) {
                 Text(entry.questionSummary)
-                    .font(.system(size: 11))
+                    .font(.system(size: 12))
                     .lineLimit(2)
                     .foregroundColor(.primary)
 
@@ -419,14 +425,23 @@ private struct HistoryEntryRow: View {
                 }
             }
 
+            Spacer(minLength: 12)
+
+            // Status indicator
+            Circle()
+                .fill(statusColor)
+                .frame(width: 8, height: 8)
+
             Image(systemName: "chevron.right")
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundColor(Color(.tertiaryLabelColor))
         }
-        .padding(10)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(isHovered ? Color(.selectedControlColor).opacity(0.3) : Color(.controlBackgroundColor))
+                .fill(isHovered ? Color(.selectedControlColor).opacity(0.3) : (isAlternate ? Color(.controlBackgroundColor).opacity(0.5) : Color(.controlBackgroundColor)))
         )
         .contentShape(Rectangle())
         .onHover { hovering in isHovered = hovering }
@@ -434,5 +449,6 @@ private struct HistoryEntryRow: View {
 }
 
 #Preview {
-    HistoryView(isPresented: .constant(true))
+    HistoryDetailView()
+        .frame(width: 480, height: 500)
 }

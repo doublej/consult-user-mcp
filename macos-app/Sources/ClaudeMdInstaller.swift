@@ -60,7 +60,21 @@ enum ClaudeMdInstaller {
     }
 
     static var bundledVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        guard let content = basePromptContent() else {
+            return "1.0.0"
+        }
+
+        // Extract version from <!-- version: X.Y.Z --> comment
+        let versionPattern = #"<!--\s*version:\s*([0-9]+\.[0-9]+\.[0-9]+)\s*-->"#
+        if let match = try? NSRegularExpression(pattern: versionPattern).firstMatch(
+            in: content,
+            range: NSRange(content.startIndex..., in: content)
+        ),
+        let versionNSRange = Range(match.range(at: 1), in: content) {
+            return String(content[versionNSRange])
+        }
+
+        return "1.0.0"
     }
 
     static func detectExisting(for target: InstallTarget) -> Bool {

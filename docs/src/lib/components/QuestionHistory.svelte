@@ -410,8 +410,6 @@
 		gap: 32px;
 		padding: 0 max(24px, calc((100vw - 1400px) / 2));
 		overflow-x: auto;
-		scroll-snap-type: x mandatory;
-		scroll-padding: max(24px, calc((100vw - 1400px) / 2));
 		-webkit-overflow-scrolling: touch;
 		scrollbar-width: thin;
 		scrollbar-color: #d0d0d0 transparent;
@@ -436,7 +434,6 @@
 
 	.dialog-wrapper {
 		flex: 0 0 360px;
-		scroll-snap-align: start;
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
@@ -583,7 +580,6 @@
 		.history-scroll {
 			padding: 0 20px;
 			gap: 24px;
-			scroll-padding: 20px;
 		}
 
 		.dialog-wrapper {

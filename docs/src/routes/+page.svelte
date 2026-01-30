@@ -5,6 +5,7 @@
 	import InteractiveDemo from '$lib/components/InteractiveDemo.svelte';
 	import PerspectiveDialog from '$lib/components/PerspectiveDialog.svelte';
 	import QuestionHistory from '$lib/components/QuestionHistory.svelte';
+	import FeaturePanels from '$lib/components/FeaturePanels.svelte';
 
 	let copied = false;
 	const installCommand = 'curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/install.sh | bash';
@@ -86,18 +87,7 @@
 	<section class="section animate-in" style="animation-delay: 800ms;">
 		<h2>Snooze and Feedback</h2>
 		<p class="section-desc">Every dialog includes options beyond simple yes/no responses.</p>
-		<div class="feature-row">
-			<div class="feature-block">
-				<img src="{base}/screenshots/confirm-snooze-panel.png" alt="Snooze panel" />
-				<h3>Snooze</h3>
-				<p>Defer the dialog from 1 minute to 1 hour. The agent automatically retries when time is up.</p>
-			</div>
-			<div class="feature-block">
-				<img src="{base}/screenshots/confirm-feedback-panel.png" alt="Feedback panel" />
-				<h3>Feedback</h3>
-				<p>Send text feedback to redirect the agent without fully canceling the current operation.</p>
-			</div>
-		</div>
+		<FeaturePanels />
 	</section>
 
 	<section class="section animate-in" style="animation-delay: 900ms;">
@@ -651,9 +641,6 @@
 			font-size: 1rem;
 		}
 
-		.feature-row {
-			grid-template-columns: 1fr;
-		}
 
 		.code-line {
 			flex-direction: column;

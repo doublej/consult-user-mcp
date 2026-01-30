@@ -3,6 +3,17 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.7.0",
+      "date": "2026-01-30",
+      "highlight": "Enhanced documentation site",
+      "changes": [
+        { "text": "Documentation site now features interactive dialog examples from real development history", "type": "added" },
+        { "text": "28 real questions displayed in scrollable gallery with actual options and answers", "type": "added" },
+        { "text": "Settings window height increased to reduce scrolling and better use screen space", "type": "changed" },
+        { "text": "Replaced static screenshots with interactive feature panels showing Snooze and Feedback dialogs", "type": "changed" }
+      ]
+    },
+    {
       "version": "1.6.0",
       "date": "2026-01-30",
       "highlight": "Improved agent workflows",

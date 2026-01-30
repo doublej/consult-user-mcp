@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-01-30
+
+### Added
+- Documentation site now features interactive dialog examples from real development history
+- 28 real questions displayed in scrollable gallery with actual options and answers
+
+### Changed
+- Settings window height increased to reduce scrolling and better use screen space
+- Replaced static screenshots with interactive feature panels showing Snooze and Feedback dialogs
+
 ## [1.6.0] - 2026-01-30
 
 ### Added

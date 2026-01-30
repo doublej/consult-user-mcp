@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-01-30
+
+### Added
+- Usage hints now include concrete examples of correct vs incorrect question patterns
+- Better guidance for when agents should batch questions vs ask sequentially
+
+### Changed
+- Agents now batch multiple questions together instead of asking one at a time
+- Agents continue working smoothly after receiving answers without checking back in
+
 ## [1.5.0] - 2026-01-28
 
 ### Added

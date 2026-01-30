@@ -3,6 +3,17 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.6.0",
+      "date": "2026-01-30",
+      "highlight": "Improved agent workflows",
+      "changes": [
+        { "text": "Agents now batch multiple questions together instead of asking one at a time", "type": "changed" },
+        { "text": "Agents continue working smoothly after receiving answers without checking back in", "type": "changed" },
+        { "text": "Usage hints now include concrete examples of correct vs incorrect question patterns", "type": "added" },
+        { "text": "Better guidance for when agents should batch questions vs ask sequentially", "type": "added" }
+      ]
+    },
+    {
       "version": "1.5.0",
       "date": "2026-01-28",
       "highlight": "Project context & versioned hints",

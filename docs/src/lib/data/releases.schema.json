@@ -41,6 +41,15 @@
                   "type": "string",
                   "enum": ["added", "changed", "fixed", "removed"],
                   "description": "Type of change"
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["app", "server", "docs", "cli"],
+                  "description": "Which part of the project this change affects"
+                },
+                "featured": {
+                  "type": "boolean",
+                  "description": "Show this change in the hero dialog (only mark interesting/big updates)"
                 }
               }
             }

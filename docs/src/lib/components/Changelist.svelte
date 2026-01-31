@@ -4,6 +4,8 @@
 	type ChangeItem = {
 		text: string;
 		type: 'added' | 'changed' | 'fixed' | 'removed';
+		scope?: 'app' | 'server' | 'docs' | 'cli';
+		featured?: boolean;
 	};
 
 	type Release = {
@@ -21,11 +23,18 @@
 		fixed: 'Fixed',
 		removed: 'Removed'
 	};
+
+	const scopeLabels: Record<string, string> = {
+		app: 'App',
+		server: 'Server',
+		docs: 'Docs',
+		cli: 'CLI'
+	};
 </script>
 
 <div class="changelist">
 	{#each releases as release, i}
-		<div class="release" class:latest={i === 0} class:compact={i > 0}>
+		<div class="release" class:latest={i === 0}>
 			<div class="release-header">
 				<a href="https://github.com/doublej/consult-user-mcp/releases/tag/v{release.version}" class="version" target="_blank" rel="noopener">v{release.version}</a>
 				{#if i === 0}
@@ -36,16 +45,17 @@
 			{#if release.highlight}
 				<p class="highlight">{release.highlight}</p>
 			{/if}
-			{#if i === 0}
-				<ul class="changes">
-					{#each release.changes as change}
-						<li class="change {change.type}">
-							<span class="type-badge">{typeLabels[change.type]}</span>
-							<span class="change-text">{change.text}</span>
-						</li>
-					{/each}
-				</ul>
-			{/if}
+			<ul class="changes">
+				{#each release.changes as change}
+					<li class="change {change.type}">
+						<span class="type-badge">{typeLabels[change.type]}</span>
+						{#if change.scope}
+							<span class="scope-badge {change.scope}">{scopeLabels[change.scope]}</span>
+						{/if}
+						<span class="change-text">{change.text}</span>
+					</li>
+				{/each}
+			</ul>
 		</div>
 	{/each}
 </div>
@@ -66,21 +76,6 @@
 	.release.latest {
 		border-color: #1a1a1a;
 		padding: 20px;
-	}
-
-	.release.compact {
-		padding: 12px 16px;
-	}
-
-	.release.compact .release-header {
-		margin-bottom: 0;
-	}
-
-	.release.compact .highlight {
-		margin: 6px 0 0;
-		font-size: 0.85rem;
-		font-weight: 400;
-		color: #707070;
 	}
 
 	.release-header {
@@ -137,7 +132,7 @@
 	.change {
 		display: flex;
 		align-items: flex-start;
-		gap: 10px;
+		gap: 8px;
 		font-size: 0.9rem;
 		color: #606060;
 	}
@@ -169,6 +164,37 @@
 
 	.change.removed .type-badge {
 		background: #f3e5f5;
+		color: #7b1fa2;
+	}
+
+	.scope-badge {
+		font-size: 0.65rem;
+		font-weight: 500;
+		padding: 2px 5px;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		flex-shrink: 0;
+		margin-top: 2px;
+		border: 1px solid;
+	}
+
+	.scope-badge.app {
+		border-color: #d0d0d0;
+		color: #707070;
+	}
+
+	.scope-badge.server {
+		border-color: #c8e6c9;
+		color: #388e3c;
+	}
+
+	.scope-badge.docs {
+		border-color: #bbdefb;
+		color: #1976d2;
+	}
+
+	.scope-badge.cli {
+		border-color: #e1bee7;
 		color: #7b1fa2;
 	}
 

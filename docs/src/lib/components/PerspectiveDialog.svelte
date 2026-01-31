@@ -1,11 +1,12 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import '../styles/dialog.css';
 	import releasesData from '$lib/data/releases.json';
 
 	// Get latest release from JSON
 	const latestRelease = releasesData.releases[0];
-	// Show max 4 changes for the hero preview
-	const changes = latestRelease.changes.slice(0, 4);
+	// Show only featured (interesting/big) changes in the hero preview
+	const changes = latestRelease.changes.filter((c: { featured?: boolean }) => c.featured);
 
 	const typeLabels: Record<string, string> = {
 		added: 'New',
@@ -44,7 +45,7 @@
 					</div>
 
 					<div class="button-row">
-						<button class="btn secondary">Later</button>
+						<a href="{base}/changelog" class="btn secondary">Changelog</a>
 						<a href="https://github.com/doublej/consult-user-mcp/releases/tag/v{latestRelease.version}" class="btn primary" target="_blank" rel="noopener">Update <span class="key-hint">&#x23CE;</span></a>
 					</div>
 				</div>
@@ -190,9 +191,14 @@
 		color: #c0c0c5;
 	}
 
-	/* Non-interactive buttons */
-	:global(.btn.secondary) {
-		cursor: default;
+	/* Make secondary button clickable */
+	a.btn.secondary {
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	a.btn.secondary:hover {
+		filter: brightness(1.2);
 	}
 
 	/* Make primary button clickable */

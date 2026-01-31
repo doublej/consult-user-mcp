@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { base } from '$app/paths';
-	import Changelist from '$lib/components/Changelist.svelte';
 	import DialogPreviews from '$lib/components/DialogPreviews.svelte';
 	import InteractiveDemo from '$lib/components/InteractiveDemo.svelte';
 	import PerspectiveDialog from '$lib/components/PerspectiveDialog.svelte';
@@ -43,6 +42,7 @@
 				<a href="#demo" class="nav-link">Demo</a>
 				<a href="#dialogs" class="nav-link">Dialogs</a>
 				<a href="#install" class="nav-link">Install</a>
+				<a href="{base}/changelog" class="nav-link">Changelog</a>
 				<a href="https://github.com/doublej/consult-user-mcp" class="nav-link" target="_blank" rel="noopener">GitHub</a>
 			</div>
 		</nav>

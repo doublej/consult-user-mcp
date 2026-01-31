@@ -7,12 +7,12 @@
       "date": "2026-01-31",
       "highlight": "SwiftUI text input & settings overhaul",
       "changes": [
-        { "text": "Text input dialog now supports snooze and feedback, matching all other dialogs", "type": "added" },
-        { "text": "Dev build workflow now installs directly to the running app with one command", "type": "added" },
-        { "text": "Test dialogs are now hidden behind option+click on the tray icon", "type": "changed" },
-        { "text": "Right-click tray menu now shows settings, updates, and quit only", "type": "changed" },
-        { "text": "Settings window split into modular views for better maintainability", "type": "changed" },
-        { "text": "Text input dialog migrated from AppKit to SwiftUI for consistency", "type": "changed" }
+        { "text": "Text input dialog now supports snooze and feedback, matching all other dialogs", "type": "added", "scope": "app", "featured": true },
+        { "text": "Dev build workflow now installs directly to the running app with one command", "type": "added", "scope": "app" },
+        { "text": "Test dialogs are now hidden behind option+click on the tray icon", "type": "changed", "scope": "app" },
+        { "text": "Right-click tray menu now shows settings, updates, and quit only", "type": "changed", "scope": "app" },
+        { "text": "Settings window split into modular views for better maintainability", "type": "changed", "scope": "app" },
+        { "text": "Text input dialog migrated from AppKit to SwiftUI for consistency", "type": "changed", "scope": "app", "featured": true }
       ]
     },
     {
@@ -20,10 +20,10 @@
       "date": "2026-01-30",
       "highlight": "Enhanced documentation site",
       "changes": [
-        { "text": "Documentation site now features interactive dialog examples from real development history", "type": "added" },
-        { "text": "28 real questions displayed in scrollable gallery with actual options and answers", "type": "added" },
-        { "text": "Settings window height increased to reduce scrolling and better use screen space", "type": "changed" },
-        { "text": "Replaced static screenshots with interactive feature panels showing Snooze and Feedback dialogs", "type": "changed" }
+        { "text": "Documentation site now features interactive dialog examples from real development history", "type": "added", "scope": "docs", "featured": true },
+        { "text": "28 real questions displayed in scrollable gallery with actual options and answers", "type": "added", "scope": "docs", "featured": true },
+        { "text": "Settings window height increased to reduce scrolling and better use screen space", "type": "changed", "scope": "app" },
+        { "text": "Replaced static screenshots with interactive feature panels showing Snooze and Feedback dialogs", "type": "changed", "scope": "docs" }
       ]
     },
     {
@@ -31,10 +31,10 @@
       "date": "2026-01-30",
       "highlight": "Improved agent workflows",
       "changes": [
-        { "text": "Agents now batch multiple questions together instead of asking one at a time", "type": "changed" },
-        { "text": "Agents continue working smoothly after receiving answers without checking back in", "type": "changed" },
-        { "text": "Usage hints now include concrete examples of correct vs incorrect question patterns", "type": "added" },
-        { "text": "Better guidance for when agents should batch questions vs ask sequentially", "type": "added" }
+        { "text": "Agents now batch multiple questions together instead of asking one at a time", "type": "changed", "scope": "server", "featured": true },
+        { "text": "Agents continue working smoothly after receiving answers without checking back in", "type": "changed", "scope": "server" },
+        { "text": "Usage hints now include concrete examples of correct vs incorrect question patterns", "type": "added", "scope": "server" },
+        { "text": "Better guidance for when agents should batch questions vs ask sequentially", "type": "added", "scope": "server" }
       ]
     },
     {
@@ -42,10 +42,10 @@
       "date": "2026-01-28",
       "highlight": "Project context & versioned hints",
       "changes": [
-        { "text": "Dialogs now show which project they belong to via project_path parameter", "type": "added" },
-        { "text": "Usage hints now include version info for detecting when updates are available", "type": "added" },
-        { "text": "Install wizard shows update option when newer usage hints are bundled", "type": "added" },
-        { "text": "Button cooldown now prevents accidental rapid clicks across all dialogs", "type": "fixed" }
+        { "text": "Dialogs now show which project they belong to via project_path parameter", "type": "added", "scope": "app", "featured": true },
+        { "text": "Usage hints now include version info for detecting when updates are available", "type": "added", "scope": "server" },
+        { "text": "Install wizard shows update option when newer usage hints are bundled", "type": "added", "scope": "app" },
+        { "text": "Button cooldown now prevents accidental rapid clicks across all dialogs", "type": "fixed", "scope": "app" }
       ]
     },
     {
@@ -53,10 +53,10 @@
       "date": "2026-01-27",
       "highlight": "Markdown support",
       "changes": [
-        { "text": "Text input dialogs now support markdown formatting in the body text", "type": "added" },
-        { "text": "Inline code blocks are now properly rendered in dialog text", "type": "added" },
-        { "text": "Partial answers are now preserved when providing feedback mid-dialog", "type": "added" },
-        { "text": "Button cooldown now works correctly across multiple interactions", "type": "fixed" }
+        { "text": "Text input dialogs now support markdown formatting in the body text", "type": "added", "scope": "app", "featured": true },
+        { "text": "Inline code blocks are now properly rendered in dialog text", "type": "added", "scope": "app" },
+        { "text": "Partial answers are now preserved when providing feedback mid-dialog", "type": "added", "scope": "app" },
+        { "text": "Button cooldown now works correctly across multiple interactions", "type": "fixed", "scope": "app" }
       ]
     },
     {
@@ -64,9 +64,9 @@
       "date": "2026-01-25",
       "highlight": "History detail view",
       "changes": [
-        { "text": "View full question details, answers, and metadata in history", "type": "added" },
-        { "text": "Navigate through history entries with back button support", "type": "added" },
-        { "text": "History rows now show hover states and navigation indicators", "type": "added" }
+        { "text": "View full question details, answers, and metadata in history", "type": "added", "scope": "app", "featured": true },
+        { "text": "Navigate through history entries with back button support", "type": "added", "scope": "app" },
+        { "text": "History rows now show hover states and navigation indicators", "type": "added", "scope": "app" }
       ]
     },
     {
@@ -74,13 +74,13 @@
       "date": "2026-01-20",
       "highlight": "Dialog history tracking",
       "changes": [
-        { "text": "All dialog interactions are now tracked and viewable in settings", "type": "added" },
-        { "text": "iOS PWA now supports full keyboard navigation", "type": "added" },
-        { "text": "App now checks for updates automatically via GitHub", "type": "added" },
-        { "text": "iOS PWA now works on home screen with proper icons", "type": "added" },
-        { "text": "Snooze state now syncs properly between CLI and menu bar", "type": "fixed" },
-        { "text": "Better error messages when Dialog CLI isn't found", "type": "fixed" },
-        { "text": "Long-running dialogs no longer timeout unexpectedly", "type": "fixed" }
+        { "text": "All dialog interactions are now tracked and viewable in settings", "type": "added", "scope": "app", "featured": true },
+        { "text": "iOS PWA now supports full keyboard navigation", "type": "added", "scope": "app" },
+        { "text": "App now checks for updates automatically via GitHub", "type": "added", "scope": "app", "featured": true },
+        { "text": "iOS PWA now works on home screen with proper icons", "type": "added", "scope": "app" },
+        { "text": "Snooze state now syncs properly between CLI and menu bar", "type": "fixed", "scope": "app" },
+        { "text": "Better error messages when Dialog CLI isn't found", "type": "fixed", "scope": "cli" },
+        { "text": "Long-running dialogs no longer timeout unexpectedly", "type": "fixed", "scope": "app" }
       ]
     },
     {
@@ -88,9 +88,9 @@
       "date": "2026-01-10",
       "highlight": "Native Swift dialogs",
       "changes": [
-        { "text": "Dialogs are now native Swift for better performance and reliability", "type": "changed" },
-        { "text": "Snooze feature now works reliably without crashes", "type": "fixed" },
-        { "text": "Menu bar icon now matches your system theme", "type": "fixed" }
+        { "text": "Dialogs are now native Swift for better performance and reliability", "type": "changed", "scope": "app", "featured": true },
+        { "text": "Snooze feature now works reliably without crashes", "type": "fixed", "scope": "app" },
+        { "text": "Menu bar icon now matches your system theme", "type": "fixed", "scope": "app" }
       ]
     },
     {
@@ -98,7 +98,7 @@
       "date": "2025-12-16",
       "highlight": "Install script fix",
       "changes": [
-        { "text": "Installation script now runs without permission errors", "type": "fixed" }
+        { "text": "Installation script now runs without permission errors", "type": "fixed", "scope": "cli" }
       ]
     },
     {
@@ -106,9 +106,9 @@
       "date": "2025-12-16",
       "highlight": "Easier installation",
       "changes": [
-        { "text": "One-line install script with clear setup instructions", "type": "added" },
-        { "text": "Faster builds using bun instead of npm", "type": "changed" },
-        { "text": "Dialog CLI now works correctly regardless of install location", "type": "fixed" }
+        { "text": "One-line install script with clear setup instructions", "type": "added", "scope": "cli", "featured": true },
+        { "text": "Faster builds using bun instead of npm", "type": "changed", "scope": "cli" },
+        { "text": "Dialog CLI now works correctly regardless of install location", "type": "fixed", "scope": "cli" }
       ]
     },
     {
@@ -116,11 +116,11 @@
       "date": "2025-12-11",
       "highlight": "Renamed to Consult User MCP",
       "changes": [
-        { "text": "Renamed from 'Speak MCP' to 'Consult User MCP'", "type": "changed" },
-        { "text": "Dialogs now focus correctly when switching between apps", "type": "changed" },
-        { "text": "Keyboard hints are now more compact and less intrusive", "type": "changed" },
-        { "text": "Typing 's' or 'f' in feedback fields no longer triggers shortcuts", "type": "fixed" },
-        { "text": "Removed experimental shader overlay effect", "type": "removed" }
+        { "text": "Renamed from 'Speak MCP' to 'Consult User MCP'", "type": "changed", "scope": "app", "featured": true },
+        { "text": "Dialogs now focus correctly when switching between apps", "type": "changed", "scope": "app" },
+        { "text": "Keyboard hints are now more compact and less intrusive", "type": "changed", "scope": "app" },
+        { "text": "Typing 's' or 'f' in feedback fields no longer triggers shortcuts", "type": "fixed", "scope": "app" },
+        { "text": "Removed experimental shader overlay effect", "type": "removed", "scope": "app" }
       ]
     },
     {
@@ -128,12 +128,12 @@
       "date": "2025-11-27",
       "highlight": "Initial release",
       "changes": [
-        { "text": "Native macOS dialogs that let AI agents ask you questions", "type": "added" },
-        { "text": "Four dialog types: yes/no, multiple choice, text input, and multi-question wizards", "type": "added" },
-        { "text": "Snooze dialogs for 1-60 minutes when you're busy", "type": "added" },
-        { "text": "Provide feedback to redirect the agent mid-conversation", "type": "added" },
-        { "text": "iOS companion app for answering dialogs remotely", "type": "added" },
-        { "text": "Menu bar app with settings and status display", "type": "added" }
+        { "text": "Native macOS dialogs that let AI agents ask you questions", "type": "added", "scope": "app", "featured": true },
+        { "text": "Four dialog types: yes/no, multiple choice, text input, and multi-question wizards", "type": "added", "scope": "app", "featured": true },
+        { "text": "Snooze dialogs for 1-60 minutes when you're busy", "type": "added", "scope": "app" },
+        { "text": "Provide feedback to redirect the agent mid-conversation", "type": "added", "scope": "app" },
+        { "text": "iOS companion app for answering dialogs remotely", "type": "added", "scope": "app" },
+        { "text": "Menu bar app with settings and status display", "type": "added", "scope": "app" }
       ]
     }
   ]

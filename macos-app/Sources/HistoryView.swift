@@ -6,6 +6,8 @@ struct HistoryDetailView: View {
     @ObservedObject private var historyManager = HistoryManager.shared
     @State private var showClearConfirmation = false
     @State private var selectedEntry: HistoryEntry?
+    @State private var searchText: String = ""
+    @State private var collapsedSections: Set<String> = []
 
     var body: some View {
         VStack(spacing: 0) {
@@ -30,29 +32,20 @@ struct HistoryDetailView: View {
         VStack(spacing: 0) {
             header
 
+            if !historyManager.entries.isEmpty {
+                searchField
+            }
+
             if historyManager.entries.isEmpty {
                 emptyState
+            } else if filteredEntries.isEmpty {
+                noResultsState
             } else {
                 ScrollView(.vertical, showsIndicators: true) {
                     VStack(alignment: .leading, spacing: 16) {
-                        ForEach(groupedEntries.keys.sorted().reversed(), id: \.self) { group in
-                            if let entries = groupedEntries[group] {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(group)
-                                        .font(.system(size: 11, weight: .medium))
-                                        .foregroundColor(.secondary)
-                                        .textCase(.uppercase)
-                                        .tracking(0.5)
-
-                                    VStack(spacing: 6) {
-                                        ForEach(Array(entries.reversed().enumerated()), id: \.element.id) { index, entry in
-                                            Button { selectedEntry = entry } label: {
-                                                HistoryEntryRow(entry: entry, isAlternate: index % 2 == 1)
-                                            }
-                                            .buttonStyle(.plain)
-                                        }
-                                    }
-                                }
+                        ForEach(sortedGroupKeys, id: \.self) { dateKey in
+                            if let entries = groupedEntries[dateKey] {
+                                sectionView(dateKey: dateKey, entries: entries)
                             }
                         }
                     }
@@ -62,6 +55,106 @@ struct HistoryDetailView: View {
 
             footer
         }
+        .onAppear { initCollapsedSections() }
+    }
+
+    private func sectionView(dateKey: String, entries: [HistoryEntry]) -> some View {
+        let isCollapsed = !isSearching && collapsedSections.contains(dateKey)
+        return VStack(alignment: .leading, spacing: 8) {
+            sectionHeaderButton(dateKey: dateKey, count: entries.count)
+
+            if !isCollapsed {
+                VStack(spacing: 6) {
+                    ForEach(Array(entries.reversed().enumerated()), id: \.element.id) { index, entry in
+                        Button { selectedEntry = entry } label: {
+                            HistoryEntryRow(entry: entry, isAlternate: index % 2 == 1)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+        }
+    }
+
+    private func sectionHeaderButton(dateKey: String, count: Int) -> some View {
+        let isCollapsed = !isSearching && collapsedSections.contains(dateKey)
+        return Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                if collapsedSections.contains(dateKey) {
+                    collapsedSections.remove(dateKey)
+                } else {
+                    collapsedSections.insert(dateKey)
+                }
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(.secondary)
+                    .frame(width: 12)
+
+                Text(sectionHeader(for: dateKey))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+
+                if isCollapsed {
+                    Text("(\(count))")
+                        .font(.system(size: 10))
+                        .foregroundColor(Color(.tertiaryLabelColor))
+                }
+
+                Spacer()
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Search
+
+    private var isSearching: Bool { !searchText.isEmpty }
+
+    private var searchField: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+            TextField("Search history…", text: $searchText)
+                .textFieldStyle(.plain)
+                .font(.system(size: 12))
+            if isSearching {
+                Button { searchText = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(8)
+        .background(RoundedRectangle(cornerRadius: 6).fill(Color(.controlBackgroundColor)))
+        .padding(.horizontal, 24)
+        .padding(.bottom, 4)
+    }
+
+    private var noResultsState: some View {
+        VStack(spacing: 12) {
+            Spacer()
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 32))
+                .foregroundColor(.secondary)
+            Text("No matching entries")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.secondary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func initCollapsedSections() {
+        let todayKey = Self.dayFormatter.string(from: Date())
+        collapsedSections = Set(sortedGroupKeys.filter { $0 != todayKey })
     }
 
     // MARK: - Header
@@ -92,14 +185,20 @@ struct HistoryDetailView: View {
 
     private var footer: some View {
         HStack {
-            Text("\(historyManager.entries.count) entries")
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(Color(.tertiaryLabelColor))
+            Group {
+                if isSearching {
+                    Text("\(filteredEntries.count) of \(historyManager.entries.count) entries")
+                } else {
+                    Text("\(historyManager.entries.count) entries")
+                }
+            }
+            .font(.system(size: 11, design: .monospaced))
+            .foregroundColor(Color(.tertiaryLabelColor))
 
             Spacer()
 
             Button {
-                NSWorkspace.shared.activateFileViewerSelecting([historyManager.historyURL])
+                NSWorkspace.shared.activateFileViewerSelecting([historyManager.historyDir])
             } label: {
                 Image(systemName: "folder")
                     .font(.system(size: 11))
@@ -134,23 +233,47 @@ struct HistoryDetailView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    // MARK: - Grouping
+    // MARK: - Filtering & Grouping
 
-    private var groupedEntries: [String: [HistoryEntry]] {
-        Dictionary(grouping: historyManager.entries) { entry in
-            dateGroup(for: entry.timestamp)
+    private static let dayFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = .current
+        return f
+    }()
+
+    private var filteredEntries: [HistoryEntry] {
+        guard isSearching else { return historyManager.entries }
+        let query = searchText.lowercased()
+        return historyManager.entries.filter { entry in
+            entry.questionSummary.localizedCaseInsensitiveContains(query)
+                || (entry.answer?.localizedCaseInsensitiveContains(query) ?? false)
+                || entry.clientName.localizedCaseInsensitiveContains(query)
         }
     }
 
-    private func dateGroup(for date: Date) -> String {
-        let calendar = Calendar.current
-        if calendar.isDateInToday(date) {
-            return "Today"
-        } else if calendar.isDateInYesterday(date) {
-            return "Yesterday"
-        } else {
-            return "Older"
+    private var groupedEntries: [String: [HistoryEntry]] {
+        Dictionary(grouping: filteredEntries) { entry in
+            Self.dayFormatter.string(from: entry.timestamp)
         }
+    }
+
+    private var sortedGroupKeys: [String] {
+        groupedEntries.keys.sorted().reversed()
+    }
+
+    private func sectionHeader(for dateKey: String) -> String {
+        guard let date = Self.dayFormatter.date(from: dateKey) else { return dateKey }
+
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return "Today" }
+        if calendar.isDateInYesterday(date) { return "Yesterday" }
+
+        let display = DateFormatter()
+        display.dateFormat = "EEEE, MMM d"
+        display.timeZone = .current
+        return display.string(from: date)
     }
 }
 

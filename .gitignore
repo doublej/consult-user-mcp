@@ -43,6 +43,5 @@ macos-app/dialog-cli/
 .beads/
 CLAUDE.md
 
-# Confidential
-MONETIZATION_PLAN.md
-promotion/
+# Confidential / local-only
+local/

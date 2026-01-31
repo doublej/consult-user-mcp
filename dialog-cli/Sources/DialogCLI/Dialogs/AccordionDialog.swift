@@ -112,14 +112,8 @@ struct AccordionSection: View {
 
     private func toggleSelection(at index: Int) {
         var current = selectedIndices
-        if question.multiSelect {
-            if current.contains(index) {
-                current.remove(index)
-            } else {
-                current.insert(index)
-            }
-        } else {
-            current = [index]
+        current.toggle(index, multiSelect: question.multiSelect)
+        if !question.multiSelect {
             // Auto-advance to next section after single-select
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 onAutoAdvance()
@@ -141,7 +135,6 @@ struct SwiftUIAccordionDialog: View {
     @State private var answers: [String: QuestionAnswer] = [:]
     @State private var textInputs: [String: String] = [:]
     @State private var focusedOptionIndex: Int = 0
-    @State private var expandedTool: DialogToolbar.ToolbarTool?
 
     private var answeredCount: Int {
         answers.values.filter { !$0.isEmpty }.count
@@ -159,7 +152,7 @@ struct SwiftUIAccordionDialog: View {
     }
 
     var body: some View {
-        DialogContainer(keyHandler: handleKeyPress) {
+        DialogContainer(keyHandler: handleKeyPress) { expandedTool in
             VStack(spacing: 0) {
                 // Header with progress
                 HStack {
@@ -217,7 +210,7 @@ struct SwiftUIAccordionDialog: View {
 
                 VStack(spacing: 0) {
                     DialogToolbar(
-                        expandedTool: $expandedTool,
+                        expandedTool: expandedTool,
                         onSnooze: onSnooze,
                         onFeedback: { feedback in onFeedback(feedback, answers) }
                     )
@@ -228,9 +221,7 @@ struct SwiftUIAccordionDialog: View {
                             KeyboardHint(key: "↑↓", label: "navigate"),
                             KeyboardHint(key: "Space", label: "select"),
                             KeyboardHint(key: "⏎", label: "done"),
-                            KeyboardHint(key: "S", label: "snooze"),
-                            KeyboardHint(key: "F", label: "feedback")
-                        ])
+                        ] + KeyboardHint.toolbarHints)
                         HStack(spacing: 10) {
                             FocusableButton(title: "Cancel", isPrimary: false, action: onCancel)
                                 .frame(height: 48)
@@ -253,7 +244,6 @@ struct SwiftUIAccordionDialog: View {
         }
         .onChange(of: expandedId) { _ in
             focusedOptionIndex = 0
-            // Focus first element in expanded section (delay must exceed animation duration)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 FocusManager.shared.focusFirst()
             }
@@ -282,40 +272,20 @@ struct SwiftUIAccordionDialog: View {
                 }
             }
         }
-        // If last question, stay expanded (user can click Done)
     }
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
-        // Block action keys during cooldown
-        if CooldownManager.shared.shouldBlockKey(keyCode) {
-            return true
-        }
-
         switch keyCode {
         case KeyCode.escape:
-            if expandedTool != nil {
-                toggleToolbarTool(expandedTool!)
-                return true
-            }
             onCancel()
             return true
         case KeyCode.returnKey:
-            if expandedTool == .feedback { return false }
             if answeredCount > 0 {
                 onComplete(answers)
             }
             return true
-        case KeyCode.s:
-            if expandedTool == .feedback { return false }
-            toggleToolbarTool(.snooze)
-            return true
-        case KeyCode.f:
-            if expandedTool == .feedback { return false }
-            toggleToolbarTool(.feedback)
-            return true
         case KeyCode.tab:
             if modifiers.contains(.shift) {
-                // Shift+Tab: go to previous section
                 if let currentId = expandedId,
                    let currentIdx = questions.firstIndex(where: { $0.id == currentId }),
                    currentIdx > 0 {
@@ -330,7 +300,6 @@ struct SwiftUIAccordionDialog: View {
                     return true
                 }
             } else {
-                // Tab: go to next section, or to buttons if at last section
                 if let currentId = expandedId,
                    let currentIdx = questions.firstIndex(where: { $0.id == currentId }) {
                     if currentIdx < questions.count - 1 {
@@ -344,22 +313,11 @@ struct SwiftUIAccordionDialog: View {
                         }
                         return true
                     }
-                    // At last section - fall through to default Tab to reach buttons
                 }
             }
-            return false // Let default Tab behavior handle buttons
+            return false
         default:
             return false
-        }
-    }
-
-    private func toggleToolbarTool(_ tool: DialogToolbar.ToolbarTool) {
-        if reduceMotion {
-            expandedTool = expandedTool == tool ? nil : tool
-        } else {
-            withAnimation(.easeOut(duration: 0.2)) {
-                expandedTool = expandedTool == tool ? nil : tool
-            }
         }
     }
 }

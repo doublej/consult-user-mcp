@@ -8,6 +8,12 @@ struct KeyboardHint: Identifiable {
     let label: String
 }
 
+extension KeyboardHint {
+    static let snooze = KeyboardHint(key: "S", label: "snooze")
+    static let feedback = KeyboardHint(key: "F", label: "feedback")
+    static let toolbarHints: [KeyboardHint] = [.snooze, .feedback]
+}
+
 struct KeyboardHintsView: View {
     let hints: [KeyboardHint]
 

@@ -22,6 +22,16 @@ extension NSBezierPath {
     }
 }
 
+extension Set where Element == Int {
+    mutating func toggle(_ index: Int, multiSelect: Bool) {
+        if multiSelect {
+            if contains(index) { remove(index) } else { insert(index) }
+        } else {
+            self = [index]
+        }
+    }
+}
+
 extension Array {
     subscript(safe index: Int) -> Element? {
         return indices.contains(index) ? self[index] : nil

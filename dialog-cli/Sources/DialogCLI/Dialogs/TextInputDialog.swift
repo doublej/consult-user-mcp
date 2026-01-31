@@ -13,9 +13,6 @@ struct SwiftUITextInputDialog: View {
     let onFeedback: (String) -> Void
 
     @State private var inputText: String
-    @State private var expandedTool: DialogToolbar.ToolbarTool?
-
-    @Environment(\.accessibilityReduceMotion) var reduceMotion
 
     init(
         title: String,
@@ -40,34 +37,17 @@ struct SwiftUITextInputDialog: View {
 
     var body: some View {
         DialogContainer(keyHandler: { keyCode, _ in
-            if CooldownManager.shared.shouldBlockKey(keyCode) {
-                return true
-            }
-
             switch keyCode {
             case KeyCode.escape:
-                if expandedTool != nil {
-                    toggleTool(expandedTool!)
-                    return true
-                }
                 onCancel()
                 return true
             case KeyCode.returnKey:
-                if expandedTool == .feedback { return false }
                 onSubmit(inputText)
-                return true
-            case KeyCode.s:
-                if expandedTool == .feedback { return false }
-                toggleTool(.snooze)
-                return true
-            case KeyCode.f:
-                if expandedTool == .feedback { return false }
-                toggleTool(.feedback)
                 return true
             default:
                 return false
             }
-        }) {
+        }) { expandedTool in
             VStack(spacing: 0) {
                 DialogHeader(
                     icon: isHidden ? "lock.fill" : "text.cursor",
@@ -86,7 +66,7 @@ struct SwiftUITextInputDialog: View {
                 .padding(.bottom, 12)
 
                 DialogToolbar(
-                    expandedTool: $expandedTool,
+                    expandedTool: expandedTool,
                     onSnooze: onSnooze,
                     onFeedback: onFeedback
                 )
@@ -95,9 +75,7 @@ struct SwiftUITextInputDialog: View {
                     hints: [
                         KeyboardHint(key: "⏎", label: "submit"),
                         KeyboardHint(key: "Esc", label: "cancel"),
-                        KeyboardHint(key: "S", label: "snooze"),
-                        KeyboardHint(key: "F", label: "feedback")
-                    ],
+                    ] + KeyboardHint.toolbarHints,
                     buttons: [
                         .init("Cancel", action: onCancel),
                         .init("Submit", isPrimary: true, showReturnHint: true, action: { onSubmit(inputText) })
@@ -106,16 +84,6 @@ struct SwiftUITextInputDialog: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityLabel(Text("\(title). \(bodyText)"))
-        }
-    }
-
-    private func toggleTool(_ tool: DialogToolbar.ToolbarTool) {
-        if reduceMotion {
-            expandedTool = expandedTool == tool ? nil : tool
-        } else {
-            withAnimation(.easeOut(duration: 0.2)) {
-                expandedTool = expandedTool == tool ? nil : tool
-            }
         }
     }
 }

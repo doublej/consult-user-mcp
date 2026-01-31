@@ -16,7 +16,6 @@ struct SwiftUIChooseDialog: View {
 
     @State private var selectedIndices: Set<Int> = []
     @State private var focusedIndex: Int = 0
-    @State private var expandedTool: DialogToolbar.ToolbarTool?
 
     init(body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String, Set<Int>) -> Void) {
         self.bodyText = body
@@ -36,14 +35,14 @@ struct SwiftUIChooseDialog: View {
     }
 
     var body: some View {
-        DialogContainer(keyHandler: handleKeyPress) {
+        DialogContainer(keyHandler: handleKeyPress) { expandedTool in
             VStack(spacing: 0) {
                 headerView
                 choicesScrollView
                     .clipped()
 
                 DialogToolbar(
-                    expandedTool: $expandedTool,
+                    expandedTool: expandedTool,
                     onSnooze: onSnooze,
                     onFeedback: { feedback in onFeedback(feedback, selectedIndices) }
                 )
@@ -100,9 +99,7 @@ struct SwiftUIChooseDialog: View {
                 KeyboardHint(key: "↑↓", label: "navigate"),
                 KeyboardHint(key: "Space", label: "select"),
                 KeyboardHint(key: "⏎", label: "done"),
-                KeyboardHint(key: "S", label: "snooze"),
-                KeyboardHint(key: "F", label: "feedback")
-            ],
+            ] + KeyboardHint.toolbarHints,
             buttons: [
                 .init("Cancel", action: onCancel),
                 .init("Done", isPrimary: true, isDisabled: selectedIndices.isEmpty, showReturnHint: true, action: { onComplete(selectedIndices) })
@@ -111,51 +108,18 @@ struct SwiftUIChooseDialog: View {
     }
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
-        // Block action keys during cooldown
-        if CooldownManager.shared.shouldBlockKey(keyCode) {
-            return true
-        }
-
-        // Navigation (Tab, arrows) and Space handled by FocusManager + focused views
         switch keyCode {
         case KeyCode.escape:
-            if expandedTool != nil {
-                toggleTool(expandedTool!)
-                return true
-            }
             return false
         case KeyCode.returnKey:
-            if expandedTool == .feedback { return false }
             if !selectedIndices.isEmpty { onComplete(selectedIndices) }
-            return true
-        case KeyCode.s:
-            if expandedTool == .feedback { return false }
-            toggleTool(.snooze)
-            return true
-        case KeyCode.f:
-            if expandedTool == .feedback { return false }
-            toggleTool(.feedback)
             return true
         default:
             return false
         }
     }
 
-    private func toggleTool(_ tool: DialogToolbar.ToolbarTool) {
-        withAnimation(.easeOut(duration: 0.2)) {
-            expandedTool = expandedTool == tool ? nil : tool
-        }
-    }
-
     private func toggleSelection(at index: Int) {
-        if allowMultiple {
-            if selectedIndices.contains(index) {
-                selectedIndices.remove(index)
-            } else {
-                selectedIndices.insert(index)
-            }
-        } else {
-            selectedIndices = [index]
-        }
+        selectedIndices.toggle(index, multiSelect: allowMultiple)
     }
 }

@@ -13,46 +13,24 @@ struct SwiftUIConfirmDialog: View {
     let onSnooze: (Int) -> Void
     let onFeedback: (String) -> Void
 
-    @State private var expandedTool: DialogToolbar.ToolbarTool?
-
-    @Environment(\.accessibilityReduceMotion) var reduceMotion
-
     var body: some View {
         DialogContainer(keyHandler: { keyCode, _ in
-            // Block action keys during cooldown
-            if CooldownManager.shared.shouldBlockKey(keyCode) {
-                return true
-            }
-
             switch keyCode {
             case KeyCode.escape:
-                if expandedTool != nil {
-                    toggleTool(expandedTool!)
-                    return true
-                }
                 return false
             case KeyCode.returnKey:
-                if expandedTool == .feedback { return false }
                 onConfirm()
-                return true
-            case KeyCode.s:
-                if expandedTool == .feedback { return false }
-                toggleTool(.snooze)
-                return true
-            case KeyCode.f:
-                if expandedTool == .feedback { return false }
-                toggleTool(.feedback)
                 return true
             default:
                 return false
             }
-        }) {
+        }) { expandedTool in
             VStack(spacing: 0) {
                 DialogHeader(icon: "questionmark", title: title, body: bodyText)
                     .padding(.bottom, 12)
 
                 DialogToolbar(
-                    expandedTool: $expandedTool,
+                    expandedTool: expandedTool,
                     onSnooze: onSnooze,
                     onFeedback: onFeedback
                 )
@@ -61,9 +39,7 @@ struct SwiftUIConfirmDialog: View {
                     hints: [
                         KeyboardHint(key: "⏎", label: "confirm"),
                         KeyboardHint(key: "Esc", label: "cancel"),
-                        KeyboardHint(key: "S", label: "snooze"),
-                        KeyboardHint(key: "F", label: "feedback")
-                    ],
+                    ] + KeyboardHint.toolbarHints,
                     buttons: [
                         .init(cancelLabel, action: onCancel),
                         .init(confirmLabel, isPrimary: true, showReturnHint: true, action: onConfirm)
@@ -72,16 +48,6 @@ struct SwiftUIConfirmDialog: View {
             }
             .accessibilityElement(children: .contain)
             .accessibilityLabel(Text("\(title). \(bodyText)"))
-        }
-    }
-
-    private func toggleTool(_ tool: DialogToolbar.ToolbarTool) {
-        if reduceMotion {
-            expandedTool = expandedTool == tool ? nil : tool
-        } else {
-            withAnimation(.easeOut(duration: 0.2)) {
-                expandedTool = expandedTool == tool ? nil : tool
-            }
         }
     }
 }

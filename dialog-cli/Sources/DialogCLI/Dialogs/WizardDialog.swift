@@ -76,15 +76,7 @@ struct QuestionSection: View {
 
     private func toggleSelection(at index: Int) {
         var current = selectedIndices
-        if question.multiSelect {
-            if current.contains(index) {
-                current.remove(index)
-            } else {
-                current.insert(index)
-            }
-        } else {
-            current = [index]
-        }
+        current.toggle(index, multiSelect: question.multiSelect)
         answer = .choices(current)
     }
 }
@@ -102,7 +94,6 @@ struct SwiftUIWizardDialog: View {
     @State private var answers: [String: QuestionAnswer] = [:]
     @State private var focusedOptionIndex: Int = 0
     @State private var textInputs: [String: String] = [:]
-    @State private var expandedTool: DialogToolbar.ToolbarTool?
 
     private var currentQuestion: QuestionItem { questions[currentIndex] }
     private var currentAnswer: QuestionAnswer { answers[currentQuestion.id] ?? (currentQuestion.type == .text ? .text("") : .choices([])) }
@@ -110,7 +101,7 @@ struct SwiftUIWizardDialog: View {
     private var isLast: Bool { currentIndex == questions.count - 1 }
 
     var body: some View {
-        DialogContainer(keyHandler: handleKeyPress) {
+        DialogContainer(keyHandler: handleKeyPress) { expandedTool in
             VStack(spacing: 0) {
                 // Progress bar
                 ProgressBar(current: currentIndex + 1, total: questions.count)
@@ -152,7 +143,7 @@ struct SwiftUIWizardDialog: View {
 
                 VStack(spacing: 0) {
                     DialogToolbar(
-                        expandedTool: $expandedTool,
+                        expandedTool: expandedTool,
                         onSnooze: onSnooze,
                         onFeedback: { feedback in onFeedback(feedback, answers) }
                     )
@@ -163,9 +154,7 @@ struct SwiftUIWizardDialog: View {
                             KeyboardHint(key: "↑↓", label: "navigate"),
                             KeyboardHint(key: "Space", label: "select"),
                             KeyboardHint(key: "⏎", label: isLast ? "done" : "next"),
-                            KeyboardHint(key: "S", label: "snooze"),
-                            KeyboardHint(key: "F", label: "feedback")
-                        ])
+                        ] + KeyboardHint.toolbarHints)
                         HStack(spacing: 10) {
                             if isFirst {
                                 FocusableButton(title: "Cancel", isPrimary: false, action: onCancel)
@@ -194,7 +183,6 @@ struct SwiftUIWizardDialog: View {
         }
         .onChange(of: currentIndex) { _ in
             focusedOptionIndex = 0
-            // Focus first element (delay to let view tree update)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 FocusManager.shared.focusFirst()
             }
@@ -202,22 +190,11 @@ struct SwiftUIWizardDialog: View {
     }
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
-        // Block action keys during cooldown
-        if CooldownManager.shared.shouldBlockKey(keyCode) {
-            return true
-        }
-
-        // Navigation (Tab, up/down arrows) and Space handled by FocusManager + focused views
         switch keyCode {
         case KeyCode.escape:
-            if expandedTool != nil {
-                toggleTool(expandedTool!)
-                return true
-            }
             onCancel()
             return true
         case KeyCode.returnKey:
-            if expandedTool == .feedback { return false }
             if !currentAnswer.isEmpty {
                 if isLast { onComplete(answers) } else { goNext() }
             }
@@ -228,22 +205,8 @@ struct SwiftUIWizardDialog: View {
         case KeyCode.leftArrow:
             if !isFirst { goBack() }
             return true
-        case KeyCode.s:
-            if expandedTool == .feedback { return false }
-            toggleTool(.snooze)
-            return true
-        case KeyCode.f:
-            if expandedTool == .feedback { return false }
-            toggleTool(.feedback)
-            return true
         default:
             return false
-        }
-    }
-
-    private func toggleTool(_ tool: DialogToolbar.ToolbarTool) {
-        withAnimation(.easeOut(duration: 0.2)) {
-            expandedTool = expandedTool == tool ? nil : tool
         }
     }
 

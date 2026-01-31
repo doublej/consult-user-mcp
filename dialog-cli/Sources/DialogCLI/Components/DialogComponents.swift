@@ -1,6 +1,19 @@
 import SwiftUI
 import AppKit
 
+// MARK: - Environment Keys
+
+private struct HasProjectBadgeKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var hasProjectBadge: Bool {
+        get { self[HasProjectBadgeKey.self] }
+        set { self[HasProjectBadgeKey.self] = newValue }
+    }
+}
+
 // MARK: - Project Badge
 
 struct ProjectBadge: View {
@@ -150,6 +163,8 @@ struct DialogHeader: View {
     let title: String
     let bodyText: String?
 
+    @Environment(\.hasProjectBadge) private var hasProjectBadge
+
     init(icon: String, title: String, body: String? = nil, iconColor: Color = Theme.Colors.accentBlue) {
         self.icon = icon
         self.iconColor = iconColor
@@ -157,26 +172,8 @@ struct DialogHeader: View {
         self.bodyText = body
     }
 
-    private var projectName: String? {
-        DialogManager.shared.getProjectName()
-    }
-
-    private var projectPath: String? {
-        DialogManager.shared.getProjectPath()
-    }
-
     var body: some View {
         VStack(spacing: 0) {
-            // Project badge in top-right
-            if let name = projectName, let path = projectPath {
-                HStack {
-                    Spacer()
-                    ProjectBadge(projectName: name, projectPath: path)
-                }
-                .padding(.top, 12)
-                .padding(.trailing, 12)
-            }
-
             ZStack {
                 Circle()
                     .fill(iconColor.opacity(0.15))
@@ -186,7 +183,7 @@ struct DialogHeader: View {
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(iconColor)
             }
-            .padding(.top, projectName != nil ? 8 : 28)
+            .padding(.top, hasProjectBadge ? 8 : 28)
             .padding(.bottom, 16)
 
             Text(title)
@@ -259,27 +256,53 @@ struct DialogFooter: View {
 struct DialogContainer<Content: View>: View {
     let onEscape: (() -> Void)?
     let keyHandler: ((UInt16, NSEvent.ModifierFlags) -> Bool)?
-    let content: Content
+    let contentBuilder: (Binding<DialogToolbar.ToolbarTool?>) -> Content
 
     @State private var keyboardMonitor: KeyboardNavigationMonitor?
+    @State private var expandedTool: DialogToolbar.ToolbarTool?
+
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+
+    private var projectName: String? {
+        DialogManager.shared.getProjectName()
+    }
+
+    private var projectPath: String? {
+        DialogManager.shared.getProjectPath()
+    }
 
     init(
         onEscape: (() -> Void)? = nil,
         keyHandler: ((UInt16, NSEvent.ModifierFlags) -> Bool)? = nil,
-        @ViewBuilder content: () -> Content
+        @ViewBuilder content: @escaping (Binding<DialogToolbar.ToolbarTool?>) -> Content
     ) {
         self.onEscape = onEscape
         self.keyHandler = keyHandler
-        self.content = content()
+        self.contentBuilder = content
+    }
+
+    private var hasBadge: Bool {
+        projectName != nil && projectPath != nil
     }
 
     var body: some View {
-        content
-            .background(Color.clear)
-            .onAppear {
+        VStack(spacing: 0) {
+            if let name = projectName, let path = projectPath {
+                HStack {
+                    Spacer()
+                    ProjectBadge(projectName: name, projectPath: path)
+                }
+                .padding(.top, 12)
+                .padding(.trailing, 12)
+            }
+
+            contentBuilder($expandedTool)
+        }
+        .environment(\.hasProjectBadge, hasBadge)
+        .background(Color.clear)
+        .onAppear {
                 FocusManager.shared.reset()
                 setupKeyboardNavigation()
-                // Focus first element after a brief delay to let views register
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     FocusManager.shared.focusFirst()
                 }
@@ -290,9 +313,39 @@ struct DialogContainer<Content: View>: View {
             }
     }
 
+    private func toggleTool(_ tool: DialogToolbar.ToolbarTool) {
+        if reduceMotion {
+            expandedTool = expandedTool == tool ? nil : tool
+        } else {
+            withAnimation(.easeOut(duration: 0.2)) {
+                expandedTool = expandedTool == tool ? nil : tool
+            }
+        }
+    }
+
     private func setupKeyboardNavigation() {
         keyboardMonitor = KeyboardNavigationMonitor { keyCode, modifiers in
-            // Let custom handler try first (allows dialogs to override Tab behavior)
+            // Universal cooldown check — blocks rapid keypresses for all keys
+            if CooldownManager.shared.shouldBlockKey(keyCode) {
+                return true
+            }
+            if keyCode == KeyCode.escape && expandedTool != nil {
+                toggleTool(expandedTool!)
+                return true
+            }
+            if keyCode == KeyCode.s && expandedTool != .feedback {
+                toggleTool(.snooze)
+                return true
+            }
+            if keyCode == KeyCode.f && expandedTool != .feedback {
+                toggleTool(.feedback)
+                return true
+            }
+            if keyCode == KeyCode.returnKey && expandedTool == .feedback {
+                return false
+            }
+
+            // Let custom handler try next
             if let handler = keyHandler, handler(keyCode, modifiers) {
                 return true
             }

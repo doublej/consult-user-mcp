@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-01-31
+
+### Added
+- History view now includes a search field to filter entries by question, answer, or client name
+- Day sections in history are now collapsible, with today expanded by default
+- History footer now has a button to reveal the data folder in Finder
+
+### Changed
+- History entries are now stored in per-day files for better performance and organization
+- Existing history is automatically migrated to the new per-day format
+- Toolbar keyboard shortcuts (S, F, Esc) now handled consistently across all dialog types
+
 ## [1.8.0] - 2026-01-31
 
 ### Added

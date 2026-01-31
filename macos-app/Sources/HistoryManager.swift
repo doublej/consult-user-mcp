@@ -4,7 +4,7 @@ import Combine
 final class HistoryManager: ObservableObject {
     static let shared = HistoryManager()
 
-    private let historyURL: URL
+    let historyURL: URL
     private var pollTimer: Timer?
     private var lastModified: Date?
 

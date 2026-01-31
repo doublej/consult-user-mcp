@@ -97,6 +97,16 @@ struct HistoryDetailView: View {
                 .foregroundColor(Color(.tertiaryLabelColor))
 
             Spacer()
+
+            Button {
+                NSWorkspace.shared.activateFileViewerSelecting([historyManager.historyURL])
+            } label: {
+                Image(systemName: "folder")
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(.tertiaryLabelColor))
+            }
+            .buttonStyle(.plain)
+            .help("Reveal data file in Finder")
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)

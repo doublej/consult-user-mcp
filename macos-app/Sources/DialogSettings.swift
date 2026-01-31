@@ -6,7 +6,8 @@ final class DialogSettings: ObservableObject {
 
     private let settingsURL: URL
     private var snoozeTimer: Timer?
-    private var fileMonitor: DispatchSourceFileSystemObject?
+    private var pollTimer: Timer?
+    private var lastModified: Date?
 
     // MARK: - Persisted Settings
 
@@ -63,8 +64,9 @@ final class DialogSettings: ObservableObject {
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         settingsURL = folder.appendingPathComponent("settings.json")
 
+        lastModified = settingsModificationDate()
         loadFromFile()
-        startFileMonitoring()
+        startPolling()
 
         // Start countdown timer if snooze is already active from file
         if isSnoozed {
@@ -109,6 +111,7 @@ final class DialogSettings: ObservableObject {
 
         guard let data = try? encoder.encode(settings) else { return }
         try? data.write(to: settingsURL, options: .atomic)
+        lastModified = settingsModificationDate()
     }
 
     private func loadFromFile() {
@@ -203,27 +206,23 @@ final class DialogSettings: ObservableObject {
         }
     }
 
-    // MARK: - File Monitoring (for external changes)
+    // MARK: - File Polling (for external changes)
 
-    private func startFileMonitoring() {
-        let fd = open(settingsURL.path, O_EVTONLY)
-        guard fd >= 0 else { return }
-
-        fileMonitor = DispatchSource.makeFileSystemObjectSource(
-            fileDescriptor: fd,
-            eventMask: [.write, .rename],
-            queue: .main
-        )
-
-        fileMonitor?.setEventHandler { [weak self] in
-            self?.handleExternalFileChange()
+    private func startPolling() {
+        pollTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            self?.checkForChanges()
         }
+    }
 
-        fileMonitor?.setCancelHandler {
-            close(fd)
-        }
+    private func checkForChanges() {
+        let currentMod = settingsModificationDate()
+        guard currentMod != lastModified else { return }
+        lastModified = currentMod
+        handleExternalFileChange()
+    }
 
-        fileMonitor?.resume()
+    private func settingsModificationDate() -> Date? {
+        try? FileManager.default.attributesOfItem(atPath: settingsURL.path)[.modificationDate] as? Date
     }
 
     private func handleExternalFileChange() {

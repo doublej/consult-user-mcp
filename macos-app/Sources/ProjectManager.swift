@@ -34,7 +34,8 @@ final class ProjectManager: ObservableObject {
     @Published private(set) var projects: [Project] = []
 
     private let configURL: URL
-    private var fileMonitor: DispatchSourceFileSystemObject?
+    private var pollTimer: Timer?
+    private var lastModified: Date?
 
     private init() {
         let configDir = FileManager.default.homeDirectoryForCurrentUser
@@ -44,8 +45,9 @@ final class ProjectManager: ObservableObject {
         try? FileManager.default.createDirectory(at: configDir, withIntermediateDirectories: true)
         configURL = configDir.appendingPathComponent("projects.json")
 
+        lastModified = configModificationDate()
         loadFromFile()
-        startFileMonitoring()
+        startPolling()
     }
 
     // MARK: - CRUD Operations
@@ -107,32 +109,29 @@ final class ProjectManager: ObservableObject {
 
         guard let data = try? encoder.encode(file) else { return }
         try? data.write(to: configURL, options: .atomic)
+        lastModified = configModificationDate()
     }
 
     private func sortProjects() {
         projects.sort { $0.lastSeen > $1.lastSeen }
     }
 
-    // MARK: - File Monitoring
+    // MARK: - File Polling
 
-    private func startFileMonitoring() {
-        let fd = open(configURL.path, O_EVTONLY)
-        guard fd >= 0 else { return }
-
-        fileMonitor = DispatchSource.makeFileSystemObjectSource(
-            fileDescriptor: fd,
-            eventMask: [.write, .rename],
-            queue: .main
-        )
-
-        fileMonitor?.setEventHandler { [weak self] in
-            self?.loadFromFile()
+    private func startPolling() {
+        pollTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            self?.checkForChanges()
         }
+    }
 
-        fileMonitor?.setCancelHandler {
-            close(fd)
-        }
+    private func checkForChanges() {
+        let currentMod = configModificationDate()
+        guard currentMod != lastModified else { return }
+        lastModified = currentMod
+        loadFromFile()
+    }
 
-        fileMonitor?.resume()
+    private func configModificationDate() -> Date? {
+        try? FileManager.default.attributesOfItem(atPath: configURL.path)[.modificationDate] as? Date
     }
 }

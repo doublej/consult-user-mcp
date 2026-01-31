@@ -5,7 +5,8 @@ final class HistoryManager: ObservableObject {
     static let shared = HistoryManager()
 
     private let historyURL: URL
-    private var fileMonitor: DispatchSourceFileSystemObject?
+    private var pollTimer: Timer?
+    private var lastModified: Date?
 
     @Published private(set) var entries: [HistoryEntry] = []
 
@@ -20,8 +21,9 @@ final class HistoryManager: ObservableObject {
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         historyURL = folder.appendingPathComponent("history.json")
 
+        lastModified = fileModificationDate()
         loadFromFile()
-        startFileMonitoring()
+        startPolling()
     }
 
     // MARK: - Load
@@ -55,28 +57,25 @@ final class HistoryManager: ObservableObject {
 
         guard let data = try? encoder.encode(file) else { return }
         try? data.write(to: historyURL, options: .atomic)
+        lastModified = fileModificationDate()
     }
 
-    // MARK: - File Monitoring
+    // MARK: - File Polling
 
-    private func startFileMonitoring() {
-        let fd = open(historyURL.path, O_EVTONLY | O_CREAT, S_IRUSR | S_IWUSR)
-        guard fd >= 0 else { return }
-
-        fileMonitor = DispatchSource.makeFileSystemObjectSource(
-            fileDescriptor: fd,
-            eventMask: [.write, .rename, .extend],
-            queue: .main
-        )
-
-        fileMonitor?.setEventHandler { [weak self] in
-            self?.loadFromFile()
+    private func startPolling() {
+        pollTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            self?.checkForChanges()
         }
+    }
 
-        fileMonitor?.setCancelHandler {
-            close(fd)
-        }
+    private func checkForChanges() {
+        let currentMod = fileModificationDate()
+        guard currentMod != lastModified else { return }
+        lastModified = currentMod
+        loadFromFile()
+    }
 
-        fileMonitor?.resume()
+    private func fileModificationDate() -> Date? {
+        try? FileManager.default.attributesOfItem(atPath: historyURL.path)[.modificationDate] as? Date
     }
 }

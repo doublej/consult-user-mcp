@@ -13,9 +13,9 @@ struct HistoryEntry: Codable, Identifiable {
     let snoozed: Bool
 }
 
-// MARK: - History File
+// MARK: - Legacy History File (for migration)
 
-struct HistoryFile: Codable {
+struct LegacyHistoryFile: Codable {
     var version: Int = 1
     var entries: [HistoryEntry]
 }

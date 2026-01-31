@@ -4,9 +4,12 @@ import Combine
 final class HistoryManager: ObservableObject {
     static let shared = HistoryManager()
 
-    let historyURL: URL
+    let historyDir: URL
+    private let legacyFileURL: URL
     private var pollTimer: Timer?
-    private var lastModified: Date?
+    private var lastDirModified: Date?
+    private var lastTodayFileModified: Date?
+    private let maxDaysToLoad = 30
 
     @Published private(set) var entries: [HistoryEntry] = []
 
@@ -18,46 +21,82 @@ final class HistoryManager: ObservableObject {
             in: .userDomainMask
         ).first!
         let folder = appSupport.appendingPathComponent("ConsultUserMCP")
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        historyURL = folder.appendingPathComponent("history.json")
+        historyDir = folder.appendingPathComponent("history")
+        legacyFileURL = folder.appendingPathComponent("history.json")
 
-        lastModified = fileModificationDate()
-        loadFromFile()
+        try? FileManager.default.createDirectory(at: historyDir, withIntermediateDirectories: true)
+        migrateLegacyFile()
+        loadAllDays()
         startPolling()
     }
 
-    // MARK: - Load
+    // MARK: - Migration
 
-    private func loadFromFile() {
-        guard let data = try? Data(contentsOf: historyURL) else {
-            entries = []
-            return
-        }
+    private func migrateLegacyFile() {
+        let fm = FileManager.default
+        guard fm.fileExists(atPath: legacyFileURL.path),
+              let data = try? Data(contentsOf: legacyFileURL) else { return }
 
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
 
-        guard let file = try? decoder.decode(HistoryFile.self, from: data) else {
+        guard let legacy = try? decoder.decode(LegacyHistoryFile.self, from: data) else { return }
+
+        let grouped = Dictionary(grouping: legacy.entries) { dayString(from: $0.timestamp) }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+
+        for (day, dayEntries) in grouped {
+            let dayURL = historyDir.appendingPathComponent("\(day).json")
+            guard let encoded = try? encoder.encode(dayEntries) else { continue }
+            try? encoded.write(to: dayURL, options: .atomic)
+        }
+
+        try? fm.removeItem(at: legacyFileURL)
+    }
+
+    // MARK: - Load
+
+    private func loadAllDays() {
+        let fm = FileManager.default
+        guard let files = try? fm.contentsOfDirectory(at: historyDir, includingPropertiesForKeys: nil) else {
             entries = []
             return
         }
 
-        entries = file.entries
+        let cutoff = Calendar.current.date(byAdding: .day, value: -maxDaysToLoad, to: Date())!
+        let cutoffString = dayString(from: cutoff)
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        var all: [HistoryEntry] = []
+        for file in files where file.pathExtension == "json" {
+            let name = file.deletingPathExtension().lastPathComponent
+            guard name >= cutoffString else { continue }
+            guard let data = try? Data(contentsOf: file),
+                  let dayEntries = try? decoder.decode([HistoryEntry].self, from: data) else { continue }
+            all.append(contentsOf: dayEntries)
+        }
+
+        entries = all.sorted { $0.timestamp < $1.timestamp }
+        lastDirModified = dirModificationDate()
+        lastTodayFileModified = todayFileModificationDate()
     }
 
     // MARK: - Clear
 
     func clearHistory() {
         entries = []
-        let file = HistoryFile(entries: [])
-
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        encoder.dateEncodingStrategy = .iso8601
-
-        guard let data = try? encoder.encode(file) else { return }
-        try? data.write(to: historyURL, options: .atomic)
-        lastModified = fileModificationDate()
+        let fm = FileManager.default
+        guard let files = try? fm.contentsOfDirectory(at: historyDir, includingPropertiesForKeys: nil) else { return }
+        for file in files where file.pathExtension == "json" {
+            try? fm.removeItem(at: file)
+        }
+        lastDirModified = dirModificationDate()
+        lastTodayFileModified = nil
     }
 
     // MARK: - File Polling
@@ -69,13 +108,32 @@ final class HistoryManager: ObservableObject {
     }
 
     private func checkForChanges() {
-        let currentMod = fileModificationDate()
-        guard currentMod != lastModified else { return }
-        lastModified = currentMod
-        loadFromFile()
+        let currentDirMod = dirModificationDate()
+        let currentTodayMod = todayFileModificationDate()
+
+        let dirChanged = currentDirMod != lastDirModified
+        let todayChanged = currentTodayMod != lastTodayFileModified
+
+        guard dirChanged || todayChanged else { return }
+        loadAllDays()
     }
 
-    private func fileModificationDate() -> Date? {
-        try? FileManager.default.attributesOfItem(atPath: historyURL.path)[.modificationDate] as? Date
+    private func dirModificationDate() -> Date? {
+        try? FileManager.default.attributesOfItem(atPath: historyDir.path)[.modificationDate] as? Date
+    }
+
+    private func todayFileModificationDate() -> Date? {
+        let todayURL = historyDir.appendingPathComponent("\(dayString(from: Date())).json")
+        return try? FileManager.default.attributesOfItem(atPath: todayURL.path)[.modificationDate] as? Date
+    }
+
+    // MARK: - Date formatting
+
+    private func dayString(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        return formatter.string(from: date)
     }
 }

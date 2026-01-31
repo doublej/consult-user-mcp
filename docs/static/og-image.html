@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #0a0a0f;
+  }
+
+  .canvas {
+    width: 1200px;
+    height: 630px;
+    background: radial-gradient(ellipse at 35% 50%, #1a1a2e 0%, #0a0a0f 70%);
+    display: flex;
+    position: relative;
+  }
+
+  .left {
+    flex: 1;
+    padding: 80px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    z-index: 1;
+  }
+
+  .logo {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .logo img {
+    width: 100%;
+    height: 100%;
+  }
+
+  h1 {
+    font-size: 46px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.92);
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+  }
+
+  .tagline {
+    font-size: 21px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.4;
+  }
+
+  .sub {
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.25);
+    margin-top: 4px;
+  }
+
+  .badges {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .badge {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+    font-size: 12px;
+    color: #666;
+    background: rgba(255,255,255,0.07);
+    padding: 6px 14px;
+    border-radius: 6px;
+  }
+
+  .right {
+    width: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  /* Dialog mockup */
+  .dialog {
+    width: 380px;
+    background: rgba(26, 26, 31, 0.98);
+    border-radius: 16px;
+    border: 1px solid #3a3a3f;
+    box-shadow: 0 30px 60px -15px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset;
+    overflow: hidden;
+  }
+
+  .window-header {
+    padding: 14px 16px 10px;
+    display: flex;
+    gap: 7px;
+  }
+
+  .light { width: 12px; height: 12px; border-radius: 50%; opacity: 0.85; }
+  .light.r { background: #ff5f57; }
+  .light.y { background: #febc2e; }
+  .light.g { background: #28c840; }
+
+  .dialog-body {
+    padding: 6px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #5A8CFF, #4070e0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .dialog-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .dialog-text {
+    font-size: 13px;
+    color: #9a9a9f;
+    text-align: center;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn.secondary {
+    background: #2a2a30;
+    color: #BFBFBF;
+    border: 1px solid #3a3a3f;
+  }
+
+  .btn.primary {
+    background: linear-gradient(135deg, #5A8CFF, #4a7cf0);
+    color: white;
+    box-shadow: 0 0 16px rgba(90, 140, 255, 0.4);
+  }
+
+  .key-hint {
+    font-size: 10px;
+    opacity: 0.7;
+    background: rgba(255,255,255,0.15);
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+
+  /* Snooze toolbar */
+  .toolbar {
+    background: #242428;
+    padding: 12px 20px;
+    border-top: 1px solid #2a2a2f;
+  }
+
+  .toolbar-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #9a9a9f;
+    margin-bottom: 8px;
+  }
+
+  .snooze-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .pill {
+    width: 48px;
+    height: 36px;
+    background: #242428;
+    border: 1px solid #3a3a3f;
+    border-radius: 8px;
+    color: #e0e0e0;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+  }
+
+  .pill.active {
+    background: #5A8CFF;
+    border-color: #5A8CFF;
+    color: white;
+  }
+
+  .toolbar-btns {
+    display: flex;
+    gap: 12px;
+    padding: 8px 20px;
+    border-top: 1px solid #2a2a2f;
+  }
+
+  .toolbar-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #9a9a9f;
+    background: transparent;
+  }
+
+  .toolbar-btn.active {
+    background: rgba(90, 140, 255, 0.15);
+    color: #5A8CFF;
+  }
+
+  /* Keyboard hints */
+  .hints {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    padding: 12px 14px;
+    background: rgba(0,0,0,0.25);
+    border-top: 1px solid #2a2a2f;
+  }
+
+  .hint {
+    color: #666;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .hint kbd {
+    background: #2a2a30;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 9px;
+    color: #9a9a9f;
+    border: 1px solid #3a3a3f;
+  }
+
+  .tool-label {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 11px;
+    color: #505050;
+    background: rgba(255,255,255,0.06);
+    padding: 4px 12px;
+    border-radius: 6px;
+    margin-top: 12px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="left">
+    <div class="logo">
+      <img src="app-icon.png" alt="">
+    </div>
+    <h1>Consult User MCP</h1>
+    <div class="tagline">Native macOS dialogs for MCP agents</div>
+    <div class="sub">Respond with a click. Snooze for later. No terminal needed.</div>
+    <div class="badges">
+      <span class="badge">macOS</span>
+      <span class="badge">open source</span>
+    </div>
+  </div>
+  <div class="right">
+    <div>
+      <div class="dialog">
+        <div class="window-header">
+          <span class="light r"></span>
+          <span class="light y"></span>
+          <span class="light g"></span>
+        </div>
+        <div class="dialog-body">
+          <div class="icon-circle">?</div>
+          <div class="dialog-title">Confirmation</div>
+          <div class="dialog-text">Deploy to production on a Friday at 4:59 PM?</div>
+          <div class="btn-row">
+            <div class="btn secondary">No</div>
+            <div class="btn primary">Yes <span class="key-hint">&#x23CE;</span></div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="toolbar-label">Ask me again in:</div>
+          <div class="snooze-row">
+            <div class="pill">1m</div>
+            <div class="pill">5m</div>
+            <div class="pill active">15m</div>
+            <div class="pill">30m</div>
+            <div class="pill">1h</div>
+          </div>
+        </div>
+        <div class="toolbar-btns">
+          <div class="toolbar-btn active">&#x21BA; Snooze</div>
+          <div class="toolbar-btn">&#x270E; Feedback</div>
+        </div>
+        <div class="hints">
+          <span class="hint"><kbd>&#x23CE;</kbd> confirm</span>
+          <span class="hint"><kbd>Esc</kbd> cancel</span>
+          <span class="hint"><kbd>S</kbd> snooze</span>
+          <span class="hint"><kbd>F</kbd> feedback</span>
+        </div>
+      </div>
+      <div class="tool-label">ask_confirmation</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

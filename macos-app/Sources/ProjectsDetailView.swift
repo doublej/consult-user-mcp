@@ -15,21 +15,17 @@ struct ProjectsDetailView: View {
     // MARK: - Header
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 16) {
-                SettingsPageHeader(
-                    icon: "folder.fill",
-                    title: "Projects",
-                    description: "Manage discovered project directories"
-                )
-
-                if !projectManager.projects.isEmpty {
-                    Button(action: { projectManager.removeAll() }) {
-                        Label("Clear All", systemImage: "trash")
-                            .font(.system(size: 12))
-                    }
-                    .buttonStyle(.bordered)
+        SettingsPageHeader(
+            icon: "folder.fill",
+            title: "Projects",
+            description: "Manage discovered project directories"
+        ) {
+            if !projectManager.projects.isEmpty {
+                Button(action: { projectManager.removeAll() }) {
+                    Label("Clear All", systemImage: "trash")
+                        .font(.system(size: 12))
                 }
+                .buttonStyle(.bordered)
             }
         }
         .padding(.horizontal, 24)
@@ -129,7 +125,7 @@ private struct ProjectDetailRow: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, minHeight: 56)
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(isHovered ? Color(.controlBackgroundColor) : Color(.controlBackgroundColor).opacity(0.7))
@@ -138,56 +134,34 @@ private struct ProjectDetailRow: View {
     }
 
     private var actionButtons: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             if isEditing {
-                Button(action: saveEdit) {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 11, weight: .medium))
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-
-                Button(action: cancelEdit) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 11, weight: .medium))
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
+                actionButton("checkmark", action: saveEdit)
+                actionButton("xmark", action: cancelEdit)
             } else {
-                Button(action: startEdit) {
-                    Image(systemName: "pencil")
-                        .font(.system(size: 11, weight: .medium))
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .help("Rename")
-
-                Button(action: openInFinder) {
-                    Image(systemName: "folder")
-                        .font(.system(size: 11, weight: .medium))
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .help("Open in Finder")
-
-                Button(action: openInTerminal) {
-                    Image(systemName: "terminal")
-                        .font(.system(size: 11, weight: .medium))
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .help("Open in Terminal")
-
-                Button(action: remove) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.red)
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .help("Remove")
+                actionButton("pencil", action: startEdit, help: "Rename")
+                actionButton("folder", action: openInFinder, help: "Open in Finder")
+                actionButton("terminal", action: openInTerminal, help: "Open in Terminal")
+                actionButton("trash", action: remove, help: "Remove", color: .red)
             }
         }
+    }
+
+    private func actionButton(
+        _ icon: String,
+        action: @escaping () -> Void,
+        help: String? = nil,
+        color: Color? = nil
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(color)
+                .frame(width: 28, height: 28)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .help(help ?? "")
     }
 
     // MARK: - Actions

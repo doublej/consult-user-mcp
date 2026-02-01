@@ -175,11 +175,7 @@ struct InstallDetailView: View {
                     .foregroundColor(.secondary)
             }
 
-            basePromptToggle
-            if answers.includeBasePrompt && fileExists {
-                existingFileOptions
-            }
-
+            basePromptSection
         }
     }
 
@@ -199,8 +195,8 @@ struct InstallDetailView: View {
         ClaudeMdInstaller.isUpdateAvailable(for: answers.target)
     }
 
-    private var basePromptToggle: some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private var basePromptSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
             Toggle(isOn: $answers.includeBasePrompt) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Include usage hints")
@@ -211,13 +207,22 @@ struct InstallDetailView: View {
                 }
             }
             .toggleStyle(.switch)
+            .padding(16)
 
             if fileExists {
+                Divider().padding(.leading, 16)
+
                 fileStatusBadge
-                    .padding(.leading, 36)
+                    .padding(16)
+            }
+
+            if answers.includeBasePrompt && fileExists {
+                Divider().padding(.leading, 16)
+
+                existingFileOptions
+                    .padding(16)
             }
         }
-        .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color(.controlBackgroundColor))

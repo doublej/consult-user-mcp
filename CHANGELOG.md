@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [1.10.0] - 2026-02-01
+## [1.9.1] - 2026-02-01
 
 ### Changed
 - Settings version panel is now more compact with a cleaner layout

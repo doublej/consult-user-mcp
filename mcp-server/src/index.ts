@@ -2,6 +2,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { SwiftDialogProvider } from "./providers/swift.js";
+import { WindowsDialogProvider } from "./providers/windows.js";
+import type { DialogProvider } from "./providers/interface.js";
 import type { DialogPosition, QuestionsMode } from "./types.js";
 
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
@@ -16,7 +18,13 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 const server = new McpServer({ name: "consult-user-mcp-server", version: "1.0.0" });
-const provider = new SwiftDialogProvider();
+
+function createProvider(): DialogProvider {
+  if (process.platform === "win32") return new WindowsDialogProvider();
+  return new SwiftDialogProvider();
+}
+
+const provider = createProvider();
 const pos = z.enum(["left", "right", "center"]).default("left");
 const projectPath = z.string().describe("Project path for context badge");
 

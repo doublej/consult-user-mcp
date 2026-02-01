@@ -1,11 +1,12 @@
 {
   "name": "consult-user-mcp",
   "private": true,
-  "description": "Native macOS dialog system for MCP servers",
+  "description": "Native dialog system for MCP servers",
   "scripts": {
     "build": "cd mcp-server && bun run build",
     "build:cli": "cd dialog-cli && swift build -c release",
     "build:app": "cd macos-app && swift build -c release",
+    "build:cli:windows": "cd dialog-cli-windows && dotnet publish -r win-x64 --self-contained -p:PublishSingleFile=true",
     "build:bundle": "bash scripts/build-app.sh",
     "dev": "bash scripts/dev-install.sh",
     "start": "cd mcp-server && bun run start",

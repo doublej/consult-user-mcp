@@ -2,6 +2,8 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { SwiftDialogProvider } from "./providers/swift.js";
+import { WindowsDialogProvider } from "./providers/windows.js";
+import type { DialogProvider } from "./providers/interface.js";
 import type { DialogPosition, QuestionsMode } from "./types.js";
 import { compactResponse } from "./compact.js";
 import { checkForUpdate } from "./update-check.js";
@@ -40,7 +42,12 @@ function tracked<T>(promise: Promise<T>, extra: Parameters<typeof withHeartbeat>
 }
 
 const server = new McpServer({ name: "consult-user-mcp-server", version: "1.0.0" });
-const provider = new SwiftDialogProvider();
+function createProvider(): DialogProvider {
+  if (process.platform === "win32") return new WindowsDialogProvider();
+  return new SwiftDialogProvider();
+}
+
+const provider = createProvider();
 
 let cachedProjectPath: string | undefined;
 

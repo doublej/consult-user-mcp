@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-02-01
+
+### Changed
+- Settings version panel is now more compact with a cleaner layout
+
+### Fixed
+- Keyboard shortcuts (S, F) no longer trigger while typing in text input fields
+
 ## [1.9.0] - 2026-01-31
 
 ### Added

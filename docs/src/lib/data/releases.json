@@ -3,6 +3,15 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.10.0",
+      "date": "2026-02-01",
+      "highlight": "Hotkey fix & compact settings",
+      "changes": [
+        { "text": "Keyboard shortcuts (S, F) no longer trigger while typing in text input fields", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Settings version panel is now more compact with a cleaner layout", "type": "changed", "scope": "app", "featured": true }
+      ]
+    },
+    {
       "version": "1.9.0",
       "date": "2026-01-31",
       "highlight": "Searchable history & per-day storage",

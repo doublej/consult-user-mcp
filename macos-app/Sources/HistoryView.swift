@@ -160,13 +160,11 @@ struct HistoryDetailView: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack(spacing: 16) {
-            SettingsPageHeader(
-                icon: "clock.arrow.circlepath",
-                title: "History",
-                description: "View past dialog interactions"
-            )
-
+        SettingsPageHeader(
+            icon: "clock.arrow.circlepath",
+            title: "History",
+            description: "View past dialog interactions"
+        ) {
             if !historyManager.entries.isEmpty {
                 Button(action: { showClearConfirmation = true }) {
                     Label("Clear All", systemImage: "trash")
@@ -558,16 +556,17 @@ private struct HistoryEntryRow: View {
                 }
             }
 
-            Spacer(minLength: 12)
+            Spacer(minLength: 8)
 
-            // Status indicator
-            Circle()
-                .fill(statusColor)
-                .frame(width: 8, height: 8)
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(statusColor)
+                    .frame(width: 8, height: 8)
 
-            Image(systemName: "chevron.right")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(Color(.tertiaryLabelColor))
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(Color(.tertiaryLabelColor))
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)

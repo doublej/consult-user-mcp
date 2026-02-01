@@ -1,12 +1,10 @@
-using System.Text.Json.Serialization;
-
 namespace DialogCLI.Models;
 
 public enum DialogPosition
 {
-    [JsonStringEnumMemberName("left")] Left,
-    [JsonStringEnumMemberName("center")] Center,
-    [JsonStringEnumMemberName("right")] Right,
+    Left,
+    Center,
+    Right,
 }
 
 public record ConfirmRequest(

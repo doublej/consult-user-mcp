@@ -75,20 +75,28 @@ struct UpdatesSettingsView: View {
 
     private var currentVersionSection: some View {
         SettingsSectionContainer(title: "Current Version") {
-            HStack(spacing: 20) {
-                appIcon
+            VStack(spacing: 0) {
+                HStack(spacing: 16) {
+                    appIcon
 
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Consult User MCP")
-                        .font(.system(size: 17, weight: .semibold))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Consult User MCP")
+                            .font(.system(size: 15, weight: .semibold))
+                        Text("v\(VersionInfo.app)")
+                            .font(.system(size: 12, design: .monospaced))
+                            .foregroundColor(.secondary)
+                    }
 
-                    versionGrid
+                    Spacer(minLength: 0)
                 }
+                .padding(16)
 
-                Spacer(minLength: 0)
+                Divider()
+                    .padding(.horizontal, 16)
+
+                versionGrid
+                    .padding(16)
             }
-            .padding(20)
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
@@ -99,18 +107,18 @@ struct UpdatesSettingsView: View {
                 Image(nsImage: icon)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 72, height: 72)
+                    .frame(width: 48, height: 48)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
             } else {
                 Image(systemName: "app.fill")
-                    .font(.system(size: 52))
+                    .font(.system(size: 36))
                     .foregroundColor(.secondary)
             }
         }
     }
 
     private var versionGrid: some View {
-        Grid(alignment: .leading, horizontalSpacing: 16, verticalSpacing: 6) {
-            versionGridRow("App", VersionInfo.app)
+        Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 8) {
             versionGridRow("MCP Server", VersionInfo.mcp)
             versionGridRow("Dialog CLI", VersionInfo.cli)
             versionGridRow("Base Prompt", VersionInfo.baseprompt)
@@ -121,11 +129,11 @@ struct UpdatesSettingsView: View {
     private func versionGridRow(_ label: String, _ version: String) -> some View {
         GridRow {
             Text(label)
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
+                .font(.system(size: 11))
+                .foregroundStyle(.tertiary)
             Text("v\(version)")
-                .font(.system(size: 12, weight: .medium, design: .monospaced))
-                .foregroundColor(.primary)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(.secondary)
         }
     }
 
@@ -135,36 +143,34 @@ struct UpdatesSettingsView: View {
         SettingsSectionContainer(title: "Updates") {
             VStack(spacing: 0) {
                 statusRow
-                    .padding(20)
-                    .frame(maxWidth: .infinity)
+                    .padding(16)
 
                 if let progress = settings.updateDownloadProgress {
                     Divider()
-                    VStack(spacing: 8) {
+                        .padding(.horizontal, 16)
+                    VStack(spacing: 6) {
                         ProgressView(value: progress)
                             .progressViewStyle(.linear)
                         Text("\(Int(progress * 100))%")
                             .font(.system(size: 11, design: .monospaced))
                             .foregroundColor(.secondary)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                    .padding(16)
                 }
             }
         }
     }
 
     private var statusRow: some View {
-        HStack(spacing: 20) {
+        HStack(spacing: 12) {
             statusIcon
-                .frame(width: 36, height: 36)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 statusText
                 statusSubtext
             }
 
-            Spacer(minLength: 16)
+            Spacer(minLength: 8)
 
             actionButton
         }
@@ -174,14 +180,14 @@ struct UpdatesSettingsView: View {
     private var statusIcon: some View {
         if settings.updateCheckInProgress || isDownloading {
             ProgressView()
-                .controlSize(.regular)
+                .controlSize(.small)
         } else if settings.updateAvailable != nil {
             Image(systemName: "arrow.up.circle.fill")
-                .font(.system(size: 28))
+                .font(.system(size: 22))
                 .foregroundColor(.orange)
         } else {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 28))
+                .font(.system(size: 22))
                 .foregroundColor(.green)
         }
     }
@@ -218,7 +224,7 @@ struct UpdatesSettingsView: View {
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
         } else {
-            Text("v\(VersionInfo.app) · \(lastCheckText)")
+            Text(lastCheckText)
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
         }

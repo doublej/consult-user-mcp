@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.9.2] - 2026-02-01
+
+### Changed
+- Install wizard now has a persistent footer bar with Back/Next buttons
+- Install wizard progress stepper uses evenly-spaced columns with centered labels
+- Project rows now have consistent height and larger action button hit targets
+- Base prompt toggle, status badge, and file options grouped in a single container
+- History row status dot and chevron grouped as a tighter trailing cluster
+
+### Fixed
+- Sidebar badges now align vertically across all rows
+
 ## [1.9.1] - 2026-02-01
 
 ### Changed

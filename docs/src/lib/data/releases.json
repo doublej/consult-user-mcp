@@ -3,6 +3,19 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.9.2",
+      "date": "2026-02-01",
+      "highlight": "Settings UI polish",
+      "changes": [
+        { "text": "Sidebar badges now align vertically across all rows", "type": "fixed", "scope": "app", "featured": true },
+        { "text": "Install wizard now has a persistent footer bar with Back/Next buttons", "type": "changed", "scope": "app", "featured": true },
+        { "text": "Install wizard progress stepper uses evenly-spaced columns with centered labels", "type": "changed", "scope": "app" },
+        { "text": "Project rows now have consistent height and larger action button hit targets", "type": "changed", "scope": "app" },
+        { "text": "Base prompt toggle, status badge, and file options grouped in a single container", "type": "changed", "scope": "app" },
+        { "text": "History row status dot and chevron grouped as a tighter trailing cluster", "type": "changed", "scope": "app" }
+      ]
+    },
+    {
       "version": "1.9.1",
       "date": "2026-02-01",
       "highlight": "Hotkey fix & compact settings",

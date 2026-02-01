@@ -5,6 +5,7 @@
 	import PerspectiveDialog from '$lib/components/PerspectiveDialog.svelte';
 	import QuestionHistory from '$lib/components/QuestionHistory.svelte';
 	import FeaturePanels from '$lib/components/FeaturePanels.svelte';
+	import ComparisonTable from '$lib/components/ComparisonTable.svelte';
 
 	let copied = false;
 	const installCommand = 'curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/install.sh | bash';
@@ -14,17 +15,6 @@
 		copied = true;
 		setTimeout(() => copied = false, 2000);
 	}
-
-	const comparison = [
-		{ feature: 'Interface', ask: 'In-terminal prompt', consult: 'Native macOS dialog' },
-		{ feature: 'Options per question', ask: '2-4', consult: 'Up to 20' },
-		{ feature: 'Multi-select', ask: 'Yes', consult: 'Yes' },
-		{ feature: 'Free text input', ask: 'Via "Other" option', consult: 'Dedicated tool' },
-		{ feature: 'Snooze/defer', ask: '-', consult: '1min - 1hr' },
-		{ feature: 'Feedback to redirect agent', ask: '-', consult: 'Yes' },
-		{ feature: 'Hidden/password input', ask: '-', consult: 'Yes' },
-		{ feature: 'System notifications', ask: '-', consult: 'Yes' }
-	];
 </script>
 
 <svelte:head>
@@ -41,6 +31,7 @@
 			<div class="nav-links">
 				<a href="#demo" class="nav-link">Demo</a>
 				<a href="#dialogs" class="nav-link">Dialogs</a>
+				<a href="#compare" class="nav-link">Compare</a>
 				<a href="#install" class="nav-link">Install</a>
 				<a href="{base}/changelog" class="nav-link">Changelog</a>
 				<a href="https://github.com/doublej/consult-user-mcp" class="nav-link" target="_blank" rel="noopener">GitHub</a>
@@ -90,29 +81,10 @@
 		<FeaturePanels />
 	</section>
 
-	<section class="section animate-in" style="animation-delay: 900ms;">
+	<section class="section animate-in" style="animation-delay: 900ms;" id="compare">
 		<h2>Comparison</h2>
-		<p class="section-desc">How this compares to Claude's built-in AskUserQuestion tool.</p>
-		<div class="table-wrap">
-			<table>
-				<thead>
-					<tr>
-						<th></th>
-						<th>AskUserQuestion</th>
-						<th>consult-user-mcp</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each comparison as row}
-						<tr>
-							<td class="feature-name">{row.feature}</td>
-							<td class="cell-muted">{row.ask}</td>
-							<td class="cell-accent">{row.consult}</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
+		<p class="section-desc">How consult-user-mcp compares to other human-in-the-loop MCP servers.</p>
+		<ComparisonTable />
 	</section>
 
 	<section class="section animate-in" style="animation-delay: 1000ms;">
@@ -400,86 +372,6 @@
 		overflow: visible;
 	}
 
-	/* Feature row */
-	.feature-row {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 24px;
-	}
-
-	.feature-block {
-		background: #fff;
-		border: 1px solid #d0d0d0;
-		overflow: hidden;
-	}
-
-	.feature-block img {
-		width: 100%;
-		display: block;
-		border-bottom: 1px solid #e0e0e0;
-	}
-
-	.feature-block h3 {
-		font-size: 1rem;
-		font-weight: 600;
-		color: #1a1a1a;
-		margin: 16px 16px 6px;
-	}
-
-	.feature-block p {
-		margin: 0 16px 16px;
-		font-size: 0.9rem;
-		color: #606060;
-	}
-
-	/* Table */
-	.table-wrap {
-		overflow-x: auto;
-	}
-
-	table {
-		width: 100%;
-		border-collapse: collapse;
-		font-size: 0.9rem;
-		background: #fff;
-		border: 1px solid #d0d0d0;
-	}
-
-	th, td {
-		padding: 12px 16px;
-		text-align: left;
-		border-bottom: 1px solid #e8e8e8;
-	}
-
-	th {
-		font-weight: 500;
-		color: #808080;
-		font-size: 0.85rem;
-		background: #f8f8f8;
-		border-bottom: 1px solid #d0d0d0;
-	}
-
-	th:first-child {
-		width: 40%;
-	}
-
-	.feature-name {
-		color: #303030;
-		font-weight: 500;
-	}
-
-	.cell-muted {
-		color: #a0a0a0;
-	}
-
-	.cell-accent {
-		color: #1a1a1a;
-		font-weight: 500;
-	}
-
-	tbody tr:last-child td {
-		border-bottom: none;
-	}
 
 
 	/* Manual note */

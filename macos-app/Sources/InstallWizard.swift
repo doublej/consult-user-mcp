@@ -72,6 +72,62 @@ struct WizardProgressBar<Step: WizardStep>: View where Step.AllCases: RandomAcce
     }
 }
 
+// MARK: - Progress Steps View (Settings)
+
+struct ProgressStepsView<Step: WizardStep>: View where Step.AllCases: RandomAccessCollection {
+    let steps: Step.AllCases
+    let currentStep: Step
+
+    private var currentIndex: Int {
+        steps.firstIndex(of: currentStep).map { steps.distance(from: steps.startIndex, to: $0) } ?? 0
+    }
+
+    private var progress: CGFloat {
+        guard steps.count > 1 else { return 1 }
+        return CGFloat(currentIndex) / CGFloat(steps.count - 1)
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 1.5)
+                        .fill(Color(.separatorColor))
+                        .frame(height: 3)
+
+                    RoundedRectangle(cornerRadius: 1.5)
+                        .fill(Color.accentColor)
+                        .frame(width: geometry.size.width * progress, height: 3)
+                        .animation(.easeInOut(duration: 0.3), value: progress)
+                }
+            }
+            .frame(height: 3)
+
+            HStack(spacing: 0) {
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, wizardStep in
+                    stepColumn(step: wizardStep, index: index)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+        }
+    }
+
+    private func stepColumn(step: Step, index: Int) -> some View {
+        let isActive = index <= currentIndex
+        let isCurrent = step == currentStep
+
+        return VStack(spacing: 6) {
+            Circle()
+                .fill(isActive ? Color.accentColor : Color(.separatorColor))
+                .frame(width: 10, height: 10)
+
+            Text(step.title)
+                .font(.system(size: 11, weight: isCurrent ? .semibold : .regular))
+                .foregroundColor(isActive ? .primary : .secondary)
+        }
+    }
+}
+
 // MARK: - Wizard Container
 
 struct WizardContainer<Step: WizardStep, Content: View>: View where Step.AllCases: RandomAccessCollection {

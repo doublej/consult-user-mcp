@@ -16,22 +16,40 @@ struct InstallDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            progressBar
+            progressStepsView
             content
+
+            if installResult == nil {
+                Divider()
+                footerBar
+            }
         }
         .background(Color(.windowBackgroundColor))
+    }
+
+    private var footerBar: some View {
+        HStack {
+            if step != .targetSelection {
+                Button("Back") { goBack() }
+                    .buttonStyle(.bordered)
+            }
+
+            Spacer()
+
+            Button(step == .confirmation ? "Install" : "Next") { goNext() }
+                .buttonStyle(.borderedProminent)
+        }
+        .padding(16)
     }
 
     // MARK: - Header
 
     private var header: some View {
-        HStack(spacing: 16) {
-            SettingsPageHeader(
-                icon: "puzzlepiece.extension.fill",
-                title: "Install",
-                description: "Set up MCP integration with your AI tools"
-            )
-
+        SettingsPageHeader(
+            icon: "puzzlepiece.extension.fill",
+            title: "Install",
+            description: "Set up MCP integration with your AI tools"
+        ) {
             if installResult?.isFullySuccessful == true {
                 Button("Start Over") {
                     resetWizard()
@@ -44,58 +62,15 @@ struct InstallDetailView: View {
         .padding(.bottom, 8)
     }
 
-    // MARK: - Progress Bar
+    // MARK: - Progress Steps
 
-    private var progressBar: some View {
-        VStack(spacing: 16) {
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(.separatorColor))
-                        .frame(height: 8)
-
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.accentColor)
-                        .frame(width: geometry.size.width * progress, height: 8)
-                        .animation(.easeInOut(duration: 0.3), value: progress)
-                }
-            }
-            .frame(height: 8)
-
-            HStack {
-                ForEach(Array(InstallWizardStep.allCases.enumerated()), id: \.offset) { index, wizardStep in
-                    stepIndicator(step: wizardStep, index: index)
-                    if index < InstallWizardStep.allCases.count - 1 {
-                        Spacer()
-                    }
-                }
-            }
-        }
+    private var progressStepsView: some View {
+        ProgressStepsView(
+            steps: InstallWizardStep.allCases,
+            currentStep: step
+        )
         .padding(.horizontal, 24)
         .padding(.bottom, 20)
-    }
-
-    private var progress: CGFloat {
-        let steps = InstallWizardStep.allCases
-        guard let index = steps.firstIndex(of: step) else { return 0 }
-        return CGFloat(index) / CGFloat(steps.count - 1)
-    }
-
-    private func stepIndicator(step wizardStep: InstallWizardStep, index: Int) -> some View {
-        let currentIndex = InstallWizardStep.allCases.firstIndex(of: step) ?? 0
-        let isActive = index <= currentIndex
-        let isCurrent = wizardStep == step
-
-        return VStack(spacing: 8) {
-            Circle()
-                .fill(isActive ? Color.accentColor : Color(.separatorColor))
-                .frame(width: isCurrent ? 14 : 12, height: isCurrent ? 14 : 12)
-                .animation(.easeInOut(duration: 0.2), value: isCurrent)
-
-            Text(wizardStep.title)
-                .font(.system(size: 12, weight: isCurrent ? .semibold : .regular))
-                .foregroundColor(isActive ? .primary : .secondary)
-        }
     }
 
     // MARK: - Content
@@ -135,7 +110,6 @@ struct InstallDetailView: View {
                 }
             }
 
-            navigationButtons(showBack: false)
         }
     }
 
@@ -206,7 +180,6 @@ struct InstallDetailView: View {
                 existingFileOptions
             }
 
-            navigationButtons(showBack: true)
         }
     }
 
@@ -241,6 +214,7 @@ struct InstallDetailView: View {
 
             if fileExists {
                 fileStatusBadge
+                    .padding(.leading, 36)
             }
         }
         .padding(16)
@@ -377,7 +351,6 @@ struct InstallDetailView: View {
                     .fill(Color(.controlBackgroundColor))
             )
 
-            navigationButtons(showBack: true, nextLabel: "Install")
         }
     }
 
@@ -525,23 +498,6 @@ struct InstallDetailView: View {
     }
 
     // MARK: - Navigation
-
-    private func navigationButtons(showBack: Bool, nextLabel: String = "Next") -> some View {
-        HStack {
-            if showBack {
-                Button("Back") { goBack() }
-                    .buttonStyle(.bordered)
-            }
-
-            Spacer()
-
-            if installResult == nil {
-                Button(nextLabel) { goNext() }
-                    .buttonStyle(.borderedProminent)
-            }
-        }
-        .padding(.top, 8)
-    }
 
     private func goBack() {
         withAnimation(.easeInOut(duration: 0.2)) {

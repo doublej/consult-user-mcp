@@ -11,16 +11,18 @@ public record FooterButton(string Label, bool IsPrimary, Action OnClick);
 public static class DialogFooter
 {
     public static StackPanel Create(params FooterButton[] buttons)
+        => Create("Esc to cancel \u2022 Enter to confirm", buttons);
+
+    public static StackPanel Create(string hintText, params FooterButton[] buttons)
     {
         var panel = new StackPanel
         {
             Margin = new Thickness(DialogTheme.Padding, 8, DialogTheme.Padding, DialogTheme.Padding),
         };
 
-        // Keyboard hints
         var hints = new TextBlock
         {
-            Text = "Esc to cancel \u2022 Enter to confirm",
+            Text = hintText,
             FontSize = DialogTheme.HintFontSize,
             Foreground = DialogTheme.SecondaryTextBrush,
             HorizontalAlignment = HorizontalAlignment.Center,
@@ -28,7 +30,6 @@ public static class DialogFooter
         };
         panel.Children.Add(hints);
 
-        // Button row
         var buttonPanel = new StackPanel
         {
             Orientation = Orientation.Horizontal,
@@ -38,6 +39,7 @@ public static class DialogFooter
         foreach (var btn in buttons)
         {
             var button = CreateButton(btn.Label, btn.IsPrimary);
+            button.IsTabStop = false;
             button.Click += (_, _) => btn.OnClick();
             buttonPanel.Children.Add(button);
         }

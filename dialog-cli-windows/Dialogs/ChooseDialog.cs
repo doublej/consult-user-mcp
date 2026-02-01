@@ -39,7 +39,6 @@ public class ChooseDialog : DialogBase
 
         stack.Children.Add(DialogHeader.Create("Choose", _request.Body));
 
-        // Scrollable choices
         var scrollViewer = new ScrollViewer
         {
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
@@ -57,7 +56,10 @@ public class ChooseDialog : DialogBase
         scrollViewer.Content = choicesPanel;
         stack.Children.Add(scrollViewer);
 
-        stack.Children.Add(DialogFooter.Create(
+        var hint = _request.AllowMultiple
+            ? "\u2191\u2193 navigate \u2022 Space select \u2022 Enter done"
+            : "\u2191\u2193 navigate \u2022 Enter confirm";
+        stack.Children.Add(DialogFooter.Create(hint,
             new FooterButton("Cancel", false, () =>
             {
                 Result = new ChoiceResponse { Cancelled = true };
@@ -146,16 +148,27 @@ public class ChooseDialog : DialogBase
         for (int i = 0; i < _cards.Count; i++)
         {
             var isSelected = _selected.Contains(i);
-            _cards[i].BorderBrush = isSelected
-                ? DialogTheme.AccentBrush
-                : DialogTheme.TransparentBrush;
-            _cards[i].Background = isSelected
-                ? new SolidColorBrush(Color.FromArgb(30, 59, 130, 246))
-                : DialogTheme.CardBrush;
+            var isFocused = i == _focusedIndex;
+
+            if (isSelected)
+            {
+                _cards[i].BorderBrush = DialogTheme.AccentBrush;
+                _cards[i].Background = new SolidColorBrush(Color.FromArgb(30, 59, 130, 246));
+            }
+            else if (isFocused)
+            {
+                _cards[i].BorderBrush = DialogTheme.FocusRingBrush;
+                _cards[i].Background = DialogTheme.CardBrush;
+            }
+            else
+            {
+                _cards[i].BorderBrush = DialogTheme.TransparentBrush;
+                _cards[i].Background = DialogTheme.CardBrush;
+            }
         }
     }
 
-    protected override void OnWindowKeyDown(object sender, KeyEventArgs e)
+    protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
         switch (e.Key)
         {
@@ -176,7 +189,7 @@ public class ChooseDialog : DialogBase
                 e.Handled = true;
                 return;
         }
-        base.OnWindowKeyDown(sender, e);
+        base.OnWindowPreviewKeyDown(sender, e);
     }
 
     private void MoveFocus(int delta)
@@ -186,8 +199,8 @@ public class ChooseDialog : DialogBase
         {
             _selected.Clear();
             _selected.Add(_focusedIndex);
-            UpdateVisuals();
         }
+        UpdateVisuals();
     }
 
     protected override void OnCancelled()

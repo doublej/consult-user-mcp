@@ -15,6 +15,8 @@ public class WizardDialog : DialogBase
     private readonly QuestionsRequest _request;
     private readonly Dictionary<string, HashSet<int>> _answers = new();
     private int _currentIndex;
+    private int _focusedOptionIndex;
+    private readonly List<Border> _optionCards = new();
     private readonly StackPanel _contentPanel = new();
     private readonly TextBlock _progressText = new();
     private readonly StackPanel _progressBar = new();
@@ -32,19 +34,16 @@ public class WizardDialog : DialogBase
         var outer = CreateOuterBorder();
         var rootStack = new StackPanel();
 
-        // Progress bar
         _progressBar.Orientation = Orientation.Horizontal;
         _progressBar.Margin = new Thickness(DialogTheme.Padding, DialogTheme.Padding, DialogTheme.Padding, 8);
         rootStack.Children.Add(_progressBar);
 
-        // Progress text
         _progressText.FontSize = DialogTheme.SmallFontSize;
         _progressText.Foreground = DialogTheme.SecondaryTextBrush;
         _progressText.HorizontalAlignment = HorizontalAlignment.Center;
         _progressText.Margin = new Thickness(0, 0, 0, 12);
         rootStack.Children.Add(_progressText);
 
-        // Content area (swapped per step)
         _contentPanel.Margin = new Thickness(DialogTheme.Padding, 0, DialogTheme.Padding, 0);
         var scroll = new ScrollViewer
         {
@@ -54,7 +53,6 @@ public class WizardDialog : DialogBase
         };
         rootStack.Children.Add(scroll);
 
-        // Footer with nav buttons (built dynamically)
         var footerPanel = new StackPanel { Margin = new Thickness(DialogTheme.Padding, 12, DialogTheme.Padding, DialogTheme.Padding) };
         rootStack.Children.Add(footerPanel);
 
@@ -67,6 +65,8 @@ public class WizardDialog : DialogBase
     private void RenderStep()
     {
         var q = _request.Questions[_currentIndex];
+        _focusedOptionIndex = 0;
+        _optionCards.Clear();
 
         // Update progress bar
         _progressBar.Children.Clear();
@@ -87,7 +87,7 @@ public class WizardDialog : DialogBase
         // Render question options
         _contentPanel.Children.Clear();
 
-        var questionText = new TextBlock
+        _contentPanel.Children.Add(new TextBlock
         {
             Text = q.Question,
             FontSize = DialogTheme.TitleFontSize,
@@ -95,15 +95,13 @@ public class WizardDialog : DialogBase
             Foreground = DialogTheme.TextBrush,
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(0, 0, 0, 12),
-        };
-        _contentPanel.Children.Add(questionText);
+        });
 
         var selected = _answers.GetValueOrDefault(q.Id, new HashSet<int>());
         for (int i = 0; i < q.Options.Length; i++)
         {
             var optIdx = i;
             var opt = q.Options[i];
-            var isSelected = selected.Contains(i);
 
             var textStack = new StackPanel { Margin = new Thickness(12, 8, 12, 8) };
             textStack.Children.Add(new TextBlock
@@ -128,27 +126,39 @@ public class WizardDialog : DialogBase
             var card = new Border
             {
                 Child = textStack,
-                Background = isSelected ? new SolidColorBrush(Color.FromArgb(30, 59, 130, 246)) : DialogTheme.CardBrush,
+                Background = DialogTheme.CardBrush,
                 CornerRadius = new CornerRadius(DialogTheme.CardCornerRadius),
                 BorderThickness = new Thickness(2),
-                BorderBrush = isSelected ? DialogTheme.AccentBrush : DialogTheme.TransparentBrush,
+                BorderBrush = DialogTheme.TransparentBrush,
                 Margin = new Thickness(0, 0, 0, 6),
                 Cursor = Cursors.Hand,
             };
             card.MouseLeftButtonDown += (_, _) =>
             {
+                _focusedOptionIndex = optIdx;
                 ToggleOption(q.Id, optIdx, q.MultiSelect);
-                RenderStep();
+                UpdateOptionVisuals();
             };
+            _optionCards.Add(card);
             _contentPanel.Children.Add(card);
         }
+
+        // Hint text
+        _contentPanel.Children.Add(new TextBlock
+        {
+            Text = "\u2191\u2193 navigate \u2022 Space select \u2022 \u2190\u2192 steps \u2022 Enter next/done",
+            FontSize = DialogTheme.HintFontSize,
+            Foreground = DialogTheme.SecondaryTextBrush,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 8, 0, 4),
+        });
 
         // Navigation buttons
         var buttonRow = new StackPanel
         {
             Orientation = Orientation.Horizontal,
             HorizontalAlignment = HorizontalAlignment.Right,
-            Margin = new Thickness(0, 12, 0, 0),
+            Margin = new Thickness(0, 4, 0, 0),
         };
 
         if (_currentIndex == 0)
@@ -174,6 +184,35 @@ public class WizardDialog : DialogBase
         });
 
         _contentPanel.Children.Add(buttonRow);
+        UpdateOptionVisuals();
+    }
+
+    private void UpdateOptionVisuals()
+    {
+        var q = _request.Questions[_currentIndex];
+        var selected = _answers.GetValueOrDefault(q.Id, new HashSet<int>());
+
+        for (int i = 0; i < _optionCards.Count; i++)
+        {
+            var isSelected = selected.Contains(i);
+            var isFocused = i == _focusedOptionIndex;
+
+            if (isSelected)
+            {
+                _optionCards[i].BorderBrush = DialogTheme.AccentBrush;
+                _optionCards[i].Background = new SolidColorBrush(Color.FromArgb(30, 59, 130, 246));
+            }
+            else if (isFocused)
+            {
+                _optionCards[i].BorderBrush = DialogTheme.FocusRingBrush;
+                _optionCards[i].Background = DialogTheme.CardBrush;
+            }
+            else
+            {
+                _optionCards[i].BorderBrush = DialogTheme.TransparentBrush;
+                _optionCards[i].Background = DialogTheme.CardBrush;
+            }
+        }
     }
 
     private void ToggleOption(string questionId, int index, bool multiSelect)
@@ -193,7 +232,7 @@ public class WizardDialog : DialogBase
         }
     }
 
-    protected override void OnWindowKeyDown(object sender, KeyEventArgs e)
+    protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
         var q = _request.Questions[_currentIndex];
         var hasAnswer = _answers.ContainsKey(q.Id) && _answers[q.Id].Count > 0;
@@ -203,6 +242,21 @@ public class WizardDialog : DialogBase
             case Key.Enter when hasAnswer:
                 if (_currentIndex == _request.Questions.Length - 1) Complete();
                 else { _currentIndex++; RenderStep(); }
+                e.Handled = true;
+                return;
+            case Key.Up:
+                _focusedOptionIndex = Math.Max(0, _focusedOptionIndex - 1);
+                UpdateOptionVisuals();
+                e.Handled = true;
+                return;
+            case Key.Down:
+                _focusedOptionIndex = Math.Min(q.Options.Length - 1, _focusedOptionIndex + 1);
+                UpdateOptionVisuals();
+                e.Handled = true;
+                return;
+            case Key.Space:
+                ToggleOption(q.Id, _focusedOptionIndex, q.MultiSelect);
+                UpdateOptionVisuals();
                 e.Handled = true;
                 return;
             case Key.Left when _currentIndex > 0:
@@ -216,7 +270,7 @@ public class WizardDialog : DialogBase
                 e.Handled = true;
                 return;
         }
-        base.OnWindowKeyDown(sender, e);
+        base.OnWindowPreviewKeyDown(sender, e);
     }
 
     protected override void OnCancelled()
@@ -262,6 +316,7 @@ public class WizardDialog : DialogBase
             Foreground = isPrimary ? Brushes.White : DialogTheme.TextBrush,
             BorderBrush = isPrimary ? DialogTheme.AccentBrush : DialogTheme.BorderBrush,
             BorderThickness = new Thickness(1),
+            IsTabStop = false,
         };
         btn.Click += (_, _) => onClick();
         panel.Children.Add(btn);

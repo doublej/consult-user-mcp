@@ -88,7 +88,7 @@ public class TextInputDialog : DialogBase
         };
     }
 
-    protected override void OnWindowKeyDown(object sender, KeyEventArgs e)
+    protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
         {
@@ -96,7 +96,7 @@ public class TextInputDialog : DialogBase
             e.Handled = true;
             return;
         }
-        base.OnWindowKeyDown(sender, e);
+        base.OnWindowPreviewKeyDown(sender, e);
     }
 
     protected override void OnCancelled()

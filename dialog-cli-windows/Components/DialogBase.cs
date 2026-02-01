@@ -30,11 +30,11 @@ public abstract class DialogBase : Window
                 DragMove();
         };
 
-        // Escape key closes dialog
-        KeyDown += OnWindowKeyDown;
+        // Tunneling phase — fires before WPF buttons consume Enter/Space
+        PreviewKeyDown += OnWindowPreviewKeyDown;
     }
 
-    protected virtual void OnWindowKeyDown(object sender, KeyEventArgs e)
+    protected virtual void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Escape)
         {

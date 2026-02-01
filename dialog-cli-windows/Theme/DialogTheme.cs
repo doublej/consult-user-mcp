@@ -16,6 +16,7 @@ public static class DialogTheme
     public static readonly Color BorderColor = Color.FromRgb(60, 60, 60);
     public static readonly Color SelectedColor = Color.FromRgb(59, 130, 246);
     public static readonly Color DangerColor = Color.FromRgb(239, 68, 68);
+    public static readonly Color FocusRingColor = Color.FromRgb(140, 180, 255);
 
     // Brushes (cached)
     public static readonly SolidColorBrush BackgroundBrush = new(BackgroundColor);
@@ -26,6 +27,7 @@ public static class DialogTheme
     public static readonly SolidColorBrush AccentBrush = new(AccentColor);
     public static readonly SolidColorBrush AccentHoverBrush = new(AccentHoverColor);
     public static readonly SolidColorBrush BorderBrush = new(BorderColor);
+    public static readonly SolidColorBrush FocusRingBrush = new(FocusRingColor);
     public static readonly SolidColorBrush TransparentBrush = Brushes.Transparent;
 
     // Sizing

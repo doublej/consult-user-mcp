@@ -15,6 +15,8 @@ public class AccordionDialog : DialogBase
     private readonly QuestionsRequest _request;
     private readonly Dictionary<string, HashSet<int>> _answers = new();
     private string? _expandedId;
+    private int _focusedOptionIndex;
+    private readonly List<Border> _optionCards = new();
     private readonly StackPanel _sectionsPanel = new();
     private readonly TextBlock _counterText = new();
 
@@ -32,7 +34,6 @@ public class AccordionDialog : DialogBase
         var outer = CreateOuterBorder();
         var rootStack = new StackPanel();
 
-        // Header row
         var headerRow = new DockPanel { Margin = new Thickness(DialogTheme.Padding, DialogTheme.Padding, DialogTheme.Padding, 12) };
         headerRow.Children.Add(new TextBlock
         {
@@ -48,7 +49,6 @@ public class AccordionDialog : DialogBase
         headerRow.Children.Add(_counterText);
         rootStack.Children.Add(headerRow);
 
-        // Scrollable sections
         var scroll = new ScrollViewer
         {
             Content = _sectionsPanel,
@@ -58,8 +58,8 @@ public class AccordionDialog : DialogBase
         };
         rootStack.Children.Add(scroll);
 
-        // Footer
         rootStack.Children.Add(DialogFooter.Create(
+            "Tab sections \u2022 \u2191\u2193 navigate \u2022 Space select \u2022 Enter done",
             new FooterButton("Cancel", false, () =>
             {
                 Result = new QuestionsResponse { Cancelled = true };
@@ -80,6 +80,7 @@ public class AccordionDialog : DialogBase
         _counterText.Text = $"{answered}/{_request.Questions.Length} answered";
 
         _sectionsPanel.Children.Clear();
+        _optionCards.Clear();
 
         foreach (var q in _request.Questions)
         {
@@ -101,7 +102,6 @@ public class AccordionDialog : DialogBase
 
             var headerRow = new DockPanel();
 
-            // Status indicator
             var statusCircle = new Border
             {
                 Width = 22,
@@ -125,7 +125,6 @@ public class AccordionDialog : DialogBase
             DockPanel.SetDock(statusCircle, Dock.Left);
             headerRow.Children.Add(statusCircle);
 
-            // Chevron
             var chevron = new TextBlock
             {
                 Text = isExpanded ? "\u25B2" : "\u25BC",
@@ -151,6 +150,7 @@ public class AccordionDialog : DialogBase
             headerBorder.MouseLeftButtonDown += (_, _) =>
             {
                 _expandedId = _expandedId == qId ? null : qId;
+                _focusedOptionIndex = 0;
                 RenderSections();
             };
             section.Children.Add(headerBorder);
@@ -173,6 +173,7 @@ public class AccordionDialog : DialogBase
                     var optIdx = i;
                     var opt = q.Options[i];
                     var isSel = selected.Contains(i);
+                    var isFocused = i == _focusedOptionIndex;
 
                     var textStack = new StackPanel { Margin = new Thickness(10, 6, 10, 6) };
                     textStack.Children.Add(new TextBlock
@@ -196,20 +197,36 @@ public class AccordionDialog : DialogBase
                     var optCard = new Border
                     {
                         Child = textStack,
-                        Background = isSel ? new SolidColorBrush(Color.FromArgb(30, 59, 130, 246)) : DialogTheme.TransparentBrush,
                         CornerRadius = new CornerRadius(6),
                         BorderThickness = new Thickness(2),
-                        BorderBrush = isSel ? DialogTheme.AccentBrush : DialogTheme.TransparentBrush,
                         Margin = new Thickness(0, 0, 0, 4),
                         Cursor = Cursors.Hand,
                     };
+
+                    if (isSel)
+                    {
+                        optCard.Background = new SolidColorBrush(Color.FromArgb(30, 59, 130, 246));
+                        optCard.BorderBrush = DialogTheme.AccentBrush;
+                    }
+                    else if (isFocused)
+                    {
+                        optCard.Background = DialogTheme.TransparentBrush;
+                        optCard.BorderBrush = DialogTheme.FocusRingBrush;
+                    }
+                    else
+                    {
+                        optCard.Background = DialogTheme.TransparentBrush;
+                        optCard.BorderBrush = DialogTheme.TransparentBrush;
+                    }
+
                     optCard.MouseLeftButtonDown += (_, _) =>
                     {
+                        _focusedOptionIndex = optIdx;
                         ToggleOption(q.Id, optIdx, q.MultiSelect);
-                        // Auto-advance on single select
                         if (!q.MultiSelect) AdvanceToNext(qId);
                         else RenderSections();
                     };
+                    _optionCards.Add(optCard);
                     optionsPanel.Children.Add(optCard);
                 }
 
@@ -243,10 +260,11 @@ public class AccordionDialog : DialogBase
         var idx = Array.FindIndex(_request.Questions, q => q.Id == currentId);
         if (idx < _request.Questions.Length - 1)
             _expandedId = _request.Questions[idx + 1].Id;
+        _focusedOptionIndex = 0;
         RenderSections();
     }
 
-    protected override void OnWindowKeyDown(object sender, KeyEventArgs e)
+    protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)
         {
@@ -265,11 +283,35 @@ public class AccordionDialog : DialogBase
             {
                 if (currentIdx < _request.Questions.Length - 1) _expandedId = _request.Questions[currentIdx + 1].Id;
             }
+            _focusedOptionIndex = 0;
             RenderSections();
             e.Handled = true;
             return;
         }
-        base.OnWindowKeyDown(sender, e);
+        if (_expandedId is not null)
+        {
+            var q = _request.Questions.First(q => q.Id == _expandedId);
+            switch (e.Key)
+            {
+                case Key.Up:
+                    _focusedOptionIndex = Math.Max(0, _focusedOptionIndex - 1);
+                    RenderSections();
+                    e.Handled = true;
+                    return;
+                case Key.Down:
+                    _focusedOptionIndex = Math.Min(q.Options.Length - 1, _focusedOptionIndex + 1);
+                    RenderSections();
+                    e.Handled = true;
+                    return;
+                case Key.Space:
+                    ToggleOption(q.Id, _focusedOptionIndex, q.MultiSelect);
+                    if (!q.MultiSelect) AdvanceToNext(q.Id);
+                    else RenderSections();
+                    e.Handled = true;
+                    return;
+            }
+        }
+        base.OnWindowPreviewKeyDown(sender, e);
     }
 
     protected override void OnCancelled()

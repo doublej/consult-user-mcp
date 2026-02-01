@@ -46,29 +46,30 @@ struct SidebarView: View {
     private func badge(for section: SettingsSection) -> some View {
         switch section {
         case .projects where !projectManager.projects.isEmpty:
-            Text("\(projectManager.projects.count)")
-                .font(.system(size: 10, design: .monospaced))
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Capsule().fill(Color(.controlBackgroundColor)))
+            countBadge(projectManager.projects.count)
 
         case .history where !historyManager.entries.isEmpty:
-            Text("\(historyManager.entries.count)")
-                .font(.system(size: 10, design: .monospaced))
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Capsule().fill(Color(.controlBackgroundColor)))
+            countBadge(historyManager.entries.count)
 
         case .updates where settings.updateAvailable != nil:
             Circle()
                 .fill(Color.orange)
                 .frame(width: 8, height: 8)
+                .frame(minWidth: 28)
 
         default:
             EmptyView()
         }
+    }
+
+    private func countBadge(_ count: Int) -> some View {
+        Text("\(count)")
+            .font(.system(size: 10, design: .monospaced))
+            .foregroundColor(.secondary)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .frame(minWidth: 28)
+            .background(Capsule().fill(Color(.controlBackgroundColor)))
     }
 }
 

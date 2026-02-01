@@ -205,14 +205,26 @@ private struct BehaviorSettingsSection: View {
 
 // MARK: - Page Header
 
-struct SettingsPageHeader: View {
+struct SettingsPageHeader<Trailing: View>: View {
     let icon: String
     let title: String
     let description: String
+    let trailing: Trailing
+
+    init(
+        icon: String,
+        title: String,
+        description: String,
+        @ViewBuilder trailing: () -> Trailing = { EmptyView() }
+    ) {
+        self.icon = icon
+        self.title = title
+        self.description = description
+        self.trailing = trailing()
+    }
 
     var body: some View {
         HStack(spacing: 16) {
-            // Icon with gradient background
             ZStack {
                 RoundedRectangle(cornerRadius: 12)
                     .fill(
@@ -246,6 +258,8 @@ struct SettingsPageHeader: View {
             }
 
             Spacer()
+
+            trailing
         }
         .padding(.bottom, 8)
     }

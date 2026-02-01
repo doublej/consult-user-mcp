@@ -333,11 +333,13 @@ struct DialogContainer<Content: View>: View {
                 toggleTool(expandedTool!)
                 return true
             }
-            if keyCode == KeyCode.s && expandedTool != .feedback {
+            // Skip character hotkeys when a text field is being edited
+            let isEditingText = NSApp.keyWindow?.firstResponder is NSTextView
+            if !isEditingText && keyCode == KeyCode.s && expandedTool != .feedback {
                 toggleTool(.snooze)
                 return true
             }
-            if keyCode == KeyCode.f && expandedTool != .feedback {
+            if !isEditingText && keyCode == KeyCode.f && expandedTool != .feedback {
                 toggleTool(.feedback)
                 return true
             }

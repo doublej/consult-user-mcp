@@ -1,19 +1,6 @@
 import SwiftUI
 import AppKit
 
-// MARK: - Environment Keys
-
-private struct HasProjectBadgeKey: EnvironmentKey {
-    static let defaultValue = false
-}
-
-extension EnvironmentValues {
-    var hasProjectBadge: Bool {
-        get { self[HasProjectBadgeKey.self] }
-        set { self[HasProjectBadgeKey.self] = newValue }
-    }
-}
-
 // MARK: - Project Badge
 
 struct ProjectBadge: View {
@@ -163,8 +150,6 @@ struct DialogHeader: View {
     let title: String
     let bodyText: String?
 
-    @Environment(\.hasProjectBadge) private var hasProjectBadge
-
     init(icon: String, title: String, body: String? = nil, iconColor: Color = Theme.Colors.accentBlue) {
         self.icon = icon
         self.iconColor = iconColor
@@ -183,7 +168,7 @@ struct DialogHeader: View {
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(iconColor)
             }
-            .padding(.top, hasProjectBadge ? 8 : 28)
+            .padding(.top, 28)
             .padding(.bottom, 16)
 
             Text(title)
@@ -286,20 +271,15 @@ struct DialogContainer<Content: View>: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            if let name = projectName, let path = projectPath {
-                HStack {
-                    Spacer()
+        contentBuilder($expandedTool)
+            .overlay(alignment: .topTrailing) {
+                if let name = projectName, let path = projectPath {
                     ProjectBadge(projectName: name, projectPath: path)
+                        .padding(.top, 12)
+                        .padding(.trailing, 12)
                 }
-                .padding(.top, 12)
-                .padding(.trailing, 12)
             }
-
-            contentBuilder($expandedTool)
-        }
-        .environment(\.hasProjectBadge, hasBadge)
-        .background(Color.clear)
+            .background(Color.clear)
         .onAppear {
                 FocusManager.shared.reset()
                 setupKeyboardNavigation()

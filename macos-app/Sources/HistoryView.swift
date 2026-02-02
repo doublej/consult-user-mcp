@@ -280,6 +280,7 @@ struct HistoryDetailView: View {
 private struct HistoryEntryDetailView: View {
     let entry: HistoryEntry
     let onBack: () -> Void
+    @State private var showCopied = false
 
     private var icon: String {
         switch entry.dialogType {
@@ -412,10 +413,28 @@ private struct HistoryEntryDetailView: View {
 
     private var answerSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Answer")
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
+            HStack {
+                Text("Answer")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.secondary)
+                    .textCase(.uppercase)
+
+                Spacer()
+
+                if let answer = entry.answer {
+                    Button {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(answer, forType: .string)
+                        showCopied = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { showCopied = false }
+                    } label: {
+                        Label(showCopied ? "Copied" : "Copy", systemImage: showCopied ? "checkmark" : "doc.on.doc")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(showCopied ? .green : .secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
 
             if let answer = entry.answer {
                 Text(answer)
@@ -488,6 +507,7 @@ private struct HistoryEntryRow: View {
     let entry: HistoryEntry
     let isAlternate: Bool
     @State private var isHovered = false
+    @State private var showCopied = false
 
     init(entry: HistoryEntry, isAlternate: Bool = false) {
         self.entry = entry
@@ -559,6 +579,21 @@ private struct HistoryEntryRow: View {
             Spacer(minLength: 8)
 
             HStack(spacing: 6) {
+                if isHovered, let answer = entry.answer {
+                    Button {
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(answer, forType: .string)
+                        showCopied = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { showCopied = false }
+                    } label: {
+                        Image(systemName: showCopied ? "checkmark" : "doc.on.doc")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(showCopied ? .green : .secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Copy answer")
+                }
+
                 Circle()
                     .fill(statusColor)
                     .frame(width: 8, height: 8)

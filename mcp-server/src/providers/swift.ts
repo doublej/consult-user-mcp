@@ -58,12 +58,25 @@ let cliPath: string | null = null;
  */
 export class SwiftDialogProvider implements DialogProvider {
   private clientName = "MCP";
+  private activeDialog: Promise<unknown> | null = null;
 
   setClientName(name: string): void {
     this.clientName = name;
   }
 
   private async runCli<T>(command: string, args: object, projectPath?: string): Promise<T> {
+    if (command !== "notify" && command !== "pulse" && this.activeDialog) {
+      return this.activeDialog as Promise<T>;
+    }
+    const promise = this.execCli<T>(command, args, projectPath);
+    if (command !== "notify" && command !== "pulse") {
+      this.activeDialog = promise;
+      promise.finally(() => { this.activeDialog = null; }).catch(() => {});
+    }
+    return promise;
+  }
+
+  private async execCli<T>(command: string, args: object, projectPath?: string): Promise<T> {
     if (!cliPath) cliPath = getCliPath();
     const jsonArg = JSON.stringify(args);
     let stdout: string;

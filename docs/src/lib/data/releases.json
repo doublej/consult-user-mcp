@@ -3,6 +3,15 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.9.3",
+      "date": "2026-02-02",
+      "highlight": "Duplicate dialog prevention",
+      "changes": [
+        { "text": "Long-running dialogs no longer spawn duplicates when the MCP client retries after timeout", "type": "fixed", "scope": "server", "featured": true },
+        { "text": "Progress heartbeat keeps the MCP client connection alive during slow dialog interactions", "type": "added", "scope": "server", "featured": true }
+      ]
+    },
+    {
       "version": "1.9.2",
       "date": "2026-02-01",
       "highlight": "Settings UI polish",

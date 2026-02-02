@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.9.3] - 2026-02-02
+
+### Added
+- Progress heartbeat keeps the MCP client connection alive during slow dialog interactions
+
+### Fixed
+- Long-running dialogs no longer spawn duplicates when the MCP client retries after timeout
+
 ## [1.9.2] - 2026-02-01
 
 ### Changed

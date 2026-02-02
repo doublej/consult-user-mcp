@@ -3,8 +3,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { SwiftDialogProvider } from "./providers/swift.js";
 import type { DialogPosition, QuestionsMode } from "./types.js";
-
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+const HEARTBEAT_INTERVAL_MS = 15_000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -13,6 +13,22 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
       setTimeout(() => reject(new Error(`Dialog timed out after ${ms / 1000}s`)), ms)
     ),
   ]);
+}
+
+function withHeartbeat<T>(
+  promise: Promise<T>,
+  extra: { _meta?: { progressToken?: string | number }; sendNotification: (n: never) => Promise<void> },
+): Promise<T> {
+  const token = extra._meta?.progressToken;
+  if (token == null) return promise;
+  let progress = 0;
+  const iv = setInterval(() => {
+    extra.sendNotification({
+      method: "notifications/progress" as const,
+      params: { progressToken: token, progress: ++progress, message: "Waiting for user response" },
+    } as never);
+  }, HEARTBEAT_INTERVAL_MS);
+  return promise.finally(() => clearInterval(iv));
 }
 
 const server = new McpServer({ name: "consult-user-mcp-server", version: "1.0.0" });
@@ -30,14 +46,14 @@ server.registerTool("ask_confirmation", {
     position: pos,
     project_path: projectPath,
   }),
-}, async (p) => {
+}, async (p, extra) => {
   provider.pulse();
-  const r = await withTimeout(provider.confirm({
+  const r = await withHeartbeat(withTimeout(provider.confirm({
     body: p.body, title: p.title ?? "Confirmation",
     confirmLabel: p.confirm_label ?? "Yes", cancelLabel: p.cancel_label ?? "No",
     position: (p.position ?? "left") as DialogPosition,
     projectPath: p.project_path,
-  }), DIALOG_TIMEOUT_MS);
+  }), DIALOG_TIMEOUT_MS), extra);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
 
@@ -52,14 +68,14 @@ server.registerTool("ask_multiple_choice", {
     position: pos,
     project_path: projectPath,
   }),
-}, async (p) => {
+}, async (p, extra) => {
   provider.pulse();
-  const r = await withTimeout(provider.choose({
+  const r = await withHeartbeat(withTimeout(provider.choose({
     body: p.body, choices: p.choices, descriptions: p.descriptions,
     allowMultiple: p.allow_multiple ?? true, defaultSelection: p.default_selection,
     position: (p.position ?? "left") as DialogPosition,
     projectPath: p.project_path,
-  }), DIALOG_TIMEOUT_MS);
+  }), DIALOG_TIMEOUT_MS), extra);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
 
@@ -73,14 +89,14 @@ server.registerTool("ask_text_input", {
     position: pos,
     project_path: projectPath,
   }),
-}, async (p) => {
+}, async (p, extra) => {
   provider.pulse();
-  const r = await withTimeout(provider.textInput({
+  const r = await withHeartbeat(withTimeout(provider.textInput({
     body: p.body, title: p.title ?? "Input",
     defaultValue: p.default_value ?? "", hidden: p.hidden ?? false,
     position: (p.position ?? "left") as DialogPosition,
     projectPath: p.project_path,
-  }), DIALOG_TIMEOUT_MS);
+  }), DIALOG_TIMEOUT_MS), extra);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
 
@@ -118,9 +134,9 @@ server.registerTool("ask_questions", {
     position: pos,
     project_path: projectPath,
   }),
-}, async (p) => {
+}, async (p, extra) => {
   provider.pulse();
-  const r = await withTimeout(provider.questions({
+  const r = await withHeartbeat(withTimeout(provider.questions({
     questions: p.questions.map(q => ({
       id: q.id,
       question: q.question,
@@ -130,7 +146,7 @@ server.registerTool("ask_questions", {
     mode: (p.mode ?? "wizard") as QuestionsMode,
     position: (p.position ?? "left") as DialogPosition,
     projectPath: p.project_path,
-  }), DIALOG_TIMEOUT_MS);
+  }), DIALOG_TIMEOUT_MS), extra);
   return { content: [{ type: "text", text: JSON.stringify(r) }] };
 });
 

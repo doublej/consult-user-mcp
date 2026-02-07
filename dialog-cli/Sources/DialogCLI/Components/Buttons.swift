@@ -380,7 +380,7 @@ struct FocusableTextField: NSViewRepresentable {
 
 class FocusableTextFieldView: NSView, NSTextFieldDelegate {
     var placeholder: String = "" {
-        didSet { textField.placeholderString = placeholder }
+        didSet { updatePlaceholderAppearance() }
     }
     var text: String {
         get { textField.stringValue }
@@ -431,7 +431,8 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
         textField.backgroundColor = .clear
         textField.focusRingType = .none
         textField.font = NSFont.systemFont(ofSize: 15)
-        textField.textColor = Theme.textPrimary
+        applyTextAppearance()
+        updatePlaceholderAppearance()
         textField.delegate = self
         textField.translatesAutoresizingMaskIntoConstraints = false
         addSubview(textField)
@@ -441,6 +442,32 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
             textField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -14),
             textField.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
+    }
+
+    private func applyTextAppearance() {
+        textField.textColor = Theme.textPrimary
+    }
+
+    private func updatePlaceholderAppearance() {
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: Theme.textMuted.withAlphaComponent(0.9),
+            .font: NSFont.systemFont(ofSize: 15)
+        ]
+        textField.placeholderAttributedString = NSAttributedString(string: placeholder, attributes: attributes)
+    }
+
+    private func styleFieldEditor() {
+        guard let editor = textField.currentEditor() else { return }
+        editor.textColor = Theme.textPrimary
+        editor.backgroundColor = .clear
+        editor.drawsBackground = false
+        if let textView = editor as? NSTextView {
+            textView.insertionPointColor = Theme.textPrimary
+            textView.selectedTextAttributes = [
+                NSAttributedString.Key.foregroundColor: Theme.textPrimary,
+                NSAttributedString.Key.backgroundColor: Theme.accentBlue.withAlphaComponent(0.35)
+            ]
+        }
     }
 
     override func viewDidMoveToWindow() {
@@ -458,12 +485,14 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
 
     override func becomeFirstResponder() -> Bool {
         window?.makeFirstResponder(textField)
+        styleFieldEditor()
         needsDisplay = true
         return true
     }
 
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(textField)
+        styleFieldEditor()
     }
 
     override var intrinsicContentSize: NSSize {
@@ -489,15 +518,20 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
     // MARK: - NSTextFieldDelegate
 
     func controlTextDidChange(_ obj: Notification) {
+        applyTextAppearance()
+        styleFieldEditor()
         onTextChange?(textField.stringValue)
         needsDisplay = true
     }
 
     func controlTextDidBeginEditing(_ obj: Notification) {
+        applyTextAppearance()
+        styleFieldEditor()
         needsDisplay = true
     }
 
     func controlTextDidEndEditing(_ obj: Notification) {
+        applyTextAppearance()
         needsDisplay = true
     }
 

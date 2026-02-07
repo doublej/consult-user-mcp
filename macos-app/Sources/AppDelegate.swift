@@ -1,13 +1,13 @@
 import SwiftUI
 import AppKit
 import Combine
-import UserNotifications
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var debugMenu: NSMenu!
     private var contextMenu: NSMenu!
     private var snoozeObserver: AnyCancellable?
+    private var isPresentingUpdateDecision = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -16,7 +16,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupDebugMenu()
         setupContextMenu()
         observeSnooze()
-        setupNotifications()
         observeProjectNotifications()
         checkForUpdatesAutomatically()
     }
@@ -95,17 +94,63 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         confirmItem.target = self
         debugMenu.addItem(confirmItem)
 
-        let chooseItem = NSMenuItem(title: "Test Multiple Choice", action: #selector(testChoose), keyEquivalent: "2")
-        chooseItem.target = self
+        let chooseItem = NSMenuItem(title: "Test Multiple Choice", action: nil, keyEquivalent: "")
+        let chooseSubmenu = NSMenu()
+
+        let chooseSingle = NSMenuItem(title: "Single Select", action: #selector(testChooseSingle), keyEquivalent: "")
+        chooseSingle.target = self
+        chooseSubmenu.addItem(chooseSingle)
+
+        let chooseMulti = NSMenuItem(title: "Multi Select", action: #selector(testChooseMulti), keyEquivalent: "")
+        chooseMulti.target = self
+        chooseSubmenu.addItem(chooseMulti)
+
+        let chooseMultiDesc = NSMenuItem(title: "Multi Select + Descriptions", action: #selector(testChooseMultiDescriptions), keyEquivalent: "")
+        chooseMultiDesc.target = self
+        chooseSubmenu.addItem(chooseMultiDesc)
+
+        chooseItem.submenu = chooseSubmenu
         debugMenu.addItem(chooseItem)
 
-        let textItem = NSMenuItem(title: "Test Text Input", action: #selector(testTextInput), keyEquivalent: "3")
-        textItem.target = self
+        let textItem = NSMenuItem(title: "Test Text Input", action: nil, keyEquivalent: "")
+        let textSubmenu = NSMenu()
+
+        let textPlain = NSMenuItem(title: "Plain", action: #selector(testTextInput), keyEquivalent: "")
+        textPlain.target = self
+        textSubmenu.addItem(textPlain)
+
+        let textPassword = NSMenuItem(title: "Password", action: #selector(testTextInputPassword), keyEquivalent: "")
+        textPassword.target = self
+        textSubmenu.addItem(textPassword)
+
+        let textMarkdown = NSMenuItem(title: "Markdown", action: #selector(testTextInputMarkdown), keyEquivalent: "")
+        textMarkdown.target = self
+        textSubmenu.addItem(textMarkdown)
+
+        textItem.submenu = textSubmenu
         debugMenu.addItem(textItem)
 
-        let notifyItem = NSMenuItem(title: "Test Notification", action: #selector(testNotify), keyEquivalent: "4")
-        notifyItem.target = self
-        debugMenu.addItem(notifyItem)
+        let questionsItem = NSMenuItem(title: "Test Questions", action: nil, keyEquivalent: "")
+        let questionsSubmenu = NSMenu()
+
+        let questionsWizard = NSMenuItem(title: "Wizard", action: #selector(testQuestionsWizard), keyEquivalent: "")
+        questionsWizard.target = self
+        questionsSubmenu.addItem(questionsWizard)
+
+        let questionsAccordion = NSMenuItem(title: "Accordion", action: #selector(testQuestionsAccordion), keyEquivalent: "")
+        questionsAccordion.target = self
+        questionsSubmenu.addItem(questionsAccordion)
+
+        questionsItem.submenu = questionsSubmenu
+        debugMenu.addItem(questionsItem)
+
+        let notifyToolItem = NSMenuItem(title: "Test Notification", action: #selector(testNotifyTool), keyEquivalent: "4")
+        notifyToolItem.target = self
+        debugMenu.addItem(notifyToolItem)
+
+        let notifyUpdateItem = NSMenuItem(title: "Test Update Notification", action: #selector(testNotifyUpdate), keyEquivalent: "5")
+        notifyUpdateItem.target = self
+        debugMenu.addItem(notifyUpdateItem)
 
         debugMenu.addItem(NSMenuItem.separator())
 
@@ -184,14 +229,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return "/usr/local/bin/dialog-cli"
     }
 
-    private func runDialogCli(command: String, json: String, completion: ((String) -> Void)? = nil) {
+    private func runDialogCli(
+        command: String,
+        json: String,
+        clientName: String = "Debug",
+        completion: ((String) -> Void)? = nil
+    ) {
         let cliPath = dialogCliPath()
 
         DispatchQueue.global(qos: .userInitiated).async {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: cliPath)
             process.arguments = [command, json]
-            process.environment = ProcessInfo.processInfo.environment.merging(["MCP_CLIENT_NAME": "Debug"]) { _, new in new }
+            process.environment = ProcessInfo.processInfo.environment.merging(["MCP_CLIENT_NAME": clientName]) { _, new in new }
 
             let outPipe = Pipe()
             process.standardOutput = outPipe
@@ -212,6 +262,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    private func showPaneNotification(title: String, body: String, sound: Bool = true, clientName: String = "Consult User MCP") {
+        let payload: [String: Any] = [
+            "body": body,
+            "title": title,
+            "sound": sound
+        ]
+
+        guard let json = encodeJSON(payload) else { return }
+        runDialogCli(command: "notify", json: json, clientName: clientName)
+    }
+
+    private func encodeJSON(_ payload: [String: Any]) -> String? {
+        guard JSONSerialization.isValidJSONObject(payload),
+              let data = try? JSONSerialization.data(withJSONObject: payload),
+              let json = String(data: data, encoding: .utf8) else {
+            return nil
+        }
+        return json
+    }
+
     // MARK: - Test Actions
 
     @objc private func testConfirm() {
@@ -222,10 +292,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         runDialogCli(command: "confirm", json: json)
     }
 
-    @objc private func testChoose() {
+    @objc private func testChooseSingle() {
         let settings = DialogSettings.shared
         let json = """
         {"body":"Select your preferred option from the list below:","choices":["Option Alpha","Option Beta","Option Gamma","Option Delta"],"descriptions":["First choice with description","Second choice - recommended","Third alternative option","Fourth fallback option"],"allowMultiple":false,"position":"\(settings.position.rawValue)"}
+        """
+        runDialogCli(command: "choose", json: json)
+    }
+
+    @objc private func testChooseMulti() {
+        let settings = DialogSettings.shared
+        let json = """
+        {"body":"Select one or more features to enable:","choices":["Authentication","Database","API Endpoints","Logging"],"allowMultiple":true,"position":"\(settings.position.rawValue)"}
+        """
+        runDialogCli(command: "choose", json: json)
+    }
+
+    @objc private func testChooseMultiDescriptions() {
+        let settings = DialogSettings.shared
+        let json = """
+        {"body":"Select one or more features to enable:","choices":["Authentication","Database","API Endpoints","Logging"],"descriptions":["OAuth2 + JWT tokens","PostgreSQL with migrations","REST + GraphQL","Structured JSON output"],"allowMultiple":true,"position":"\(settings.position.rawValue)"}
         """
         runDialogCli(command: "choose", json: json)
     }
@@ -238,53 +324,190 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         runDialogCli(command: "textInput", json: json)
     }
 
-    @objc private func testNotify() {
+    @objc private func testTextInputPassword() {
+        let settings = DialogSettings.shared
         let json = """
-        {"body":"This is a test notification from Consult User MCP.","title":"Notification Test","sound":true}
+        {"body":"Enter your API key:","title":"API Configuration","defaultValue":"","hidden":true,"position":"\(settings.position.rawValue)"}
         """
-        runDialogCli(command: "notify", json: json)
+        runDialogCli(command: "textInput", json: json)
+    }
+
+    @objc private func testTextInputMarkdown() {
+        let settings = DialogSettings.shared
+        let json = """
+        {"body":"Provide a **commit message** for the changes.\\n\\nUse `conventional commits` format (e.g. `feat:`, `fix:`).\\n\\nSee [docs](https://conventionalcommits.org) for details.","title":"Commit Message","defaultValue":"","hidden":false,"position":"\(settings.position.rawValue)"}
+        """
+        runDialogCli(command: "textInput", json: json)
+    }
+
+    @objc private func testQuestionsWizard() {
+        let settings = DialogSettings.shared
+        let json = """
+        {"questions":[{"id":"language","question":"What programming language?","options":[{"label":"TypeScript","description":"Strongly typed JavaScript"},{"label":"Python","description":"Dynamic scripting language"},{"label":"Go","description":"Fast compiled language"}],"type":"choice","multiSelect":false},{"id":"framework","question":"Which framework?","options":[{"label":"Express","description":"Minimal Node.js framework"},{"label":"FastAPI","description":"Modern Python API framework"},{"label":"Gin","description":"High-performance Go framework"}],"type":"choice","multiSelect":false}],"mode":"wizard","position":"\(settings.position.rawValue)"}
+        """
+        runDialogCli(command: "questions", json: json)
+    }
+
+    @objc private func testQuestionsAccordion() {
+        let settings = DialogSettings.shared
+        let json = """
+        {"questions":[{"id":"database","question":"Select database type:","options":[{"label":"PostgreSQL","description":"Advanced relational database"},{"label":"MongoDB","description":"Document-oriented NoSQL"},{"label":"Redis","description":"In-memory key-value store"}],"type":"choice","multiSelect":false},{"id":"auth","question":"Authentication method:","options":[{"label":"OAuth 2.0","description":"Third-party providers"},{"label":"JWT","description":"Stateless tokens"},{"label":"Session","description":"Server-side sessions"}],"type":"choice","multiSelect":true},{"id":"hosting","question":"Deployment platform:","options":[{"label":"AWS","description":"Amazon Web Services"},{"label":"Vercel","description":"Edge-first platform"},{"label":"Self-hosted","description":"Your own infrastructure"}],"type":"choice","multiSelect":false}],"mode":"accordion","position":"\(settings.position.rawValue)"}
+        """
+        runDialogCli(command: "questions", json: json)
+    }
+
+    @objc private func testNotifyTool() {
+        showPaneNotification(
+            title: "Notification Test",
+            body: "This is a test notification from Consult User MCP.",
+            sound: true,
+            clientName: "Debug"
+        )
+    }
+
+    @objc private func testNotifyUpdate() {
+        guard let mockZipURL = URL(string: "https://github.com/doublej/consult-user-mcp/releases/latest") else { return }
+        let release = UpdateManager.Release(version: "9.9.9-test", zipURL: mockZipURL)
+        DialogSettings.shared.updateAvailable = release
+        presentUpdateDecisionDialog(for: release)
     }
 
     @objc private func testAll() {
         testConfirm()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { self.testChoose() }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { self.testTextInput() }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) { self.testNotify() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { self.testChooseSingle() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { self.testChooseMulti() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) { self.testChooseMultiDescriptions() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) { self.testTextInput() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 7.5) { self.testTextInputPassword() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 9.0) { self.testTextInputMarkdown() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10.5) { self.testQuestionsWizard() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 12.0) { self.testQuestionsAccordion() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 13.5) { self.testNotifyTool() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 14.5) { self.testNotifyUpdate() }
     }
 
     // MARK: - Update
 
     @objc private func checkForUpdates() {
-        UpdateManager.shared.checkForUpdates { [weak self] result in
+        performUpdateCheck(isAutomatic: false)
+    }
+
+    private func performUpdateCheck(isAutomatic: Bool) {
+        if isAutomatic && !DialogSettings.shared.shouldAutoCheckForUpdates {
+            return
+        }
+
+        UpdateManager.shared.checkForUpdatesWithDetails(
+            includePrerelease: DialogSettings.shared.includePrereleaseUpdates
+        ) { [weak self] result in
             DispatchQueue.main.async {
-                self?.handleUpdateResult(result)
+                guard let self = self else { return }
+                switch result {
+                case .success(let checkResult):
+                    DialogSettings.shared.recordUpdateCheck(latestVersion: checkResult.remoteVersion)
+                    DialogSettings.shared.updateAvailable = checkResult.release
+
+                    guard let release = checkResult.release else {
+                        if !isAutomatic {
+                            self.showUpToDateAlert()
+                        }
+                        return
+                    }
+
+                    if isAutomatic && !DialogSettings.shared.shouldPromptForUpdate(version: release.version) {
+                        return
+                    }
+
+                    self.presentUpdateDecisionDialog(for: release)
+                case .failure(let error):
+                    if !isAutomatic {
+                        self.showAlert(title: "Update Check Failed", message: error.localizedDescription)
+                    }
+                }
             }
         }
     }
 
-    private func handleUpdateResult(_ result: Result<UpdateManager.Release?, Error>) {
-        switch result {
-        case .success(let release):
-            if let release = release {
-                showUpdateAvailableAlert(release)
+    private func presentUpdateDecisionDialog(for release: UpdateManager.Release) {
+        if isPresentingUpdateDecision {
+            return
+        }
+        isPresentingUpdateDecision = true
+
+        let reminderLabel = DialogSettings.shared.updateReminderInterval.label
+        let choices = [
+            "Yes, update now",
+            "Remind me again in \(reminderLabel)",
+            "I'll do it manually later"
+        ]
+        let body = "Consult User MCP v\(release.version) is available. You have v\(UpdateManager.shared.currentVersion).\n\nHow do you want to proceed?"
+
+        let payload: [String: Any] = [
+            "body": body,
+            "choices": choices,
+            "allowMultiple": false,
+            "position": DialogSettings.shared.position.rawValue
+        ]
+
+        guard let json = encodeJSON(payload) else {
+            isPresentingUpdateDecision = false
+            return
+        }
+
+        runDialogCli(command: "choose", json: json, clientName: "Consult User MCP") { [weak self] output in
+            guard let self = self else { return }
+            self.isPresentingUpdateDecision = false
+            self.handleUpdateDecision(output: output, release: release)
+        }
+    }
+
+    private func handleUpdateDecision(output: String, release: UpdateManager.Release) {
+        guard let data = output.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            DialogSettings.shared.remindAboutUpdateUsingPreference()
+            return
+        }
+
+        if let snoozed = json["snoozed"] as? Bool, snoozed {
+            if let remaining = json["remainingSeconds"] as? Double {
+                DialogSettings.shared.remindAboutUpdate(after: remaining)
+            } else if let minutes = json["snoozeMinutes"] as? Double {
+                DialogSettings.shared.remindAboutUpdate(after: minutes * 60)
             } else {
-                showUpToDateAlert()
+                DialogSettings.shared.remindAboutUpdateUsingPreference()
             }
-        case .failure(let error):
-            showAlert(title: "Update Check Failed", message: error.localizedDescription)
+            return
         }
-    }
 
-    private func showUpdateAvailableAlert(_ release: UpdateManager.Release) {
-        let alert = NSAlert()
-        alert.messageText = "Update Available"
-        alert.informativeText = "Version \(release.version) is available. You have \(UpdateManager.shared.currentVersion)."
-        alert.addButton(withTitle: "Update")
-        alert.addButton(withTitle: "Later")
-        alert.alertStyle = .informational
+        if let cancelled = json["cancelled"] as? Bool, cancelled {
+            DialogSettings.shared.remindAboutUpdateUsingPreference()
+            return
+        }
 
-        if alert.runModal() == .alertFirstButtonReturn {
+        let answerValue = json["answer"]
+        let answer: String?
+        if let single = answerValue as? String {
+            answer = single
+        } else if let multiple = answerValue as? [String], let first = multiple.first {
+            answer = first
+        } else {
+            answer = nil
+        }
+
+        switch answer {
+        case "Yes, update now":
+            DialogSettings.shared.clearUpdateReminderState()
             downloadAndInstall(release)
+        case "Remind me again in \(DialogSettings.shared.updateReminderInterval.label)":
+            DialogSettings.shared.remindAboutUpdateUsingPreference()
+        case "Remind me again in 1 hour":
+            DialogSettings.shared.remindAboutUpdate(hours: 1) // Backward-compat with older choice labels
+        case "Remind me again in 24 hours":
+            DialogSettings.shared.remindAboutUpdate(hours: 24) // Backward-compat with older choice labels
+        case "I'll do it manually later":
+            DialogSettings.shared.ignoreUpdate(version: release.version)
+        default:
+            DialogSettings.shared.remindAboutUpdateUsingPreference()
         }
     }
 
@@ -335,40 +558,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Auto Update Check
 
-    private func setupNotifications() {
-        UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
-    }
-
     private func checkForUpdatesAutomatically() {
-        guard DialogSettings.shared.shouldAutoCheckForUpdates else { return }
-
-        UpdateManager.shared.checkForUpdatesWithDetails { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let checkResult):
-                    DialogSettings.shared.recordUpdateCheck(latestVersion: checkResult.remoteVersion)
-                    DialogSettings.shared.updateAvailable = checkResult.release
-
-                    if let release = checkResult.release {
-                        self?.showUpdateNotification(version: release.version)
-                    }
-                case .failure:
-                    break
-                }
-            }
-        }
-    }
-
-    private func showUpdateNotification(version: String) {
-        let content = UNMutableNotificationContent()
-        content.title = "Update Available"
-        content.body = "Consult User MCP v\(version) is available. Click to update."
-        content.sound = .default
-        content.categoryIdentifier = "UPDATE_AVAILABLE"
-
-        let request = UNNotificationRequest(identifier: "update-available", content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request)
+        performUpdateCheck(isAutomatic: true)
     }
 
     // MARK: - Snooze Observer
@@ -380,31 +571,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.updateStatusIcon()
             }
     }
-}
 
-// MARK: - Notification Delegate
-
-extension AppDelegate: UNUserNotificationCenterDelegate {
-    func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping () -> Void
-    ) {
-        if response.notification.request.identifier == "update-available" {
-            DispatchQueue.main.async { [weak self] in
-                if let release = DialogSettings.shared.updateAvailable {
-                    self?.showUpdateAvailableAlert(release)
-                }
-            }
-        }
-        completionHandler()
-    }
-
-    func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification,
-        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
-    ) {
-        completionHandler([.banner, .sound])
-    }
 }

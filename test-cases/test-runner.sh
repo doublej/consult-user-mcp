@@ -62,6 +62,22 @@ dismiss_dialog() {
     osascript -e 'tell application "System Events" to key code 53' 2>/dev/null || true
 }
 
+# Open a toolbar pane before capture (for dialogs with Snooze/Feedback panes)
+activate_test_pane() {
+    local pane="${1:-}"
+    case "$pane" in
+        snooze)
+            osascript -e 'tell application "System Events" to keystroke "s"' 2>/dev/null || true
+            ;;
+        feedback)
+            osascript -e 'tell application "System Events" to keystroke "f"' 2>/dev/null || true
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+}
+
 # Map directory name to CLI command
 get_command() {
     local dir="$1"
@@ -70,6 +86,7 @@ get_command() {
         choose) echo "choose" ;;
         text-input) echo "textInput" ;;
         questions) echo "questions" ;;
+        notify) echo "notify" ;;
         *) echo "" ;;
     esac
 }
@@ -95,6 +112,10 @@ run_test_case() {
     local project_path
     project_path=$(echo "$json" | jq -r '.projectPath // empty')
 
+    # Optional pane activation for screenshoting expanded toolbar state
+    local test_pane
+    test_pane=$(echo "$json" | jq -r '.testPane // empty')
+
     # Build environment
     local env_vars=()
     [ -n "$THEME" ] && env_vars+=("DIALOG_THEME=$THEME")
@@ -110,6 +131,12 @@ run_test_case() {
 
     # Wait for render
     sleep "$RENDER_DELAY"
+
+    # Optionally open pane, then wait for animation/layout to settle
+    if [ -n "$test_pane" ]; then
+        activate_test_pane "$test_pane"
+        sleep 0.35
+    fi
 
     # Capture frontmost window (dialog should be frontmost)
     capture_frontmost_window "$output_path"

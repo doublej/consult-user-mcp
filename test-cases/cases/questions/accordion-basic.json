@@ -4,31 +4,67 @@
       "id": "database",
       "question": "Select database type:",
       "options": [
-        {"label": "PostgreSQL", "description": "Advanced relational database"},
-        {"label": "MongoDB", "description": "Document-oriented NoSQL"},
-        {"label": "Redis", "description": "In-memory key-value store"}
-      ]
+        {
+          "label": "PostgreSQL",
+          "description": "Advanced relational database"
+        },
+        {
+          "label": "MongoDB",
+          "description": "Document-oriented NoSQL"
+        },
+        {
+          "label": "Redis",
+          "description": "In-memory key-value store"
+        }
+      ],
+      "type": "choice",
+      "multiSelect": false,
+      "placeholder": ""
     },
     {
       "id": "auth",
       "question": "Authentication method:",
       "multiSelect": true,
       "options": [
-        {"label": "OAuth 2.0", "description": "Third-party providers"},
-        {"label": "JWT", "description": "Stateless tokens"},
-        {"label": "Session", "description": "Server-side sessions"}
-      ]
+        {
+          "label": "OAuth 2.0",
+          "description": "Third-party providers"
+        },
+        {
+          "label": "JWT",
+          "description": "Stateless tokens"
+        },
+        {
+          "label": "Session",
+          "description": "Server-side sessions"
+        }
+      ],
+      "type": "choice",
+      "placeholder": ""
     },
     {
       "id": "hosting",
       "question": "Deployment platform:",
       "options": [
-        {"label": "AWS", "description": "Amazon Web Services"},
-        {"label": "Vercel", "description": "Edge-first platform"},
-        {"label": "Self-hosted", "description": "Your own infrastructure"}
-      ]
+        {
+          "label": "AWS",
+          "description": "Amazon Web Services"
+        },
+        {
+          "label": "Vercel",
+          "description": "Edge-first platform"
+        },
+        {
+          "label": "Self-hosted",
+          "description": "Your own infrastructure"
+        }
+      ],
+      "type": "choice",
+      "multiSelect": false,
+      "placeholder": ""
     }
   ],
   "mode": "accordion",
-  "position": "center"
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

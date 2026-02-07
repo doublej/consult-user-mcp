@@ -17,5 +17,7 @@
     "Evaluate all options comprehensively"
   ],
   "allowMultiple": true,
-  "position": "center"
+  "position": "center",
+  "defaultSelection": "React",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

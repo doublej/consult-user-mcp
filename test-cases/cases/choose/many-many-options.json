@@ -23,5 +23,29 @@
     "Nim"
   ],
   "allowMultiple": true,
-  "position": "center"
+  "position": "center",
+  "descriptions": [
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+  ],
+  "defaultSelection": "JavaScript",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

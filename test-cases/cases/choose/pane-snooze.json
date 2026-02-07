@@ -1,0 +1,18 @@
+{
+  "body": "Select deployment target:",
+  "choices": [
+    "Development",
+    "Staging",
+    "Production"
+  ],
+  "descriptions": [
+    "Fast iteration",
+    "Pre-release validation",
+    "Live environment"
+  ],
+  "allowMultiple": false,
+  "defaultSelection": "Staging",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "snooze"
+}

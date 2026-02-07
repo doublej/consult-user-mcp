@@ -1,0 +1,9 @@
+{
+  "body": "Write a short release summary:",
+  "title": "Release Notes",
+  "defaultValue": "feat: improve update settings and notifications",
+  "hidden": false,
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "snooze"
+}

@@ -44,8 +44,8 @@ final class UpdateManager {
 
     // MARK: - Check for Updates
 
-    func checkForUpdates(completion: @escaping (Result<Release?, Error>) -> Void) {
-        checkForUpdatesWithDetails { result in
+    func checkForUpdates(includePrerelease: Bool = false, completion: @escaping (Result<Release?, Error>) -> Void) {
+        checkForUpdatesWithDetails(includePrerelease: includePrerelease) { result in
             switch result {
             case .success(let checkResult):
                 completion(.success(checkResult.release))
@@ -55,11 +55,20 @@ final class UpdateManager {
         }
     }
 
-    func checkForUpdatesWithDetails(completion: @escaping (Result<CheckResult, Error>) -> Void) {
+    func checkForUpdatesWithDetails(
+        includePrerelease: Bool = false,
+        completion: @escaping (Result<CheckResult, Error>) -> Void
+    ) {
         let current = currentVersion
         logger.info("Checking for updates. Current version: \(current)")
 
-        let url = URL(string: "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases/latest")!
+        let endpoint = includePrerelease
+            ? "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases?per_page=10"
+            : "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases/latest"
+        guard let url = URL(string: endpoint) else {
+            completion(.failure(UpdateError.noRelease))
+            return
+        }
 
         var request = URLRequest(url: url)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
@@ -71,10 +80,14 @@ final class UpdateManager {
                 return
             }
 
-            guard let self = self, let data = data,
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let tagName = json["tag_name"] as? String else {
-                self?.logger.error("Failed to parse release info from GitHub")
+            guard let self = self, let data = data else {
+                completion(.failure(UpdateError.noRelease))
+                return
+            }
+
+            guard let releaseJSON = self.selectRelease(from: data, includePrerelease: includePrerelease),
+                  let tagName = releaseJSON["tag_name"] as? String else {
+                self.logger.error("Failed to parse release info from GitHub")
                 completion(.failure(UpdateError.noRelease))
                 return
             }
@@ -85,7 +98,7 @@ final class UpdateManager {
             self.logger.info("Remote version: \(remoteVersion), Current: \(current), Update available: \(isNewer)")
 
             if isNewer,
-               let assets = json["assets"] as? [[String: Any]],
+               let assets = releaseJSON["assets"] as? [[String: Any]],
                let zipAsset = assets.first(where: { ($0["name"] as? String)?.hasSuffix(".zip") == true }),
                let downloadURL = zipAsset["browser_download_url"] as? String,
                let url = URL(string: downloadURL) {
@@ -155,8 +168,8 @@ final class UpdateManager {
     // MARK: - Semver Compare
 
     private func isNewer(remote: String, current: String) -> Bool {
-        let remoteParts = remote.split(separator: ".").compactMap { Int($0) }
-        let currentParts = current.split(separator: ".").compactMap { Int($0) }
+        let remoteParts = versionParts(from: remote)
+        let currentParts = versionParts(from: current)
 
         for i in 0..<max(remoteParts.count, currentParts.count) {
             let r = i < remoteParts.count ? remoteParts[i] : 0
@@ -165,6 +178,26 @@ final class UpdateManager {
             if r < c { return false }
         }
         return false
+    }
+
+    private func versionParts(from version: String) -> [Int] {
+        version
+            .split(whereSeparator: { !$0.isNumber })
+            .compactMap { Int($0) }
+    }
+
+    private func selectRelease(from data: Data, includePrerelease: Bool) -> [String: Any]? {
+        if includePrerelease {
+            guard let releases = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+                return nil
+            }
+            return releases.first(where: { release in
+                let isDraft = release["draft"] as? Bool ?? false
+                return !isDraft
+            })
+        }
+
+        return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
     }
 }
 

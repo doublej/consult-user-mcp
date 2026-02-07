@@ -42,7 +42,9 @@ class WindowSizeObserver: NSObject {
             let newHeight = min(max(fittingSize.height + 16, self.minHeight), self.maxHeight)
 
             let currentFrame = window.frame
-            if abs(currentFrame.height - newHeight) < 1 { return }
+            let widthDelta = abs(currentFrame.width - newWidth)
+            let heightDelta = abs(currentFrame.height - newHeight)
+            if widthDelta < 1 && heightDelta < 1 { return }
 
             let newY = currentFrame.origin.y + currentFrame.height - newHeight
             let newFrame = NSRect(x: currentFrame.origin.x, y: newY, width: newWidth, height: newHeight)

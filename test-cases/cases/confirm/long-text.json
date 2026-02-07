@@ -3,5 +3,6 @@
   "title": "Critical Infrastructure Change Requiring Immediate Attention",
   "confirmLabel": "I understand the risks and want to proceed anyway",
   "cancelLabel": "Cancel",
-  "position": "center"
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

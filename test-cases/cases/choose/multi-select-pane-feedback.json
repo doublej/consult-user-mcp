@@ -7,13 +7,14 @@
     "Logging"
   ],
   "allowMultiple": true,
-  "position": "center",
   "descriptions": [
-    "",
-    "",
-    "",
-    ""
+    "OAuth2 + JWT tokens",
+    "PostgreSQL with migrations",
+    "REST + GraphQL",
+    "Structured JSON output"
   ],
   "defaultSelection": "Authentication",
-  "projectPath": "/Users/example/projects/consult-user-mcp"
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "feedback"
 }

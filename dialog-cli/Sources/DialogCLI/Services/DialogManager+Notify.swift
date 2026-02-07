@@ -1,31 +1,51 @@
-import Foundation
+import AppKit
+import SwiftUI
 
 extension DialogManager {
     func notify(_ request: NotifyRequest) -> NotifyResponse {
-        let title = buildTitle()
-        var script = "display notification \"\(escapeForAppleScript(request.body))\" with title \"\(escapeForAppleScript(title))\""
+        NSApp.setActivationPolicy(.accessory)
+
+        let pane = SwiftUINotifyPane(
+            title: request.title,
+            bodyText: request.body
+        )
+
+        let (window, _, _) = createAutoSizedWindow(
+            content: pane,
+            minWidth: 360,
+            minHeight: 120,
+            maxHeightRatio: 0.45
+        )
+
+        let position = DialogPosition(rawValue: getSettings().position) ?? .right
+        positionWindow(window, position: position)
+        window.level = .floating
+        window.orderFrontRegardless()
+
         if request.sound {
-            script += " sound name \"default\""
+            playShowSound(for: .notification)
         }
 
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", script]
-
-        let success: Bool
-        do {
-            try process.run()
-            process.waitUntilExit()
-            success = process.terminationStatus == 0
-        } catch {
-            success = false
+        let autoCloseDelay: TimeInterval = 4.0
+        DispatchQueue.main.asyncAfter(deadline: .now() + autoCloseDelay) {
+            NSApp.stopModal()
         }
 
-        return NotifyResponse(dialogType: "notify", success: success)
-    }
+        NSApp.runModal(for: window)
+        window.close()
 
-    func escapeForAppleScript(_ str: String) -> String {
-        return str.replacingOccurrences(of: "\\", with: "\\\\")
-                  .replacingOccurrences(of: "\"", with: "\\\"")
+        let entry = HistoryEntry(
+            id: UUID(),
+            timestamp: Date(),
+            clientName: getClientName(),
+            dialogType: "notify",
+            questionSummary: request.title,
+            answer: request.body,
+            cancelled: false,
+            snoozed: false
+        )
+        HistoryManager.append(entry: entry)
+
+        return NotifyResponse(dialogType: "notify", success: true)
     }
 }

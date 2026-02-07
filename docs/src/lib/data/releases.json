@@ -3,6 +3,20 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.9.4",
+      "date": "2026-02-07",
+      "highlight": "About pane and smarter update controls",
+      "changes": [
+        { "text": "Settings now include a dedicated About pane with version details and a direct GitHub Issues feedback link", "type": "added", "scope": "app", "featured": true },
+        { "text": "Updates settings now support automatic-check toggle, daily/weekly/manual cadence, reminder interval, and pre-release channel selection", "type": "added", "scope": "app", "featured": true },
+        { "text": "General settings now let you choose notification sounds separately for question dialogs and informational notifications", "type": "added", "scope": "app", "featured": true },
+        { "text": "Update reminder dialogs now respect your configured reminder interval instead of fixed 1-hour/24-hour options", "type": "changed", "scope": "app" },
+        { "text": "Project badges now stay compact as text-sized pills in the top-right corner without overlapping dialog content", "type": "fixed", "scope": "cli" },
+        { "text": "Notification dialogs now render as native SwiftUI panes with optional sound and history logging", "type": "changed", "scope": "cli" },
+        { "text": "Visual test scenarios now cover notify dialogs and expanded snooze/feedback panes with full current CLI arguments", "type": "changed", "scope": "cli" }
+      ]
+    },
+    {
       "version": "1.9.3",
       "date": "2026-02-02",
       "highlight": "Duplicate dialog prevention",

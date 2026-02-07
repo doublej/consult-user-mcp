@@ -13,13 +13,17 @@ for window in windowList {
     let name = window[kCGWindowName as String] as? String ?? ""
 
     // Match by owner name (DialogCLI, dialog-cli, etc.)
-    let isDialogOwner = owner.lowercased().contains("dialog")
+    let ownerLower = owner.lowercased()
+    let isDialogOwner = ownerLower.contains("dialogcli") || ownerLower.contains("dialog-cli")
 
     // Match by window characteristics: floating panel layer with typical dialog names
     let isDialogWindow = layer == 3 && (
         name.contains("Confirmation") ||
         name.contains("Input") ||
         name.contains("Choose") ||
+        name.contains("Questions") ||
+        name.contains("Notification") ||
+        name.contains("Notice") ||
         name.isEmpty  // DialogCLI windows often have empty names
     )
 

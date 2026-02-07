@@ -6,11 +6,19 @@ import AppKit
 struct UserSettings {
     var position: String = "left"
     var soundOnShow: String = "subtle"
+    var playSoundForQuestions: Bool = true
+    var playSoundForNotifications: Bool = false
+    var muteSoundsWhileSnoozed: Bool = true
     var animationsEnabled: Bool = true
     var alwaysOnTop: Bool = true
     var snoozeUntil: Date?
     var buttonCooldownEnabled: Bool = true
     var buttonCooldownDuration: Double = 2.0
+
+    enum SoundContext {
+        case question
+        case notification
+    }
 
     func playSound() {
         let soundName: String?
@@ -22,6 +30,24 @@ struct UserSettings {
         }
         guard let name = soundName else { return }
         NSSound(named: NSSound.Name(name))?.play()
+    }
+
+    func shouldPlaySound(for context: SoundContext) -> Bool {
+        if muteSoundsWhileSnoozed, isSnoozedNow {
+            return false
+        }
+
+        switch context {
+        case .question:
+            return playSoundForQuestions
+        case .notification:
+            return playSoundForNotifications
+        }
+    }
+
+    private var isSnoozedNow: Bool {
+        guard let snoozeUntil else { return false }
+        return snoozeUntil > Date()
     }
 
     private static var settingsURL: URL? {
@@ -49,6 +75,15 @@ struct UserSettings {
         }
         if let onTop = json["alwaysOnTop"] as? Bool {
             settings.alwaysOnTop = onTop
+        }
+        if let playQuestions = json["playSoundForQuestions"] as? Bool {
+            settings.playSoundForQuestions = playQuestions
+        }
+        if let playNotifications = json["playSoundForNotifications"] as? Bool {
+            settings.playSoundForNotifications = playNotifications
+        }
+        if let muteWhileSnoozed = json["muteSoundsWhileSnoozed"] as? Bool {
+            settings.muteSoundsWhileSnoozed = muteWhileSnoozed
         }
         if let snoozeStr = json["snoozeUntil"] as? String {
             let formatter = ISO8601DateFormatter()

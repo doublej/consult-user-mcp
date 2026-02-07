@@ -1,6 +1,17 @@
 {
   "body": "Select a database type:",
-  "choices": ["PostgreSQL", "MySQL", "SQLite"],
+  "choices": [
+    "PostgreSQL",
+    "MySQL",
+    "SQLite"
+  ],
   "allowMultiple": false,
-  "position": "center"
+  "position": "center",
+  "descriptions": [
+    "",
+    "",
+    ""
+  ],
+  "defaultSelection": "PostgreSQL",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

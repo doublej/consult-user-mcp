@@ -1,0 +1,18 @@
+{
+  "body": "Which release channel should this build target?",
+  "choices": [
+    "Stable",
+    "Beta",
+    "Canary"
+  ],
+  "descriptions": [
+    "General availability",
+    "Early adopters",
+    "Internal validation"
+  ],
+  "allowMultiple": false,
+  "defaultSelection": "Stable",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "feedback"
+}

@@ -1,0 +1,32 @@
+{
+  "questions": [
+    {
+      "id": "runtime",
+      "question": "Select target runtime:",
+      "type": "choice",
+      "options": [
+        {"label": "Node.js", "description": "General backend workloads"},
+        {"label": "Bun", "description": "Fast startup and tooling"},
+        {"label": "Deno", "description": "Secure runtime defaults"}
+      ],
+      "multiSelect": false,
+      "placeholder": ""
+    },
+    {
+      "id": "ci",
+      "question": "Select CI providers:",
+      "type": "choice",
+      "options": [
+        {"label": "GitHub Actions", "description": "Default choice"},
+        {"label": "CircleCI", "description": "Managed pipelines"},
+        {"label": "Buildkite", "description": "Hybrid runners"}
+      ],
+      "multiSelect": true,
+      "placeholder": ""
+    }
+  ],
+  "mode": "wizard",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "snooze"
+}

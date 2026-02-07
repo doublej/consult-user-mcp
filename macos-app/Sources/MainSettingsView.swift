@@ -29,6 +29,8 @@ struct MainSettingsView: View {
             UpdatesSettingsView()
         case .install:
             InstallDetailView()
+        case .about:
+            AboutSettingsView()
         }
     }
 }

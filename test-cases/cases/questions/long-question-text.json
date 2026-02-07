@@ -4,20 +4,40 @@
       "id": "arch",
       "question": "Given the requirements for high availability, horizontal scalability, and the need to support both real-time and batch processing workloads, which architectural pattern would you recommend for the new data pipeline?",
       "options": [
-        {"label": "Lambda Architecture", "description": "Separate batch and speed layers with a serving layer that merges results, providing both accuracy and low latency"},
-        {"label": "Kappa Architecture", "description": "Single stream processing layer that handles both real-time and reprocessing, simpler but requires careful design"},
-        {"label": "Delta Architecture", "description": "Unified batch and streaming using Delta Lake, combining the benefits of data lakes with ACID transactions"}
-      ]
+        {
+          "label": "Lambda Architecture",
+          "description": "Separate batch and speed layers with a serving layer that merges results, providing both accuracy and low latency"
+        },
+        {
+          "label": "Kappa Architecture",
+          "description": "Single stream processing layer that handles both real-time and reprocessing, simpler but requires careful design"
+        },
+        {
+          "label": "Delta Architecture",
+          "description": "Unified batch and streaming using Delta Lake, combining the benefits of data lakes with ACID transactions"
+        }
+      ],
+      "type": "choice",
+      "multiSelect": false,
+      "placeholder": ""
     },
     {
       "id": "simple",
       "question": "OK?",
       "options": [
-        {"label": "Yes"},
-        {"label": "No"}
-      ]
+        {
+          "label": "Yes"
+        },
+        {
+          "label": "No"
+        }
+      ],
+      "type": "choice",
+      "multiSelect": false,
+      "placeholder": ""
     }
   ],
   "mode": "accordion",
-  "position": "center"
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

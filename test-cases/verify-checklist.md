@@ -35,6 +35,16 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 - [ ] Badge has tooltip showing full path on hover
 - [ ] Badge styling is subtle (muted colors, capsule shape)
 
+### `confirm/pane-snooze.json`
+- [ ] Snooze pane is expanded
+- [ ] Duration chips (`1m`, `5m`, `15m`, `30m`, `1h`) are visible
+- [ ] No overlap between snooze pane and footer buttons
+
+### `confirm/pane-feedback.json`
+- [ ] Feedback pane is expanded
+- [ ] Feedback input field and Send button are visible
+- [ ] No clipping in toolbar expanded state
+
 ---
 
 ## Choose Dialogs
@@ -61,6 +71,24 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 - [ ] ScrollView properly accounts for bottom toolbar
 - [ ] No overlap between choices and keyboard hints
 
+### `choose/pane-snooze.json`
+- [ ] Snooze pane opens with choice list still intact above
+- [ ] Pane does not obscure selected/default option state
+
+### `choose/pane-feedback.json`
+- [ ] Feedback pane opens with input + Send button
+- [ ] Toolbar expansion does not break list scroll sizing
+
+### `choose/multi-select-pane-snooze.json`
+- [ ] Multi-select checkboxes visible with snooze pane open
+- [ ] Descriptions render below each option label
+- [ ] Snooze pane does not obscure choices or descriptions
+
+### `choose/multi-select-pane-feedback.json`
+- [ ] Multi-select checkboxes visible with feedback pane open
+- [ ] Descriptions render below each option label
+- [ ] Feedback input + Send button visible without clipping
+
 ---
 
 ## Text Input Dialogs
@@ -85,6 +113,14 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 - [ ] [Links](url) render as clickable blue text
 - [ ] All markdown elements render correctly together
 
+### `text-input/pane-snooze.json`
+- [ ] Snooze pane expands below input field
+- [ ] Input field remains visible and not overlapped
+
+### `text-input/pane-feedback.json`
+- [ ] Feedback pane expands with editable input + Send
+- [ ] Toolbar and footer maintain spacing/alignment
+
 ---
 
 ## Questions Dialogs
@@ -102,6 +138,34 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 - [ ] Current section expanded
 - [ ] Other sections collapsed showing summary
 - [ ] Multi-select question shows checkbox indicators
+
+### `questions/pane-snooze.json`
+- [ ] Snooze pane visible in questions flow
+- [ ] Question list and footer remain readable
+
+### `questions/pane-feedback.json`
+- [ ] Feedback pane visible in questions flow
+- [ ] No layout jump causing question content clipping
+
+---
+
+## Notify Dialogs
+
+### `notify/basic.json`
+- [ ] Notification icon + title visible
+- [ ] Body text wraps correctly
+- [ ] Window auto-closes after display timeout
+- [ ] Project badge visible in top-right corner
+
+### `notify/long-message.json`
+- [ ] Long body text wraps without clipping
+- [ ] Title remains single-line and readable
+- [ ] Project badge visible in top-right corner
+
+### `notify/silent.json`
+- [ ] Notification renders normally with `sound=false`
+- [ ] No crash or missing UI state when silent
+- [ ] No project badge (no projectPath provided)
 
 ---
 

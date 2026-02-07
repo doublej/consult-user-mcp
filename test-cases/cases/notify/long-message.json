@@ -1,0 +1,6 @@
+{
+  "body": "Dependency refresh finished with warnings. 3 optional packages were skipped due to incompatible platform constraints. Review lockfile diff before shipping.",
+  "title": "Dependency Update",
+  "sound": true,
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

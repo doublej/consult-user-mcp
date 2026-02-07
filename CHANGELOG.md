@@ -7,6 +7,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.9.4] - 2026-02-07
+
+### Added
+- Settings now include a dedicated About pane with version details and a direct GitHub Issues feedback link
+- Updates settings now support automatic-check toggle, daily/weekly/manual cadence, reminder interval, and pre-release channel selection
+- General settings now let you choose notification sounds separately for question dialogs and informational notifications
+
+### Changed
+- Update reminder dialogs now respect your configured reminder interval instead of fixed 1-hour/24-hour options
+- Notification dialogs now render as native SwiftUI panes with optional sound and history logging
+- Visual test scenarios now cover notify dialogs and expanded snooze/feedback panes with full current CLI arguments
+
+### Fixed
+- Project badges now stay compact as text-sized pills in the top-right corner without overlapping dialog content
+
 ## [1.9.3] - 2026-02-02
 
 ### Added

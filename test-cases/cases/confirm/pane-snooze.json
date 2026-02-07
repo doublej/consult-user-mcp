@@ -1,0 +1,9 @@
+{
+  "body": "Run the full verification suite before merge?",
+  "title": "Pre-merge Check",
+  "confirmLabel": "Run Tests",
+  "cancelLabel": "Skip",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "snooze"
+}

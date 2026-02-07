@@ -3,5 +3,6 @@
   "title": "Path",
   "defaultValue": "/Users/username/Documents/projects/my-extremely-long-project-name/config/environments/production/settings.override.local.json",
   "hidden": false,
-  "position": "center"
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

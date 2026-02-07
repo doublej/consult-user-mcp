@@ -3,5 +3,6 @@
   "title": "Delete Files",
   "confirmLabel": "Delete All",
   "cancelLabel": "Keep Files",
-  "position": "center"
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

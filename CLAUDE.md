@@ -70,6 +70,45 @@ The base prompt has its own independent version number:
 - Minor (Y): New features, examples, or significant guidance improvements
 - Patch (Z): Bug fixes, typos, clarifications
 
+## Dialog Types & MCP Tools
+
+This project exposes 5 MCP tools, each mapping to a dialog type. When adding features, fixing bugs, or creating test/debug coverage, **all 5 types and their key variants must be considered**.
+
+### Invariant
+
+The debug menu (`macos-app/Sources/AppDelegate.swift`) and visual test fixtures (`test-cases/cases/`) must cover **every dialog type and its major variants**. When adding a new variant or dialog type, update both.
+
+### Tools → CLI commands → Dialog types
+
+| MCP Tool | CLI Command | Dialog | Key Variants |
+|----------|-------------|--------|-------------|
+| `ask_confirmation` | `confirm` | Confirm | basic, custom labels, with project badge |
+| `ask_multiple_choice` | `choose` | Choose | single-select, multi-select, with/without descriptions |
+| `ask_text_input` | `textInput` | Text Input | plain, password (`hidden: true`), markdown body |
+| `ask_questions` | `questions` | Questions | wizard mode, accordion mode, multi-select questions |
+| `notify_user` | `notify` | Notify | with/without sound, with/without project badge |
+
+### Shared parameters (all interactive tools)
+
+| Parameter | CLI env var | Purpose |
+|-----------|------------|---------|
+| `position` | — | `"left"` (default), `"center"`, `"right"` |
+| `project_path` | `MCP_PROJECT_PATH` | Shows project badge in dialog |
+| — | `MCP_CLIENT_NAME` | Prefixes dialog title |
+| — | `DIALOG_THEME` | `"sunset"`, `"midnight"`, or system default |
+
+### Shared response states (all interactive tools)
+
+Every interactive dialog (not notify) can return: normal answer, `snoozed: true`, `feedbackText`, or `cancelled: true`. Test fixtures use `testPane: "snooze"` / `testPane: "feedback"` to screenshot expanded toolbar states.
+
+### Tool-specific parameters
+
+**ask_confirmation**: `body`, `title`, `confirm_label`, `cancel_label`
+**ask_multiple_choice**: `body`, `choices[]`, `descriptions[]?`, `allow_multiple`, `default_selection?`
+**ask_text_input**: `body`, `title`, `default_value`, `hidden`
+**ask_questions**: `questions[]` (each: `id`, `question`, `options[]`, `multi_select`), `mode` (`"wizard"` | `"accordion"`)
+**notify_user**: `body`, `title`, `sound` (no project_path in MCP schema, but CLI reads `MCP_PROJECT_PATH`)
+
 ## Documentation Structure
 
 - **`docs/src/lib/data/releases.json`** - Single source of truth for app releases

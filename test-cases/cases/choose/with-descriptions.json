@@ -1,11 +1,17 @@
 {
   "body": "Choose a deployment target:",
-  "choices": ["Development", "Staging", "Production"],
+  "choices": [
+    "Development",
+    "Staging",
+    "Production"
+  ],
   "descriptions": [
     "Local development environment with hot reload",
     "Pre-production testing environment",
     "Live production deployment"
   ],
   "allowMultiple": false,
-  "position": "center"
+  "position": "center",
+  "defaultSelection": "Development",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

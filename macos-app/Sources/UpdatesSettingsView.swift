@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 // MARK: - Version Info
 
@@ -58,10 +57,10 @@ struct UpdatesSettingsView: View {
                 SettingsPageHeader(
                     icon: "arrow.triangle.2.circlepath",
                     title: "Updates",
-                    description: "Check for new versions and install updates"
+                    description: "Configure automatic checks and install updates"
                 )
 
-                currentVersionSection
+                updateAutomationSection
                 updateStatusSection
 
                 Spacer()
@@ -71,73 +70,67 @@ struct UpdatesSettingsView: View {
         .background(Color(.windowBackgroundColor))
     }
 
-    // MARK: - Current Version
-
-    private var currentVersionSection: some View {
-        SettingsSectionContainer(title: "Current Version") {
-            VStack(spacing: 0) {
-                HStack(spacing: 16) {
-                    appIcon
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Consult User MCP")
-                            .font(.system(size: 15, weight: .semibold))
-                        Text("v\(VersionInfo.app)")
-                            .font(.system(size: 12, design: .monospaced))
-                            .foregroundColor(.secondary)
-                    }
-
-                    Spacer(minLength: 0)
-                }
-                .padding(16)
-
-                Divider()
-                    .padding(.horizontal, 16)
-
-                versionGrid
-                    .padding(16)
-            }
-        }
-    }
-
-    private var appIcon: some View {
-        Group {
-            if let icnsURL = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
-               let icon = NSImage(contentsOf: icnsURL) {
-                Image(nsImage: icon)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 48, height: 48)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-            } else {
-                Image(systemName: "app.fill")
-                    .font(.system(size: 36))
-                    .foregroundColor(.secondary)
-            }
-        }
-    }
-
-    private var versionGrid: some View {
-        Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 8) {
-            versionGridRow("MCP Server", VersionInfo.mcp)
-            versionGridRow("Dialog CLI", VersionInfo.cli)
-            versionGridRow("Base Prompt", VersionInfo.baseprompt)
-        }
-    }
-
-    @ViewBuilder
-    private func versionGridRow(_ label: String, _ version: String) -> some View {
-        GridRow {
-            Text(label)
-                .font(.system(size: 11))
-                .foregroundStyle(.tertiary)
-            Text("v\(version)")
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(.secondary)
-        }
-    }
-
     // MARK: - Update Status
+
+    private var updateAutomationSection: some View {
+        SettingsSectionContainer(title: "Automation") {
+            VStack(spacing: 0) {
+                SettingsToggleRow(
+                    icon: "arrow.triangle.2.circlepath.circle",
+                    title: "Check for updates automatically",
+                    subtitle: "Run background checks on your chosen cadence",
+                    isOn: $settings.autoCheckForUpdatesEnabled
+                )
+
+                Divider().padding(.leading, 40)
+
+                SettingsRowWithControl(
+                    icon: "calendar",
+                    title: "Check cadence",
+                    subtitle: "How often automatic checks should run"
+                ) {
+                    Picker("", selection: $settings.updateCheckCadence) {
+                        ForEach(UpdateCheckCadence.allCases, id: \.self) { cadence in
+                            Text(cadence.label).tag(cadence)
+                        }
+                    }
+                    .labelsHidden()
+                    .frame(width: 120)
+                    .disabled(!settings.autoCheckForUpdatesEnabled)
+                }
+
+                Divider().padding(.leading, 40)
+
+                SettingsRowWithControl(
+                    icon: "bell.badge",
+                    title: "Remind me again in",
+                    subtitle: "Delay before update reminders reappear"
+                ) {
+                    Picker("", selection: $settings.updateReminderInterval) {
+                        ForEach(UpdateReminderInterval.allCases, id: \.self) { interval in
+                            Text(interval.label).tag(interval)
+                        }
+                    }
+                    .labelsHidden()
+                    .frame(width: 90)
+                }
+
+                Divider().padding(.leading, 40)
+
+                SettingsToggleRow(
+                    icon: "flask",
+                    title: "Include pre-release versions",
+                    subtitle: "Show beta and preview builds",
+                    isOn: $settings.includePrereleaseUpdates
+                )
+            }
+            .padding(.vertical, 4)
+        }
+        .onChange(of: settings.autoCheckForUpdatesEnabled) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.updateCheckCadence) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.updateReminderInterval) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.includePrereleaseUpdates) { _, _ in settings.saveToFile() }
+    }
 
     private var updateStatusSection: some View {
         SettingsSectionContainer(title: "Updates") {
@@ -274,7 +267,7 @@ struct UpdatesSettingsView: View {
     private func checkForUpdates() {
         settings.updateCheckInProgress = true
 
-        UpdateManager.shared.checkForUpdatesWithDetails { result in
+        UpdateManager.shared.checkForUpdatesWithDetails(includePrerelease: settings.includePrereleaseUpdates) { result in
             DispatchQueue.main.async {
                 settings.updateCheckInProgress = false
 

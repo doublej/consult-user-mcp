@@ -11,5 +11,7 @@
     "This description is extremely long while the label above is just a single letter, creating a weird visual imbalance that might cause layout issues"
   ],
   "allowMultiple": false,
-  "position": "center"
+  "position": "center",
+  "defaultSelection": "A",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

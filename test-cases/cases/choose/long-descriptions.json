@@ -11,5 +11,7 @@
     "Event-driven functions that scale automatically and charge per execution, ideal for sporadic workloads but potentially expensive at scale and challenging for long-running processes"
   ],
   "allowMultiple": false,
-  "position": "center"
+  "position": "center",
+  "defaultSelection": "Monolith",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
 }

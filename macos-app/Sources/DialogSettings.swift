@@ -19,11 +19,20 @@ final class DialogSettings: ObservableObject {
     @AppStorage("showCommentField") var showCommentField: Bool = true
     @AppStorage("buttonCooldownEnabled") var buttonCooldownEnabled: Bool = true
     @AppStorage("buttonCooldownDuration") var buttonCooldownDuration: Double = 2.0
+    @AppStorage("playSoundForQuestions") var playSoundForQuestions: Bool = true
+    @AppStorage("playSoundForNotifications") var playSoundForNotifications: Bool = false
+    @AppStorage("muteSoundsWhileSnoozed") var muteSoundsWhileSnoozed: Bool = true
 
     // MARK: - Update Settings (persisted via AppStorage)
 
+    @AppStorage("autoCheckForUpdatesEnabled") var autoCheckForUpdatesEnabled: Bool = true
+    @AppStorage("updateCheckCadence") var updateCheckCadence: UpdateCheckCadence = .weekly
+    @AppStorage("updateReminderInterval") var updateReminderInterval: UpdateReminderInterval = .threeDays
+    @AppStorage("includePrereleaseUpdates") var includePrereleaseUpdates: Bool = false
     @AppStorage("lastUpdateCheckTime") private var lastUpdateCheckTime: Double = 0
     @AppStorage("latestKnownVersion") var latestKnownVersion: String = ""
+    @AppStorage("updateReminderUntilTime") private var updateReminderUntilTime: Double = 0
+    @AppStorage("ignoredUpdateVersion") private var ignoredUpdateVersion: String = ""
 
     // MARK: - Runtime State
 
@@ -46,11 +55,58 @@ final class DialogSettings: ObservableObject {
         if let version = latestVersion {
             latestKnownVersion = version
         }
+        saveToFile()
     }
 
     var shouldAutoCheckForUpdates: Bool {
+        guard autoCheckForUpdatesEnabled else { return false }
+        guard let minimumInterval = updateCheckCadence.minimumInterval else { return false }
         guard let lastCheck = lastUpdateCheck else { return true }
-        return Date().timeIntervalSince(lastCheck) > 60 // 1 minute
+        return Date().timeIntervalSince(lastCheck) >= minimumInterval
+    }
+
+    var updateReminderUntil: Date? {
+        guard updateReminderUntilTime > 0 else { return nil }
+        return Date(timeIntervalSince1970: updateReminderUntilTime)
+    }
+
+    func remindAboutUpdate(after seconds: TimeInterval) {
+        updateReminderUntilTime = Date().addingTimeInterval(seconds).timeIntervalSince1970
+        saveToFile()
+    }
+
+    func remindAboutUpdate(hours: Int) {
+        remindAboutUpdate(after: TimeInterval(hours) * 3600)
+    }
+
+    func ignoreUpdate(version: String) {
+        ignoredUpdateVersion = version
+        updateReminderUntilTime = 0
+        saveToFile()
+    }
+
+    func clearUpdateReminderState() {
+        updateReminderUntilTime = 0
+        ignoredUpdateVersion = ""
+        saveToFile()
+    }
+
+    func shouldPromptForUpdate(version: String) -> Bool {
+        if ignoredUpdateVersion == version {
+            return false
+        }
+        if let reminderUntil = updateReminderUntil, reminderUntil > Date() {
+            return false
+        }
+        if updateReminderUntil != nil && (updateReminderUntil ?? .distantPast) <= Date() {
+            updateReminderUntilTime = 0
+            saveToFile()
+        }
+        return true
+    }
+
+    func remindAboutUpdateUsingPreference() {
+        remindAboutUpdate(after: updateReminderInterval.seconds)
     }
 
     // MARK: - Init
@@ -84,6 +140,13 @@ final class DialogSettings: ObservableObject {
         var alwaysOnTop: Bool
         var showCommentField: Bool
         var snoozeUntil: Date?
+        var playSoundForQuestions: Bool?
+        var playSoundForNotifications: Bool?
+        var muteSoundsWhileSnoozed: Bool?
+        var autoCheckForUpdatesEnabled: Bool?
+        var updateCheckCadence: UpdateCheckCadence?
+        var updateReminderInterval: UpdateReminderInterval?
+        var includePrereleaseUpdates: Bool?
         var lastUpdateCheckTime: Double?
         var latestKnownVersion: String?
         var buttonCooldownEnabled: Bool?
@@ -99,6 +162,13 @@ final class DialogSettings: ObservableObject {
             alwaysOnTop: alwaysOnTop,
             showCommentField: showCommentField,
             snoozeUntil: snoozeUntilDate,
+            playSoundForQuestions: playSoundForQuestions,
+            playSoundForNotifications: playSoundForNotifications,
+            muteSoundsWhileSnoozed: muteSoundsWhileSnoozed,
+            autoCheckForUpdatesEnabled: autoCheckForUpdatesEnabled,
+            updateCheckCadence: updateCheckCadence,
+            updateReminderInterval: updateReminderInterval,
+            includePrereleaseUpdates: includePrereleaseUpdates,
             lastUpdateCheckTime: lastUpdateCheckTime > 0 ? lastUpdateCheckTime : nil,
             latestKnownVersion: latestKnownVersion.isEmpty ? nil : latestKnownVersion,
             buttonCooldownEnabled: buttonCooldownEnabled,
@@ -129,6 +199,27 @@ final class DialogSettings: ObservableObject {
         alwaysOnTop = settings.alwaysOnTop
         showCommentField = settings.showCommentField
         snoozeUntilDate = settings.snoozeUntil
+        if let soundForQuestions = settings.playSoundForQuestions {
+            playSoundForQuestions = soundForQuestions
+        }
+        if let soundForNotifications = settings.playSoundForNotifications {
+            playSoundForNotifications = soundForNotifications
+        }
+        if let muteOnSnooze = settings.muteSoundsWhileSnoozed {
+            muteSoundsWhileSnoozed = muteOnSnooze
+        }
+        if let autoCheck = settings.autoCheckForUpdatesEnabled {
+            autoCheckForUpdatesEnabled = autoCheck
+        }
+        if let cadence = settings.updateCheckCadence {
+            updateCheckCadence = cadence
+        }
+        if let reminderInterval = settings.updateReminderInterval {
+            updateReminderInterval = reminderInterval
+        }
+        if let includePrerelease = settings.includePrereleaseUpdates {
+            includePrereleaseUpdates = includePrerelease
+        }
         if let checkTime = settings.lastUpdateCheckTime {
             lastUpdateCheckTime = checkTime
         }

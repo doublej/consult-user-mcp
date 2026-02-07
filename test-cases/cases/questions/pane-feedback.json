@@ -1,0 +1,31 @@
+{
+  "questions": [
+    {
+      "id": "db",
+      "question": "Pick primary database:",
+      "type": "choice",
+      "options": [
+        {"label": "PostgreSQL", "description": "Relational"},
+        {"label": "MySQL", "description": "Widely compatible"},
+        {"label": "SQLite", "description": "Embedded"}
+      ],
+      "multiSelect": false,
+      "placeholder": ""
+    },
+    {
+      "id": "cache",
+      "question": "Pick cache layer:",
+      "type": "choice",
+      "options": [
+        {"label": "Redis", "description": "In-memory"},
+        {"label": "Memcached", "description": "Simple key-value"}
+      ],
+      "multiSelect": false,
+      "placeholder": ""
+    }
+  ],
+  "mode": "accordion",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "feedback"
+}

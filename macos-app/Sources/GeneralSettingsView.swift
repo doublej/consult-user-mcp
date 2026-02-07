@@ -19,6 +19,7 @@ struct GeneralSettingsView: View {
 
                 PositionSettingsSection()
                 AppearanceSettingsSection()
+                NotificationSettingsSection()
                 BehaviorSettingsSection()
 
                 Spacer()
@@ -200,6 +201,47 @@ private struct BehaviorSettingsSection: View {
         }
         .onChange(of: settings.buttonCooldownEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.buttonCooldownDuration) { _, _ in settings.saveToFile() }
+    }
+}
+
+// MARK: - Notification Section
+
+private struct NotificationSettingsSection: View {
+    @ObservedObject private var settings = DialogSettings.shared
+
+    var body: some View {
+        SettingsSectionContainer(title: "Notifications") {
+            VStack(spacing: 0) {
+                SettingsToggleRow(
+                    icon: "questionmark.circle",
+                    title: "Play sound for questions",
+                    subtitle: "Alert me when input is required",
+                    isOn: $settings.playSoundForQuestions
+                )
+
+                Divider().padding(.leading, 40)
+
+                SettingsToggleRow(
+                    icon: "info.circle",
+                    title: "Play sound for informational dialogs",
+                    subtitle: "Include non-actionable notifications",
+                    isOn: $settings.playSoundForNotifications
+                )
+
+                Divider().padding(.leading, 40)
+
+                SettingsToggleRow(
+                    icon: "moon.zzz",
+                    title: "Mute sounds while snoozed",
+                    subtitle: "Silence alerts until snooze expires",
+                    isOn: $settings.muteSoundsWhileSnoozed
+                )
+            }
+            .padding(.vertical, 4)
+        }
+        .onChange(of: settings.playSoundForQuestions) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.playSoundForNotifications) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.muteSoundsWhileSnoozed) { _, _ in settings.saveToFile() }
     }
 }
 

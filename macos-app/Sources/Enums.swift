@@ -90,6 +90,52 @@ enum SoundEffect: String, CaseIterable, Codable {
     }
 }
 
+// MARK: - Update Cadence
+
+enum UpdateCheckCadence: String, CaseIterable, Codable {
+    case daily
+    case weekly
+    case manual
+
+    var label: String {
+        switch self {
+        case .daily: return "Daily"
+        case .weekly: return "Weekly"
+        case .manual: return "Manual only"
+        }
+    }
+
+    var minimumInterval: TimeInterval? {
+        switch self {
+        case .daily: return 24 * 60 * 60
+        case .weekly: return 7 * 24 * 60 * 60
+        case .manual: return nil
+        }
+    }
+}
+
+enum UpdateReminderInterval: String, CaseIterable, Codable {
+    case oneDay
+    case threeDays
+    case sevenDays
+
+    var label: String {
+        switch self {
+        case .oneDay: return "1 day"
+        case .threeDays: return "3 days"
+        case .sevenDays: return "7 days"
+        }
+    }
+
+    var seconds: TimeInterval {
+        switch self {
+        case .oneDay: return 24 * 60 * 60
+        case .threeDays: return 3 * 24 * 60 * 60
+        case .sevenDays: return 7 * 24 * 60 * 60
+        }
+    }
+}
+
 // MARK: - Install Target
 
 enum InstallTarget: String, CaseIterable, Identifiable {

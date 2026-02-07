@@ -22,6 +22,7 @@ test-cases/
     choose/             # Multiple choice dialogs
     text-input/         # Text input dialogs
     questions/          # Multi-question wizard/accordion
+    notify/             # Notification panes
 ```
 
 ## Options
@@ -56,10 +57,15 @@ Create a JSON file in the appropriate `cases/` subdirectory matching the request
 
 | Directory | CLI Command | Model |
 |-----------|-------------|-------|
-| confirm/ | `confirm` | `{body, title, confirmLabel, cancelLabel, position, projectPath?}` |
-| choose/ | `choose` | `{body, choices, descriptions?, allowMultiple, defaultSelection?, position, projectPath?}` |
-| text-input/ | `textInput` | `{body, title, defaultValue, hidden, position, projectPath?}` |
-| questions/ | `questions` | `{questions[], mode, position, projectPath?}` |
+| confirm/ | `confirm` | `{body, title, confirmLabel, cancelLabel, position, projectPath}` |
+| choose/ | `choose` | `{body, choices, descriptions, allowMultiple, defaultSelection, position, projectPath}` |
+| text-input/ | `textInput` | `{body, title, defaultValue, hidden, position, projectPath}` |
+| questions/ | `questions` | `{questions[{id, question, type, options, multiSelect, placeholder}], mode, position, projectPath}` |
+| notify/ | `notify` | `{body, title, sound}` |
+
+Optional visual test key:
+
+- `testPane`: `"snooze"` or `"feedback"` to auto-open that pane before screenshot capture
 
 ## Known Issues
 

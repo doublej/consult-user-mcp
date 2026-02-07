@@ -33,9 +33,13 @@ class DialogManager {
         userSettings
     }
 
-    func playShowSound() {
-        userSettings.playSound()
-        CooldownManager.shared.startCooldown()
+    func playShowSound(for context: UserSettings.SoundContext = .question) {
+        if userSettings.shouldPlaySound(for: context) {
+            userSettings.playSound()
+        }
+        if context == .question {
+            CooldownManager.shared.startCooldown()
+        }
     }
 
     func effectivePosition(_ requestedPosition: DialogPosition) -> DialogPosition {

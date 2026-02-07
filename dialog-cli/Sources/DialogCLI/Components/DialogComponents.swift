@@ -7,8 +7,6 @@ struct ProjectBadge: View {
     let projectName: String
     let projectPath: String
 
-    @State private var isHovered = false
-
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: "folder.fill")
@@ -16,7 +14,9 @@ struct ProjectBadge: View {
             Text(projectName)
                 .font(.system(size: 10, weight: .medium))
                 .lineLimit(1)
+                .truncationMode(.middle)
         }
+        .fixedSize(horizontal: true, vertical: false)
         .foregroundColor(Theme.Colors.textMuted)
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
@@ -29,9 +29,6 @@ struct ProjectBadge: View {
                 )
         )
         .help(projectPath)
-        .onHover { hovering in
-            isHovered = hovering
-        }
     }
 }
 
@@ -266,31 +263,32 @@ struct DialogContainer<Content: View>: View {
         self.contentBuilder = content
     }
 
-    private var hasBadge: Bool {
-        projectName != nil && projectPath != nil
-    }
-
     var body: some View {
-        contentBuilder($expandedTool)
-            .overlay(alignment: .topTrailing) {
-                if let name = projectName, let path = projectPath {
+        VStack(spacing: 0) {
+            if let name = projectName, let path = projectPath {
+                HStack {
+                    Spacer(minLength: 0)
                     ProjectBadge(projectName: name, projectPath: path)
-                        .padding(.top, 12)
-                        .padding(.trailing, 12)
                 }
+                .padding(.leading, 12)
+                .padding(.top, 12)
+                .padding(.trailing, 12)
             }
-            .background(Color.clear)
+
+            contentBuilder($expandedTool)
+        }
+        .background(Color.clear)
         .onAppear {
-                FocusManager.shared.reset()
-                setupKeyboardNavigation()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    FocusManager.shared.focusFirst()
-                }
+            FocusManager.shared.reset()
+            setupKeyboardNavigation()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                FocusManager.shared.focusFirst()
             }
-            .onDisappear {
-                keyboardMonitor = nil
-                FocusManager.shared.reset()
-            }
+        }
+        .onDisappear {
+            keyboardMonitor = nil
+            FocusManager.shared.reset()
+        }
     }
 
     private func toggleTool(_ tool: DialogToolbar.ToolbarTool) {
@@ -315,7 +313,7 @@ struct DialogContainer<Content: View>: View {
             }
             // Skip character hotkeys when a text field is being edited
             let isEditingText = NSApp.keyWindow?.firstResponder is NSTextView
-            if !isEditingText && keyCode == KeyCode.s && expandedTool != .feedback {
+            if !isEditingText && keyCode == KeyCode.s && expandedTool != .snooze {
                 toggleTool(.snooze)
                 return true
             }

@@ -136,6 +136,12 @@ enum UpdateReminderInterval: String, CaseIterable, Codable {
     }
 }
 
+// MARK: - Notifications
+
+extension Notification.Name {
+    static let snoozeDidEnd = Notification.Name("snoozeDidEnd")
+}
+
 // MARK: - Install Target
 
 enum InstallTarget: String, CaseIterable, Identifiable {

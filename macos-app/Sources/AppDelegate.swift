@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupDebugMenu()
         setupContextMenu()
         observeSnooze()
+        observeSnoozeEnd()
         observeProjectNotifications()
         checkForUpdatesAutomatically()
     }
@@ -572,4 +573,36 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
     }
 
+    private func observeSnoozeEnd() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleSnoozeEnd),
+            name: .snoozeDidEnd,
+            object: nil
+        )
+    }
+
+    @objc private func handleSnoozeEnd() {
+        let manager = SnoozedRequestsManager.shared
+        guard manager.count > 0 else { return }
+
+        let requests = manager.requests
+        let count = requests.count
+        let lines = requests.suffix(5).map { req in
+            "\(req.clientName) (\(req.dialogType)): \(String(req.summary.prefix(80)))"
+        }
+        var body = lines.joined(separator: "\n")
+        if count > 5 {
+            body += "\n...and \(count - 5) more"
+        }
+
+        showPaneNotification(
+            title: "Snooze Ended — \(count) Missed Dialog\(count == 1 ? "" : "s")",
+            body: body,
+            sound: true,
+            clientName: "Consult User MCP"
+        )
+
+        manager.clear()
+    }
 }

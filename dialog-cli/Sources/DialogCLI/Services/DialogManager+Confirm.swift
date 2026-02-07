@@ -5,6 +5,7 @@ extension DialogManager {
     func confirm(_ request: ConfirmRequest) -> ConfirmResponse {
         let snoozeCheck = UserSettings.isSnoozeActive()
         if snoozeCheck.active, let remaining = snoozeCheck.remainingSeconds {
+            SnoozedRequestsManager.append(clientName: getClientName(), dialogType: "confirm", summary: request.body)
             return ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: nil, comment: nil, snoozed: true, snoozeMinutes: nil, remainingSeconds: remaining, feedbackText: nil, instruction: snoozeActiveInstruction(remaining: remaining))
         }
 

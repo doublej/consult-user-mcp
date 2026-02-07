@@ -5,6 +5,7 @@ extension DialogManager {
     func choose(_ request: ChooseRequest) -> ChoiceResponse {
         let snoozeCheck = UserSettings.isSnoozeActive()
         if snoozeCheck.active, let remaining = snoozeCheck.remainingSeconds {
+            SnoozedRequestsManager.append(clientName: getClientName(), dialogType: "choose", summary: request.body)
             return ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: true, snoozeMinutes: nil, remainingSeconds: remaining, feedbackText: nil, instruction: snoozeActiveInstruction(remaining: remaining))
         }
 

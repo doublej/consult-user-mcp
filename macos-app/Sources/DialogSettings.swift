@@ -258,6 +258,7 @@ final class DialogSettings: ObservableObject {
         snoozeRemaining = 0
         snoozeTotalSeconds = 0
         saveToFile()
+        NotificationCenter.default.post(name: .snoozeDidEnd, object: nil)
     }
 
     // MARK: - Countdown Timer (on-demand)
@@ -294,6 +295,7 @@ final class DialogSettings: ObservableObject {
             snoozeUntilDate = nil
             snoozeTotalSeconds = 0
             saveToFile()
+            NotificationCenter.default.post(name: .snoozeDidEnd, object: nil)
         }
     }
 

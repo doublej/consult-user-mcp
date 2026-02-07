@@ -5,6 +5,8 @@ extension DialogManager {
     func questions(_ request: QuestionsRequest) -> QuestionsResponse {
         let snoozeCheck = UserSettings.isSnoozeActive()
         if snoozeCheck.active, let remaining = snoozeCheck.remainingSeconds {
+            let summary = request.questions.first?.question ?? "Multiple questions"
+            SnoozedRequestsManager.append(clientName: getClientName(), dialogType: "questions", summary: summary)
             return QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: true, snoozeMinutes: nil, remainingSeconds: remaining, feedbackText: nil, instruction: snoozeActiveInstruction(remaining: remaining))
         }
 

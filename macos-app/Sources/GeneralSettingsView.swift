@@ -34,6 +34,7 @@ struct GeneralSettingsView: View {
 
 struct SnoozeBannerView: View {
     @ObservedObject private var settings = DialogSettings.shared
+    @ObservedObject private var snoozedRequests = SnoozedRequestsManager.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -47,6 +48,12 @@ struct SnoozeBannerView: View {
                     .foregroundColor(.primary)
 
                 Spacer()
+
+                if snoozedRequests.count > 0 {
+                    Label("\(snoozedRequests.count) missed", systemImage: "tray.full")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.orange)
+                }
 
                 Button("End Snooze") {
                     settings.clearSnooze()

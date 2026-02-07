@@ -55,7 +55,9 @@ class DialogManager {
     }
 
     func snoozeActiveInstruction(remaining: Int) -> String {
-        "Snooze active. Wait \(remaining) seconds before re-asking."
+        let count = SnoozedRequestsManager.count()
+        let missed = count > 0 ? " \(count) dialog\(count == 1 ? "" : "s") missed so far." : ""
+        return "Snooze active. Wait \(remaining) seconds before re-asking.\(missed)"
     }
 
     func createWindow(width: CGFloat, height: CGFloat) -> (NSWindow, DraggableView) {

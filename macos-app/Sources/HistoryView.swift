@@ -1,5 +1,13 @@
 import SwiftUI
 
+// MARK: - History Group (pre-sorted, identifiable for ForEach)
+
+private struct HistoryGroup: Identifiable {
+    let dateKey: String
+    let entries: [HistoryEntry] // newest-first
+    var id: String { dateKey }
+}
+
 // MARK: - History Detail View (for NavigationSplitView)
 
 struct HistoryDetailView: View {
@@ -38,15 +46,13 @@ struct HistoryDetailView: View {
 
             if historyManager.entries.isEmpty {
                 emptyState
-            } else if filteredEntries.isEmpty {
+            } else if filteredGroups.isEmpty {
                 noResultsState
             } else {
                 ScrollView(.vertical, showsIndicators: true) {
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(sortedGroupKeys, id: \.self) { dateKey in
-                            if let entries = groupedEntries[dateKey] {
-                                sectionView(dateKey: dateKey, entries: entries)
-                            }
+                    LazyVStack(alignment: .leading, spacing: 16) {
+                        ForEach(filteredGroups) { group in
+                            sectionView(group: group)
                         }
                     }
                     .padding(24)
@@ -58,14 +64,14 @@ struct HistoryDetailView: View {
         .onAppear { initCollapsedSections() }
     }
 
-    private func sectionView(dateKey: String, entries: [HistoryEntry]) -> some View {
-        let isCollapsed = !isSearching && collapsedSections.contains(dateKey)
+    private func sectionView(group: HistoryGroup) -> some View {
+        let isCollapsed = !isSearching && collapsedSections.contains(group.dateKey)
         return VStack(alignment: .leading, spacing: 8) {
-            sectionHeaderButton(dateKey: dateKey, count: entries.count)
+            sectionHeaderButton(dateKey: group.dateKey, count: group.entries.count)
 
             if !isCollapsed {
-                VStack(spacing: 6) {
-                    ForEach(Array(entries.reversed().enumerated()), id: \.element.id) { index, entry in
+                LazyVStack(spacing: 6) {
+                    ForEach(Array(group.entries.enumerated()), id: \.element.id) { index, entry in
                         Button { selectedEntry = entry } label: {
                             HistoryEntryRow(entry: entry, isAlternate: index % 2 == 1)
                         }
@@ -154,7 +160,7 @@ struct HistoryDetailView: View {
 
     private func initCollapsedSections() {
         let todayKey = Self.dayFormatter.string(from: Date())
-        collapsedSections = Set(sortedGroupKeys.filter { $0 != todayKey })
+        collapsedSections = Set(filteredGroups.map(\.dateKey).filter { $0 != todayKey })
     }
 
     // MARK: - Header
@@ -185,7 +191,8 @@ struct HistoryDetailView: View {
         HStack {
             Group {
                 if isSearching {
-                    Text("\(filteredEntries.count) of \(historyManager.entries.count) entries")
+                    let filtered = filteredGroups.reduce(0) { $0 + $1.entries.count }
+                    Text("\(filtered) of \(historyManager.entries.count) entries")
                 } else {
                     Text("\(historyManager.entries.count) entries")
                 }
@@ -241,6 +248,13 @@ struct HistoryDetailView: View {
         return f
     }()
 
+    private static let displayDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "EEEE, MMM d"
+        f.timeZone = .current
+        return f
+    }()
+
     private var filteredEntries: [HistoryEntry] {
         guard isSearching else { return historyManager.entries }
         let query = searchText.lowercased()
@@ -251,14 +265,14 @@ struct HistoryDetailView: View {
         }
     }
 
-    private var groupedEntries: [String: [HistoryEntry]] {
-        Dictionary(grouping: filteredEntries) { entry in
+    /// Single pass: filter → group → sort → reverse entries per group
+    private var filteredGroups: [HistoryGroup] {
+        let grouped = Dictionary(grouping: filteredEntries) { entry in
             Self.dayFormatter.string(from: entry.timestamp)
         }
-    }
-
-    private var sortedGroupKeys: [String] {
-        groupedEntries.keys.sorted().reversed()
+        return grouped.keys.sorted().reversed().map { key in
+            HistoryGroup(dateKey: key, entries: (grouped[key] ?? []).reversed())
+        }
     }
 
     private func sectionHeader(for dateKey: String) -> String {
@@ -268,10 +282,7 @@ struct HistoryDetailView: View {
         if calendar.isDateInToday(date) { return "Today" }
         if calendar.isDateInYesterday(date) { return "Yesterday" }
 
-        let display = DateFormatter()
-        display.dateFormat = "EEEE, MMM d"
-        display.timeZone = .current
-        return display.string(from: date)
+        return Self.displayDateFormatter.string(from: date)
     }
 }
 
@@ -316,12 +327,12 @@ private struct HistoryEntryDetailView: View {
         return .green
     }
 
-    private var dateFormatter: DateFormatter {
+    private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter
-    }
+    }()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -472,7 +483,7 @@ private struct HistoryEntryDetailView: View {
             VStack(spacing: 0) {
                 metadataRow(label: "Client", value: entry.clientName)
                 Divider().padding(.leading, 8)
-                metadataRow(label: "Time", value: dateFormatter.string(from: entry.timestamp))
+                metadataRow(label: "Time", value: Self.dateFormatter.string(from: entry.timestamp))
                 Divider().padding(.leading, 8)
                 metadataRow(label: "Type", value: dialogTypeName)
             }
@@ -530,11 +541,11 @@ private struct HistoryEntryRow: View {
         return .green
     }
 
-    private var timeFormatter: DateFormatter {
+    private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter
-    }
+    }()
 
     var body: some View {
         HStack(spacing: 16) {
@@ -551,7 +562,7 @@ private struct HistoryEntryRow: View {
                     .foregroundColor(.primary)
                     .lineLimit(1)
 
-                Text(timeFormatter.string(from: entry.timestamp))
+                Text(Self.timeFormatter.string(from: entry.timestamp))
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundColor(Color(.tertiaryLabelColor))
             }

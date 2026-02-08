@@ -124,7 +124,7 @@
 
 	function showInitialTerminalState(): void {
 		const q = selectedTopic.questions[0];
-		addLine(`ask_questions(mode: "wizard", questions: ${totalSteps})`, 'mcp');
+		addLine(`ask(type: "form", mode: "wizard", questions: ${totalSteps})`, 'mcp');
 		addLine(`Question 1/${totalSteps}: "${q.question}"`, 'info');
 		addLine(`Options: ${JSON.stringify(q.options)}`, 'info');
 		addLine(`Waiting for user input...`, 'thinking');

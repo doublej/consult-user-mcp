@@ -2,10 +2,10 @@
 	import '../styles/dialog.css';
 
 	const dialogs = [
-		{ name: 'ask_confirmation', content: 'confirm' },
-		{ name: 'ask_multiple_choice', content: 'choices' },
-		{ name: 'ask_questions', content: 'wizard' },
-		{ name: 'ask_text_input', content: 'text' }
+		{ name: 'ask type=confirm', content: 'confirm' },
+		{ name: 'ask type=pick', content: 'choices' },
+		{ name: 'ask type=form', content: 'wizard' },
+		{ name: 'ask type=text', content: 'text' }
 	] as const;
 
 	const choiceItems = [

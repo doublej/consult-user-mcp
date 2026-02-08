@@ -7,6 +7,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-02-08
+
+### Added
+- Project path is cached after the first call, saving tokens on every subsequent dialog
+
+### Changed
+- MCP interface consolidated from 5 tools to 2: `ask` (with type=confirm/pick/text/form) and `notify`
+- Responses are now compact — only meaningful fields are returned, no more null padding
+- Single-select is now the default for pick dialogs (was multi-select)
+- Base prompt updated to v2.0.0 with streamlined tool reference and examples
+
 ## [1.9.4] - 2026-02-07
 
 ### Added

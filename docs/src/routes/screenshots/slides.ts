@@ -16,13 +16,13 @@ export interface Slide {
 const setA: Record<string, Slide> = {
 	'a-01': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		headline: 'Introducing Consult User MCP',
 		text: 'Rename all variables to emoji for readability?',
 	},
 	'a-02': {
 		template: 'multiple-choice',
-		toolName: 'ask_multiple_choice',
+		toolName: 'ask type=pick',
 		question: 'How would you like to refer to Consult User MCP?',
 		choices: [
 			{ label: 'CUMCP' },
@@ -31,7 +31,7 @@ const setA: Record<string, Slide> = {
 	},
 	'a-03': {
 		template: 'multiple-choice',
-		toolName: 'ask_multiple_choice',
+		toolName: 'ask type=pick',
 		question: 'How should your AI agent ask you things?',
 		choices: [
 			{ label: 'Wall of text in terminal' },
@@ -41,18 +41,18 @@ const setA: Record<string, Slide> = {
 	},
 	'a-04': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Deploy to production on a Friday at 4:59 PM?',
 	},
 	'a-05': {
 		template: 'text-input',
-		toolName: 'ask_text_input',
+		toolName: 'ask type=text',
 		text: 'What should the agent call this service?',
 		inputText: 'todo-app-but-enterprise-grade',
 	},
 	'a-06': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 1,
 		totalSteps: 3,
 		question: "What's your preferred error handling?",
@@ -64,25 +64,25 @@ const setA: Record<string, Slide> = {
 	},
 	'a-07': {
 		template: 'snooze',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Run the full test suite before merging?',
 		selectedDuration: '15m',
 	},
 	'a-08': {
 		template: 'feedback',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Rewrite the entire codebase in Rust?',
 		feedbackText: 'just the hot path please',
 	},
 	'a-09': {
 		template: 'text-input',
-		toolName: 'ask_text_input',
+		toolName: 'ask type=text',
 		text: 'What should the error message say?',
 		inputText: 'Session expired. Please log in again.',
 	},
 	'a-10': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Was this dialog better than a wall of terminal text?',
 	},
 };
@@ -91,13 +91,13 @@ const setA: Record<string, Slide> = {
 const setB: Record<string, Slide> = {
 	'b-01': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		headline: 'Introducing Consult User MCP',
 		text: 'Add 47 npm packages for a date picker?',
 	},
 	'b-02': {
 		template: 'multiple-choice',
-		toolName: 'ask_multiple_choice',
+		toolName: 'ask type=pick',
 		question: 'The AI agent is "pretty confident". Trust it?',
 		choices: [
 			{ label: 'Always' },
@@ -108,18 +108,18 @@ const setB: Record<string, Slide> = {
 	},
 	'b-03': {
 		template: 'text-input',
-		toolName: 'ask_text_input',
+		toolName: 'ask type=text',
 		text: 'What should the commit message say?',
 		inputText: 'fix: stuff',
 	},
 	'b-04': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Mass-replace all semicolons with Greek question marks?',
 	},
 	'b-05': {
 		template: 'multiple-choice',
-		toolName: 'ask_multiple_choice',
+		toolName: 'ask type=pick',
 		question: "It's 3 AM. The CI is red. What do you do?",
 		choices: [
 			{ label: 'Fix it now' },
@@ -129,7 +129,7 @@ const setB: Record<string, Slide> = {
 	},
 	'b-06': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 2,
 		totalSteps: 3,
 		question: 'Where should sessions be stored?',
@@ -141,25 +141,25 @@ const setB: Record<string, Slide> = {
 	},
 	'b-07': {
 		template: 'snooze',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Deploy the database migration now?',
 		selectedDuration: '30m',
 	},
 	'b-08': {
 		template: 'feedback',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Split this 2000-line file into modules?',
 		feedbackText: 'start with the utils',
 	},
 	'b-09': {
 		template: 'text-input',
-		toolName: 'ask_text_input',
+		toolName: 'ask type=text',
 		text: 'Describe the breaking change:',
 		inputText: 'Removed deprecated v1 endpoints',
 	},
 	'b-10': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Tag this as v2.0.0 and push to main?',
 	},
 };
@@ -168,13 +168,13 @@ const setB: Record<string, Slide> = {
 const setC: Record<string, Slide> = {
 	'c-01': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		headline: 'Introducing Consult User MCP',
 		text: 'Create a new Git branch for this feature?',
 	},
 	'c-02': {
 		template: 'multiple-choice',
-		toolName: 'ask_multiple_choice',
+		toolName: 'ask type=pick',
 		question: 'Which auth strategy for the new API?',
 		choices: [
 			{ label: 'JWT tokens' },
@@ -185,7 +185,7 @@ const setC: Record<string, Slide> = {
 	},
 	'c-03': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 1,
 		totalSteps: 3,
 		question: 'Configure the deployment target:',
@@ -197,13 +197,13 @@ const setC: Record<string, Slide> = {
 	},
 	'c-04': {
 		template: 'text-input',
-		toolName: 'ask_text_input',
+		toolName: 'ask type=text',
 		text: 'What should the PR title say?',
 		inputText: 'feat: add user authentication flow',
 	},
 	'c-05': {
 		template: 'multiple-choice',
-		toolName: 'ask_multiple_choice',
+		toolName: 'ask type=pick',
 		question: 'Found 3 failing tests. How to proceed?',
 		choices: [
 			{ label: 'Fix and retry' },
@@ -213,24 +213,24 @@ const setC: Record<string, Slide> = {
 	},
 	'c-06': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Install 12 missing peer dependencies?',
 	},
 	'c-07': {
 		template: 'snooze',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Run the linter before committing?',
 		selectedDuration: '5m',
 	},
 	'c-08': {
 		template: 'feedback',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'Refactor the auth module into separate files?',
 		feedbackText: 'keep it in one file for now',
 	},
 	'c-09': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 3,
 		totalSteps: 3,
 		question: 'Choose the test runner:',
@@ -242,7 +242,7 @@ const setC: Record<string, Slide> = {
 	},
 	'c-10': {
 		template: 'text-input',
-		toolName: 'ask_text_input',
+		toolName: 'ask type=text',
 		text: 'Name the new database table:',
 		inputText: 'user_sessions',
 	},
@@ -252,13 +252,13 @@ const setC: Record<string, Slide> = {
 const setD: Record<string, Slide> = {
 	'd-01': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		headline: 'Introducing Consult User MCP',
 		text: 'Help me triage these 20 backlog tickets?',
 	},
 	'd-02': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 1,
 		totalSteps: 4,
 		question: 'Ticket #4: User auth timeout — Priority?',
@@ -271,7 +271,7 @@ const setD: Record<string, Slide> = {
 	},
 	'd-03': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 2,
 		totalSteps: 4,
 		question: 'Ticket #4: Assign to?',
@@ -284,7 +284,7 @@ const setD: Record<string, Slide> = {
 	},
 	'd-04': {
 		template: 'multiple-choice',
-		toolName: 'ask_multiple_choice',
+		toolName: 'ask type=pick',
 		question: 'Ticket #7: Stale cache on deploy — Is this blocking the release?',
 		choices: [
 			{ label: 'Yes' },
@@ -294,7 +294,7 @@ const setD: Record<string, Slide> = {
 	},
 	'd-05': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 1,
 		totalSteps: 4,
 		question: "New project setup (1/4): What's the stack?",
@@ -307,7 +307,7 @@ const setD: Record<string, Slide> = {
 	},
 	'd-06': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 2,
 		totalSteps: 4,
 		question: 'New project setup (2/4): Auth provider?',
@@ -320,7 +320,7 @@ const setD: Record<string, Slide> = {
 	},
 	'd-07': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 3,
 		totalSteps: 4,
 		question: 'New project setup (3/4): Database?',
@@ -333,7 +333,7 @@ const setD: Record<string, Slide> = {
 	},
 	'd-08': {
 		template: 'wizard',
-		toolName: 'ask_questions',
+		toolName: 'ask type=form',
 		step: 4,
 		totalSteps: 4,
 		question: 'New project setup (4/4): Deploy target?',
@@ -346,7 +346,7 @@ const setD: Record<string, Slide> = {
 	},
 	'd-09': {
 		template: 'multiple-choice',
-		toolName: 'ask_multiple_choice',
+		toolName: 'ask type=pick',
 		question: 'Design review: Which layout direction?',
 		choices: [
 			{ label: 'Sidebar nav', selected: true },
@@ -357,7 +357,7 @@ const setD: Record<string, Slide> = {
 	},
 	'd-10': {
 		template: 'confirmation',
-		toolName: 'ask_confirmation',
+		toolName: 'ask type=confirm',
 		text: 'All 20 tickets triaged. Apply changes to backlog?',
 	},
 };

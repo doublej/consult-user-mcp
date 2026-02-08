@@ -16,7 +16,7 @@ All choice options should be fully visible and scrollable, with proper padding/m
 The last option ("All of them" in screenshot) is clipped - only the top portion visible, text overlaps with toolbar.
 
 ## Reproduction
-1. Call `ask_multiple_choice` with 6+ choices including descriptions
+1. Call `ask` with `type=pick` and 6+ choices including descriptions
 2. Observe last option is cut off
 
 ## Screenshot

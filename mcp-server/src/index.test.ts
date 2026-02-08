@@ -1,6 +1,7 @@
 import { describe, test, expect, mock } from "bun:test";
 import { z } from "zod";
 import { SwiftDialogProvider } from "./providers/swift.js";
+import { compactResponse } from "./compact.js";
 
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -30,69 +31,222 @@ describe("withTimeout", () => {
   });
 });
 
-describe("input schemas", () => {
-  const pos = z.enum(["left", "right", "center"]).default("left");
-
-  const confirmSchema = z.object({
-    body: z.string().min(1).max(1000),
-    title: z.string().max(80).default("Confirmation"),
-    confirm_label: z.string().max(20).default("Yes"),
-    cancel_label: z.string().max(20).default("No"),
-    position: pos,
-  });
-
-  const chooseSchema = z.object({
-    body: z.string().min(1).max(1000),
-    choices: z.array(z.string().min(1).max(100)).min(2).max(20),
+describe("ask schema", () => {
+  const questionSchema = z.object({
+    id: z.string().min(1).max(50),
+    question: z.string().min(1).max(500),
+    options: z.array(z.string().min(1).max(100)).min(2).max(10),
     descriptions: z.array(z.string().max(200)).optional(),
-    allow_multiple: z.boolean().default(true),
-    default_selection: z.string().optional(),
-    position: pos,
+    multi: z.boolean().default(false),
   });
 
-  const textInputSchema = z.object({
+  const askSchema = z.object({
+    type: z.enum(["confirm", "pick", "text", "form"]),
     body: z.string().min(1).max(1000),
-    title: z.string().max(80).default("Input"),
-    default_value: z.string().max(1000).default(""),
+    yes: z.string().max(20).default("Yes"),
+    no: z.string().max(20).default("No"),
+    choices: z.array(z.string().min(1).max(100)).min(2).max(20).optional(),
+    multi: z.boolean().default(false),
+    descriptions: z.array(z.string().max(200)).optional(),
+    default: z.string().optional(),
     hidden: z.boolean().default(false),
-    position: pos,
+    questions: z.array(questionSchema).min(1).max(10).optional(),
+    mode: z.enum(["wizard", "accordion"]).default("wizard"),
+    title: z.string().max(80).optional(),
+    position: z.enum(["left", "right", "center"]).default("left"),
+    project_path: z.string().optional(),
   });
 
-  test("confirm schema accepts valid input", () => {
-    const result = confirmSchema.parse({ body: "Proceed?" });
-    expect(result.body).toBe("Proceed?");
-    expect(result.title).toBe("Confirmation");
-    expect(result.position).toBe("left");
+  test("confirm with minimal params", () => {
+    const r = askSchema.parse({ type: "confirm", body: "Proceed?" });
+    expect(r.type).toBe("confirm");
+    expect(r.body).toBe("Proceed?");
+    expect(r.yes).toBe("Yes");
+    expect(r.no).toBe("No");
+    expect(r.position).toBe("left");
   });
 
-  test("confirm schema rejects empty body", () => {
-    expect(() => confirmSchema.parse({ body: "" })).toThrow();
+  test("confirm with custom labels", () => {
+    const r = askSchema.parse({ type: "confirm", body: "Deploy?", yes: "Deploy", no: "Cancel" });
+    expect(r.yes).toBe("Deploy");
+    expect(r.no).toBe("Cancel");
   });
 
-  test("choose schema requires at least 2 choices", () => {
-    expect(() => chooseSchema.parse({ body: "Pick", choices: ["one"] })).toThrow();
+  test("pick requires choices", () => {
+    const r = askSchema.parse({ type: "pick", body: "Pick", choices: ["a", "b"] });
+    expect(r.choices).toEqual(["a", "b"]);
+    expect(r.multi).toBe(false);
   });
 
-  test("choose schema accepts valid choices", () => {
-    const result = chooseSchema.parse({ body: "Pick", choices: ["a", "b"] });
-    expect(result.choices).toEqual(["a", "b"]);
+  test("pick with multi", () => {
+    const r = askSchema.parse({ type: "pick", body: "Pick", choices: ["a", "b"], multi: true });
+    expect(r.multi).toBe(true);
   });
 
-  test("textInput schema applies defaults", () => {
-    const result = textInputSchema.parse({ body: "Enter name:" });
-    expect(result.hidden).toBe(false);
-    expect(result.default_value).toBe("");
+  test("text with defaults", () => {
+    const r = askSchema.parse({ type: "text", body: "Enter:" });
+    expect(r.hidden).toBe(false);
+    expect(r.default).toBeUndefined();
   });
 
-  test("position enum rejects invalid values", () => {
-    expect(() => confirmSchema.parse({ body: "Test", position: "top" })).toThrow();
+  test("text hidden", () => {
+    const r = askSchema.parse({ type: "text", body: "Key:", hidden: true });
+    expect(r.hidden).toBe(true);
   });
 
-  test("position enum accepts all valid values", () => {
+  test("form with questions", () => {
+    const r = askSchema.parse({
+      type: "form", body: "Setup",
+      questions: [{ id: "lang", question: "Language?", options: ["TS", "Py"] }],
+    });
+    expect(r.questions).toHaveLength(1);
+    expect(r.questions![0].multi).toBe(false);
+  });
+
+  test("rejects empty body", () => {
+    expect(() => askSchema.parse({ type: "confirm", body: "" })).toThrow();
+  });
+
+  test("rejects invalid type", () => {
+    expect(() => askSchema.parse({ type: "invalid", body: "test" })).toThrow();
+  });
+
+  test("position accepts all valid values", () => {
     for (const p of ["left", "right", "center"]) {
-      const result = confirmSchema.parse({ body: "Test", position: p });
-      expect(result.position).toBe(p);
+      const r = askSchema.parse({ type: "confirm", body: "Test", position: p });
+      expect(r.position).toBe(p);
     }
+  });
+
+  test("position rejects invalid values", () => {
+    expect(() => askSchema.parse({ type: "confirm", body: "Test", position: "top" })).toThrow();
+  });
+});
+
+describe("compactResponse", () => {
+  test("confirm: normal yes", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: true, cancelled: false,
+      dismissed: false, answer: "Yes", comment: null,
+    });
+    expect(r).toEqual({ answer: true });
+  });
+
+  test("confirm: normal no", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: false, cancelled: false,
+      dismissed: false, answer: "No", comment: null,
+    });
+    expect(r).toEqual({ answer: false });
+  });
+
+  test("confirm: cancelled", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: false, cancelled: true,
+      dismissed: false, answer: null, comment: null,
+    });
+    expect(r).toEqual({ cancelled: true });
+  });
+
+  test("confirm: dismissed maps to cancelled", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: false, cancelled: false,
+      dismissed: true, answer: null, comment: null,
+    });
+    expect(r).toEqual({ cancelled: true });
+  });
+
+  test("confirm: snoozed", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: false, cancelled: false,
+      dismissed: false, answer: null, comment: null,
+      snoozed: true, snoozeMinutes: 5, remainingSeconds: 300,
+    });
+    expect(r).toEqual({ snoozed: true, remainingSeconds: 300 });
+  });
+
+  test("confirm: feedback", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: false, cancelled: false,
+      dismissed: false, answer: null, comment: null,
+      feedbackText: "Need more context",
+    });
+    expect(r).toEqual({ feedbackText: "Need more context" });
+  });
+
+  test("pick: single selection", () => {
+    const r = compactResponse("pick", {
+      dialogType: "choose", answer: "PostgreSQL", cancelled: false,
+      dismissed: false, description: null, comment: null,
+    });
+    expect(r).toEqual({ answer: "PostgreSQL" });
+  });
+
+  test("pick: multi selection", () => {
+    const r = compactResponse("pick", {
+      dialogType: "choose", answer: ["Auth", "UI"], cancelled: false,
+      dismissed: false, description: null, comment: null,
+    });
+    expect(r).toEqual({ answer: ["Auth", "UI"] });
+  });
+
+  test("pick: cancelled", () => {
+    const r = compactResponse("pick", {
+      dialogType: "choose", answer: null, cancelled: true,
+      dismissed: false, description: null, comment: null,
+    });
+    expect(r).toEqual({ cancelled: true });
+  });
+
+  test("text: normal answer", () => {
+    const r = compactResponse("text", {
+      dialogType: "textInput", answer: "my message", cancelled: false,
+      dismissed: false, comment: null,
+    });
+    expect(r).toEqual({ answer: "my message" });
+  });
+
+  test("text: cancelled", () => {
+    const r = compactResponse("text", {
+      dialogType: "textInput", answer: null, cancelled: true,
+      dismissed: false, comment: null,
+    });
+    expect(r).toEqual({ cancelled: true });
+  });
+
+  test("form: complete answers", () => {
+    const r = compactResponse("form", {
+      dialogType: "questions", answers: { lang: "TypeScript", test: "Vitest" },
+      cancelled: false, dismissed: false, completedCount: 2,
+    });
+    expect(r).toEqual({ answer: { lang: "TypeScript", test: "Vitest" }, completedCount: 2 });
+  });
+
+  test("form: partial answers on cancel", () => {
+    const r = compactResponse("form", {
+      dialogType: "questions", answers: { lang: "TypeScript" },
+      cancelled: true, dismissed: false, completedCount: 1,
+    });
+    expect(r).toEqual({ cancelled: true, answer: { lang: "TypeScript" }, completedCount: 1 });
+  });
+
+  test("form: cancelled with no answers", () => {
+    const r = compactResponse("form", {
+      dialogType: "questions", answers: {},
+      cancelled: true, dismissed: false, completedCount: 0,
+    });
+    expect(r).toEqual({ cancelled: true });
+  });
+
+  test("strips null fields from output", () => {
+    const r = compactResponse("text", {
+      dialogType: "textInput", answer: "hello", cancelled: false,
+      dismissed: false, comment: null,
+      snoozed: undefined, feedbackText: undefined,
+    });
+    expect(r).toEqual({ answer: "hello" });
+    expect("cancelled" in r).toBe(false);
+    expect("snoozed" in r).toBe(false);
   });
 });
 
@@ -123,14 +277,11 @@ function withHeartbeat<T>(
 describe("singleton dialog guard", () => {
   test("activeDialog is initially null", () => {
     const provider = new SwiftDialogProvider();
-    // activeDialog is private, but we can verify behavior:
-    // two concurrent calls should return the same result
     expect(provider).toBeDefined();
   });
 
   test("concurrent calls return same promise result", async () => {
     const provider = new SwiftDialogProvider();
-    // Mock execCli by accessing the private method through prototype
     let callCount = 0;
     const original = (provider as any).execCli;
     (provider as any).execCli = async () => {
@@ -140,8 +291,8 @@ describe("singleton dialog guard", () => {
     };
 
     const [r1, r2] = await Promise.all([
-      provider.confirm({ body: "test", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left" }),
-      provider.confirm({ body: "test", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left" }),
+      provider.confirm({ body: "test", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left", projectPath: "" }),
+      provider.confirm({ body: "test", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left", projectPath: "" }),
     ]);
 
     expect(callCount).toBe(1);
@@ -157,8 +308,8 @@ describe("singleton dialog guard", () => {
       return { confirmed: true };
     };
 
-    await provider.confirm({ body: "first", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left" });
-    await provider.confirm({ body: "second", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left" });
+    await provider.confirm({ body: "first", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left", projectPath: "" });
+    await provider.confirm({ body: "second", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left", projectPath: "" });
 
     expect(callCount).toBe(2);
   });
@@ -173,10 +324,10 @@ describe("singleton dialog guard", () => {
     };
 
     await expect(
-      provider.confirm({ body: "fail", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left" }),
+      provider.confirm({ body: "fail", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left", projectPath: "" }),
     ).rejects.toThrow("fail");
 
-    const r = await provider.confirm({ body: "ok", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left" });
+    const r = await provider.confirm({ body: "ok", title: "T", confirmLabel: "Y", cancelLabel: "N", position: "left", projectPath: "" });
     expect(callCount).toBe(2);
     expect(r).toEqual({ confirmed: true });
   });
@@ -200,14 +351,11 @@ describe("withHeartbeat", () => {
       sendNotification: send,
     });
 
-    // Fast-forward: wait enough for 2 heartbeats (using real timers with short interval)
-    // We'll test with a shorter mock instead
     await new Promise(r => setTimeout(r, 50));
     resolve("done");
     const result = await wrapped;
 
     expect(result).toBe("done");
-    // Can't reliably assert count with real 15s interval, but verify no error
   });
 
   test("clears interval on rejection", async () => {
@@ -217,6 +365,5 @@ describe("withHeartbeat", () => {
     await expect(
       withHeartbeat(failing, { _meta: { progressToken: "tok" }, sendNotification: send }),
     ).rejects.toThrow("boom");
-    // Interval should be cleared, no lingering timers
   });
 });

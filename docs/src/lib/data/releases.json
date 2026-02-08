@@ -3,6 +3,18 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.10.0",
+      "date": "2026-02-08",
+      "highlight": "Unified 2-tool MCP interface",
+      "changes": [
+        { "text": "MCP interface consolidated from 5 tools to 2: `ask` (with type=confirm/pick/text/form) and `notify`", "type": "changed", "scope": "server", "featured": true },
+        { "text": "Responses are now compact — only meaningful fields are returned, no more null padding", "type": "changed", "scope": "server", "featured": true },
+        { "text": "Project path is cached after the first call, saving tokens on every subsequent dialog", "type": "added", "scope": "server" },
+        { "text": "Single-select is now the default for pick dialogs (was multi-select)", "type": "changed", "scope": "server" },
+        { "text": "Base prompt updated to v2.0.0 with streamlined tool reference and examples", "type": "changed", "scope": "server" }
+      ]
+    },
+    {
       "version": "1.9.4",
       "date": "2026-02-07",
       "highlight": "About pane and smarter update controls",

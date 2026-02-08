@@ -6,11 +6,8 @@ An MCP server for interacting with users through native macOS dialogs.
 
 | Tool | Description |
 |------|-------------|
-| `ask_confirmation` | Yes/No dialog with custom buttons |
-| `ask_multiple_choice` | Scrollable list picker (single or multi-select) |
-| `ask_text_input` | Free-form text input (supports password masking) |
-| `ask_questions` | Multi-question dialog (wizard or accordion mode) |
-| `notify_user` | macOS notification banner (non-blocking) |
+| `ask` | Interactive dialog — type: `confirm` (yes/no), `pick` (list picker), `text` (free-form input), `form` (multi-question wizard/accordion) |
+| `notify` | macOS notification banner (non-blocking) |
 
 All interactive dialogs support **snooze** (defer with 1-60 min delay) and **feedback** (user provides text instead of answering).
 
@@ -46,24 +43,23 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 **Confirmation:**
 ```
 LLM: "Should I proceed with deleting these files?"
--> ask_confirmation with confirm_label="Delete", cancel_label="Cancel"
+-> ask with type="confirm", yes="Delete", no="Cancel"
 -> User clicks "Delete"
--> Returns: { confirmed: true, cancelled: false, answer: "Delete" }
+-> Returns: { answer: true }
 ```
 
-**Multiple choice:**
+**Pick from list:**
 ```
 LLM: "Which deployment target?"
--> ask_multiple_choice with choices ["staging", "production", "dev"]
+-> ask with type="pick", choices=["staging", "production", "dev"]
 -> User selects "staging"
--> Returns: { answer: "staging", cancelled: false }
+-> Returns: { answer: "staging" }
 ```
 
 **Text input:**
 ```
 LLM: "What should I name the project?"
--> ask_text_input with body "Enter project name"
+-> ask with type="text", body="Enter project name"
 -> User types "my-app"
--> Returns: { answer: "my-app", cancelled: false }
+-> Returns: { answer: "my-app" }
 ```
-

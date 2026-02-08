@@ -61,7 +61,7 @@ When releasing a new version:
 The base prompt has its own independent version number:
 - **Location:** `macos-app/Sources/Resources/base-prompt.md` (first line comment)
 - **Format:** `<!-- version: X.Y.Z -->`
-- **Current:** v1.3.1
+- **Current:** v2.0.0
 - **Validation:** Run `bash scripts/validate-baseprompt-version.sh`
 - **CI:** Automatically validated on every push/PR
 
@@ -72,42 +72,43 @@ The base prompt has its own independent version number:
 
 ## Dialog Types & MCP Tools
 
-This project exposes 5 MCP tools, each mapping to a dialog type. When adding features, fixing bugs, or creating test/debug coverage, **all 5 types and their key variants must be considered**.
+This project exposes 2 MCP tools: `ask` (unified interactive dialog) and `notify` (fire-and-forget). The `ask` tool routes to 4 dialog types via the `type` field. When adding features, fixing bugs, or creating test/debug coverage, **all 4 dialog types and their key variants must be considered**.
 
 ### Invariant
 
 The debug menu (`macos-app/Sources/AppDelegate.swift`) and visual test fixtures (`test-cases/cases/`) must cover **every dialog type and its major variants**. When adding a new variant or dialog type, update both.
 
-### Tools → CLI commands → Dialog types
+### ask type → CLI command → Dialog types
 
-| MCP Tool | CLI Command | Dialog | Key Variants |
-|----------|-------------|--------|-------------|
-| `ask_confirmation` | `confirm` | Confirm | basic, custom labels, with project badge |
-| `ask_multiple_choice` | `choose` | Choose | single-select, multi-select, with/without descriptions |
-| `ask_text_input` | `textInput` | Text Input | plain, password (`hidden: true`), markdown body |
-| `ask_questions` | `questions` | Questions | wizard mode, accordion mode, multi-select questions |
-| `notify_user` | `notify` | Notify | with/without sound, with/without project badge |
+| `ask` type | CLI Command | Dialog | Key Variants |
+|------------|-------------|--------|-------------|
+| `confirm` | `confirm` | Confirm | basic, custom labels (`yes`/`no`), with project badge |
+| `pick` | `choose` | Choose | single-select, multi-select (`multi: true`), with/without `descriptions` |
+| `text` | `textInput` | Text Input | plain, password (`hidden: true`), with `default` |
+| `form` | `questions` | Questions | wizard mode, accordion mode (`mode`), multi-select questions |
 
-### Shared parameters (all interactive tools)
+`notify` tool maps directly to the `notify` CLI command.
+
+### Shared parameters (`ask` tool)
 
 | Parameter | CLI env var | Purpose |
 |-----------|------------|---------|
 | `position` | — | `"left"` (default), `"center"`, `"right"` |
-| `project_path` | `MCP_PROJECT_PATH` | Shows project badge in dialog |
+| `project_path` | `MCP_PROJECT_PATH` | Shows project badge in dialog (cached after first call) |
 | — | `MCP_CLIENT_NAME` | Prefixes dialog title |
 | — | `DIALOG_THEME` | `"sunset"`, `"midnight"`, or system default |
 
-### Shared response states (all interactive tools)
+### Shared response states (all interactive dialogs)
 
-Every interactive dialog (not notify) can return: normal answer, `snoozed: true`, `feedbackText`, or `cancelled: true`. Test fixtures use `testPane: "snooze"` / `testPane: "feedback"` to screenshot expanded toolbar states.
+Every `ask` dialog can return: normal `answer`, `snoozed: true`, `feedbackText`, or `cancelled: true`. Responses are compacted by `compact.ts` (strips null fields, maps `confirmed` → `answer: bool`, merges `dismissed` into `cancelled`). Test fixtures use `testPane: "snooze"` / `testPane: "feedback"` to screenshot expanded toolbar states.
 
-### Tool-specific parameters
+### Type-specific parameters
 
-**ask_confirmation**: `body`, `title`, `confirm_label`, `cancel_label`
-**ask_multiple_choice**: `body`, `choices[]`, `descriptions[]?`, `allow_multiple`, `default_selection?`
-**ask_text_input**: `body`, `title`, `default_value`, `hidden`
-**ask_questions**: `questions[]` (each: `id`, `question`, `options[]`, `multi_select`), `mode` (`"wizard"` | `"accordion"`)
-**notify_user**: `body`, `title`, `sound` (no project_path in MCP schema, but CLI reads `MCP_PROJECT_PATH`)
+**confirm**: `body`, `title`, `yes`, `no`
+**pick**: `body`, `choices[]`, `descriptions[]?`, `multi`, `default?`
+**text**: `body`, `title`, `default`, `hidden`
+**form**: `body`, `questions[]` (each: `id`, `question`, `options[]`, `descriptions[]?`, `multi`), `mode` (`"wizard"` | `"accordion"`)
+**notify**: `body`, `title`, `sound`
 
 ## Documentation Structure
 

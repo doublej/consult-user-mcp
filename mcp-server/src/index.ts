@@ -3,6 +3,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { SwiftDialogProvider } from "./providers/swift.js";
 import type { DialogPosition, QuestionsMode } from "./types.js";
+import { compactResponse } from "./compact.js";
+
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 const HEARTBEAT_INTERVAL_MS = 15_000;
 
@@ -31,77 +33,104 @@ function withHeartbeat<T>(
   return promise.finally(() => clearInterval(iv));
 }
 
+/** Wrap a provider call with timeout + heartbeat. */
+function tracked<T>(promise: Promise<T>, extra: Parameters<typeof withHeartbeat>[1]): Promise<T> {
+  return withHeartbeat(withTimeout(promise, DIALOG_TIMEOUT_MS), extra);
+}
+
 const server = new McpServer({ name: "consult-user-mcp-server", version: "1.0.0" });
 const provider = new SwiftDialogProvider();
-const pos = z.enum(["left", "right", "center"]).default("left");
-const projectPath = z.string().describe("Project path for context badge");
 
-server.registerTool("ask_confirmation", {
-  description: "Yes/No dialog. Returns {confirmed, cancelled, answer}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
-  inputSchema: z.object({
-    body: z.string().min(1).max(1000),
-    title: z.string().max(80).default("Confirmation"),
-    confirm_label: z.string().max(20).default("Yes"),
-    cancel_label: z.string().max(20).default("No"),
-    position: pos,
-    project_path: projectPath,
-  }),
-}, async (p, extra) => {
-  provider.pulse();
-  const r = await withHeartbeat(withTimeout(provider.confirm({
-    body: p.body, title: p.title ?? "Confirmation",
-    confirmLabel: p.confirm_label ?? "Yes", cancelLabel: p.cancel_label ?? "No",
-    position: (p.position ?? "left") as DialogPosition,
-    projectPath: p.project_path,
-  }), DIALOG_TIMEOUT_MS), extra);
-  return { content: [{ type: "text", text: JSON.stringify(r) }] };
+let cachedProjectPath: string | undefined;
+
+const questionSchema = z.object({
+  id: z.string().min(1).max(50),
+  question: z.string().min(1).max(500),
+  options: z.array(z.string().min(1).max(100)).min(2).max(10),
+  descriptions: z.array(z.string().max(200)).optional(),
+  multi: z.boolean().default(false),
 });
 
-server.registerTool("ask_multiple_choice", {
-  description: "List picker dialog. Returns {answer, cancelled, description}. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
-  inputSchema: z.object({
-    body: z.string().min(1).max(1000),
-    choices: z.array(z.string().min(1).max(100)).min(2).max(20),
-    descriptions: z.array(z.string().max(200)).optional(),
-    allow_multiple: z.boolean().default(true),
-    default_selection: z.string().optional(),
-    position: pos,
-    project_path: projectPath,
-  }),
-}, async (p, extra) => {
-  provider.pulse();
-  const r = await withHeartbeat(withTimeout(provider.choose({
-    body: p.body, choices: p.choices, descriptions: p.descriptions,
-    allowMultiple: p.allow_multiple ?? true, defaultSelection: p.default_selection,
-    position: (p.position ?? "left") as DialogPosition,
-    projectPath: p.project_path,
-  }), DIALOG_TIMEOUT_MS), extra);
-  return { content: [{ type: "text", text: JSON.stringify(r) }] };
+const askSchema = z.object({
+  type: z.enum(["confirm", "pick", "text", "form"]),
+  body: z.string().min(1).max(1000),
+  // confirm
+  yes: z.string().max(20).default("Yes"),
+  no: z.string().max(20).default("No"),
+  // pick
+  choices: z.array(z.string().min(1).max(100)).min(2).max(20).optional(),
+  multi: z.boolean().default(false),
+  descriptions: z.array(z.string().max(200)).optional(),
+  default: z.string().optional(),
+  // text
+  hidden: z.boolean().default(false),
+  // form
+  questions: z.array(questionSchema).min(1).max(10).optional(),
+  mode: z.enum(["wizard", "accordion"]).default("wizard"),
+  // shared
+  title: z.string().max(80).optional(),
+  position: z.enum(["left", "right", "center"]).default("left"),
+  project_path: z.string().optional(),
 });
 
-server.registerTool("ask_text_input", {
-  description: "Text input dialog. Returns {answer, cancelled}. Supports hidden input. 10 min timeout. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
-  inputSchema: z.object({
-    body: z.string().min(1).max(1000),
-    title: z.string().max(80).default("Input"),
-    default_value: z.string().max(1000).default(""),
-    hidden: z.boolean().default(false),
-    position: pos,
-    project_path: projectPath,
-  }),
+server.registerTool("ask", {
+  description: "Interactive dialog. Types: confirm (yes/no), pick (select from list), text (free input), form (multi-question). 10min timeout. If snoozed: sleep remainingSeconds, retry.",
+  inputSchema: askSchema,
 }, async (p, extra) => {
   provider.pulse();
-  const r = await withHeartbeat(withTimeout(provider.textInput({
-    body: p.body, title: p.title ?? "Input",
-    defaultValue: p.default_value ?? "", hidden: p.hidden ?? false,
-    position: (p.position ?? "left") as DialogPosition,
-    projectPath: p.project_path,
-  }), DIALOG_TIMEOUT_MS), extra);
-  return { content: [{ type: "text", text: JSON.stringify(r) }] };
+
+  if (p.project_path) cachedProjectPath = p.project_path;
+  const projectPath = p.project_path ?? cachedProjectPath ?? "";
+  const position = p.position as DialogPosition;
+
+  let raw: unknown;
+
+  switch (p.type) {
+    case "confirm":
+      raw = await tracked(provider.confirm({
+        body: p.body, title: p.title ?? "Confirmation",
+        confirmLabel: p.yes, cancelLabel: p.no,
+        position, projectPath,
+      }), extra);
+      break;
+
+    case "pick":
+      if (!p.choices?.length) throw new Error("choices required for type=pick");
+      raw = await tracked(provider.choose({
+        body: p.body, choices: p.choices, descriptions: p.descriptions,
+        allowMultiple: p.multi, defaultSelection: p.default,
+        position, projectPath,
+      }), extra);
+      break;
+
+    case "text":
+      raw = await tracked(provider.textInput({
+        body: p.body, title: p.title ?? "Input",
+        defaultValue: p.default ?? "", hidden: p.hidden,
+        position, projectPath,
+      }), extra);
+      break;
+
+    case "form": {
+      if (!p.questions?.length) throw new Error("questions required for type=form");
+      raw = await tracked(provider.questions({
+        questions: p.questions.map(q => ({
+          id: q.id, question: q.question,
+          options: q.options.map((label, i) => ({ label, description: q.descriptions?.[i] })),
+          multiSelect: q.multi,
+        })),
+        mode: p.mode as QuestionsMode,
+        position, projectPath,
+      }), extra);
+      break;
+    }
+  }
+
+  return { content: [{ type: "text", text: JSON.stringify(compactResponse(p.type, raw)) }] };
 });
 
-server.registerTool("notify_user", {
-  description: "Show macOS notification banner. Non-blocking, no user response needed. Returns {success}.",
+server.registerTool("notify", {
+  description: "Non-blocking notification. Returns {success}.",
   inputSchema: z.object({
     body: z.string().min(1).max(1000),
     title: z.string().max(80).default("Notice"),
@@ -109,45 +138,8 @@ server.registerTool("notify_user", {
   }),
 }, async (p) => {
   provider.pulse();
-  const r = await provider.notify({
-    body: p.body, title: p.title ?? "Notice",
-    sound: p.sound ?? true,
-  });
-  return { content: [{ type: "text", text: JSON.stringify(r) }] };
-});
-
-const questionSchema = z.object({
-  id: z.string().min(1).max(50),
-  question: z.string().min(1).max(500),
-  options: z.array(z.object({
-    label: z.string().min(1).max(100),
-    description: z.string().max(200).optional(),
-  })).min(2).max(10),
-  multi_select: z.boolean().default(false),
-});
-
-server.registerTool("ask_questions", {
-  description: "Multi-question dialog. Modes: wizard (prev/next), accordion (collapsible). Returns {answers, cancelled, completedCount}. User may snooze (snoozed, snoozeMinutes, remainingSeconds) or provide feedback (feedbackText) instead. IMPORTANT: If snoozed, all subsequent dialog calls return {snoozed: true, remainingSeconds} without showing dialog - run `sleep <remainingSeconds>` then retry.",
-  inputSchema: z.object({
-    questions: z.array(questionSchema).min(1).max(10),
-    mode: z.enum(["wizard", "accordion"]).default("wizard"),
-    position: pos,
-    project_path: projectPath,
-  }),
-}, async (p, extra) => {
-  provider.pulse();
-  const r = await withHeartbeat(withTimeout(provider.questions({
-    questions: p.questions.map(q => ({
-      id: q.id,
-      question: q.question,
-      options: q.options,
-      multiSelect: q.multi_select ?? false,
-    })),
-    mode: (p.mode ?? "wizard") as QuestionsMode,
-    position: (p.position ?? "left") as DialogPosition,
-    projectPath: p.project_path,
-  }), DIALOG_TIMEOUT_MS), extra);
-  return { content: [{ type: "text", text: JSON.stringify(r) }] };
+  const r = await provider.notify({ body: p.body, title: p.title, sound: p.sound });
+  return { content: [{ type: "text", text: JSON.stringify({ success: r.success }) }] };
 });
 
 async function main(): Promise<void> {

@@ -39,7 +39,7 @@ async function getComment() {
 }
 
 async function testConfirmation() {
-  console.log("\n1. Testing: ask_confirmation");
+  console.log("\n1. Testing: ask type=confirm");
   console.log("   Showing Yes/No list with multi-select (Cmd+click for comment)...\n");
 
   const choices = ["Yes", "No", "+ Add a comment"];
@@ -74,7 +74,7 @@ async function testConfirmation() {
 }
 
 async function testMultipleChoice() {
-  console.log("\n2. Testing: ask_multiple_choice");
+  console.log("\n2. Testing: ask type=pick");
   console.log("   Showing list picker with multi-select (Cmd+click for comment)...\n");
 
   const choices = ["PDF", "Word Document", "Markdown", "Plain Text", "+ Add a comment"];
@@ -105,7 +105,7 @@ async function testMultipleChoice() {
 }
 
 async function testMultipleChoiceMulti() {
-  console.log("\n3. Testing: ask_multiple_choice (multi-select)");
+  console.log("\n3. Testing: ask type=pick (multi-select)");
   console.log("   Showing list picker with multiple selection (Cmd+click)...\n");
 
   const choices = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "+ Add a comment"];
@@ -136,7 +136,7 @@ async function testMultipleChoiceMulti() {
 }
 
 async function testTextInput() {
-  console.log("\n4. Testing: ask_text_input");
+  console.log("\n4. Testing: ask type=text");
   console.log("   Showing text input dialog with + Comment option...\n");
 
   // Three buttons: Cancel, + Comment, OK
@@ -161,7 +161,7 @@ async function testTextInput() {
 }
 
 async function testNotification() {
-  console.log("\n5. Testing: notify_user");
+  console.log("\n5. Testing: notify");
   console.log("   Showing macOS notification...\n");
 
   const script = `display notification "This is a test notification from the MCP server." with title "Consult User MCP" subtitle "Test Complete" sound name "default"`;

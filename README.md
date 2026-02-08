@@ -98,21 +98,17 @@ consult-user-mcp/
 
 ## MCP Tools
 
-- `ask_confirmation` - Yes/No dialog
-- `ask_multiple_choice` - List picker
-- `ask_text_input` - Text input
-- `ask_questions` - Multi-question dialog (wizard or accordion mode)
-- `notify_user` - System notification
+- `ask` - Unified interactive dialog (type: `confirm`, `pick`, `text`, or `form`)
+- `notify` - System notification
 
 ### Timeout and Snooze Behavior
 
-All dialog tools (except `notify_user`) have a **10-minute timeout**. If the user doesn't respond within this time, the dialog closes and returns a timeout response.
+The `ask` tool has a **10-minute timeout**. If the user doesn't respond within this time, the dialog closes and returns a timeout response.
 
 **Snooze feature:** Users can snooze a dialog for 1-60 minutes instead of answering immediately. When snoozed:
 
-- The dialog returns `{ snoozed: true, snoozeMinutes: N, remainingSeconds: S, instruction: "..." }`
-- All subsequent dialog calls return `{ snoozed: true, remainingSeconds: S, instruction: "..." }` without showing a new dialog
-- The `instruction` field contains a human-readable hint for the agent (e.g., "Set a timer for 5 minutes and re-ask this question when it fires.")
+- The dialog returns `{ snoozed: true, remainingSeconds: S }`
+- All subsequent `ask` calls return `{ snoozed: true, remainingSeconds: S }` without showing a new dialog
 - The agent should wait for the snooze period to expire before retrying
 
 **Handling snooze in your agent:**
@@ -185,7 +181,7 @@ flowchart TB
 
 ### Flow
 
-1. **Agent calls tool** - Claude Code (or any MCP client) invokes a tool like `ask_confirmation`
+1. **Agent calls tool** - Claude Code (or any MCP client) invokes `ask` or `notify`
 2. **MCP Server receives** - The TypeScript server validates input with Zod schemas
 3. **CLI spawned** - `SwiftDialogProvider` executes the Swift CLI with JSON arguments
 4. **Dialog shown** - Native SwiftUI window appears with the question

@@ -44,6 +44,7 @@ cp "$ROOT/dialog-cli/VERSION" "$APP_PATH/Contents/Resources/dialog-cli/VERSION"
 # 7. Copy mcp-server dist and dependencies
 cp -r "$ROOT/mcp-server/dist/"* "$APP_PATH/Contents/Resources/mcp-server/dist/"
 cp "$ROOT/mcp-server/package.json" "$APP_PATH/Contents/Resources/mcp-server/"
+cp "$ROOT/macos-app/VERSION" "$APP_PATH/Contents/Resources/mcp-server/VERSION"
 
 # Install production dependencies
 echo "  Installing node dependencies..."

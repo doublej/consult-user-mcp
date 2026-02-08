@@ -4,6 +4,7 @@ import { z } from "zod";
 import { SwiftDialogProvider } from "./providers/swift.js";
 import type { DialogPosition, QuestionsMode } from "./types.js";
 import { compactResponse } from "./compact.js";
+import { checkForUpdate } from "./update-check.js";
 
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 const HEARTBEAT_INTERVAL_MS = 15_000;
@@ -147,6 +148,18 @@ async function main(): Promise<void> {
   await server.connect(transport);
   provider.setClientName(server.server.getClientVersion()?.name ?? "MCP");
   console.error("Consult User MCP Server running on stdio");
+
+  checkForUpdate()
+    .then(async (result) => {
+      if (result) {
+        await provider.notify({
+          body: `v${result.remoteVersion} is available (you have v${result.currentVersion}). Right-click tray icon → Check for Updates.`,
+          title: "Update Available",
+          sound: false,
+        });
+      }
+    })
+    .catch(() => {});
 }
 
 main().catch((e) => { console.error("Server error:", e); process.exit(1); });

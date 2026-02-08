@@ -50,11 +50,12 @@ When releasing a new version:
 3. Update `docs/src/lib/data/releases.json` (single source of truth)
 4. Generate CHANGELOG.md: `bun run changelog`
 5. Validate versions: `bash scripts/validate-baseprompt-version.sh`
-6. Commit and tag: `git tag -a vX.Y.Z -m "vX.Y.Z - Description"`
-7. Push with tags: `git push origin main --tags`
-8. Build bundle: `bun run build:bundle`
-9. Create zip: `cd /Applications && zip -r /tmp/Consult.User.MCP.app.zip "Consult User MCP.app" -x "*.DS_Store"`
-10. Create GitHub release with zip: `gh release create vX.Y.Z /tmp/Consult.User.MCP.app.zip --title "..." --notes "..."`
+6. Commit all changes
+7. Run `bash scripts/release.sh` — builds, zips, tags, and creates the GitHub release with the zip attached
+
+Use `bash scripts/release.sh --dry-run` to validate pre-conditions without executing.
+
+**Warning:** Never run `gh release create` manually — use the script to ensure a zip asset is always attached. Releases without assets break the auto-updater.
 
 ## Baseprompt Versioning
 

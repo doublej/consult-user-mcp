@@ -37,7 +37,7 @@ public class ChooseDialog : DialogBase
         var outer = CreateOuterBorder();
         var stack = new StackPanel();
 
-        stack.Children.Add(DialogHeader.Create("Choose", _request.Body));
+        stack.Children.Add(DialogHeader.Create(_request.Body, ""));
 
         var scrollViewer = new ScrollViewer
         {
@@ -170,6 +170,7 @@ public class ChooseDialog : DialogBase
 
     protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (Cooldown.IsCoolingDown) { e.Handled = true; return; }
         switch (e.Key)
         {
             case Key.Enter when _selected.Count > 0:

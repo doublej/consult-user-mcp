@@ -37,21 +37,3 @@ public record NotifyRequest(
     string Title,
     bool Sound
 );
-
-public record QuestionOption(
-    string Label,
-    string? Description
-);
-
-public record QuestionItem(
-    string Id,
-    string Question,
-    QuestionOption[] Options,
-    bool MultiSelect
-);
-
-public record QuestionsRequest(
-    QuestionItem[] Questions,
-    string Mode,
-    DialogPosition Position
-);

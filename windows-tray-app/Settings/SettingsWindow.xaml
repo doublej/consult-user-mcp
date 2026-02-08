@@ -1,0 +1,67 @@
+<Window x:Class="ConsultUserMCP.Settings.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Consult User MCP - Settings"
+        MinWidth="680" MinHeight="600"
+        Width="780" Height="600"
+        WindowStartupLocation="CenterScreen"
+        Background="#1E1E1E">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="#181818" BorderBrush="#333" BorderThickness="0,0,1,0">
+            <StackPanel Margin="0,16,0,0">
+                <TextBlock Text="Settings" FontSize="18" FontWeight="SemiBold"
+                           Foreground="#E6E6E6" Margin="20,0,0,16"
+                           FontFamily="Segoe UI" />
+
+                <ListBox x:Name="SectionList" Background="Transparent" BorderThickness="0"
+                         SelectionChanged="OnSectionChanged" SelectedIndex="0">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="20,10" />
+                            <Setter Property="Foreground" Value="#A0A0A0" />
+                            <Setter Property="FontSize" Value="14" />
+                            <Setter Property="FontFamily" Value="Segoe UI" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Bd" Padding="{TemplateBinding Padding}"
+                                                Background="Transparent">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="#252525" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="#2D2D2D" />
+                                                <Setter Property="Foreground" Value="#E6E6E6" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBoxItem Content="General" />
+                    <ListBoxItem Content="Updates" />
+                    <ListBoxItem Content="Projects" />
+                    <ListBoxItem Content="About" />
+                    <ListBoxItem Content="History" />
+                </ListBox>
+            </StackPanel>
+        </Border>
+
+        <!-- Content area -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ContentControl x:Name="ContentArea" Margin="32,24" />
+        </ScrollViewer>
+    </Grid>
+</Window>

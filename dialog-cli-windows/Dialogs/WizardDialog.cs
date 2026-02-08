@@ -223,6 +223,8 @@ public class WizardDialog : DialogBase
                 _focusedOptionIndex = optIdx;
                 ToggleOption(q.Id, optIdx, q.MultiSelect);
                 UpdateOptionVisuals();
+                if (!q.MultiSelect)
+                    AutoAdvance();
             };
             _optionCards.Add(card);
             _contentPanel.Children.Add(card);
@@ -324,6 +326,7 @@ public class WizardDialog : DialogBase
 
     protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (Cooldown.IsCoolingDown) { e.Handled = true; return; }
         var q = _request.Questions[_currentIndex];
 
         if (q.Type == QuestionType.Text)
@@ -364,6 +367,8 @@ public class WizardDialog : DialogBase
             case Key.Space:
                 ToggleOption(q.Id, _focusedOptionIndex, q.MultiSelect);
                 UpdateOptionVisuals();
+                if (!q.MultiSelect)
+                    AutoAdvance();
                 e.Handled = true;
                 return;
             case Key.Left when _currentIndex > 0:
@@ -384,6 +389,19 @@ public class WizardDialog : DialogBase
     {
         Result = new QuestionsResponse { Cancelled = true, Dismissed = true };
         Close();
+    }
+
+    private void AutoAdvance()
+    {
+        if (_currentIndex < _request.Questions.Length - 1)
+        {
+            _currentIndex++;
+            RenderStep();
+        }
+        else
+        {
+            Complete();
+        }
     }
 
     private void Complete()

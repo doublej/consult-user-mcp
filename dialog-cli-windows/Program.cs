@@ -27,6 +27,14 @@ public static class Program
         var clientName = Environment.GetEnvironmentVariable("MCP_CLIENT_NAME") ?? "MCP";
         mgr.SetClientName(clientName);
 
+        var projectPath = Environment.GetEnvironmentVariable("MCP_PROJECT_PATH");
+        if (!string.IsNullOrEmpty(projectPath))
+            mgr.SetProjectPath(projectPath);
+
+        var theme = Environment.GetEnvironmentVariable("DIALOG_THEME");
+        if (!string.IsNullOrEmpty(theme))
+            DialogCLI.Theme.DialogTheme.ApplyTheme(theme);
+
         // Load tray app settings (falls back to defaults if file missing)
         var settings = SettingsReader.Load();
         mgr.ApplySettings(settings);

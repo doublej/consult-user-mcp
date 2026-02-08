@@ -323,8 +323,12 @@ public class AccordionDialog : DialogBase
 
     protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (Cooldown.IsCoolingDown) { e.Handled = true; return; }
         if (e.Key == Key.Enter)
         {
+            bool hasAnswer = _choiceAnswers.Values.Any(s => s.Count > 0)
+                          || _textAnswers.Values.Any(s => !string.IsNullOrEmpty(s));
+            if (!hasAnswer) { e.Handled = true; return; }
             Complete();
             e.Handled = true;
             return;

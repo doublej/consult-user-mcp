@@ -1,0 +1,136 @@
+<UserControl x:Class="ConsultUserMCP.Settings.ProjectsSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Projects" Foreground="#E6E6E6"
+                               FontSize="18" FontWeight="SemiBold" FontFamily="Segoe UI" />
+                    <TextBlock Text="Projects that have used Consult User MCP" Foreground="#A0A0A0"
+                               FontSize="12" FontFamily="Segoe UI" Margin="0,4,0,0" />
+                </StackPanel>
+                <Button x:Name="ClearAllBtn" Grid.Column="1" Content="Clear All"
+                        Click="OnClearAll" Visibility="Collapsed"
+                        Padding="12,6" Background="#333" Foreground="#A0A0A0"
+                        FontSize="12" FontFamily="Segoe UI" BorderThickness="0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                    CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#444" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </StackPanel>
+
+        <!-- Empty state -->
+        <StackPanel x:Name="EmptyState" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="48"
+                       Foreground="#444" HorizontalAlignment="Center" Margin="0,0,0,16" />
+            <TextBlock Text="No Projects Yet" Foreground="#888"
+                       FontSize="16" FontWeight="SemiBold" FontFamily="Segoe UI"
+                       HorizontalAlignment="Center" Margin="0,0,0,8" />
+            <TextBlock Text="Projects are discovered automatically when&#x0a;dialogs are shown from a project directory."
+                       Foreground="#666" FontSize="12" FontFamily="Segoe UI"
+                       TextAlignment="Center" />
+        </StackPanel>
+
+        <!-- Project list -->
+        <ScrollViewer x:Name="ProjectsScroll" Grid.Row="1" Visibility="Collapsed"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl x:Name="ProjectsList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="#2D2D2D" CornerRadius="8"
+                                Padding="14,12" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Folder icon -->
+                                <TextBlock Grid.Column="0" Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets"
+                                           FontSize="24" Foreground="#3B82F6" VerticalAlignment="Center"
+                                           Margin="0,0,14,0" />
+
+                                <!-- Name and path -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding DisplayName}" Foreground="#E6E6E6"
+                                               FontSize="14" FontWeight="Medium" FontFamily="Segoe UI"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Path}" Foreground="#666"
+                                               FontSize="11" FontFamily="Segoe UI"
+                                               TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <!-- Action buttons -->
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Button Content="&#xE8B7;" FontFamily="Segoe MDL2 Assets"
+                                            ToolTip="Open in Explorer" Tag="{Binding Path}"
+                                            Click="OnOpenExplorer" Style="{StaticResource IconButtonStyle}" />
+                                    <Button Content="&#xE756;" FontFamily="Segoe MDL2 Assets"
+                                            ToolTip="Open in Terminal" Tag="{Binding Path}"
+                                            Click="OnOpenTerminal" Style="{StaticResource IconButtonStyle}" />
+                                    <Button Content="&#xE74D;" FontFamily="Segoe MDL2 Assets"
+                                            ToolTip="Remove" Tag="{Binding Path}"
+                                            Click="OnRemoveProject" Style="{StaticResource IconButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+
+    <UserControl.Resources>
+        <Style x:Key="IconButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="#888" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Margin" Value="2,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="4" Width="{TemplateBinding Width}"
+                                Height="{TemplateBinding Height}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#3D3D3D" />
+                                <Setter Property="Foreground" Value="#E6E6E6" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+</UserControl>

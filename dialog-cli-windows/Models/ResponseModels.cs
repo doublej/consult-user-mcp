@@ -110,16 +110,3 @@ public class NotifyResponse
     public bool Success { get; set; }
 }
 
-public class QuestionsResponse
-{
-    public string DialogType { get; set; } = "questions";
-    public Dictionary<string, StringOrStrings> Answers { get; set; } = new();
-    public bool Cancelled { get; set; }
-    public bool Dismissed { get; set; }
-    public int CompletedCount { get; set; }
-    public bool? Snoozed { get; set; }
-    public int? SnoozeMinutes { get; set; }
-    public int? RemainingSeconds { get; set; }
-    public string? FeedbackText { get; set; }
-    public string? Instruction { get; set; }
-}

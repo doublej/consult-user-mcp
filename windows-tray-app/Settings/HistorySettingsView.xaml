@@ -1,0 +1,41 @@
+<UserControl x:Class="ConsultUserMCP.Settings.HistorySettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    <StackPanel>
+        <TextBlock Text="History" Foreground="#E6E6E6"
+                   FontSize="18" FontWeight="SemiBold" FontFamily="Segoe UI"
+                   Margin="0,0,0,8" />
+        <TextBlock Text="Recent dialog interactions" Foreground="#A0A0A0"
+                   FontSize="12" FontFamily="Segoe UI" Margin="0,0,0,20" />
+
+        <TextBlock x:Name="EmptyState" Text="No history yet. Dialogs will appear here once they have been shown."
+                   Foreground="#666" FontSize="13" FontFamily="Segoe UI"
+                   FontStyle="Italic" TextWrapping="Wrap" />
+
+        <ItemsControl x:Name="HistoryList" Visibility="Collapsed">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="#2D2D2D" CornerRadius="6"
+                            Padding="12,8" Margin="0,0,0,4">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Type}" Foreground="#3B82F6"
+                                       FontSize="12" FontFamily="Segoe UI" FontWeight="SemiBold"
+                                       Width="70" />
+                            <TextBlock Grid.Column="1" Text="{Binding Summary}" Foreground="#E6E6E6"
+                                       FontSize="13" FontFamily="Segoe UI"
+                                       TextTrimming="CharacterEllipsis" Margin="8,0" />
+                            <TextBlock Grid.Column="2" Text="{Binding Time}" Foreground="#666"
+                                       FontSize="11" FontFamily="Segoe UI" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

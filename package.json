@@ -7,6 +7,8 @@
     "build:cli": "cd dialog-cli && swift build -c release",
     "build:app": "cd macos-app && swift build -c release",
     "build:cli:windows": "cd dialog-cli-windows && dotnet publish -r win-x64 --self-contained -p:PublishSingleFile=true",
+    "dev:windows-tray": "cd windows-tray-app && dotnet build",
+    "build:windows-tray": "cd windows-tray-app && dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true",
     "build:bundle": "bash scripts/build-app.sh",
     "dev": "bash scripts/dev-install.sh",
     "start": "cd mcp-server && bun run start",

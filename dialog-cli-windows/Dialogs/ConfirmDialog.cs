@@ -46,6 +46,7 @@ public class ConfirmDialog : DialogBase
 
     protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (Cooldown.IsCoolingDown) { e.Handled = true; return; }
         if (e.Key == Key.Enter)
         {
             Confirm();

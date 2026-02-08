@@ -24,8 +24,8 @@ public static class DialogTheme
     public static readonly SolidColorBrush CardHoverBrush = new(CardHoverColor);
     public static readonly SolidColorBrush TextBrush = new(TextColor);
     public static readonly SolidColorBrush SecondaryTextBrush = new(SecondaryTextColor);
-    public static readonly SolidColorBrush AccentBrush = new(AccentColor);
-    public static readonly SolidColorBrush AccentHoverBrush = new(AccentHoverColor);
+    public static SolidColorBrush AccentBrush = new(AccentColor);
+    public static SolidColorBrush AccentHoverBrush = new(AccentHoverColor);
     public static readonly SolidColorBrush BorderBrush = new(BorderColor);
     public static readonly SolidColorBrush FocusRingBrush = new(FocusRingColor);
     public static readonly SolidColorBrush TransparentBrush = Brushes.Transparent;
@@ -44,4 +44,19 @@ public static class DialogTheme
     public const double BodyFontSize = 14;
     public const double SmallFontSize = 12;
     public const double HintFontSize = 11;
+
+    public static void ApplyTheme(string themeName)
+    {
+        switch (themeName.ToLowerInvariant())
+        {
+            case "sunset":
+                AccentBrush = new SolidColorBrush(Color.FromRgb(249, 115, 22));
+                AccentHoverBrush = new SolidColorBrush(Color.FromRgb(251, 146, 60));
+                break;
+            case "midnight":
+                AccentBrush = new SolidColorBrush(Color.FromRgb(99, 102, 241));
+                AccentHoverBrush = new SolidColorBrush(Color.FromRgb(129, 140, 248));
+                break;
+        }
+    }
 }

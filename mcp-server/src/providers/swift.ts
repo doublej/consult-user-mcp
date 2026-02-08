@@ -126,7 +126,8 @@ export class SwiftDialogProvider implements DialogProvider {
   }
 
   async notify(opts: NotifyOptions): Promise<NotifyResult> {
-    return this.runCli<NotifyResult>("notify", opts);
+    const { projectPath, ...args } = opts;
+    return this.runCli<NotifyResult>("notify", args, projectPath);
   }
 
   async questions(opts: QuestionsOptions): Promise<QuestionsResult> {

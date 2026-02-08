@@ -88,6 +88,7 @@ export interface NotifyOptions {
   body: string;
   title: string;
   sound: boolean;
+  projectPath?: string;
 }
 
 // Question definition for multi-question dialogs

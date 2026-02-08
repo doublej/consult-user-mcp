@@ -136,10 +136,13 @@ server.registerTool("notify", {
     body: z.string().min(1).max(1000),
     title: z.string().max(80).default("Notice"),
     sound: z.boolean().default(true),
+    project_path: z.string().optional(),
   }),
 }, async (p) => {
   provider.pulse();
-  const r = await provider.notify({ body: p.body, title: p.title, sound: p.sound });
+  if (p.project_path) cachedProjectPath = p.project_path;
+  const projectPath = p.project_path ?? cachedProjectPath;
+  const r = await provider.notify({ body: p.body, title: p.title, sound: p.sound, projectPath });
   return { content: [{ type: "text", text: JSON.stringify({ success: r.success }) }] };
 });
 

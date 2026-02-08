@@ -1,4 +1,4 @@
-<!-- version: 2.0.0 -->
+<!-- version: 2.1.0 -->
 # Consult User MCP - Required Usage
 
 ## Critical Rules
@@ -9,7 +9,7 @@
 
 **CONTINUE smoothly after getting answers.** Don't check back in or ask "should I proceed?" - just use the answers and keep working.
 
-**ALWAYS pass `project_path`** on your first `ask` call. It's cached for the session — subsequent calls can omit it.
+**ALWAYS pass `project_path`** on your first `ask` or `notify` call. It's cached for the session — subsequent calls can omit it.
 
 ## Tools
 
@@ -28,7 +28,7 @@ All types share: `body` (required), `title`, `position`, `project_path`.
 
 ### notify — Notification
 
-Params: `body` (required), `title`, `sound`.
+Params: `body` (required), `title`, `sound`, `project_path`.
 
 ## Examples
 

@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-02-08
+
+### Added
+- Notifications now show the project badge when `project_path` is provided, matching all other dialog types
+- App now checks for updates automatically on MCP server startup
+
+### Changed
+- Project path is cached across both `ask` and `notify` — set it once on either tool and all subsequent calls inherit it
+- Base prompt updated to v2.1.0 with notify project_path guidance
+
 ## [1.9.5] - 2026-02-08
 
 ### Added

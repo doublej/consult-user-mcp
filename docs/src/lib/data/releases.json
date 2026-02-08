@@ -3,6 +3,17 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.10.0",
+      "date": "2026-02-08",
+      "highlight": "Notify now shows project badge",
+      "changes": [
+        { "text": "Notifications now show the project badge when `project_path` is provided, matching all other dialog types", "type": "added", "scope": "server", "featured": true },
+        { "text": "Project path is cached across both `ask` and `notify` — set it once on either tool and all subsequent calls inherit it", "type": "changed", "scope": "server" },
+        { "text": "Base prompt updated to v2.1.0 with notify project_path guidance", "type": "changed", "scope": "server" },
+        { "text": "App now checks for updates automatically on MCP server startup", "type": "added", "scope": "app" }
+      ]
+    },
+    {
       "version": "1.9.5",
       "date": "2026-02-08",
       "highlight": "Unified 2-tool MCP interface",

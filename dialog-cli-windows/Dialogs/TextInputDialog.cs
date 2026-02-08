@@ -101,7 +101,7 @@ public class TextInputDialog : DialogBase
 
     protected override void OnCancelled()
     {
-        Result = new TextInputResponse { Cancelled = true };
+        Result = new TextInputResponse { Cancelled = true, Dismissed = true };
         Close();
     }
 

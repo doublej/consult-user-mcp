@@ -13,10 +13,12 @@ public class AccordionDialog : DialogBase
     public QuestionsResponse Result { get; private set; }
 
     private readonly QuestionsRequest _request;
-    private readonly Dictionary<string, HashSet<int>> _answers = new();
+    private readonly Dictionary<string, HashSet<int>> _choiceAnswers = new();
+    private readonly Dictionary<string, string> _textAnswers = new();
     private string? _expandedId;
     private int _focusedOptionIndex;
     private readonly List<Border> _optionCards = new();
+    private TextBox? _textInput;
     private readonly StackPanel _sectionsPanel = new();
     private readonly TextBlock _counterText = new();
 
@@ -74,9 +76,20 @@ public class AccordionDialog : DialogBase
         RenderSections();
     }
 
+    private void SaveTextAnswer()
+    {
+        if (_textInput is not null && _expandedId is not null)
+            _textAnswers[_expandedId] = _textInput.Text;
+    }
+
     private void RenderSections()
     {
-        int answered = _answers.Values.Count(s => s.Count > 0);
+        // Save any in-progress text input before re-rendering
+        SaveTextAnswer();
+        _textInput = null;
+
+        int answered = _choiceAnswers.Values.Count(s => s.Count > 0)
+                     + _textAnswers.Values.Count(s => !string.IsNullOrEmpty(s));
         _counterText.Text = $"{answered}/{_request.Questions.Length} answered";
 
         _sectionsPanel.Children.Clear();
@@ -85,7 +98,9 @@ public class AccordionDialog : DialogBase
         foreach (var q in _request.Questions)
         {
             var isExpanded = _expandedId == q.Id;
-            var isAnswered = _answers.ContainsKey(q.Id) && _answers[q.Id].Count > 0;
+            var isAnswered = q.Type == QuestionType.Text
+                ? _textAnswers.TryGetValue(q.Id, out var t) && !string.IsNullOrEmpty(t)
+                : _choiceAnswers.ContainsKey(q.Id) && _choiceAnswers[q.Id].Count > 0;
 
             var section = new StackPanel { Margin = new Thickness(0, 0, 0, 6) };
 
@@ -165,72 +180,114 @@ public class AccordionDialog : DialogBase
                     Padding = new Thickness(10, 10, 10, 10),
                 };
 
-                var optionsPanel = new StackPanel();
-                var selected = _answers.GetValueOrDefault(q.Id, new HashSet<int>());
-
-                for (int i = 0; i < q.Options.Length; i++)
+                if (q.Type == QuestionType.Text)
                 {
-                    var optIdx = i;
-                    var opt = q.Options[i];
-                    var isSel = selected.Contains(i);
-                    var isFocused = i == _focusedOptionIndex;
-
-                    var textStack = new StackPanel { Margin = new Thickness(10, 6, 10, 6) };
-                    textStack.Children.Add(new TextBlock
+                    _textInput = new TextBox
                     {
-                        Text = opt.Label,
+                        Text = _textAnswers.GetValueOrDefault(q.Id, ""),
                         FontSize = DialogTheme.BodyFontSize,
                         Foreground = DialogTheme.TextBrush,
-                        TextWrapping = TextWrapping.Wrap,
-                    });
-                    if (!string.IsNullOrEmpty(opt.Description))
-                    {
-                        textStack.Children.Add(new TextBlock
-                        {
-                            Text = opt.Description,
-                            FontSize = DialogTheme.SmallFontSize,
-                            Foreground = DialogTheme.SecondaryTextBrush,
-                            Margin = new Thickness(0, 3, 0, 0),
-                        });
-                    }
-
-                    var optCard = new Border
-                    {
-                        Child = textStack,
-                        CornerRadius = new CornerRadius(6),
-                        BorderThickness = new Thickness(2),
-                        Margin = new Thickness(0, 0, 0, 4),
-                        Cursor = Cursors.Hand,
+                        Background = DialogTheme.CardBrush,
+                        BorderBrush = DialogTheme.BorderBrush,
+                        BorderThickness = new Thickness(1),
+                        Padding = new Thickness(10, 8, 10, 8),
+                        CaretBrush = DialogTheme.TextBrush,
+                        AcceptsReturn = false,
                     };
-
-                    if (isSel)
+                    if (!string.IsNullOrEmpty(q.Placeholder))
                     {
-                        optCard.Background = new SolidColorBrush(Color.FromArgb(30, 59, 130, 246));
-                        optCard.BorderBrush = DialogTheme.AccentBrush;
-                    }
-                    else if (isFocused)
-                    {
-                        optCard.Background = DialogTheme.TransparentBrush;
-                        optCard.BorderBrush = DialogTheme.FocusRingBrush;
+                        var ph = q.Placeholder;
+                        var tb = _textInput;
+                        var placeholderBlock = new TextBlock
+                        {
+                            Text = ph,
+                            Foreground = DialogTheme.SecondaryTextBrush,
+                            FontSize = DialogTheme.BodyFontSize,
+                            IsHitTestVisible = false,
+                            Margin = new Thickness(12, 9, 0, 0),
+                        };
+                        var grid = new Grid();
+                        grid.Children.Add(tb);
+                        grid.Children.Add(placeholderBlock);
+                        tb.Loaded += (_, _) => placeholderBlock.Visibility = string.IsNullOrEmpty(tb.Text) ? Visibility.Visible : Visibility.Collapsed;
+                        tb.TextChanged += (_, _) => placeholderBlock.Visibility = string.IsNullOrEmpty(tb.Text) ? Visibility.Visible : Visibility.Collapsed;
+                        contentBorder.Child = grid;
                     }
                     else
                     {
-                        optCard.Background = DialogTheme.TransparentBrush;
-                        optCard.BorderBrush = DialogTheme.TransparentBrush;
+                        contentBorder.Child = _textInput;
+                    }
+                    _textInput.Loaded += (_, _) => { _textInput.Focus(); _textInput.SelectAll(); };
+                }
+                else
+                {
+                    var optionsPanel = new StackPanel();
+                    var selected = _choiceAnswers.GetValueOrDefault(q.Id, new HashSet<int>());
+
+                    for (int i = 0; i < q.Options.Length; i++)
+                    {
+                        var optIdx = i;
+                        var opt = q.Options[i];
+                        var isSel = selected.Contains(i);
+                        var isFocused = i == _focusedOptionIndex;
+
+                        var textStack = new StackPanel { Margin = new Thickness(10, 6, 10, 6) };
+                        textStack.Children.Add(new TextBlock
+                        {
+                            Text = opt.Label,
+                            FontSize = DialogTheme.BodyFontSize,
+                            Foreground = DialogTheme.TextBrush,
+                            TextWrapping = TextWrapping.Wrap,
+                        });
+                        if (!string.IsNullOrEmpty(opt.Description))
+                        {
+                            textStack.Children.Add(new TextBlock
+                            {
+                                Text = opt.Description,
+                                FontSize = DialogTheme.SmallFontSize,
+                                Foreground = DialogTheme.SecondaryTextBrush,
+                                Margin = new Thickness(0, 3, 0, 0),
+                            });
+                        }
+
+                        var optCard = new Border
+                        {
+                            Child = textStack,
+                            CornerRadius = new CornerRadius(6),
+                            BorderThickness = new Thickness(2),
+                            Margin = new Thickness(0, 0, 0, 4),
+                            Cursor = Cursors.Hand,
+                        };
+
+                        if (isSel)
+                        {
+                            optCard.Background = new SolidColorBrush(Color.FromArgb(30, 59, 130, 246));
+                            optCard.BorderBrush = DialogTheme.AccentBrush;
+                        }
+                        else if (isFocused)
+                        {
+                            optCard.Background = DialogTheme.TransparentBrush;
+                            optCard.BorderBrush = DialogTheme.FocusRingBrush;
+                        }
+                        else
+                        {
+                            optCard.Background = DialogTheme.TransparentBrush;
+                            optCard.BorderBrush = DialogTheme.TransparentBrush;
+                        }
+
+                        optCard.MouseLeftButtonDown += (_, _) =>
+                        {
+                            _focusedOptionIndex = optIdx;
+                            ToggleOption(q.Id, optIdx, q.MultiSelect);
+                            if (!q.MultiSelect) AdvanceToNext(qId);
+                            else RenderSections();
+                        };
+                        _optionCards.Add(optCard);
+                        optionsPanel.Children.Add(optCard);
                     }
 
-                    optCard.MouseLeftButtonDown += (_, _) =>
-                    {
-                        _focusedOptionIndex = optIdx;
-                        ToggleOption(q.Id, optIdx, q.MultiSelect);
-                        if (!q.MultiSelect) AdvanceToNext(qId);
-                        else RenderSections();
-                    };
-                    _optionCards.Add(optCard);
-                    optionsPanel.Children.Add(optCard);
+                    contentBorder.Child = optionsPanel;
                 }
-
-                contentBorder.Child = optionsPanel;
                 section.Children.Add(contentBorder);
             }
 
@@ -240,10 +297,10 @@ public class AccordionDialog : DialogBase
 
     private void ToggleOption(string questionId, int index, bool multiSelect)
     {
-        if (!_answers.ContainsKey(questionId))
-            _answers[questionId] = new HashSet<int>();
+        if (!_choiceAnswers.ContainsKey(questionId))
+            _choiceAnswers[questionId] = new HashSet<int>();
 
-        var set = _answers[questionId];
+        var set = _choiceAnswers[questionId];
         if (multiSelect)
         {
             if (!set.Remove(index)) set.Add(index);
@@ -291,6 +348,12 @@ public class AccordionDialog : DialogBase
         if (_expandedId is not null)
         {
             var q = _request.Questions.First(q => q.Id == _expandedId);
+            // Let text input handle its own keys (except Tab handled above)
+            if (q.Type == QuestionType.Text)
+            {
+                base.OnWindowPreviewKeyDown(sender, e);
+                return;
+            }
             switch (e.Key)
             {
                 case Key.Up:
@@ -316,18 +379,28 @@ public class AccordionDialog : DialogBase
 
     protected override void OnCancelled()
     {
-        Result = new QuestionsResponse { Cancelled = true };
+        Result = new QuestionsResponse { Cancelled = true, Dismissed = true };
         Close();
     }
 
     private void Complete()
     {
+        SaveTextAnswer();
+
         var response = new QuestionsResponse();
         int completed = 0;
 
         foreach (var q in _request.Questions)
         {
-            if (_answers.TryGetValue(q.Id, out var indices) && indices.Count > 0)
+            if (q.Type == QuestionType.Text)
+            {
+                if (_textAnswers.TryGetValue(q.Id, out var text) && !string.IsNullOrEmpty(text))
+                {
+                    completed++;
+                    response.Answers[q.Id] = new StringOrStrings(text);
+                }
+            }
+            else if (_choiceAnswers.TryGetValue(q.Id, out var indices) && indices.Count > 0)
             {
                 completed++;
                 var labels = indices.OrderBy(i => i).Select(i => q.Options[i].Label).ToArray();

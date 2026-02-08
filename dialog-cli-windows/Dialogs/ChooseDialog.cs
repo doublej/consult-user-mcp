@@ -205,7 +205,7 @@ public class ChooseDialog : DialogBase
 
     protected override void OnCancelled()
     {
-        Result = new ChoiceResponse { Cancelled = true };
+        Result = new ChoiceResponse { Cancelled = true, Dismissed = true };
         Close();
     }
 

@@ -33,7 +33,6 @@ public class ConfirmDialog : DialogBase
                 Result = new ConfirmResponse
                 {
                     Confirmed = false,
-                    Cancelled = true,
                     Answer = _request.CancelLabel,
                 };
                 Close();
@@ -60,9 +59,8 @@ public class ConfirmDialog : DialogBase
     {
         Result = new ConfirmResponse
         {
-            Confirmed = false,
             Cancelled = true,
-            Answer = _request.CancelLabel,
+            Dismissed = true,
         };
         Close();
     }

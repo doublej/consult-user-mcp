@@ -13,10 +13,12 @@ public class WizardDialog : DialogBase
     public QuestionsResponse Result { get; private set; }
 
     private readonly QuestionsRequest _request;
-    private readonly Dictionary<string, HashSet<int>> _answers = new();
+    private readonly Dictionary<string, HashSet<int>> _choiceAnswers = new();
+    private readonly Dictionary<string, string> _textAnswers = new();
     private int _currentIndex;
     private int _focusedOptionIndex;
     private readonly List<Border> _optionCards = new();
+    private TextBox? _textInput;
     private readonly StackPanel _contentPanel = new();
     private readonly TextBlock _progressText = new();
     private readonly StackPanel _progressBar = new();
@@ -67,6 +69,7 @@ public class WizardDialog : DialogBase
         var q = _request.Questions[_currentIndex];
         _focusedOptionIndex = 0;
         _optionCards.Clear();
+        _textInput = null;
 
         // Update progress bar
         _progressBar.Children.Clear();
@@ -84,7 +87,7 @@ public class WizardDialog : DialogBase
         }
         _progressText.Text = $"{_currentIndex + 1} of {_request.Questions.Length}";
 
-        // Render question options
+        // Render question content
         _contentPanel.Children.Clear();
 
         _contentPanel.Children.Add(new TextBlock
@@ -97,7 +100,89 @@ public class WizardDialog : DialogBase
             Margin = new Thickness(0, 0, 0, 12),
         });
 
-        var selected = _answers.GetValueOrDefault(q.Id, new HashSet<int>());
+        bool hasAnswer;
+        if (q.Type == QuestionType.Text)
+        {
+            hasAnswer = RenderTextInput(q);
+        }
+        else
+        {
+            hasAnswer = RenderChoiceOptions(q);
+        }
+
+        // Navigation buttons
+        var buttonRow = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Margin = new Thickness(0, 4, 0, 0),
+        };
+
+        if (_currentIndex == 0)
+        {
+            AddButton(buttonRow, "Cancel", false, () =>
+            {
+                Result = new QuestionsResponse { Cancelled = true };
+                Close();
+            });
+        }
+        else
+        {
+            AddButton(buttonRow, "Back", false, () => { _currentIndex--; RenderStep(); });
+        }
+
+        var isLast = _currentIndex == _request.Questions.Length - 1;
+        var hasAnswerCopy = hasAnswer;
+        AddButton(buttonRow, isLast ? "Done" : "Next", true, () =>
+        {
+            if (!hasAnswerCopy && q.Type != QuestionType.Text) return;
+            if (q.Type == QuestionType.Text) SaveTextAnswer(q.Id);
+            if (isLast) Complete();
+            else { _currentIndex++; RenderStep(); }
+        });
+
+        _contentPanel.Children.Add(buttonRow);
+        if (q.Type != QuestionType.Text) UpdateOptionVisuals();
+    }
+
+    private bool RenderTextInput(QuestionItem q)
+    {
+        _textInput = new TextBox
+        {
+            Text = _textAnswers.GetValueOrDefault(q.Id, ""),
+            FontSize = DialogTheme.BodyFontSize,
+            Foreground = DialogTheme.TextBrush,
+            Background = DialogTheme.CardBrush,
+            BorderBrush = DialogTheme.BorderBrush,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(10, 8, 10, 8),
+            CaretBrush = DialogTheme.TextBrush,
+            AcceptsReturn = false,
+        };
+        if (!string.IsNullOrEmpty(q.Placeholder))
+            SetPlaceholder(_textInput, q.Placeholder);
+
+        _contentPanel.Children.Add(_textInput);
+
+        // Hint text
+        _contentPanel.Children.Add(new TextBlock
+        {
+            Text = "Enter answer \u2022 \u2190\u2192 steps \u2022 Enter next/done",
+            FontSize = DialogTheme.HintFontSize,
+            Foreground = DialogTheme.SecondaryTextBrush,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Margin = new Thickness(0, 8, 0, 4),
+        });
+
+        // Focus the text input after layout
+        _textInput.Loaded += (_, _) => { _textInput.Focus(); _textInput.SelectAll(); };
+
+        return !string.IsNullOrEmpty(_textInput.Text);
+    }
+
+    private bool RenderChoiceOptions(QuestionItem q)
+    {
+        var selected = _choiceAnswers.GetValueOrDefault(q.Id, new HashSet<int>());
         for (int i = 0; i < q.Options.Length; i++)
         {
             var optIdx = i;
@@ -153,44 +238,49 @@ public class WizardDialog : DialogBase
             Margin = new Thickness(0, 8, 0, 4),
         });
 
-        // Navigation buttons
-        var buttonRow = new StackPanel
+        return selected.Count > 0;
+    }
+
+    private void SaveTextAnswer(string questionId)
+    {
+        if (_textInput is not null)
+            _textAnswers[questionId] = _textInput.Text;
+    }
+
+    private static void SetPlaceholder(TextBox textBox, string placeholder)
+    {
+        var placeholderBlock = new TextBlock
         {
-            Orientation = Orientation.Horizontal,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            Margin = new Thickness(0, 4, 0, 0),
+            Text = placeholder,
+            Foreground = DialogTheme.SecondaryTextBrush,
+            FontSize = DialogTheme.BodyFontSize,
+            IsHitTestVisible = false,
+            Margin = new Thickness(12, 9, 0, 0),
+        };
+        var grid = new Grid();
+        // Replace the textbox in its parent with a grid containing both
+        textBox.Loaded += (_, _) =>
+        {
+            placeholderBlock.Visibility = string.IsNullOrEmpty(textBox.Text) ? Visibility.Visible : Visibility.Collapsed;
+        };
+        textBox.TextChanged += (_, _) =>
+        {
+            placeholderBlock.Visibility = string.IsNullOrEmpty(textBox.Text) ? Visibility.Visible : Visibility.Collapsed;
         };
 
-        if (_currentIndex == 0)
-        {
-            AddButton(buttonRow, "Cancel", false, () =>
-            {
-                Result = new QuestionsResponse { Cancelled = true };
-                Close();
-            });
-        }
-        else
-        {
-            AddButton(buttonRow, "Back", false, () => { _currentIndex--; RenderStep(); });
-        }
-
-        var isLast = _currentIndex == _request.Questions.Length - 1;
-        var hasAnswer = selected.Count > 0;
-        AddButton(buttonRow, isLast ? "Done" : "Next", true, () =>
-        {
-            if (!hasAnswer) return;
-            if (isLast) Complete();
-            else { _currentIndex++; RenderStep(); }
-        });
-
-        _contentPanel.Children.Add(buttonRow);
-        UpdateOptionVisuals();
+        var parent = textBox.Parent as StackPanel;
+        if (parent is null) return;
+        var idx = parent.Children.IndexOf(textBox);
+        parent.Children.Remove(textBox);
+        grid.Children.Add(textBox);
+        grid.Children.Add(placeholderBlock);
+        parent.Children.Insert(idx, grid);
     }
 
     private void UpdateOptionVisuals()
     {
         var q = _request.Questions[_currentIndex];
-        var selected = _answers.GetValueOrDefault(q.Id, new HashSet<int>());
+        var selected = _choiceAnswers.GetValueOrDefault(q.Id, new HashSet<int>());
 
         for (int i = 0; i < _optionCards.Count; i++)
         {
@@ -217,10 +307,10 @@ public class WizardDialog : DialogBase
 
     private void ToggleOption(string questionId, int index, bool multiSelect)
     {
-        if (!_answers.ContainsKey(questionId))
-            _answers[questionId] = new HashSet<int>();
+        if (!_choiceAnswers.ContainsKey(questionId))
+            _choiceAnswers[questionId] = new HashSet<int>();
 
-        var set = _answers[questionId];
+        var set = _choiceAnswers[questionId];
         if (multiSelect)
         {
             if (!set.Remove(index)) set.Add(index);
@@ -235,7 +325,24 @@ public class WizardDialog : DialogBase
     protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
     {
         var q = _request.Questions[_currentIndex];
-        var hasAnswer = _answers.ContainsKey(q.Id) && _answers[q.Id].Count > 0;
+
+        if (q.Type == QuestionType.Text)
+        {
+            // For text questions, only intercept Enter (submit) and Left/Right with Ctrl for step nav
+            if (e.Key == Key.Enter)
+            {
+                SaveTextAnswer(q.Id);
+                if (_currentIndex == _request.Questions.Length - 1) Complete();
+                else { _currentIndex++; RenderStep(); }
+                e.Handled = true;
+                return;
+            }
+            // Let all other keys pass through to the TextBox
+            base.OnWindowPreviewKeyDown(sender, e);
+            return;
+        }
+
+        var hasAnswer = _choiceAnswers.ContainsKey(q.Id) && _choiceAnswers[q.Id].Count > 0;
 
         switch (e.Key)
         {
@@ -275,18 +382,30 @@ public class WizardDialog : DialogBase
 
     protected override void OnCancelled()
     {
-        Result = new QuestionsResponse { Cancelled = true };
+        Result = new QuestionsResponse { Cancelled = true, Dismissed = true };
         Close();
     }
 
     private void Complete()
     {
+        // Save current text input if on a text question
+        var current = _request.Questions[_currentIndex];
+        if (current.Type == QuestionType.Text) SaveTextAnswer(current.Id);
+
         var response = new QuestionsResponse();
         int completed = 0;
 
         foreach (var q in _request.Questions)
         {
-            if (_answers.TryGetValue(q.Id, out var indices) && indices.Count > 0)
+            if (q.Type == QuestionType.Text)
+            {
+                if (_textAnswers.TryGetValue(q.Id, out var text) && !string.IsNullOrEmpty(text))
+                {
+                    completed++;
+                    response.Answers[q.Id] = new StringOrStrings(text);
+                }
+            }
+            else if (_choiceAnswers.TryGetValue(q.Id, out var indices) && indices.Count > 0)
             {
                 completed++;
                 var labels = indices.OrderBy(i => i).Select(i => q.Options[i].Label).ToArray();

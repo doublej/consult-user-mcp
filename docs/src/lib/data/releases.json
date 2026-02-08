@@ -3,7 +3,7 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
-      "version": "1.10.0",
+      "version": "1.9.5",
       "date": "2026-02-08",
       "highlight": "Unified 2-tool MCP interface",
       "changes": [

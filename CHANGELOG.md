@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [1.10.0] - 2026-02-08
+## [1.9.5] - 2026-02-08
 
 ### Added
 - Project path is cached after the first call, saving tokens on every subsequent dialog

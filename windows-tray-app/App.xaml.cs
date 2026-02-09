@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows;
 using ConsultUserMCP.Services;
 using ConsultUserMCP.TrayIcon;
@@ -11,6 +12,15 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        DispatcherUnhandledException += (_, args) =>
+        {
+            var logPath = Path.Combine(Path.GetTempPath(), "consult-user-mcp-error.log");
+            File.WriteAllText(logPath, args.Exception.ToString());
+            MessageBox.Show($"Unhandled error logged to:\n{logPath}", "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            args.Handled = true;
+        };
 
         SettingsManager.Shared.Load();
 

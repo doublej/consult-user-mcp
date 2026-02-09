@@ -20,6 +20,12 @@ dialog-cli/.build/
 macos-app/.build/
 macos-app/.swiftpm/
 
+# Windows build artifacts
+dialog-cli-windows/bin/
+dialog-cli-windows/obj/
+windows-tray-app/bin/
+windows-tray-app/obj/
+
 # Distribution archives
 *.app.zip
 Consult*.zip

@@ -59,14 +59,24 @@ public class TrayManager : IDisposable
 
     private void OpenSettings()
     {
-        if (_settingsWindow is { IsVisible: true })
+        try
         {
-            _settingsWindow.Activate();
-            return;
-        }
+            if (_settingsWindow is { IsVisible: true })
+            {
+                _settingsWindow.Activate();
+                return;
+            }
 
-        _settingsWindow = new SettingsWindow();
-        _settingsWindow.Show();
+            _settingsWindow = new SettingsWindow();
+            _settingsWindow.Show();
+        }
+        catch (Exception ex)
+        {
+            var logPath = Path.Combine(Path.GetTempPath(), "consult-user-mcp-error.log");
+            File.WriteAllText(logPath, ex.ToString());
+            MessageBox.Show($"Failed to open settings. Error logged to:\n{logPath}", "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void CheckForUpdates()

@@ -15,12 +15,15 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        ContentArea.Content = _generalView;
         RestoreWindowPosition();
         Closing += OnClosing;
     }
 
     private void OnSectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        if (ContentArea is null) return;
+
         ContentArea.Content = SectionList.SelectedIndex switch
         {
             0 => _generalView,

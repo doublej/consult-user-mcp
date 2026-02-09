@@ -12,7 +12,9 @@
     "build:bundle": "bash scripts/build-app.sh",
     "dev": "bash scripts/dev-install.sh",
     "start": "cd mcp-server && bun run start",
-    "changelog": "bun run scripts/generate-changelog.ts"
+    "changelog": "bun run scripts/generate-changelog.ts",
+    "build:windows": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1",
+    "release:windows": "powershell -ExecutionPolicy Bypass -File scripts/release-windows.ps1"
   },
   "workspaces": [
     "mcp-server"

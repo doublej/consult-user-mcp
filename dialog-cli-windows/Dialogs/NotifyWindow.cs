@@ -12,8 +12,11 @@ namespace DialogCLI.Dialogs;
 
 public class NotifyWindow : Window
 {
+    private readonly NotifyRequest _request;
+
     public NotifyWindow(NotifyRequest request, string clientName)
     {
+        _request = request;
         WindowStyle = WindowStyle.None;
         AllowsTransparency = true;
         Background = Brushes.Transparent;
@@ -83,7 +86,7 @@ public class NotifyWindow : Window
             var workArea = SystemParameters.WorkArea;
             Left = workArea.Right - Width - 20;
             Top = workArea.Top + 20;
-            if (request.Sound)
+            if (_request.Sound)
                 SoundPlayer.PlayDialogSound();
         };
     }

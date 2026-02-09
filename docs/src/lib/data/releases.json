@@ -26,6 +26,19 @@
       ]
     },
     {
+      "version": "1.1.0",
+      "platform": "windows",
+      "date": "2026-02-10",
+      "highlight": "Installer and auto-updates",
+      "changes": [
+        { "text": "Professional installer with automatic setup — no more manual zip extraction", "type": "added", "scope": "app", "featured": true },
+        { "text": "Auto-updates with delta downloads — only download what changed between versions", "type": "added", "scope": "app", "featured": true },
+        { "text": "First-run wizard automatically configures Claude Code MCP server", "type": "added", "scope": "app" },
+        { "text": "Launch at startup toggle in Settings", "type": "added", "scope": "app" },
+        { "text": "Executables renamed to cross-platform convention (dialog-cli.exe, consult-user-mcp.exe)", "type": "changed", "scope": "app" }
+      ]
+    },
+    {
       "version": "1.0.0",
       "platform": "windows",
       "date": "2026-02-09",

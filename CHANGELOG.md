@@ -26,6 +26,17 @@ All notable changes to this project will be documented in this file.
 - Project path is cached across both `ask` and `notify` — set it once on either tool and all subsequent calls inherit it
 - Base prompt updated to v2.1.0 with notify project_path guidance
 
+## [1.1.0] (Windows) - 2026-02-10
+
+### Added
+- Professional installer with automatic setup — no more manual zip extraction
+- Auto-updates with delta downloads — only download what changed between versions
+- First-run wizard automatically configures Claude Code MCP server
+- Launch at startup toggle in Settings
+
+### Changed
+- Executables renamed to cross-platform convention (dialog-cli.exe, consult-user-mcp.exe)
+
 ## [1.0.0] (Windows) - 2026-02-09
 
 ### Added

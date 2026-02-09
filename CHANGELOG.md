@@ -7,7 +7,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [1.10.0] - 2026-02-08
+## [1.11.0] (macOS) - 2026-02-09
+
+### Added
+- macOS and Windows now have independent version numbers and release cycles
+
+### Changed
+- Auto-updater now correctly identifies macOS releases when both platforms are published
+- Install script now uses GitHub API to find the latest macOS release
+
+## [1.10.0] (macOS) - 2026-02-08
 
 ### Added
 - Notifications now show the project badge when `project_path` is provided, matching all other dialog types
@@ -17,7 +26,17 @@ All notable changes to this project will be documented in this file.
 - Project path is cached across both `ask` and `notify` — set it once on either tool and all subsequent calls inherit it
 - Base prompt updated to v2.1.0 with notify project_path guidance
 
-## [1.9.5] - 2026-02-08
+## [1.0.0] (Windows) - 2026-02-09
+
+### Added
+- Native Windows dialogs that let AI agents ask you questions
+- Four dialog types: yes/no, multiple choice, text input, and multi-question wizards
+- System tray app with settings, snooze management, and auto-updates
+- Dark-themed WPF dialogs with keyboard shortcuts and markdown support
+- Snooze dialogs for 1-60 minutes when you're busy
+- Provide feedback to redirect the agent mid-conversation
+
+## [1.9.5] (macOS) - 2026-02-08
 
 ### Added
 - Project path is cached after the first call, saving tokens on every subsequent dialog
@@ -28,7 +47,7 @@ All notable changes to this project will be documented in this file.
 - Single-select is now the default for pick dialogs (was multi-select)
 - Base prompt updated to v2.0.0 with streamlined tool reference and examples
 
-## [1.9.4] - 2026-02-07
+## [1.9.4] (macOS) - 2026-02-07
 
 ### Added
 - Settings now include a dedicated About pane with version details and a direct GitHub Issues feedback link
@@ -43,7 +62,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Project badges now stay compact as text-sized pills in the top-right corner without overlapping dialog content
 
-## [1.9.3] - 2026-02-02
+## [1.9.3] (macOS) - 2026-02-02
 
 ### Added
 - Progress heartbeat keeps the MCP client connection alive during slow dialog interactions
@@ -51,7 +70,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Long-running dialogs no longer spawn duplicates when the MCP client retries after timeout
 
-## [1.9.2] - 2026-02-01
+## [1.9.2] (macOS) - 2026-02-01
 
 ### Changed
 - Install wizard now has a persistent footer bar with Back/Next buttons
@@ -63,7 +82,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Sidebar badges now align vertically across all rows
 
-## [1.9.1] - 2026-02-01
+## [1.9.1] (macOS) - 2026-02-01
 
 ### Changed
 - Settings version panel is now more compact with a cleaner layout
@@ -71,7 +90,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Keyboard shortcuts (S, F) no longer trigger while typing in text input fields
 
-## [1.9.0] - 2026-01-31
+## [1.9.0] (macOS) - 2026-01-31
 
 ### Added
 - History view now includes a search field to filter entries by question, answer, or client name
@@ -83,7 +102,7 @@ All notable changes to this project will be documented in this file.
 - Existing history is automatically migrated to the new per-day format
 - Toolbar keyboard shortcuts (S, F, Esc) now handled consistently across all dialog types
 
-## [1.8.0] - 2026-01-31
+## [1.8.0] (macOS) - 2026-01-31
 
 ### Added
 - Text input dialog now supports snooze and feedback, matching all other dialogs
@@ -95,7 +114,7 @@ All notable changes to this project will be documented in this file.
 - Settings window split into modular views for better maintainability
 - Text input dialog migrated from AppKit to SwiftUI for consistency
 
-## [1.7.0] - 2026-01-30
+## [1.7.0] (macOS) - 2026-01-30
 
 ### Added
 - Documentation site now features interactive dialog examples from real development history
@@ -105,7 +124,7 @@ All notable changes to this project will be documented in this file.
 - Settings window height increased to reduce scrolling and better use screen space
 - Replaced static screenshots with interactive feature panels showing Snooze and Feedback dialogs
 
-## [1.6.0] - 2026-01-30
+## [1.6.0] (macOS) - 2026-01-30
 
 ### Added
 - Usage hints now include concrete examples of correct vs incorrect question patterns
@@ -115,7 +134,7 @@ All notable changes to this project will be documented in this file.
 - Agents now batch multiple questions together instead of asking one at a time
 - Agents continue working smoothly after receiving answers without checking back in
 
-## [1.5.0] - 2026-01-28
+## [1.5.0] (macOS) - 2026-01-28
 
 ### Added
 - Dialogs now show which project they belong to via project_path parameter
@@ -125,7 +144,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Button cooldown now prevents accidental rapid clicks across all dialogs
 
-## [1.4.1] - 2026-01-27
+## [1.4.1] (macOS) - 2026-01-27
 
 ### Added
 - Text input dialogs now support markdown formatting in the body text
@@ -135,14 +154,14 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Button cooldown now works correctly across multiple interactions
 
-## [1.4.0] - 2026-01-25
+## [1.4.0] (macOS) - 2026-01-25
 
 ### Added
 - View full question details, answers, and metadata in history
 - Navigate through history entries with back button support
 - History rows now show hover states and navigation indicators
 
-## [1.3.0] - 2026-01-20
+## [1.3.0] (macOS) - 2026-01-20
 
 ### Added
 - All dialog interactions are now tracked and viewable in settings
@@ -155,7 +174,7 @@ All notable changes to this project will be documented in this file.
 - Better error messages when Dialog CLI isn't found
 - Long-running dialogs no longer timeout unexpectedly
 
-## [1.2.0] - 2026-01-10
+## [1.2.0] (macOS) - 2026-01-10
 
 ### Changed
 - Dialogs are now native Swift for better performance and reliability
@@ -164,12 +183,12 @@ All notable changes to this project will be documented in this file.
 - Snooze feature now works reliably without crashes
 - Menu bar icon now matches your system theme
 
-## [1.1.2] - 2025-12-16
+## [1.1.2] (macOS) - 2025-12-16
 
 ### Fixed
 - Installation script now runs without permission errors
 
-## [1.1.1] - 2025-12-16
+## [1.1.1] (macOS) - 2025-12-16
 
 ### Added
 - One-line install script with clear setup instructions
@@ -180,7 +199,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Dialog CLI now works correctly regardless of install location
 
-## [1.1.0] - 2025-12-11
+## [1.1.0] (macOS) - 2025-12-11
 
 ### Changed
 - Renamed from 'Speak MCP' to 'Consult User MCP'
@@ -193,7 +212,7 @@ All notable changes to this project will be documented in this file.
 ### Removed
 - Removed experimental shader overlay effect
 
-## [1.0.0] - 2025-11-27
+## [1.0.0] (macOS) - 2025-11-27
 
 ### Added
 - Native macOS dialogs that let AI agents ask you questions

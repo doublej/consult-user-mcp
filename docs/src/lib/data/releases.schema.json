@@ -11,12 +11,17 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["version", "date", "changes"],
+        "required": ["version", "platform", "date", "changes"],
         "properties": {
           "version": {
             "type": "string",
             "pattern": "^\\d+\\.\\d+\\.\\d+$",
             "description": "Semantic version (e.g., 1.4.0)"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["macos", "windows"],
+            "description": "Target platform for this release"
           },
           "date": {
             "type": "string",

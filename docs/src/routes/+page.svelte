@@ -8,10 +8,11 @@
 	import ComparisonTable from '$lib/components/ComparisonTable.svelte';
 
 	let copied = false;
-	const installCommand = 'curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/install.sh | bash';
+	let selectedPlatform: 'macos' | 'windows' = 'macos';
+	const macosInstallCommand = 'curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/install.sh | bash';
 
 	function copyInstall() {
-		navigator.clipboard.writeText(installCommand);
+		navigator.clipboard.writeText(macosInstallCommand);
 		copied = true;
 		setTimeout(() => copied = false, 2000);
 	}
@@ -41,20 +42,34 @@
 
 	<section class="hero-row">
 		<div class="hero">
-			<h1 class="animate-in">Native macOS dialogs for <span class="nowrap">MCP agents</span></h1>
+			<h1 class="animate-in">Native dialogs for <span class="nowrap">MCP agents</span></h1>
 			<p class="lead animate-in" style="animation-delay: 200ms;">
-				An MCP server that surfaces agent checkpoints as native macOS dialogs.
+				An MCP server that surfaces agent checkpoints as native dialogs.
 				Respond to questions, snooze for later, or redirect the agent without switching windows.
 			</p>
+			<div class="platform-badges animate-in" style="animation-delay: 300ms;">
+				<span class="platform-badge">
+					<svg viewBox="0 0 384 512" width="14" height="14" fill="currentColor" aria-hidden="true">
+						<path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5c0 26.2 4.8 53.3 14.4 81.2 12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-62.1 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/>
+					</svg>
+					macOS
+				</span>
+				<span class="platform-badge">
+					<svg viewBox="0 0 448 512" width="13" height="13" fill="currentColor" aria-hidden="true">
+						<path d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"/>
+					</svg>
+					Windows
+				</span>
+			</div>
 			<div class="install-block animate-in" style="animation-delay: 400ms;">
 				<div class="code-line">
-					<code>{installCommand}</code>
+					<code>{macosInstallCommand}</code>
 					<button onclick={copyInstall} class="copy-btn" aria-label="Copy install command">
 						{copied ? 'Copied' : 'Copy'}
 					</button>
 				</div>
 				<p class="install-note">
-					Requires macOS and <a href="https://bun.sh" target="_blank" rel="noopener">Bun</a>
+					macOS one-liner · <a href="#install">Windows &amp; manual install</a>
 				</p>
 			</div>
 		</div>
@@ -95,56 +110,111 @@
 
 	<section class="section animate-in" style="animation-delay: 1100ms;" id="install">
 		<h2>Installation</h2>
-		<p class="section-desc">One command installs the server and configures Claude Code automatically.</p>
-		<div class="install-block standalone">
-			<div class="code-line">
-				<code>{installCommand}</code>
-				<button onclick={copyInstall} class="copy-btn" aria-label="Copy install command">
-					{copied ? 'Copied' : 'Copy'}
-				</button>
-			</div>
+		<p class="section-desc">Install the server and tray app for your platform.</p>
+
+		<div class="platform-tabs">
+			<button class="platform-tab" class:active={selectedPlatform === 'macos'} onclick={() => selectedPlatform = 'macos'}>
+				<svg viewBox="0 0 384 512" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5c0 26.2 4.8 53.3 14.4 81.2 12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-62.1 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+				macOS
+			</button>
+			<button class="platform-tab" class:active={selectedPlatform === 'windows'} onclick={() => selectedPlatform = 'windows'}>
+				<svg viewBox="0 0 448 512" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"/></svg>
+				Windows
+			</button>
 		</div>
 
-		<div class="install-steps">
-			<h3>Setup steps</h3>
-			<ol class="steps-list">
-				<li>
-					<span class="step-num">1</span>
-					<div class="step-content">
-						<strong>Run the install command</strong>
-						<p>Downloads the app from GitHub and moves it to <code>/Applications</code></p>
-					</div>
-				</li>
-				<li>
-					<span class="step-num">2</span>
-					<div class="step-content">
-						<strong>Launch the app</strong>
-						<p>Open "Consult User MCP" from Applications. A menu bar icon will appear.</p>
-					</div>
-				</li>
-				<li>
-					<span class="step-num">3</span>
-					<div class="step-content">
-						<strong>Run the install wizard</strong>
-						<p>Click the menu bar icon and select "Install Guide". Follow the steps to configure Claude Code or Claude Desktop.</p>
-					</div>
-				</li>
-				<li>
-					<span class="step-num">4</span>
-					<div class="step-content">
-						<strong>Restart your MCP client</strong>
-						<p>Quit and reopen Claude Code (or Claude Desktop) to load the MCP server</p>
-					</div>
-				</li>
-				<li>
-					<span class="step-num">5</span>
-					<div class="step-content">
-						<strong>Test it</strong>
-						<p>Ask Claude a question that requires your input—a dialog should appear</p>
-					</div>
-				</li>
-			</ol>
-		</div>
+		{#if selectedPlatform === 'macos'}
+			<div class="install-block standalone">
+				<div class="code-line">
+					<code>{macosInstallCommand}</code>
+					<button onclick={copyInstall} class="copy-btn" aria-label="Copy install command">
+						{copied ? 'Copied' : 'Copy'}
+					</button>
+				</div>
+			</div>
+
+			<div class="install-steps">
+				<h3>Setup steps</h3>
+				<ol class="steps-list">
+					<li>
+						<span class="step-num">1</span>
+						<div class="step-content">
+							<strong>Run the install command</strong>
+							<p>Downloads the app from GitHub and moves it to <code>/Applications</code></p>
+						</div>
+					</li>
+					<li>
+						<span class="step-num">2</span>
+						<div class="step-content">
+							<strong>Launch the app</strong>
+							<p>Open "Consult User MCP" from Applications. A menu bar icon will appear.</p>
+						</div>
+					</li>
+					<li>
+						<span class="step-num">3</span>
+						<div class="step-content">
+							<strong>Run the install wizard</strong>
+							<p>Click the menu bar icon and select "Install Guide". Follow the steps to configure Claude Code or Claude Desktop.</p>
+						</div>
+					</li>
+					<li>
+						<span class="step-num">4</span>
+						<div class="step-content">
+							<strong>Restart your MCP client</strong>
+							<p>Quit and reopen Claude Code (or Claude Desktop) to load the MCP server</p>
+						</div>
+					</li>
+					<li>
+						<span class="step-num">5</span>
+						<div class="step-content">
+							<strong>Test it</strong>
+							<p>Ask Claude a question that requires your input—a dialog should appear</p>
+						</div>
+					</li>
+				</ol>
+			</div>
+		{:else}
+			<div class="install-steps">
+				<h3>Setup steps</h3>
+				<ol class="steps-list">
+					<li>
+						<span class="step-num">1</span>
+						<div class="step-content">
+							<strong>Download the latest release</strong>
+							<p>Get the Windows zip from the <a href="https://github.com/doublej/consult-user-mcp/releases" target="_blank" rel="noopener">GitHub releases page</a> (the release tagged <code>windows/v...</code>)</p>
+						</div>
+					</li>
+					<li>
+						<span class="step-num">2</span>
+						<div class="step-content">
+							<strong>Extract and run</strong>
+							<p>Unzip to a folder (e.g. <code>C:\Program Files\ConsultUserMCP</code>) and run <code>ConsultUserMCP.exe</code>. A system tray icon will appear.</p>
+						</div>
+					</li>
+					<li>
+						<span class="step-num">3</span>
+						<div class="step-content">
+							<strong>Configure your MCP client</strong>
+							<p>Right-click the tray icon, open Settings, and copy the MCP server path. Add it to your Claude Code or Claude Desktop config. See the <a href="https://github.com/doublej/consult-user-mcp#windows" target="_blank" rel="noopener">README</a> for details.</p>
+						</div>
+					</li>
+					<li>
+						<span class="step-num">4</span>
+						<div class="step-content">
+							<strong>Restart your MCP client</strong>
+							<p>Quit and reopen Claude Code (or Claude Desktop) to load the MCP server</p>
+						</div>
+					</li>
+					<li>
+						<span class="step-num">5</span>
+						<div class="step-content">
+							<strong>Test it</strong>
+							<p>Ask Claude a question that requires your input—a dialog should appear</p>
+						</div>
+					</li>
+				</ol>
+			</div>
+		{/if}
 
 		<p class="manual-note">
 			For manual installation or other MCP clients, see the <a href="https://github.com/doublej/consult-user-mcp#readme" target="_blank" rel="noopener">README</a>.
@@ -152,7 +222,9 @@
 		<div class="unsigned-note">
 			<h3>Unsigned software</h3>
 			<p>
-				This app is not signed with an Apple Developer certificate. On first launch, macOS will show a warning that the app is from an "unidentified developer." To open it, right-click the app and select "Open", then click "Open" in the dialog. You only need to do this once.
+				<strong>macOS:</strong> This app is not signed with an Apple Developer certificate. On first launch, macOS will show a warning. Right-click the app and select "Open", then click "Open" in the dialog.
+				<strong>Windows:</strong> SmartScreen may warn about an unidentified publisher. Click "More info" then "Run anyway".
+				You only need to do this once.
 			</p>
 		</div>
 	</section>
@@ -277,6 +349,58 @@
 		color: #606060;
 		max-width: 600px;
 		margin: 0 0 40px;
+	}
+
+	/* Platform badges */
+	.platform-badges {
+		display: flex;
+		gap: 16px;
+		margin: 0 0 32px;
+	}
+
+	.platform-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: #808080;
+	}
+
+	/* Platform tabs */
+	.platform-tabs {
+		display: flex;
+		gap: 0;
+		margin-bottom: 0;
+		border-bottom: 1px solid #d0d0d0;
+	}
+
+	.platform-tab {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 10px 20px;
+		background: none;
+		border: 1px solid transparent;
+		border-bottom: none;
+		cursor: pointer;
+		font-size: 0.9rem;
+		font-weight: 500;
+		font-family: 'Instrument Sans', sans-serif;
+		color: #808080;
+		transition: color 0.15s, background 0.15s;
+		margin-bottom: -1px;
+	}
+
+	.platform-tab:hover {
+		color: #404040;
+	}
+
+	.platform-tab.active {
+		color: #1a1a1a;
+		background: #fff;
+		border-color: #d0d0d0;
+		border-bottom-color: #fff;
 	}
 
 	/* Install block */

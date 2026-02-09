@@ -3,8 +3,8 @@
 	import '../styles/dialog.css';
 	import releasesData from '$lib/data/releases.json';
 
-	// Get latest release from JSON
-	const latestRelease = releasesData.releases[0];
+	// Get latest macOS release from JSON (hero renders macOS-styled window)
+	const latestRelease = releasesData.releases.find((r: { platform?: string }) => r.platform === 'macos') ?? releasesData.releases[0];
 	// Show only featured (interesting/big) changes in the hero preview
 	const changes = latestRelease.changes.filter((c: { featured?: boolean }) => c.featured);
 
@@ -46,7 +46,7 @@
 
 					<div class="button-row">
 						<a href="{base}/changelog" class="btn secondary">Changelog</a>
-						<a href="https://github.com/doublej/consult-user-mcp/releases/tag/v{latestRelease.version}" class="btn primary" target="_blank" rel="noopener">Update <span class="key-hint">&#x23CE;</span></a>
+						<a href="https://github.com/doublej/consult-user-mcp/releases/tag/macos/v{latestRelease.version}" class="btn primary" target="_blank" rel="noopener">Update <span class="key-hint">&#x23CE;</span></a>
 					</div>
 				</div>
 

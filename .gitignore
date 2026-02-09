@@ -23,12 +23,13 @@ macos-app/.swiftpm/
 # Windows build artifacts
 dialog-cli-windows/bin/
 dialog-cli-windows/obj/
-windows-tray-app/bin/
-windows-tray-app/obj/
+windows-app/bin/
+windows-app/obj/
 
 # Distribution archives
 *.app.zip
 Consult*.zip
+releases/
 
 # Generated icons (keep SVG source)
 *.icns

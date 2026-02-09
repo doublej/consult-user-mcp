@@ -24,15 +24,15 @@ const __dirname = dirname(__filename);
 
 function findDialogCli(): string | null {
   // Installed alongside mcp-server
-  const siblingPath = join(__dirname, "..", "..", "..", "dialog-cli-windows", "dialog-cli-windows.exe");
+  const siblingPath = join(__dirname, "..", "..", "..", "dialog-cli-windows", "dialog-cli.exe");
   if (existsSync(siblingPath)) return siblingPath;
 
   // Dev: published output
-  const devPath = join(__dirname, "..", "..", "..", "dialog-cli-windows", "bin", "Release", "net8.0-windows", "win-x64", "publish", "dialog-cli-windows.exe");
+  const devPath = join(__dirname, "..", "..", "..", "dialog-cli-windows", "bin", "Release", "net8.0-windows", "win-x64", "publish", "dialog-cli.exe");
   if (existsSync(devPath)) return devPath;
 
   // Dev: debug build
-  const debugPath = join(__dirname, "..", "..", "..", "dialog-cli-windows", "bin", "Debug", "net8.0-windows", "win-x64", "dialog-cli-windows.exe");
+  const debugPath = join(__dirname, "..", "..", "..", "dialog-cli-windows", "bin", "Debug", "net8.0-windows", "win-x64", "dialog-cli.exe");
   if (existsSync(debugPath)) return debugPath;
 
   return null;

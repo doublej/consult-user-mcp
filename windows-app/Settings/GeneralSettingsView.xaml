@@ -122,6 +122,16 @@
         <CheckBox x:Name="MuteSnoozedCheck" Content="Mute sounds while snoozed"
                   Foreground="#E6E6E6" FontFamily="Segoe UI" FontSize="13"
                   Checked="OnSettingToggled" Unchecked="OnSettingToggled"
+                  Margin="0,0,0,24" />
+
+        <!-- Startup -->
+        <TextBlock Text="Startup" Foreground="#E6E6E6"
+                   FontSize="16" FontWeight="SemiBold" FontFamily="Segoe UI"
+                   Margin="0,0,0,12" />
+
+        <CheckBox x:Name="LaunchAtStartupCheck" Content="Launch at startup"
+                  Foreground="#E6E6E6" FontFamily="Segoe UI" FontSize="13"
+                  Checked="OnLaunchAtStartupToggled" Unchecked="OnLaunchAtStartupToggled"
                   Margin="0,0,0,8" />
     </StackPanel>
 </UserControl>

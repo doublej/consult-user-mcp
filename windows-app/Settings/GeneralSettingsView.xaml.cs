@@ -44,6 +44,8 @@ public partial class GeneralSettingsView : UserControl
         SoundNotificationsCheck.IsChecked = s.PlaySoundForNotifications;
         MuteSnoozedCheck.IsChecked = s.MuteSoundsWhileSnoozed;
 
+        LaunchAtStartupCheck.IsChecked = StartupManager.IsEnabled;
+
         _loading = false;
     }
 
@@ -91,6 +93,12 @@ public partial class GeneralSettingsView : UserControl
         SettingsManager.Shared.Settings.ButtonCooldownDuration = CooldownSlider.Value;
         CooldownLabel.Text = $"{CooldownSlider.Value:F1}s";
         SettingsManager.Shared.Save();
+    }
+
+    private void OnLaunchAtStartupToggled(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        StartupManager.SetEnabled(LaunchAtStartupCheck.IsChecked == true);
     }
 
     private void OnEndSnooze(object sender, RoutedEventArgs e)

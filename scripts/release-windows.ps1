@@ -7,7 +7,7 @@ if ($args -contains "--dry-run") {
 }
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
-$VersionFile = Join-Path $RepoRoot "windows-tray-app\VERSION"
+$VersionFile = Join-Path $RepoRoot "windows-app\VERSION"
 
 # 1. Read version
 if (-not (Test-Path $VersionFile)) {
@@ -15,7 +15,7 @@ if (-not (Test-Path $VersionFile)) {
     exit 1
 }
 $Version = (Get-Content $VersionFile -Raw).Trim()
-$Tag = "v$Version-windows"
+$Tag = "windows/v$Version"
 Write-Host "version: $Version (tag: $Tag)"
 
 # 2. Check tag doesn't already exist locally
@@ -52,32 +52,28 @@ if ($DryRun) {
 # 5. Build
 Write-Host ""
 Write-Host "building..."
-$BuildScript = Join-Path $RepoRoot "scripts\build-windows.ps1"
+$BuildScript = Join-Path $RepoRoot "scripts\build-windows-installer.ps1"
 & powershell -ExecutionPolicy Bypass -File $BuildScript
 if ($LASTEXITCODE -ne 0) { exit 1 }
 
-# 6. Verify installer exists
-$DistDir = Join-Path $RepoRoot "dist"
-$InstallerExe = Join-Path $DistDir "ConsultUserMCP-Setup-$Version.exe"
-if (-not (Test-Path $InstallerExe)) {
-    Write-Error "error: installer not found at $InstallerExe"
+# 6. Verify Velopack output
+$OutputDir = Join-Path $RepoRoot "releases\windows"
+$Assets = Get-ChildItem -Path $OutputDir -File
+if ($Assets.Count -eq 0) {
+    Write-Error "error: no files found in $OutputDir"
     exit 1
 }
-$Size = (Get-Item $InstallerExe).Length
-if ($Size -lt 1000) {
-    Write-Error "error: installer is suspiciously small ($Size bytes)"
-    exit 1
-}
-Write-Host "ok: installer is $([math]::Round($Size / 1MB, 1)) MB"
+Write-Host "ok: found $($Assets.Count) release assets"
 
 # 7. Create annotated tag and push
 git tag -a $Tag -m $Tag
 git push origin $Tag
 Write-Host "ok: tag $Tag pushed"
 
-# 8. Create GitHub release with installer
-gh release create $Tag $InstallerExe `
-    --title "$Tag — Windows Release" `
+# 8. Create GitHub release with all Velopack assets
+$AssetPaths = $Assets | ForEach-Object { $_.FullName }
+gh release create $Tag @AssetPaths `
+    --title "Windows v$Version" `
     --notes "## Windows Release $Version`n`nInstaller for Windows (x64)."
 
 if ($LASTEXITCODE -ne 0) {
@@ -86,4 +82,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host ""
-Write-Host "release $Tag created with installer attached"
+Write-Host "release $Tag created with $($Assets.Count) assets attached"

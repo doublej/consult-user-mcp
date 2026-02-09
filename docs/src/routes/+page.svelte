@@ -188,7 +188,7 @@
 						<span class="step-num">2</span>
 						<div class="step-content">
 							<strong>Extract and run</strong>
-							<p>Unzip to a folder (e.g. <code>C:\Program Files\ConsultUserMCP</code>) and run <code>ConsultUserMCP.exe</code>. A system tray icon will appear.</p>
+							<p>Unzip to a folder (e.g. <code>C:\Program Files\ConsultUserMCP</code>) and run <code>consult-user-mcp.exe</code>. A system tray icon will appear.</p>
 						</div>
 					</li>
 					<li>

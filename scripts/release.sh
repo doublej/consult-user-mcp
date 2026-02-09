@@ -32,7 +32,7 @@ case "$PLATFORM" in
     PLATFORM_LABEL="macOS"
     ;;
   windows)
-    VERSION_FILE="windows-tray-app/VERSION"
+    VERSION_FILE="windows-app/VERSION"
     TAG_PREFIX="windows/v"
     PLATFORM_LABEL="Windows"
     if [[ -z "$ZIP_ARG" ]]; then

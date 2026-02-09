@@ -26,11 +26,11 @@ public static class DebugDialogRunner
     private static string? FindDialogCli()
     {
         var dir = AppDomain.CurrentDomain.BaseDirectory;
-        // Installed: dialog-cli-windows.exe alongside tray app
-        var path = Path.Combine(dir, "dialog-cli-windows.exe");
+        // Installed: dialog-cli.exe alongside tray app
+        var path = Path.Combine(dir, "dialog-cli.exe");
         if (File.Exists(path)) return path;
 
-        // Dev layout: navigate from windows-tray-app/bin/Debug/net8.0-windows/win-x64/
+        // Dev layout: navigate from windows-app/bin/Debug/net8.0-windows/win-x64/
         // up to repo root, then into dialog-cli-windows build output
         var current = dir;
         for (var i = 0; i < 6; i++)
@@ -39,11 +39,10 @@ public static class DebugDialogRunner
             if (parent is null) break;
             current = parent;
 
-            // Check for sibling dialog-cli-windows project
-            var debugPath = Path.Combine(current, "dialog-cli-windows", "bin", "Debug", "net8.0-windows", "win-x64", "dialog-cli-windows.exe");
+            var debugPath = Path.Combine(current, "dialog-cli-windows", "bin", "Debug", "net8.0-windows", "win-x64", "dialog-cli.exe");
             if (File.Exists(debugPath)) return debugPath;
 
-            var releasePath = Path.Combine(current, "dialog-cli-windows", "bin", "Release", "net8.0-windows", "win-x64", "publish", "dialog-cli-windows.exe");
+            var releasePath = Path.Combine(current, "dialog-cli-windows", "bin", "Release", "net8.0-windows", "win-x64", "publish", "dialog-cli.exe");
             if (File.Exists(releasePath)) return releasePath;
         }
 

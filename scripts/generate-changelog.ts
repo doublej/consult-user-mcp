@@ -19,6 +19,7 @@ interface Change {
 
 interface Release {
   version: string;
+  platform: 'macos' | 'windows';
   date: string;
   highlight?: string;
   changes: Change[];
@@ -59,7 +60,8 @@ function generateChangelog(data: ReleasesData): string {
   ];
 
   for (const release of data.releases) {
-    lines.push(`## [${release.version}] - ${release.date}`);
+    const platformLabel = release.platform === 'macos' ? 'macOS' : 'Windows';
+    lines.push(`## [${release.version}] (${platformLabel}) - ${release.date}`);
     lines.push('');
 
     const groups = groupByType(release.changes);

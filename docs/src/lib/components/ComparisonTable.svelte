@@ -17,7 +17,7 @@
 	};
 
 	const servers: Server[] = [
-		{ name: 'consult-user-mcp', author: 'doublej', url: 'https://github.com/doublej/consult-user-mcp', stars: 0, stack: 'Swift + TS', platform: 'macOS', install: "curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/install.sh | bash", active: true },
+		{ name: 'consult-user-mcp', author: 'doublej', url: 'https://github.com/doublej/consult-user-mcp', stars: 0, stack: 'Swift + C# + TS', platform: 'macOS / Windows', install: "curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/install.sh | bash", active: true },
 		{ name: 'interactive-mcp', author: 'ttommyth', url: 'https://github.com/ttommyth/interactive-mcp', stars: 332, stack: 'TypeScript', platform: 'macOS / Linux / Windows', install: 'npx -y interactive-mcp', active: true },
 		{ name: 'ask-user-questions', author: 'paulp-o', url: 'https://github.com/paulp-o/ask-user-questions-mcp', stars: 37, stack: 'TypeScript', platform: 'macOS / Linux', install: 'npx auq-mcp-server server', active: true },
 		{ name: 'HITL GUI', author: 'GongRzhe', url: 'https://github.com/GongRzhe/Human-In-the-Loop-MCP-Server', stars: 130, stack: 'Python', platform: 'macOS / Linux / Windows', install: 'uvx hitl-mcp-server', active: false },
@@ -39,7 +39,7 @@
 		{ name: 'System notification', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'yes', 'ask-user-questions': 'no', 'HITL GUI': 'Info message tool', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 
 		// UX & interaction
-		{ name: 'UI approach', category: 'UX', values: { 'consult-user-mcp': 'Native SwiftUI', 'interactive-mcp': 'AppleScript / zenity / PowerShell', 'ask-user-questions': 'Terminal CLI', 'HITL GUI': 'Tkinter GUI', 'HITL Discord': 'Discord threads', 'mcp-interactive': 'Electron popup' } },
+		{ name: 'UI approach', category: 'UX', values: { 'consult-user-mcp': 'Native SwiftUI / WPF', 'interactive-mcp': 'AppleScript / zenity / PowerShell', 'ask-user-questions': 'Terminal CLI', 'HITL GUI': 'Tkinter GUI', 'HITL Discord': 'Discord threads', 'mcp-interactive': 'Electron popup' } },
 		{ name: 'Snooze / defer', category: 'UX', values: { 'consult-user-mcp': '1 min \u2013 1 hr', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Feedback to redirect agent', category: 'UX', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'Rejection + reason', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Persistent chat mode', category: 'UX', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'Intensive chat', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },

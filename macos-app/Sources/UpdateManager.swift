@@ -7,6 +7,7 @@ final class UpdateManager {
 
     private let repoOwner = "doublej"
     private let repoName = "consult-user-mcp"
+    private let tagPrefix = "macos/v"
     private let logger = Logger(subsystem: "com.consultuser.mcp", category: "UpdateManager")
 
     struct Release {
@@ -62,9 +63,7 @@ final class UpdateManager {
         let current = currentVersion
         logger.info("Checking for updates. Current version: \(current)")
 
-        let endpoint = includePrerelease
-            ? "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases?per_page=10"
-            : "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases/latest"
+        let endpoint = "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases?per_page=20"
         guard let url = URL(string: endpoint) else {
             completion(.failure(UpdateError.noRelease))
             return
@@ -92,7 +91,14 @@ final class UpdateManager {
                 return
             }
 
-            let remoteVersion = tagName.hasPrefix("v") ? String(tagName.dropFirst()) : tagName
+            let remoteVersion: String
+            if tagName.hasPrefix(self.tagPrefix) {
+                remoteVersion = String(tagName.dropFirst(self.tagPrefix.count))
+            } else if tagName.hasPrefix("v") {
+                remoteVersion = String(tagName.dropFirst())
+            } else {
+                remoteVersion = tagName
+            }
             let isNewer = self.isNewer(remote: remoteVersion, current: current)
 
             self.logger.info("Remote version: \(remoteVersion), Current: \(current), Update available: \(isNewer)")
@@ -187,17 +193,17 @@ final class UpdateManager {
     }
 
     private func selectRelease(from data: Data, includePrerelease: Bool) -> [String: Any]? {
-        if includePrerelease {
-            guard let releases = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
-                return nil
-            }
-            return releases.first(where: { release in
-                let isDraft = release["draft"] as? Bool ?? false
-                return !isDraft
-            })
+        guard let releases = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] else {
+            return nil
         }
-
-        return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        return releases.first { release in
+            let isDraft = release["draft"] as? Bool ?? false
+            let isPrerelease = release["prerelease"] as? Bool ?? false
+            guard let tag = release["tag_name"] as? String else { return false }
+            // Match macos/vX.Y.Z tags, or legacy vX.Y.Z tags (transition period)
+            let matchesPlatform = tag.hasPrefix(tagPrefix) || tag.first == "v" && tag.dropFirst().first?.isNumber == true
+            return matchesPlatform && !isDraft && (includePrerelease || !isPrerelease)
+        }
     }
 }
 

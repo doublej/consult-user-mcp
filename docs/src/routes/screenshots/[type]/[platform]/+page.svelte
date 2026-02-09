@@ -16,7 +16,7 @@
 			<div class="headline">
 				<span class="headline-kicker">Introducing</span>
 				<span class="headline-title">Consult User MCP</span>
-				<span class="headline-platform">for macOS</span>
+				<span class="headline-platform">for macOS & Windows</span>
 				<span class="headline-tagline">Native dialogs for your AI coding agent</span>
 			</div>
 		{/if}

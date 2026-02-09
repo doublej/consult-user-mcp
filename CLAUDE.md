@@ -43,7 +43,7 @@ When coordinating multiple Claude Code agents in tmux:
 
 ## Release Checklist
 
-When releasing a new version:
+### macOS
 
 1. Update `macos-app/VERSION` file with the new version number
 2. **If baseprompt changed:** Update version in `macos-app/Sources/Resources/base-prompt.md` (first line comment)
@@ -51,11 +51,20 @@ When releasing a new version:
 4. Generate CHANGELOG.md: `bun run changelog`
 5. Validate versions: `bash scripts/validate-baseprompt-version.sh`
 6. Commit all changes
-7. Run `bash scripts/release.sh` — builds, zips, tags, and creates the GitHub release with the zip attached
+7. Run `bash scripts/release.sh --platform macos` — builds, zips, tags, and creates the GitHub release
 
-Use `bash scripts/release.sh --dry-run` to validate pre-conditions without executing.
+### Windows
 
-**Warning:** Never run `gh release create` manually — use the script to ensure a zip asset is always attached. Releases without assets break the auto-updater.
+1. Update `windows-app/VERSION` with the new version number
+2. Update `docs/src/lib/data/releases.json`
+3. Generate CHANGELOG.md: `bun run changelog`
+4. Commit all changes
+5. On Windows: Run `pwsh scripts/build-windows-installer.ps1` — builds Velopack installer
+6. On macOS: Run `bash scripts/release.sh --platform windows --asset-dir releases/windows`
+
+Use `bash scripts/release.sh --platform <platform> --dry-run` to validate pre-conditions without executing.
+
+**Warning:** Never run `gh release create` manually — use the script to ensure assets are always attached. Releases without assets break the auto-updater.
 
 ## Baseprompt Versioning
 
@@ -70,6 +79,18 @@ The base prompt has its own independent version number:
 - Major (X): Breaking changes to tool usage or workflow
 - Minor (Y): New features, examples, or significant guidance improvements
 - Patch (Z): Bug fixes, typos, clarifications
+
+## Windows Project Structure
+
+| Directory | Output | Purpose |
+|-----------|--------|---------|
+| `dialog-cli-windows/` | `dialog-cli.exe` | WPF dialog CLI (ephemeral, spawned per dialog) |
+| `windows-app/` | `consult-user-mcp.exe` | WPF tray app (persistent background process) |
+
+- **Installer**: Velopack-based (`scripts/build-windows-installer.ps1`)
+- **Auto-updates**: Velopack delta updates from GitHub Releases
+- **First-run**: Auto-configures Claude Code MCP server, offers startup registration
+- **User data**: `%APPDATA%\ConsultUserMCP\` (settings, snooze state, history)
 
 ## Dialog Types & MCP Tools
 

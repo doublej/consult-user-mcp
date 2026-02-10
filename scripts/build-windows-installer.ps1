@@ -31,12 +31,16 @@ Write-Host "ok: windows-app built"
 Write-Host ""
 Write-Host "building mcp-server..."
 $McpDir = Join-Path $RepoRoot "mcp-server"
+Push-Location $RepoRoot
+try {
+    npm install 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "error: npm install failed"; exit 1 }
+} finally {
+    Pop-Location
+}
 Push-Location $McpDir
 try {
-    npx tsc
-    if ($LASTEXITCODE -ne 0) { exit 1 }
-
-    npm install --omit=dev
+    npx --no-install tsc
     if ($LASTEXITCODE -ne 0) { exit 1 }
 } finally {
     Pop-Location

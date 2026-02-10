@@ -33,14 +33,18 @@ Write-Host "building mcp-server..."
 $McpDir = Join-Path $RepoRoot "mcp-server"
 Push-Location $RepoRoot
 try {
+    $ErrorActionPreference = "Continue"
     npm install 2>&1 | Out-Null
+    $ErrorActionPreference = "Stop"
     if ($LASTEXITCODE -ne 0) { Write-Error "error: npm install failed"; exit 1 }
 } finally {
     Pop-Location
 }
 Push-Location $McpDir
 try {
+    $ErrorActionPreference = "Continue"
     npx --no-install tsc
+    $ErrorActionPreference = "Stop"
     if ($LASTEXITCODE -ne 0) { exit 1 }
 } finally {
     Pop-Location
@@ -71,7 +75,9 @@ Copy-Item -Path (Join-Path $McpDir "dist") -Destination (Join-Path $McpStagingDi
 Copy-Item -Path (Join-Path $McpDir "package.json") -Destination $McpStagingDir
 Push-Location $McpStagingDir
 try {
+    $ErrorActionPreference = "Continue"
     npm install --omit=dev 2>&1 | Out-Null
+    $ErrorActionPreference = "Stop"
     if ($LASTEXITCODE -ne 0) { Write-Error "error: npm install in staging failed"; exit 1 }
 } finally {
     Pop-Location

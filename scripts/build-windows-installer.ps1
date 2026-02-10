@@ -60,12 +60,18 @@ Copy-Item -Path "$TrayPublishDir\*" -Destination $StagingDir -Recurse
 $DialogExe = Join-Path $RepoRoot "dialog-cli-windows\bin\Release\net8.0-windows\win-x64\publish\dialog-cli.exe"
 Copy-Item -Path $DialogExe -Destination $StagingDir
 
-# Copy mcp-server
+# Copy mcp-server (install deps fresh — workspaces hoist to root, so mcp-server/node_modules doesn't exist)
 $McpStagingDir = Join-Path $StagingDir "mcp-server"
 New-Item -ItemType Directory -Path $McpStagingDir | Out-Null
 Copy-Item -Path (Join-Path $McpDir "dist") -Destination (Join-Path $McpStagingDir "dist") -Recurse
-Copy-Item -Path (Join-Path $McpDir "node_modules") -Destination (Join-Path $McpStagingDir "node_modules") -Recurse
 Copy-Item -Path (Join-Path $McpDir "package.json") -Destination $McpStagingDir
+Push-Location $McpStagingDir
+try {
+    npm install --omit=dev 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { Write-Error "error: npm install in staging failed"; exit 1 }
+} finally {
+    Pop-Location
+}
 
 Write-Host "ok: files staged"
 

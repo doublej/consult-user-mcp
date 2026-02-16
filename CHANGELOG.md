@@ -7,6 +7,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.12.0] (macOS) - 2026-02-16
+
+### Added
+- Ask differently: toolbar button lets you request a different dialog type mid-conversation
+- Humanize responses: answers returned as plain text instead of JSON (e.g. "The user confirmed." instead of {"answer": true})
+- Review before send: preview exactly what gets returned to the agent before it's sent
+- Validate choices: agents can no longer offer "All of the above" options — must use multi-select instead
+
+### Changed
+- Base prompt updated to v2.2.0 with ask-differently and humanize guidance
+
 ## [1.11.0] (macOS) - 2026-02-09
 
 ### Added

@@ -3,6 +3,19 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.12.0",
+      "platform": "macos",
+      "date": "2026-02-16",
+      "highlight": "Ask differently, humanize responses, and review before send",
+      "changes": [
+        { "text": "Ask differently: toolbar button lets you request a different dialog type mid-conversation", "type": "added", "scope": "cli", "featured": true },
+        { "text": "Humanize responses: answers returned as plain text instead of JSON (e.g. \"The user confirmed.\" instead of {\"answer\": true})", "type": "added", "scope": "server", "featured": true },
+        { "text": "Review before send: preview exactly what gets returned to the agent before it's sent", "type": "added", "scope": "cli", "featured": true },
+        { "text": "Validate choices: agents can no longer offer \"All of the above\" options — must use multi-select instead", "type": "added", "scope": "server" },
+        { "text": "Base prompt updated to v2.2.0 with ask-differently and humanize guidance", "type": "changed", "scope": "server" }
+      ]
+    },
+    {
       "version": "1.11.0",
       "platform": "macos",
       "date": "2026-02-09",

@@ -1,0 +1,371 @@
+<UserControl x:Class="ConsultUserMCP.Settings.InstallSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent">
+    <StackPanel>
+        <!-- Header -->
+        <TextBlock Text="Install" Foreground="#E6E6E6"
+                   FontSize="18" FontWeight="SemiBold" FontFamily="Segoe UI" />
+        <TextBlock Text="Set up MCP integration with your AI tools"
+                   Foreground="#A0A0A0" FontSize="12" FontFamily="Segoe UI"
+                   Margin="0,4,0,20" />
+
+        <!-- Progress indicator -->
+        <StackPanel x:Name="ProgressPanel" Orientation="Horizontal"
+                    HorizontalAlignment="Center" Margin="0,0,0,24">
+            <!-- Step 1 -->
+            <StackPanel Orientation="Horizontal">
+                <Ellipse x:Name="Step1Dot" Width="10" Height="10" Fill="#3B82F6" />
+                <TextBlock x:Name="Step1Label" Text="Target" Foreground="#E6E6E6"
+                           FontSize="11" FontFamily="Segoe UI" Margin="6,0,0,0"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+            <Rectangle Width="32" Height="2" Fill="#333" Margin="12,0" VerticalAlignment="Center" />
+            <!-- Step 2 -->
+            <StackPanel Orientation="Horizontal">
+                <Ellipse x:Name="Step2Dot" Width="10" Height="10" Fill="#333" />
+                <TextBlock x:Name="Step2Label" Text="Prompts" Foreground="#606060"
+                           FontSize="11" FontFamily="Segoe UI" Margin="6,0,0,0"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+            <Rectangle Width="32" Height="2" Fill="#333" Margin="12,0" VerticalAlignment="Center" />
+            <!-- Step 3 -->
+            <StackPanel Orientation="Horizontal">
+                <Ellipse x:Name="Step3Dot" Width="10" Height="10" Fill="#333" />
+                <TextBlock x:Name="Step3Label" Text="Install" Foreground="#606060"
+                           FontSize="11" FontFamily="Segoe UI" Margin="6,0,0,0"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Step 1: Target Selection -->
+        <StackPanel x:Name="TargetStep" Visibility="Visible">
+            <TextBlock Text="Choose Installation Target" Foreground="#E6E6E6"
+                       FontSize="14" FontWeight="SemiBold" FontFamily="Segoe UI" />
+            <TextBlock Text="Select where you want to install the Consult User MCP server."
+                       Foreground="#A0A0A0" FontSize="12" FontFamily="Segoe UI"
+                       Margin="0,4,0,16" />
+
+            <!-- Claude Desktop card -->
+            <Border x:Name="CardClaude" Background="#252525" CornerRadius="8"
+                    BorderThickness="1" BorderBrush="#333" Padding="16"
+                    Margin="0,0,0,8" Cursor="Hand" MouseLeftButtonDown="OnSelectClaude">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Claude" Foreground="#E6E6E6"
+                                       FontSize="14" FontWeight="SemiBold" FontFamily="Segoe UI" />
+                            <Border x:Name="BadgeClaude" Background="#1A3A1A" CornerRadius="4"
+                                    Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center"
+                                    Visibility="Collapsed">
+                                <TextBlock x:Name="BadgeClaudeText" Foreground="#4ADE80"
+                                           FontSize="10" FontFamily="Segoe UI" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="Anthropic's desktop app" Foreground="#A0A0A0"
+                                   FontSize="12" FontFamily="Segoe UI" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <Ellipse x:Name="RadioClaude" Grid.Column="1" Width="18" Height="18"
+                             Stroke="#555" StrokeThickness="2" Fill="Transparent"
+                             VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Claude Code card -->
+            <Border x:Name="CardClaudeCode" Background="#252525" CornerRadius="8"
+                    BorderThickness="1" BorderBrush="#3B82F6" Padding="16"
+                    Margin="0,0,0,8" Cursor="Hand" MouseLeftButtonDown="OnSelectClaudeCode">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Claude Code" Foreground="#E6E6E6"
+                                       FontSize="14" FontWeight="SemiBold" FontFamily="Segoe UI" />
+                            <Border x:Name="BadgeClaudeCode" Background="#1A3A1A" CornerRadius="4"
+                                    Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center"
+                                    Visibility="Collapsed">
+                                <TextBlock x:Name="BadgeClaudeCodeText" Foreground="#4ADE80"
+                                           FontSize="10" FontFamily="Segoe UI" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="CLI coding assistant" Foreground="#A0A0A0"
+                                   FontSize="12" FontFamily="Segoe UI" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <Ellipse x:Name="RadioClaudeCode" Grid.Column="1" Width="18" Height="18"
+                             Stroke="#3B82F6" StrokeThickness="2" Fill="#3B82F6"
+                             VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Codex card -->
+            <Border x:Name="CardCodex" Background="#252525" CornerRadius="8"
+                    BorderThickness="1" BorderBrush="#333" Padding="16"
+                    Margin="0,0,0,16" Cursor="Hand" MouseLeftButtonDown="OnSelectCodex">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Codex" Foreground="#E6E6E6"
+                                       FontSize="14" FontWeight="SemiBold" FontFamily="Segoe UI" />
+                            <Border x:Name="BadgeCodex" Background="#1A3A1A" CornerRadius="4"
+                                    Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center"
+                                    Visibility="Collapsed">
+                                <TextBlock x:Name="BadgeCodexText" Foreground="#4ADE80"
+                                           FontSize="10" FontFamily="Segoe UI" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="OpenAI's CLI tool" Foreground="#A0A0A0"
+                                   FontSize="12" FontFamily="Segoe UI" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <Ellipse x:Name="RadioCodex" Grid.Column="1" Width="18" Height="18"
+                             Stroke="#555" StrokeThickness="2" Fill="Transparent"
+                             VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Next button -->
+            <Button Content="Next" Click="OnNext" HorizontalAlignment="Right"
+                    Padding="24,10" FontSize="13" FontFamily="Segoe UI" FontWeight="SemiBold"
+                    Foreground="#E6E6E6" Background="#3B82F6" BorderThickness="0" Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#60A5FA" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+        </StackPanel>
+
+        <!-- Step 2: Base Prompt -->
+        <StackPanel x:Name="BasePromptStep" Visibility="Collapsed">
+            <TextBlock Text="Usage Hints" Foreground="#E6E6E6"
+                       FontSize="14" FontWeight="SemiBold" FontFamily="Segoe UI" />
+            <TextBlock x:Name="BasePromptDescription" Foreground="#A0A0A0"
+                       FontSize="12" FontFamily="Segoe UI" Margin="0,4,0,16"
+                       TextWrapping="Wrap" />
+
+            <!-- Include toggle -->
+            <Border Background="#252525" CornerRadius="8" Padding="16" Margin="0,0,0,8">
+                <StackPanel>
+                    <CheckBox x:Name="IncludeBasePromptCheck" IsChecked="True"
+                              Content="Include usage hints" Foreground="#E6E6E6"
+                              FontFamily="Segoe UI" FontSize="13"
+                              Checked="OnIncludeToggled" Unchecked="OnIncludeToggled" />
+                    <TextBlock Text="Teaches Claude when to use dialog tools instead of text questions"
+                               Foreground="#707070" FontSize="11" FontFamily="Segoe UI"
+                               Margin="20,4,0,0" TextWrapping="Wrap" />
+
+                    <!-- File status -->
+                    <StackPanel x:Name="FileStatusPanel" Orientation="Horizontal"
+                                Margin="0,12,0,0" Visibility="Collapsed">
+                        <TextBlock x:Name="FileStatusIcon" FontSize="14" Margin="0,0,6,0"
+                                   VerticalAlignment="Center" />
+                        <TextBlock x:Name="FileStatusText" FontSize="11" FontFamily="Segoe UI"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Mode options (shown when file exists + include enabled) -->
+            <Border x:Name="ModeOptionsPanel" Background="#252525" CornerRadius="8"
+                    Padding="16" Margin="0,0,0,16" Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock x:Name="ModeOptionsTitle" Foreground="#808080"
+                               FontSize="10" FontFamily="Segoe UI" FontWeight="SemiBold"
+                               Margin="0,0,0,10" />
+
+                    <StackPanel x:Name="ModeOptionsList" />
+                </StackPanel>
+            </Border>
+
+            <!-- Back / Next buttons -->
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="Back" Click="OnBack"
+                        Padding="20,10" FontSize="13" FontFamily="Segoe UI"
+                        Foreground="#A0A0A0" Background="#333" BorderThickness="0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                    CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#444" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button Grid.Column="2" Content="Next" Click="OnNext"
+                        Padding="24,10" FontSize="13" FontFamily="Segoe UI" FontWeight="SemiBold"
+                        Foreground="#E6E6E6" Background="#3B82F6" BorderThickness="0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                    CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#60A5FA" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </StackPanel>
+
+        <!-- Step 3: Confirmation -->
+        <StackPanel x:Name="ConfirmStep" Visibility="Collapsed">
+            <!-- Pre-install summary -->
+            <StackPanel x:Name="SummaryPanel">
+                <TextBlock Text="Ready to Install" Foreground="#E6E6E6"
+                           FontSize="14" FontWeight="SemiBold" FontFamily="Segoe UI" />
+                <TextBlock Text="The following changes will be made to your system."
+                           Foreground="#A0A0A0" FontSize="12" FontFamily="Segoe UI"
+                           Margin="0,4,0,16" />
+
+                <Border Background="#252525" CornerRadius="8" Padding="16" Margin="0,0,0,8">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBlock Text="MCP Configuration" Foreground="#E6E6E6"
+                                       FontSize="13" FontWeight="SemiBold" FontFamily="Segoe UI" />
+                        </StackPanel>
+                        <TextBlock x:Name="SummaryConfigPath" Foreground="#808080"
+                                   FontSize="11" FontFamily="Consolas" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="SummaryBasePromptPanel" Background="#252525" CornerRadius="8"
+                        Padding="16" Margin="0,0,0,16" Visibility="Collapsed">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBlock Text="Usage Hints" Foreground="#E6E6E6"
+                                       FontSize="13" FontWeight="SemiBold" FontFamily="Segoe UI" />
+                        </StackPanel>
+                        <TextBlock x:Name="SummaryBasePromptPath" Foreground="#808080"
+                                   FontSize="11" FontFamily="Consolas" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Back / Install buttons -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Back" Click="OnBack"
+                            Padding="20,10" FontSize="13" FontFamily="Segoe UI"
+                            Foreground="#A0A0A0" Background="#333" BorderThickness="0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#444" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Grid.Column="2" Content="Install" Click="OnInstall"
+                            Padding="24,10" FontSize="13" FontFamily="Segoe UI" FontWeight="SemiBold"
+                            Foreground="#E6E6E6" Background="#22C55E" BorderThickness="0" Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#4ADE80" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+            <!-- Post-install results -->
+            <StackPanel x:Name="ResultPanel" Visibility="Collapsed">
+                <!-- Result banner -->
+                <Border x:Name="ResultBanner" CornerRadius="8" Padding="20,16" Margin="0,0,0,16">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="ResultIcon" FontSize="28" Margin="0,0,16,0"
+                                   VerticalAlignment="Center" />
+                        <StackPanel>
+                            <TextBlock x:Name="ResultTitle" Foreground="#E6E6E6"
+                                       FontSize="16" FontWeight="SemiBold" FontFamily="Segoe UI" />
+                            <TextBlock x:Name="ResultSubtitle" Foreground="#A0A0A0"
+                                       FontSize="12" FontFamily="Segoe UI" Margin="0,4,0,0"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Result items -->
+                <Border Background="#252525" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                    <StackPanel x:Name="ResultItems" />
+                </Border>
+
+                <!-- Next steps -->
+                <TextBlock Text="NEXT STEPS" Foreground="#808080"
+                           FontSize="10" FontFamily="Segoe UI" FontWeight="SemiBold"
+                           Margin="0,0,0,8" />
+                <Border Background="#252525" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                    <TextBlock x:Name="NextStepsText" Foreground="#E6E6E6"
+                               FontSize="13" FontFamily="Segoe UI" TextWrapping="Wrap" />
+                </Border>
+
+                <!-- Start Over button -->
+                <Button Content="Start Over" Click="OnStartOver" HorizontalAlignment="Left"
+                        Padding="20,10" FontSize="13" FontFamily="Segoe UI"
+                        Foreground="#A0A0A0" Background="#333" BorderThickness="0" Cursor="Hand">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                    CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#444" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

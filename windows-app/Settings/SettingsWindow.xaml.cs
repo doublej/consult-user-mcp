@@ -6,6 +6,7 @@ namespace ConsultUserMCP.Settings;
 
 public partial class SettingsWindow : Window
 {
+    private readonly InstallSettingsView _installView = new();
     private readonly GeneralSettingsView _generalView = new();
     private readonly UpdatesSettingsView _updatesView = new();
     private readonly ProjectsSettingsView _projectsView = new();
@@ -15,7 +16,7 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
-        ContentArea.Content = _generalView;
+        ContentArea.Content = _installView;
         RestoreWindowPosition();
         Closing += OnClosing;
     }
@@ -26,12 +27,13 @@ public partial class SettingsWindow : Window
 
         ContentArea.Content = SectionList.SelectedIndex switch
         {
-            0 => _generalView,
-            1 => _updatesView,
-            2 => _projectsView,
-            3 => _aboutView,
-            4 => _historyView,
-            _ => _generalView,
+            0 => _installView,
+            1 => _generalView,
+            2 => _updatesView,
+            3 => _projectsView,
+            4 => _aboutView,
+            5 => _historyView,
+            _ => _installView,
         };
     }
 

@@ -49,6 +49,7 @@
                             </Setter>
                         </Style>
                     </ListBox.ItemContainerStyle>
+                    <ListBoxItem Content="Install" />
                     <ListBoxItem Content="General" />
                     <ListBoxItem Content="Updates" />
                     <ListBoxItem Content="Projects" />

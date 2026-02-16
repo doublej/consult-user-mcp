@@ -37,3 +37,7 @@ public record NotifyRequest(
     string Title,
     bool Sound
 );
+
+public record PreviewRequest(
+    string Body
+);

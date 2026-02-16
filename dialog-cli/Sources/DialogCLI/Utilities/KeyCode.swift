@@ -8,6 +8,7 @@ enum KeyCode {
     static let tab: UInt16 = 48
 
     // Letter keys
+    static let a: UInt16 = 0
     static let s: UInt16 = 1
     static let f: UInt16 = 3
 

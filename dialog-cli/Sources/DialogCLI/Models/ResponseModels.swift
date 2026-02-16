@@ -35,6 +35,7 @@ struct ConfirmResponse: Codable {
     let snoozeMinutes: Int?
     let remainingSeconds: Int?
     let feedbackText: String?
+    let askDifferently: String?
     let instruction: String?
 }
 
@@ -50,6 +51,7 @@ struct ChoiceResponse: Codable {
     let snoozeMinutes: Int?
     let remainingSeconds: Int?
     let feedbackText: String?
+    let askDifferently: String?
     let instruction: String?
 }
 
@@ -63,10 +65,16 @@ struct TextInputResponse: Codable {
     let snoozeMinutes: Int?
     let remainingSeconds: Int?
     let feedbackText: String?
+    let askDifferently: String?
     let instruction: String?
 }
 
 struct NotifyResponse: Codable {
+    let dialogType: String
+    let success: Bool
+}
+
+struct PreviewResponse: Codable {
     let dialogType: String
     let success: Bool
 }

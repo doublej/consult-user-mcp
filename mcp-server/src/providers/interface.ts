@@ -7,6 +7,8 @@ import type {
   TextInputResult,
   NotifyOptions,
   NotifyResult,
+  PreviewOptions,
+  PreviewResult,
   QuestionsOptions,
   QuestionsResult,
 } from "../types.js";
@@ -47,6 +49,11 @@ export interface DialogProvider {
    * Display a notification (non-blocking).
    */
   notify(opts: NotifyOptions): Promise<NotifyResult>;
+
+  /**
+   * Display a preview of the response before sending (non-blocking, no history).
+   */
+  preview(opts: PreviewOptions): Promise<PreviewResult>;
 
   /**
    * Display multiple questions in a single dialog.

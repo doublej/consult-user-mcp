@@ -174,6 +174,24 @@ private struct BehaviorSettingsSection: View {
         SettingsSectionContainer(title: "Behavior") {
             VStack(spacing: 0) {
                 SettingsToggleRow(
+                    icon: "text.bubble",
+                    title: "Humanize responses",
+                    subtitle: "Return plain-text instructions instead of JSON for non-answer states",
+                    isOn: $settings.humanizeResponses
+                )
+
+                Divider().padding(.leading, 40)
+
+                SettingsToggleRow(
+                    icon: "eye",
+                    title: "Review before send",
+                    subtitle: "Briefly show the response before returning it to the agent",
+                    isOn: $settings.reviewBeforeSend
+                )
+
+                Divider().padding(.leading, 40)
+
+                SettingsToggleRow(
                     icon: "timer",
                     title: "Button activation delay",
                     subtitle: "Prevent accidental clicks",
@@ -206,6 +224,8 @@ private struct BehaviorSettingsSection: View {
             }
             .padding(.vertical, 4)
         }
+        .onChange(of: settings.humanizeResponses) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.reviewBeforeSend) { _, _ in settings.saveToFile() }
         .onChange(of: settings.buttonCooldownEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.buttonCooldownDuration) { _, _ in settings.saveToFile() }
     }

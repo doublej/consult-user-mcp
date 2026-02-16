@@ -22,6 +22,9 @@ export function compactResponse(type: AskType, raw: unknown): Record<string, unk
     return out;
   }
 
+  // Ask differently takes priority over feedback/normal/cancelled
+  if (r.askDifferently) return { askDifferently: r.askDifferently };
+
   // Feedback takes priority over normal/cancelled
   if (r.feedbackText) return { feedbackText: r.feedbackText };
 

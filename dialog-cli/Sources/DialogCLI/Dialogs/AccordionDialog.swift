@@ -129,6 +129,7 @@ struct SwiftUIAccordionDialog: View {
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
     let onFeedback: (String, [String: QuestionAnswer]) -> Void
+    let onAskDifferently: (String) -> Void
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
     @State private var expandedId: String?
@@ -152,7 +153,11 @@ struct SwiftUIAccordionDialog: View {
     }
 
     var body: some View {
-        DialogContainer(keyHandler: handleKeyPress) { expandedTool in
+        DialogContainer(
+            keyHandler: handleKeyPress,
+            currentDialogType: "form-accordion",
+            onAskDifferently: onAskDifferently
+        ) { expandedTool in
             VStack(spacing: 0) {
                 // Header with progress
                 HStack {
@@ -211,8 +216,10 @@ struct SwiftUIAccordionDialog: View {
                 VStack(spacing: 0) {
                     DialogToolbar(
                         expandedTool: expandedTool,
+                        currentDialogType: "form-accordion",
                         onSnooze: onSnooze,
-                        onFeedback: { feedback in onFeedback(feedback, answers) }
+                        onFeedback: { feedback in onFeedback(feedback, answers) },
+                        onAskDifferently: onAskDifferently
                     )
 
                     // Footer buttons

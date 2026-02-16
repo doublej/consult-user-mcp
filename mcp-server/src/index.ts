@@ -6,7 +6,10 @@ import { WindowsDialogProvider } from "./providers/windows.js";
 import type { DialogProvider } from "./providers/interface.js";
 import type { DialogPosition, QuestionsMode } from "./types.js";
 import { compactResponse } from "./compact.js";
+import { humanize } from "./humanize.js";
+import { readSettings } from "./settings.js";
 import { checkForUpdate } from "./update-check.js";
+import { validateNoAllOfAbove } from "./validate-choices.js";
 
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 const HEARTBEAT_INTERVAL_MS = 15_000;
@@ -104,6 +107,7 @@ server.registerTool("ask", {
 
     case "pick":
       if (!p.choices?.length) throw new Error("choices required for type=pick");
+      validateNoAllOfAbove(p.choices);
       raw = await tracked(provider.choose({
         body: p.body, choices: p.choices, descriptions: p.descriptions,
         allowMultiple: p.multi, defaultSelection: p.default,
@@ -121,6 +125,7 @@ server.registerTool("ask", {
 
     case "form": {
       if (!p.questions?.length) throw new Error("questions required for type=form");
+      for (const q of p.questions) validateNoAllOfAbove(q.options);
       raw = await tracked(provider.questions({
         questions: p.questions.map(q => ({
           id: q.id, question: q.question,
@@ -134,7 +139,16 @@ server.registerTool("ask", {
     }
   }
 
-  return { content: [{ type: "text", text: JSON.stringify(compactResponse(p.type, raw)) }] };
+  const compact = compactResponse(p.type, raw);
+  const { humanizeResponses, reviewBeforeSend } = readSettings();
+  const result = humanizeResponses ? humanize(compact) : compact;
+  const text = typeof result === "string" ? result : JSON.stringify(result);
+
+  if (reviewBeforeSend && !compact.snoozed) {
+    await provider.preview({ body: text }).catch(() => {});
+  }
+
+  return { content: [{ type: "text", text }] };
 });
 
 server.registerTool("notify", {

@@ -70,6 +70,7 @@ public class ConfirmResponse
     public int? SnoozeMinutes { get; set; }
     public int? RemainingSeconds { get; set; }
     public string? FeedbackText { get; set; }
+    public string? AskDifferently { get; set; }
     public string? Instruction { get; set; }
 }
 
@@ -87,6 +88,7 @@ public class ChoiceResponse
     public int? SnoozeMinutes { get; set; }
     public int? RemainingSeconds { get; set; }
     public string? FeedbackText { get; set; }
+    public string? AskDifferently { get; set; }
     public string? Instruction { get; set; }
 }
 
@@ -101,12 +103,19 @@ public class TextInputResponse
     public int? SnoozeMinutes { get; set; }
     public int? RemainingSeconds { get; set; }
     public string? FeedbackText { get; set; }
+    public string? AskDifferently { get; set; }
     public string? Instruction { get; set; }
 }
 
 public class NotifyResponse
 {
     public string DialogType { get; set; } = "notify";
+    public bool Success { get; set; }
+}
+
+public class PreviewResponse
+{
+    public string DialogType { get; set; } = "preview";
     public bool Success { get; set; }
 }
 

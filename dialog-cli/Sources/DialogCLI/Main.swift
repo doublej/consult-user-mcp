@@ -65,7 +65,7 @@ static func run() {
 
     guard args.count >= 2 else {
         fputs("Usage: dialog-cli <command> [json]\n", stderr)
-        fputs("Commands: confirm, choose, textInput, notify, questions, pulse\n", stderr)
+        fputs("Commands: confirm, choose, textInput, notify, preview, questions, pulse\n", stderr)
         fputs("Options: --version, -v\n", stderr)
         exit(1)
     }
@@ -90,7 +90,7 @@ static func run() {
 
     guard args.count >= 3 else {
         fputs("Usage: dialog-cli <command> <json>\n", stderr)
-        fputs("Commands: confirm, choose, textInput, notify, questions, pulse\n", stderr)
+        fputs("Commands: confirm, choose, textInput, notify, preview, questions, pulse\n", stderr)
         exit(1)
     }
 
@@ -160,6 +160,14 @@ static func run() {
             exit(1)
         }
         let response = manager.notify(request)
+        outputData = try? encoder.encode(response)
+
+    case "preview":
+        guard let request = try? decoder.decode(PreviewRequest.self, from: jsonData) else {
+            fputs("Invalid preview request\n", stderr)
+            exit(1)
+        }
+        let response = manager.preview(request)
         outputData = try? encoder.encode(response)
 
     case "questions":

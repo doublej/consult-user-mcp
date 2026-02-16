@@ -26,8 +26,10 @@ enum SnoozeDuration: Int, CaseIterable {
 struct DialogToolbar: View {
     @Binding var expandedTool: ToolbarTool?
     @State private var feedbackText: String = ""
+    let currentDialogType: String
     let onSnooze: (Int) -> Void
     let onFeedback: (String) -> Void
+    let onAskDifferently: (String) -> Void
 
     enum ToolbarTool {
         case snooze
@@ -58,6 +60,11 @@ struct DialogToolbar: View {
                     label: "Feedback",
                     isActive: expandedTool == .feedback,
                     action: { toggleTool(.feedback) }
+                )
+
+                AskDifferentlyButton(
+                    currentDialogType: currentDialogType,
+                    onSelect: onAskDifferently
                 )
 
                 Spacer()
@@ -181,6 +188,41 @@ private struct ToolbarButton: View {
     }
 }
 
+// MARK: - Ask Differently Button
+
+private struct AskDifferentlyButton: View {
+    let currentDialogType: String
+    let onSelect: (String) -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Button {
+            if let type = AskDifferentlyMenuHelper.show(currentDialogType: currentDialogType) {
+                onSelect(type)
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.2.squarepath")
+                    .font(.system(size: 12, weight: .medium))
+                Text("Ask differently")
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .foregroundColor(isHovered ? Theme.Colors.accentBlue : Theme.Colors.textSecondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(isHovered ? Theme.Colors.cardHover : Color.clear)
+            )
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering in
+            isHovered = hovering
+        }
+    }
+}
+
 // MARK: - Snooze Button
 
 private struct SnoozeButton: View {
@@ -208,5 +250,64 @@ private struct SnoozeButton: View {
         .onHover { hovering in
             isHovered = hovering
         }
+    }
+}
+
+// MARK: - Ask Differently NSMenu Helper
+
+/// Shows the "Ask differently" NSMenu and returns the selected type.
+/// Uses NSMenuDelegate instead of target-action because the dialog runs
+/// in NSApp.runModal, which blocks action delivery to non-window targets.
+class AskDifferentlyMenuHelper: NSObject, NSMenuDelegate {
+    private var selectedType: String?
+    private var lastHighlightedItem: NSMenuItem?
+    private static var active: AskDifferentlyMenuHelper?
+
+    static let options: [(label: String, type: String)] = [
+        ("Confirmation", "confirm"),
+        ("Single Select", "pick"),
+        ("Multi Select", "pick-multi"),
+        ("Text Input", "text"),
+        ("Password", "text-hidden"),
+        ("Wizard Form", "form-wizard"),
+        ("Accordion Form", "form-accordion"),
+    ]
+
+    func menu(_ menu: NSMenu, willHighlight item: NSMenuItem?) {
+        lastHighlightedItem = item
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        if let item = lastHighlightedItem, item.isEnabled {
+            selectedType = item.representedObject as? String
+        }
+    }
+
+    static func show(currentDialogType: String) -> String? {
+        guard let window = NSApp.keyWindow, let view = window.contentView else { return nil }
+
+        let helper = AskDifferentlyMenuHelper()
+        active = helper
+
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+        menu.delegate = helper
+
+        for option in options {
+            let item = NSMenuItem(title: option.label, action: nil, keyEquivalent: "")
+            item.representedObject = option.type
+            item.isEnabled = option.type != currentDialogType
+            if option.type == currentDialogType {
+                item.state = .on
+            }
+            menu.addItem(item)
+        }
+
+        let point = NSPoint(x: 20, y: 50)
+        menu.popUp(positioning: nil, at: point, in: view)
+
+        let result = helper.selectedType
+        active = nil
+        return result
     }
 }

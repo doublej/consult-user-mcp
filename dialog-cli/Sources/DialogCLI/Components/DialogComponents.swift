@@ -238,6 +238,8 @@ struct DialogFooter: View {
 struct DialogContainer<Content: View>: View {
     let onEscape: (() -> Void)?
     let keyHandler: ((UInt16, NSEvent.ModifierFlags) -> Bool)?
+    let currentDialogType: String
+    let onAskDifferently: ((String) -> Void)?
     let contentBuilder: (Binding<DialogToolbar.ToolbarTool?>) -> Content
 
     @State private var keyboardMonitor: KeyboardNavigationMonitor?
@@ -256,10 +258,14 @@ struct DialogContainer<Content: View>: View {
     init(
         onEscape: (() -> Void)? = nil,
         keyHandler: ((UInt16, NSEvent.ModifierFlags) -> Bool)? = nil,
+        currentDialogType: String = "",
+        onAskDifferently: ((String) -> Void)? = nil,
         @ViewBuilder content: @escaping (Binding<DialogToolbar.ToolbarTool?>) -> Content
     ) {
         self.onEscape = onEscape
         self.keyHandler = keyHandler
+        self.currentDialogType = currentDialogType
+        self.onAskDifferently = onAskDifferently
         self.contentBuilder = content
     }
 
@@ -319,6 +325,12 @@ struct DialogContainer<Content: View>: View {
             }
             if !isEditingText && keyCode == KeyCode.f && expandedTool != .feedback {
                 toggleTool(.feedback)
+                return true
+            }
+            if !isEditingText && keyCode == KeyCode.a && onAskDifferently != nil {
+                if let type = AskDifferentlyMenuHelper.show(currentDialogType: currentDialogType) {
+                    onAskDifferently?(type)
+                }
                 return true
             }
             if keyCode == KeyCode.returnKey && expandedTool == .feedback {

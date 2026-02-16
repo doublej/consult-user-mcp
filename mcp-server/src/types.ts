@@ -13,6 +13,7 @@ export interface ConfirmResult {
   snoozeMinutes?: number;
   remainingSeconds?: number;
   feedbackText?: string;
+  askDifferently?: string;
   instruction?: string;
 }
 
@@ -29,6 +30,7 @@ export interface ChoiceResult {
   snoozeMinutes?: number;
   remainingSeconds?: number;
   feedbackText?: string;
+  askDifferently?: string;
   instruction?: string;
 }
 
@@ -43,6 +45,7 @@ export interface TextInputResult {
   snoozeMinutes?: number;
   remainingSeconds?: number;
   feedbackText?: string;
+  askDifferently?: string;
   instruction?: string;
 }
 
@@ -91,6 +94,17 @@ export interface NotifyOptions {
   projectPath?: string;
 }
 
+// Options for preview (review-before-send)
+export interface PreviewOptions {
+  body: string;
+}
+
+// Result for preview
+export interface PreviewResult {
+  dialogType: string;
+  success: boolean;
+}
+
 // Question definition for multi-question dialogs
 export interface Question {
   id: string;
@@ -121,5 +135,6 @@ export interface QuestionsResult {
   snoozeMinutes?: number;
   remainingSeconds?: number;
   feedbackText?: string;
+  askDifferently?: string;
   instruction?: string;
 }

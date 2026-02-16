@@ -13,6 +13,8 @@ import type {
   TextInputResult,
   NotifyOptions,
   NotifyResult,
+  PreviewOptions,
+  PreviewResult,
   QuestionsOptions,
   QuestionsResult,
 } from "../types.js";
@@ -65,11 +67,11 @@ export class SwiftDialogProvider implements DialogProvider {
   }
 
   private async runCli<T>(command: string, args: object, projectPath?: string): Promise<T> {
-    if (command !== "notify" && command !== "pulse" && this.activeDialog) {
+    if (command !== "notify" && command !== "preview" && command !== "pulse" && this.activeDialog) {
       return this.activeDialog as Promise<T>;
     }
     const promise = this.execCli<T>(command, args, projectPath);
-    if (command !== "notify" && command !== "pulse") {
+    if (command !== "notify" && command !== "preview" && command !== "pulse") {
       this.activeDialog = promise;
       promise.finally(() => { this.activeDialog = null; }).catch(() => {});
     }
@@ -128,6 +130,10 @@ export class SwiftDialogProvider implements DialogProvider {
   async notify(opts: NotifyOptions): Promise<NotifyResult> {
     const { projectPath, ...args } = opts;
     return this.runCli<NotifyResult>("notify", args, projectPath);
+  }
+
+  async preview(opts: PreviewOptions): Promise<PreviewResult> {
+    return this.runCli<PreviewResult>("preview", opts);
   }
 
   async questions(opts: QuestionsOptions): Promise<QuestionsResult> {

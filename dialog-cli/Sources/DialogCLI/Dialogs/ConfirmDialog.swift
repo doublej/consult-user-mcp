@@ -12,27 +12,34 @@ struct SwiftUIConfirmDialog: View {
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
     let onFeedback: (String) -> Void
+    let onAskDifferently: (String) -> Void
 
     var body: some View {
-        DialogContainer(keyHandler: { keyCode, _ in
-            switch keyCode {
-            case KeyCode.escape:
-                return false
-            case KeyCode.returnKey:
-                onConfirm()
-                return true
-            default:
-                return false
-            }
-        }) { expandedTool in
+        DialogContainer(
+            keyHandler: { keyCode, _ in
+                switch keyCode {
+                case KeyCode.escape:
+                    return false
+                case KeyCode.returnKey:
+                    onConfirm()
+                    return true
+                default:
+                    return false
+                }
+            },
+            currentDialogType: "confirm",
+            onAskDifferently: onAskDifferently
+        ) { expandedTool in
             VStack(spacing: 0) {
                 DialogHeader(icon: "questionmark", title: title, body: bodyText)
                     .padding(.bottom, 12)
 
                 DialogToolbar(
                     expandedTool: expandedTool,
+                    currentDialogType: "confirm",
                     onSnooze: onSnooze,
-                    onFeedback: onFeedback
+                    onFeedback: onFeedback,
+                    onAskDifferently: onAskDifferently
                 )
 
                 DialogFooter(

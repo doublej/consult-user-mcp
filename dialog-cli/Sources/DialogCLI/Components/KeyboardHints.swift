@@ -11,7 +11,8 @@ struct KeyboardHint: Identifiable {
 extension KeyboardHint {
     static let snooze = KeyboardHint(key: "S", label: "snooze")
     static let feedback = KeyboardHint(key: "F", label: "feedback")
-    static let toolbarHints: [KeyboardHint] = [.snooze, .feedback]
+    static let askDifferently = KeyboardHint(key: "A", label: "ask differently")
+    static let toolbarHints: [KeyboardHint] = [.snooze, .feedback, .askDifferently]
 }
 
 struct KeyboardHintsView: View {

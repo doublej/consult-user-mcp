@@ -41,5 +41,6 @@ public class QuestionsResponse
     public int? SnoozeMinutes { get; set; }
     public int? RemainingSeconds { get; set; }
     public string? FeedbackText { get; set; }
+    public string? AskDifferently { get; set; }
     public string? Instruction { get; set; }
 }

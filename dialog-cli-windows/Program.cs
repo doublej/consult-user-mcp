@@ -18,7 +18,7 @@ public static class Program
         if (args.Length < 1)
         {
             Console.Error.WriteLine("Usage: dialog-cli <command> [json]");
-            Console.Error.WriteLine("Commands: confirm, choose, textInput, notify, questions, pulse");
+            Console.Error.WriteLine("Commands: confirm, choose, textInput, notify, preview, questions, pulse");
             return 1;
         }
 
@@ -51,8 +51,8 @@ public static class Program
             return 1;
         }
 
-        // Check snooze state (skip for notify - those are fire-and-forget)
-        if (command != "notify")
+        // Check snooze state (skip for notify/preview - those are fire-and-forget)
+        if (command != "notify" && command != "preview")
         {
             var snooze = SettingsReader.GetSnoozeState();
             if (snooze is not null)
@@ -74,6 +74,7 @@ public static class Program
                 "choose" => mgr.RunDialog<ChooseRequest, ChoiceResponse>(json, mgr.ShowChoose),
                 "textInput" => mgr.RunDialog<TextInputRequest, TextInputResponse>(json, mgr.ShowTextInput),
                 "notify" => mgr.RunNotify(json),
+                "preview" => mgr.RunPreview(json),
                 "questions" => mgr.RunDialog<QuestionsRequest, QuestionsResponse>(json, mgr.ShowQuestions),
                 _ => Error($"Unknown command: {command}"),
             };

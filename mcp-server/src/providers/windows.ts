@@ -13,6 +13,8 @@ import type {
   TextInputResult,
   NotifyOptions,
   NotifyResult,
+  PreviewOptions,
+  PreviewResult,
   QuestionsOptions,
   QuestionsResult,
 } from "../types.js";
@@ -115,6 +117,10 @@ export class WindowsDialogProvider implements DialogProvider {
 
   async notify(opts: NotifyOptions): Promise<NotifyResult> {
     return this.runCli<NotifyResult>("notify", opts);
+  }
+
+  async preview(opts: PreviewOptions): Promise<PreviewResult> {
+    return this.runCli<PreviewResult>("preview", opts);
   }
 
   async questions(opts: QuestionsOptions): Promise<QuestionsResult> {

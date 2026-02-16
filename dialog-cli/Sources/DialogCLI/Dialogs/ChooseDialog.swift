@@ -13,11 +13,12 @@ struct SwiftUIChooseDialog: View {
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
     let onFeedback: (String, Set<Int>) -> Void
+    let onAskDifferently: (String) -> Void
 
     @State private var selectedIndices: Set<Int> = []
     @State private var focusedIndex: Int = 0
 
-    init(body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String, Set<Int>) -> Void) {
+    init(body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String, Set<Int>) -> Void, onAskDifferently: @escaping (String) -> Void) {
         self.bodyText = body
         self.choices = choices
         self.descriptions = descriptions
@@ -27,6 +28,7 @@ struct SwiftUIChooseDialog: View {
         self.onCancel = onCancel
         self.onSnooze = onSnooze
         self.onFeedback = onFeedback
+        self.onAskDifferently = onAskDifferently
 
         if let defaultSel = defaultSelection, let idx = choices.firstIndex(of: defaultSel) {
             _selectedIndices = State(initialValue: [idx])
@@ -35,7 +37,11 @@ struct SwiftUIChooseDialog: View {
     }
 
     var body: some View {
-        DialogContainer(keyHandler: handleKeyPress) { expandedTool in
+        DialogContainer(
+            keyHandler: handleKeyPress,
+            currentDialogType: allowMultiple ? "pick-multi" : "pick",
+            onAskDifferently: onAskDifferently
+        ) { expandedTool in
             VStack(spacing: 0) {
                 headerView
                 choicesScrollView
@@ -43,8 +49,10 @@ struct SwiftUIChooseDialog: View {
 
                 DialogToolbar(
                     expandedTool: expandedTool,
+                    currentDialogType: allowMultiple ? "pick-multi" : "pick",
                     onSnooze: onSnooze,
-                    onFeedback: { feedback in onFeedback(feedback, selectedIndices) }
+                    onFeedback: { feedback in onFeedback(feedback, selectedIndices) },
+                    onAskDifferently: onAskDifferently
                 )
 
                 footerView

@@ -11,6 +11,7 @@ struct SwiftUITextInputDialog: View {
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
     let onFeedback: (String) -> Void
+    let onAskDifferently: (String) -> Void
 
     @State private var inputText: String
 
@@ -22,7 +23,8 @@ struct SwiftUITextInputDialog: View {
         onSubmit: @escaping (String) -> Void,
         onCancel: @escaping () -> Void,
         onSnooze: @escaping (Int) -> Void,
-        onFeedback: @escaping (String) -> Void
+        onFeedback: @escaping (String) -> Void,
+        onAskDifferently: @escaping (String) -> Void
     ) {
         self.title = title
         self.bodyText = bodyText
@@ -32,22 +34,27 @@ struct SwiftUITextInputDialog: View {
         self.onCancel = onCancel
         self.onSnooze = onSnooze
         self.onFeedback = onFeedback
+        self.onAskDifferently = onAskDifferently
         self._inputText = State(initialValue: defaultValue)
     }
 
     var body: some View {
-        DialogContainer(keyHandler: { keyCode, _ in
-            switch keyCode {
-            case KeyCode.escape:
-                onCancel()
-                return true
-            case KeyCode.returnKey:
-                onSubmit(inputText)
-                return true
-            default:
-                return false
-            }
-        }) { expandedTool in
+        DialogContainer(
+            keyHandler: { keyCode, _ in
+                switch keyCode {
+                case KeyCode.escape:
+                    onCancel()
+                    return true
+                case KeyCode.returnKey:
+                    onSubmit(inputText)
+                    return true
+                default:
+                    return false
+                }
+            },
+            currentDialogType: isHidden ? "text-hidden" : "text",
+            onAskDifferently: onAskDifferently
+        ) { expandedTool in
             VStack(spacing: 0) {
                 DialogHeader(
                     icon: isHidden ? "lock.fill" : "text.cursor",
@@ -67,8 +74,10 @@ struct SwiftUITextInputDialog: View {
 
                 DialogToolbar(
                     expandedTool: expandedTool,
+                    currentDialogType: isHidden ? "text-hidden" : "text",
                     onSnooze: onSnooze,
-                    onFeedback: onFeedback
+                    onFeedback: onFeedback,
+                    onAskDifferently: onAskDifferently
                 )
 
                 DialogFooter(

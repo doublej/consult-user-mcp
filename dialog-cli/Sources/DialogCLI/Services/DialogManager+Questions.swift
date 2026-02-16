@@ -7,7 +7,7 @@ extension DialogManager {
         if snoozeCheck.active, let remaining = snoozeCheck.remainingSeconds {
             let summary = request.questions.first?.question ?? "Multiple questions"
             SnoozedRequestsManager.append(clientName: getClientName(), dialogType: "questions", summary: summary)
-            return QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: true, snoozeMinutes: nil, remainingSeconds: remaining, feedbackText: nil, instruction: snoozeActiveInstruction(remaining: remaining))
+            return QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: true, snoozeMinutes: nil, remainingSeconds: remaining, feedbackText: nil, askDifferently: nil, instruction: snoozeActiveInstruction(remaining: remaining))
         }
 
         NSApp.setActivationPolicy(.accessory)
@@ -35,7 +35,7 @@ extension DialogManager {
                 }
             }
 
-            return QuestionsResponse(dialogType: "questions", answers: responseAnswers, cancelled: cancelled, dismissed: dismissed, completedCount: completedCount, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+            return QuestionsResponse(dialogType: "questions", answers: responseAnswers, cancelled: cancelled, dismissed: dismissed, completedCount: completedCount, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
         }
 
         let onComplete: ([String: QuestionAnswer]) -> Void = { answers in
@@ -44,19 +44,24 @@ extension DialogManager {
         }
 
         let onCancel: () -> Void = {
-            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: false, completedCount: 0, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: false, completedCount: 0, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
             NSApp.stopModal()
         }
 
         let onSnooze: (Int) -> Void = { minutes in
             UserSettings.setSnooze(minutes: minutes)
-            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, instruction: self.snoozeInstruction(minutes: minutes))
+            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, askDifferently: nil, instruction: self.snoozeInstruction(minutes: minutes))
             NSApp.stopModal()
         }
 
         let onFeedback: (String, [String: QuestionAnswer]) -> Void = { feedback, currentAnswers in
             let response = buildResponse(answers: currentAnswers, cancelled: false, dismissed: false)
-            result = QuestionsResponse(dialogType: "questions", answers: response.answers, cancelled: false, dismissed: false, completedCount: response.completedCount, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, instruction: nil)
+            result = QuestionsResponse(dialogType: "questions", answers: response.answers, cancelled: false, dismissed: false, completedCount: response.completedCount, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
+            NSApp.stopModal()
+        }
+
+        let onAskDifferently: (String) -> Void = { type in
+            result = QuestionsResponse(dialogType: "questions", answers: [:], cancelled: false, dismissed: false, completedCount: 0, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: type, instruction: nil)
             NSApp.stopModal()
         }
 
@@ -68,7 +73,8 @@ extension DialogManager {
                 onComplete: onComplete,
                 onCancel: onCancel,
                 onSnooze: onSnooze,
-                onFeedback: onFeedback
+                onFeedback: onFeedback,
+                onAskDifferently: onAskDifferently
             ))
         default:
             dialogContent = AnyView(SwiftUIAccordionDialog(
@@ -76,7 +82,8 @@ extension DialogManager {
                 onComplete: onComplete,
                 onCancel: onCancel,
                 onSnooze: onSnooze,
-                onFeedback: onFeedback
+                onFeedback: onFeedback,
+                onAskDifferently: onAskDifferently
             ))
         }
 
@@ -95,7 +102,7 @@ extension DialogManager {
         FocusManager.shared.reset()
         window.close()
 
-        let response = result ?? QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: true, completedCount: 0, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, instruction: nil)
+        let response = result ?? QuestionsResponse(dialogType: "questions", answers: [:], cancelled: true, dismissed: true, completedCount: 0, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
 
         // Record to history (skip if snoozed)
         if response.snoozed != true {

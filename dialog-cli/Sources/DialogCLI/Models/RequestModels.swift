@@ -42,3 +42,7 @@ struct NotifyRequest: Codable {
     let title: String
     let sound: Bool
 }
+
+struct PreviewRequest: Codable {
+    let body: String
+}

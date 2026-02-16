@@ -22,6 +22,8 @@ final class DialogSettings: ObservableObject {
     @AppStorage("playSoundForQuestions") var playSoundForQuestions: Bool = true
     @AppStorage("playSoundForNotifications") var playSoundForNotifications: Bool = false
     @AppStorage("muteSoundsWhileSnoozed") var muteSoundsWhileSnoozed: Bool = true
+    @AppStorage("humanizeResponses") var humanizeResponses: Bool = true
+    @AppStorage("reviewBeforeSend") var reviewBeforeSend: Bool = false
 
     // MARK: - Update Settings (persisted via AppStorage)
 
@@ -151,6 +153,8 @@ final class DialogSettings: ObservableObject {
         var latestKnownVersion: String?
         var buttonCooldownEnabled: Bool?
         var buttonCooldownDuration: Double?
+        var humanizeResponses: Bool?
+        var reviewBeforeSend: Bool?
     }
 
     func saveToFile() {
@@ -172,7 +176,9 @@ final class DialogSettings: ObservableObject {
             lastUpdateCheckTime: lastUpdateCheckTime > 0 ? lastUpdateCheckTime : nil,
             latestKnownVersion: latestKnownVersion.isEmpty ? nil : latestKnownVersion,
             buttonCooldownEnabled: buttonCooldownEnabled,
-            buttonCooldownDuration: buttonCooldownDuration
+            buttonCooldownDuration: buttonCooldownDuration,
+            humanizeResponses: humanizeResponses,
+            reviewBeforeSend: reviewBeforeSend
         )
 
         let encoder = JSONEncoder()
@@ -231,6 +237,12 @@ final class DialogSettings: ObservableObject {
         }
         if let cooldownDuration = settings.buttonCooldownDuration {
             buttonCooldownDuration = cooldownDuration
+        }
+        if let humanize = settings.humanizeResponses {
+            humanizeResponses = humanize
+        }
+        if let review = settings.reviewBeforeSend {
+            reviewBeforeSend = review
         }
     }
 

@@ -89,6 +89,7 @@ struct SwiftUIWizardDialog: View {
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
     let onFeedback: (String, [String: QuestionAnswer]) -> Void
+    let onAskDifferently: (String) -> Void
 
     @State private var currentIndex = 0
     @State private var answers: [String: QuestionAnswer] = [:]
@@ -101,7 +102,11 @@ struct SwiftUIWizardDialog: View {
     private var isLast: Bool { currentIndex == questions.count - 1 }
 
     var body: some View {
-        DialogContainer(keyHandler: handleKeyPress) { expandedTool in
+        DialogContainer(
+            keyHandler: handleKeyPress,
+            currentDialogType: "form-wizard",
+            onAskDifferently: onAskDifferently
+        ) { expandedTool in
             VStack(spacing: 0) {
                 // Progress bar
                 ProgressBar(current: currentIndex + 1, total: questions.count)
@@ -144,8 +149,10 @@ struct SwiftUIWizardDialog: View {
                 VStack(spacing: 0) {
                     DialogToolbar(
                         expandedTool: expandedTool,
+                        currentDialogType: "form-wizard",
                         onSnooze: onSnooze,
-                        onFeedback: { feedback in onFeedback(feedback, answers) }
+                        onFeedback: { feedback in onFeedback(feedback, answers) },
+                        onAskDifferently: onAskDifferently
                     )
 
                     // Navigation buttons

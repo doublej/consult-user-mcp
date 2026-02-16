@@ -1,10 +1,10 @@
-# Claude Code Notes
+# Consult User MCP
 
 ## Development Workflow
 
-The installed app at `/Applications/Consult User MCP.app` runs its own bundled binaries. Local builds do NOT automatically update the installed app.
+The installed app at `/Applications/Consult User MCP.app` runs its own bundled binaries. Local builds do NOT update the installed app.
 
-**Use `bun run dev` for all development builds.** It builds everything (dialog-cli, mcp-server, macos-app) in debug mode and copies binaries into the installed app bundle. After running it, restart the tray app to pick up changes.
+**MUST use `bun run dev` for all development builds.** Builds dialog-cli, mcp-server, macos-app in debug mode and copies binaries into the installed app bundle. Restart the tray app after to pick up changes.
 
 ```bash
 bun run dev          # Build all + install to /Applications (dev workflow)
@@ -12,73 +12,91 @@ bun run build        # Build mcp-server + dialog-cli only (no install)
 bun run build:bundle # Full release build + create app bundle from scratch
 ```
 
-**Important:** Never use bare `swift build` or `bun run build` during development — those only compile locally without updating the running app.
-
-## tmux send-keys Submission Issue
-
-When sending commands to tmux panes running Claude Code, use TWO separate commands:
-
-```bash
-# WRONG - Enter gets typed as literal text
-tmux send-keys -t session:window.pane "command" Enter
-
-# CORRECT - Separate send-keys for Enter
-tmux send-keys -t session:window.pane "command"
-tmux send-keys -t session:window.pane Enter
-
-# ALSO CORRECT - Use C-m in same command
-tmux send-keys -t session:window.pane "command" C-m
-```
-
-The issue is that when `Enter` follows a quoted string, it may be interpreted as part of the string or not processed correctly. Separating into two commands ensures reliable submission.
-
-## Agent Coordination Pattern
-
-When coordinating multiple Claude Code agents in tmux:
-
-1. Send command text to pane
-2. Wait briefly (0.1-0.3s)
-3. Send Enter separately
-4. Wait for agents to start processing before checking status
+**NEVER** use bare `swift build` or `bun run build` during development — those compile locally but do not update the running app.
 
 ## Release Checklist
 
 ### macOS
 
-1. Update `macos-app/VERSION` file with the new version number
-2. **If baseprompt changed:** Update version in `macos-app/Sources/Resources/base-prompt.md` (first line comment)
+1. Update `macos-app/VERSION` with the new version number
+2. **If baseprompt changed:** update version in `macos-app/Sources/Resources/base-prompt.md` (first line comment)
 3. Update `docs/src/lib/data/releases.json` (single source of truth)
-4. Generate CHANGELOG.md: `bun run changelog`
+4. Generate CHANGELOG: `bun run changelog`
 5. Validate versions: `bash scripts/validate-baseprompt-version.sh`
 6. Commit all changes
-7. Run `bash scripts/release.sh --platform macos` — builds, zips, tags, and creates the GitHub release
+7. Run: `bash scripts/release.sh --platform macos` — builds, zips, tags, creates GitHub release
 
-### Windows
+Use `--dry-run` to validate preconditions without executing.
 
-1. Update `windows-app/VERSION` with the new version number
-2. Update `docs/src/lib/data/releases.json`
-3. Generate CHANGELOG.md: `bun run changelog`
-4. Commit all changes
-5. On Windows: Run `pwsh scripts/build-windows-installer.ps1` — builds Velopack installer
-6. On macOS: Run `bash scripts/release.sh --platform windows --asset-dir releases/windows`
 
-Use `bash scripts/release.sh --platform <platform> --dry-run` to validate pre-conditions without executing.
+## Dialog Types & MCP Tools
 
-**Warning:** Never run `gh release create` manually — use the script to ensure assets are always attached. Releases without assets break the auto-updater.
+2 MCP tools: `ask` (interactive) and `notify` (fire-and-forget). When adding features, fixing bugs, or writing tests — **ALL dialog types MUST be considered**.
+
+**Invariant:** The debug menu (`macos-app/Sources/AppDelegate.swift`) and visual test fixtures (`test-cases/cases/`) MUST cover every dialog type. When adding a new type, update both.
+
+### All dialog types (flattened)
+
+| # | Dialog | `ask` type | CLI command | Key params | Response |
+|---|--------|-----------|-------------|------------|----------|
+| 1 | **Confirm** | `confirm` | `confirm` | `body`, `title`, `yes`, `no` | `answer: bool` |
+| 2 | **Single-select** | `pick` | `choose` | `body`, `choices[]`, `descriptions[]?`, `default?` | `answer: string` |
+| 3 | **Multi-select** | `pick` | `choose` | `body`, `choices[]`, `descriptions[]?`, `multi: true` | `answer: string[]` |
+| 4 | **Text input** | `text` | `textInput` | `body`, `title`, `default` | `answer: string` |
+| 5 | **Password input** | `text` | `textInput` | `body`, `title`, `hidden: true` | `answer: string` |
+| 6 | **Wizard form** | `form` | `questions` | `body`, `questions[]`, `mode: "wizard"` | `answer: Record<id, string\|string[]>` |
+| 7 | **Accordion form** | `form` | `questions` | `body`, `questions[]`, `mode: "accordion"` | `answer: Record<id, string\|string[]>` |
+| 8 | **Notification** | — (`notify`) | `notify` | `body`, `title`, `sound` | fire-and-forget |
+
+`questions[]` items: `id`, `question`, `options[]`, `descriptions[]?`, `multi`.
+
+### Shared parameters (all `ask` types)
+
+`position` (`"left"` / `"center"` / `"right"`), `project_path` (shows project badge), `MCP_CLIENT_NAME` env var (prefixes title), `DIALOG_THEME` env var (`"sunset"` / `"midnight"` / system default).
+
+### Shared response states (all interactive dialogs)
+
+Every `ask` dialog can return: normal `answer`, `snoozed: true`, `askDifferently: "<type>"`, `feedbackText`, or `cancelled: true`. Responses compacted by `compact.ts` (strips null fields, maps `confirmed` → `answer: bool`, merges `dismissed` into `cancelled`). Compact priority: snoozed > askDifferently > feedbackText > cancelled > answer.
+
+### Windows (MUST run on Windows machine)
+
+.NET/WPF and Velopack require a Windows environment.
+
+```bash
+ssh user@192.168.178.197
+```
+
+Repo: `C:\Users\jurre\PycharmProjects\consult-user-mcp`. Commands run via `cmd.exe` by default; use `powershell -Command "..."` or `powershell -ExecutionPolicy Bypass -File ...` for PowerShell.
+
+**Prerequisites:** `dotnet` SDK 8.0, `node`/`npm`, `gh` CLI (authenticated), `vpk` (`dotnet tool install -g vpk`).
+
+**Steps:**
+
+1. On macOS: update `windows-app/VERSION`, `releases.json`, `bun run changelog`, commit + push
+2. On Windows (via SSH):
+   ```bash
+   cd C:\Users\jurre\PycharmProjects\consult-user-mcp
+   git checkout main && git pull
+   powershell -ExecutionPolicy Bypass -File scripts\build-windows-installer.ps1
+   ```
+3. Create release from Windows (gh is authenticated, assets are local):
+   ```bash
+   git tag windows/vX.Y.Z HEAD && git push origin windows/vX.Y.Z
+   gh release create windows/vX.Y.Z --title "Windows vX.Y.Z — ..." --notes "..." releases/windows/*
+   ```
+
+**NEVER** run `gh release create` without attaching assets — releases without assets break the auto-updater.
+
+**Gotcha:** The build script uses `$ErrorActionPreference = "Stop"`, so Node.js stderr warnings (e.g. ExperimentalWarning) can abort it. The script temporarily sets `Continue` around npm/npx commands. Wrap new npm commands the same way.
 
 ## Baseprompt Versioning
 
-The base prompt has its own independent version number:
-- **Location:** `macos-app/Sources/Resources/base-prompt.md` (first line comment)
-- **Format:** `<!-- version: X.Y.Z -->`
-- **Current:** v2.0.0
-- **Validation:** Run `bash scripts/validate-baseprompt-version.sh`
-- **CI:** Automatically validated on every push/PR
+The base prompt has an independent version number.
 
-**When to bump:**
-- Major (X): Breaking changes to tool usage or workflow
-- Minor (Y): New features, examples, or significant guidance improvements
-- Patch (Z): Bug fixes, typos, clarifications
+- **Location:** `macos-app/Sources/Resources/base-prompt.md` (first line: `<!-- version: X.Y.Z -->`)
+- **Current:** v2.0.0
+- **Validate:** `bash scripts/validate-baseprompt-version.sh` (also runs in CI)
+- **Bump:** Major = breaking tool/workflow changes, Minor = new features/guidance, Patch = fixes/typos
 
 ## Windows Project Structure
 
@@ -87,63 +105,17 @@ The base prompt has its own independent version number:
 | `dialog-cli-windows/` | `dialog-cli.exe` | WPF dialog CLI (ephemeral, spawned per dialog) |
 | `windows-app/` | `consult-user-mcp.exe` | WPF tray app (persistent background process) |
 
-- **Installer**: Velopack-based (`scripts/build-windows-installer.ps1`)
-- **Auto-updates**: Velopack delta updates from GitHub Releases
-- **First-run**: Auto-configures Claude Code MCP server, offers startup registration
-- **User data**: `%APPDATA%\ConsultUserMCP\` (settings, snooze state, history)
-
-## Dialog Types & MCP Tools
-
-This project exposes 2 MCP tools: `ask` (unified interactive dialog) and `notify` (fire-and-forget). The `ask` tool routes to 4 dialog types via the `type` field. When adding features, fixing bugs, or creating test/debug coverage, **all 4 dialog types and their key variants must be considered**.
-
-### Invariant
-
-The debug menu (`macos-app/Sources/AppDelegate.swift`) and visual test fixtures (`test-cases/cases/`) must cover **every dialog type and its major variants**. When adding a new variant or dialog type, update both.
-
-### ask type → CLI command → Dialog types
-
-| `ask` type | CLI Command | Dialog | Key Variants |
-|------------|-------------|--------|-------------|
-| `confirm` | `confirm` | Confirm | basic, custom labels (`yes`/`no`), with project badge |
-| `pick` | `choose` | Choose | single-select, multi-select (`multi: true`), with/without `descriptions` |
-| `text` | `textInput` | Text Input | plain, password (`hidden: true`), with `default` |
-| `form` | `questions` | Questions | wizard mode, accordion mode (`mode`), multi-select questions |
-
-`notify` tool maps directly to the `notify` CLI command.
-
-### Shared parameters (`ask` tool)
-
-| Parameter | CLI env var | Purpose |
-|-----------|------------|---------|
-| `position` | — | `"left"` (default), `"center"`, `"right"` |
-| `project_path` | `MCP_PROJECT_PATH` | Shows project badge in dialog (cached after first call) |
-| — | `MCP_CLIENT_NAME` | Prefixes dialog title |
-| — | `DIALOG_THEME` | `"sunset"`, `"midnight"`, or system default |
-
-### Shared response states (all interactive dialogs)
-
-Every `ask` dialog can return: normal `answer`, `snoozed: true`, `feedbackText`, or `cancelled: true`. Responses are compacted by `compact.ts` (strips null fields, maps `confirmed` → `answer: bool`, merges `dismissed` into `cancelled`). Test fixtures use `testPane: "snooze"` / `testPane: "feedback"` to screenshot expanded toolbar states.
-
-### Type-specific parameters
-
-**confirm**: `body`, `title`, `yes`, `no`
-**pick**: `body`, `choices[]`, `descriptions[]?`, `multi`, `default?`
-**text**: `body`, `title`, `default`, `hidden`
-**form**: `body`, `questions[]` (each: `id`, `question`, `options[]`, `descriptions[]?`, `multi`), `mode` (`"wizard"` | `"accordion"`)
-**notify**: `body`, `title`, `sound`
+Installer: Velopack-based (`scripts/build-windows-installer.ps1`), delta updates from GitHub Releases. First-run auto-configures Claude Code MCP server. User data: `%APPDATA%\ConsultUserMCP\`.
 
 ## Documentation Structure
 
-- **`docs/src/lib/data/releases.json`** - Single source of truth for app releases
-  - Feeds the /docs page: hero dialog (PerspectiveDialog) and changelist (Changelist)
-  - Generates CHANGELOG.md via `bun run changelog`
-  - Only include app changes, never docs-only changes
-- **`CHANGELOG.md`** - Auto-generated from releases.json (do not edit manually)
-- **`docs/src/lib/data/releases.schema.json`** - JSON schema for validation
+- **`docs/src/lib/data/releases.json`** — single source of truth for app releases. Feeds /docs page, generates CHANGELOG.md via `bun run changelog`. Only app changes, never docs-only.
+- **`CHANGELOG.md`** — auto-generated from releases.json. Do not edit manually.
+- **`docs/src/lib/data/releases.schema.json`** — JSON schema for validation.
 
 ### Writing Changelists
 
-Write change entries as **user-facing features and benefits**, not commit messages:
+Write **user-facing features and benefits**, not commit messages:
 
 | Bad (commit-style) | Good (user-facing) |
 |---|---|
@@ -151,5 +123,3 @@ Write change entries as **user-facing features and benefits**, not commit messag
 | Fix snooze crash | Snooze feature now works reliably without crashes |
 | Refactor DialogManager | Dialogs now focus correctly when switching apps |
 | Add execute permission | Installation script now runs without permission errors |
-
-Focus on what users can do or what's improved, not implementation details.

@@ -1,4 +1,4 @@
-<!-- version: 2.1.0 -->
+<!-- version: 2.2.0 -->
 # Consult User MCP - Required Usage
 
 ## Critical Rules
@@ -72,6 +72,7 @@ Normal: `{"answer": true}`, `{"answer": "PostgreSQL"}`, `{"answer": ["Auth", "UI
 Form: `{"answer": {"lang": "TypeScript", "test": "Vitest"}, "completedCount": 2}`
 Cancelled: `{"cancelled": true}`
 Snoozed: `{"snoozed": true, "remainingSeconds": 300}`
+Ask differently: `{"askDifferently": "text"}`
 Feedback: `{"feedbackText": "Actually, I need more context"}`
 
 ## Handling Snooze
@@ -82,6 +83,24 @@ When ANY tool returns `snoozed: true`:
 3. Retry the EXACT same question
 
 **Do NOT** proceed without waiting or ask a different question.
+
+## Handling Ask Differently
+
+When `askDifferently` is returned, the user wants you to re-ask the **same question** using the requested dialog type.
+
+| Value | Re-ask as |
+|-------|-----------|
+| `confirm` | Yes/no confirmation with appropriate labels |
+| `pick` | Single-select list with reasonable choices |
+| `pick-multi` | Multi-select list (`multi: true`) |
+| `text` | Free-form text input |
+| `text-hidden` | Hidden/password text input (`hidden: true`) |
+| `form-wizard` | Step-by-step wizard form (`mode: "wizard"`) |
+| `form-accordion` | Accordion form with all questions visible (`mode: "accordion"`) |
+
+Re-ask the same question immediately, adapting your parameters to fit the new type.
+
+**Do NOT** change the topic or skip the question. The user wants the same information asked in a different format.
 
 ## Handling Feedback
 

@@ -2,6 +2,8 @@ import { describe, test, expect, mock } from "bun:test";
 import { z } from "zod";
 import { SwiftDialogProvider } from "./providers/swift.js";
 import { compactResponse } from "./compact.js";
+import { humanize } from "./humanize.js";
+import { isAllOfTheAbove, validateNoAllOfAbove } from "./validate-choices.js";
 
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -238,6 +240,62 @@ describe("compactResponse", () => {
     expect(r).toEqual({ cancelled: true });
   });
 
+  test("confirm: askDifferently", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: false, cancelled: false,
+      dismissed: false, answer: null, comment: null,
+      askDifferently: "text",
+    });
+    expect(r).toEqual({ askDifferently: "text" });
+  });
+
+  test("pick: askDifferently", () => {
+    const r = compactResponse("pick", {
+      dialogType: "choose", answer: null, cancelled: false,
+      dismissed: false, description: null, comment: null,
+      askDifferently: "confirm",
+    });
+    expect(r).toEqual({ askDifferently: "confirm" });
+  });
+
+  test("text: askDifferently", () => {
+    const r = compactResponse("text", {
+      dialogType: "textInput", answer: null, cancelled: false,
+      dismissed: false, comment: null,
+      askDifferently: "pick",
+    });
+    expect(r).toEqual({ askDifferently: "pick" });
+  });
+
+  test("form: askDifferently", () => {
+    const r = compactResponse("form", {
+      dialogType: "questions", answers: {},
+      cancelled: false, dismissed: false, completedCount: 0,
+      askDifferently: "text",
+    });
+    expect(r).toEqual({ askDifferently: "text" });
+  });
+
+  test("askDifferently takes priority over feedback", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: false, cancelled: false,
+      dismissed: false, answer: null, comment: null,
+      feedbackText: "some feedback",
+      askDifferently: "pick",
+    });
+    expect(r).toEqual({ askDifferently: "pick" });
+  });
+
+  test("snoozed takes priority over askDifferently", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: false, cancelled: false,
+      dismissed: false, answer: null, comment: null,
+      snoozed: true, remainingSeconds: 300,
+      askDifferently: "pick",
+    });
+    expect(r).toEqual({ snoozed: true, remainingSeconds: 300 });
+  });
+
   test("strips null fields from output", () => {
     const r = compactResponse("text", {
       dialogType: "textInput", answer: "hello", cancelled: false,
@@ -247,6 +305,111 @@ describe("compactResponse", () => {
     expect(r).toEqual({ answer: "hello" });
     expect("cancelled" in r).toBe(false);
     expect("snoozed" in r).toBe(false);
+  });
+});
+
+describe("humanize", () => {
+  test("snoozed → plain text with sleep instruction", () => {
+    expect(humanize({ snoozed: true, remainingSeconds: 300 }))
+      .toBe("The user snoozed. Run `sleep 300`, then retry the exact same question.");
+  });
+
+  test("askDifferently → plain text with type description", () => {
+    expect(humanize({ askDifferently: "pick-multi" }))
+      .toBe("The user wants this question re-asked as a multi-select list (type: pick, multi: true).");
+  });
+
+  test("askDifferently: confirm", () => {
+    expect(humanize({ askDifferently: "confirm" }))
+      .toBe("The user wants this question re-asked as a yes/no confirmation (type: confirm).");
+  });
+
+  test("askDifferently: unknown type passes through", () => {
+    expect(humanize({ askDifferently: "future-type" }))
+      .toBe("The user wants this question re-asked as future-type.");
+  });
+
+  test("feedbackText → plain text with feedback", () => {
+    expect(humanize({ feedbackText: "be more specific" }))
+      .toBe('The user gave feedback: "be more specific". Adjust your approach, then re-ask.');
+  });
+
+  test("cancelled → plain text", () => {
+    expect(humanize({ cancelled: true }))
+      .toBe("The user cancelled. Proceed with a reasonable default.");
+  });
+
+  test("normal string answer", () => {
+    expect(humanize({ answer: "PostgreSQL" }))
+      .toBe("The user responded: PostgreSQL");
+  });
+
+  test("confirm true answer", () => {
+    expect(humanize({ answer: true }))
+      .toBe("The user confirmed.");
+  });
+
+  test("confirm false answer", () => {
+    expect(humanize({ answer: false }))
+      .toBe("The user declined.");
+  });
+
+  test("multi-select answer", () => {
+    expect(humanize({ answer: ["Auth", "UI"] }))
+      .toBe("The user selected: Auth, UI");
+  });
+
+  test("form answer", () => {
+    expect(humanize({ answer: { lang: "TS" }, completedCount: 1 }))
+      .toBe("The user answered: lang: TS (1/1 completed)");
+  });
+});
+
+describe("validateNoAllOfAbove", () => {
+  const rejected = [
+    "All of the above",
+    "all the above",
+    "All of these",
+    "Select all",
+    "All options",
+    "Everything",
+    "Everything above",
+    "None of the above",
+    "None of these",
+    "  All of the above  ",
+  ];
+
+  for (const option of rejected) {
+    test(`rejects: "${option}"`, () => {
+      expect(isAllOfTheAbove(option)).toBe(true);
+    });
+  }
+
+  const allowed = [
+    "All sizes",
+    "Above average",
+    "Select all images",
+    "None",
+    "All",
+    "PostgreSQL",
+    "Everything else matters",
+    "None selected yet",
+  ];
+
+  for (const option of allowed) {
+    test(`allows: "${option}"`, () => {
+      expect(isAllOfTheAbove(option)).toBe(false);
+    });
+  }
+
+  test("validateNoAllOfAbove throws on first match", () => {
+    expect(() => validateNoAllOfAbove(["A", "B", "All of the above"])).toThrow(
+      'Do not include "All of the above" style options',
+    );
+  });
+
+  test("validateNoAllOfAbove passes clean list", () => {
+    expect(() => validateNoAllOfAbove(["PostgreSQL", "MySQL", "SQLite"])).not.toThrow();
   });
 });
 

@@ -14,6 +14,11 @@ import { validateNoAllOfAbove } from "./validate-choices.js";
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 const HEARTBEAT_INTERVAL_MS = 15_000;
 
+/** Unescape literal \n and \t that LLMs commonly embed in text instead of actual newlines/tabs. */
+function unescLiterals(s: string): string {
+  return s.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
+}
+
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
     promise,
@@ -95,11 +100,12 @@ server.registerTool("ask", {
   const position = p.position as DialogPosition;
 
   let raw: unknown;
+  const body = unescLiterals(p.body);
 
   switch (p.type) {
     case "confirm":
       raw = await tracked(provider.confirm({
-        body: p.body, title: p.title ?? "Confirmation",
+        body, title: p.title ?? "Confirmation",
         confirmLabel: p.yes, cancelLabel: p.no,
         position, projectPath,
       }), extra);
@@ -109,7 +115,7 @@ server.registerTool("ask", {
       if (!p.choices?.length) throw new Error("choices required for type=pick");
       validateNoAllOfAbove(p.choices);
       raw = await tracked(provider.choose({
-        body: p.body, choices: p.choices, descriptions: p.descriptions,
+        body, choices: p.choices, descriptions: p.descriptions,
         allowMultiple: p.multi, defaultSelection: p.default,
         position, projectPath,
       }), extra);
@@ -117,7 +123,7 @@ server.registerTool("ask", {
 
     case "text":
       raw = await tracked(provider.textInput({
-        body: p.body, title: p.title ?? "Input",
+        body, title: p.title ?? "Input",
         defaultValue: p.default ?? "", hidden: p.hidden,
         position, projectPath,
       }), extra);
@@ -128,7 +134,7 @@ server.registerTool("ask", {
       for (const q of p.questions) validateNoAllOfAbove(q.options);
       raw = await tracked(provider.questions({
         questions: p.questions.map(q => ({
-          id: q.id, question: q.question,
+          id: q.id, question: unescLiterals(q.question),
           options: q.options.map((label, i) => ({ label, description: q.descriptions?.[i] })),
           multiSelect: q.multi,
         })),
@@ -163,7 +169,7 @@ server.registerTool("notify", {
   provider.pulse();
   if (p.project_path) cachedProjectPath = p.project_path;
   const projectPath = p.project_path ?? cachedProjectPath;
-  const r = await provider.notify({ body: p.body, title: p.title, sound: p.sound, projectPath });
+  const r = await provider.notify({ body: unescLiterals(p.body), title: p.title, sound: p.sound, projectPath });
   return { content: [{ type: "text", text: JSON.stringify({ success: r.success }) }] };
 });
 

@@ -223,6 +223,12 @@ class FocusableButtonView: NSView {
         }
     }
 
+    // MARK: - Accessibility
+
+    override func accessibilityRole() -> NSAccessibility.Role? { .button }
+    override func accessibilityLabel() -> String? { title }
+    override func isAccessibilityEnabled() -> Bool { !isDisabled }
+
     override var intrinsicContentSize: NSSize {
         NSSize(width: NSView.noIntrinsicMetric, height: 48)
     }
@@ -544,4 +550,10 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
         }
         return false
     }
+
+    // MARK: - Accessibility
+
+    override func accessibilityRole() -> NSAccessibility.Role? { .textField }
+    override func accessibilityLabel() -> String? { placeholder }
+    override func accessibilityValue() -> Any? { textField.stringValue }
 }

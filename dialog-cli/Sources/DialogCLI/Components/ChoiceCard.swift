@@ -184,6 +184,16 @@ class FocusableChoiceCardView: NSView {
         }
     }
 
+    // MARK: - Accessibility
+
+    override func accessibilityRole() -> NSAccessibility.Role? {
+        isMultiSelect ? .checkBox : .radioButton
+    }
+    override func accessibilityLabel() -> String? { title }
+    override func accessibilityValue() -> Any? {
+        isSelected ? NSNumber(value: 1) : NSNumber(value: 0)
+    }
+
     override var intrinsicContentSize: NSSize {
         // Use a reasonable default width if bounds.width is 0
         let width = bounds.width > 0 ? bounds.width : 300

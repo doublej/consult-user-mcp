@@ -284,7 +284,8 @@ class AskDifferentlyMenuHelper: NSObject, NSMenuDelegate {
     }
 
     static func show(currentDialogType: String) -> String? {
-        guard let window = NSApp.keyWindow, let view = window.contentView else { return nil }
+        guard let window = NSApp.keyWindow ?? NSApp.modalWindow,
+              let view = window.contentView else { return nil }
 
         let helper = AskDifferentlyMenuHelper()
         active = helper

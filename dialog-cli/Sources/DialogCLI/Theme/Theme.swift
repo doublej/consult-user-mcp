@@ -72,7 +72,7 @@ struct SunsetTheme: ThemeProtocol {
 
     let textPrimary = NSColor(red: 1.0, green: 0.96, blue: 0.92, alpha: 1.0)
     let textSecondary = NSColor(red: 0.85, green: 0.75, blue: 0.65, alpha: 1.0)
-    let textMuted = NSColor(red: 0.55, green: 0.45, blue: 0.38, alpha: 1.0)
+    let textMuted = NSColor(red: 0.62, green: 0.52, blue: 0.44, alpha: 1.0)
 
     let accentBlue = NSColor(red: 1.0, green: 0.55, blue: 0.25, alpha: 1.0)  // Orange as primary
     let accentBlueDark = NSColor(red: 0.90, green: 0.45, blue: 0.15, alpha: 1.0)
@@ -99,7 +99,7 @@ struct MidnightTheme: ThemeProtocol {
 
     let textPrimary = NSColor.white
     let textSecondary = NSColor(white: 0.75, alpha: 1.0)
-    let textMuted = NSColor(white: 0.4, alpha: 1.0)
+    let textMuted = NSColor(white: 0.5, alpha: 1.0)
 
     let accentBlue = NSColor(red: 0.35, green: 0.55, blue: 1.0, alpha: 1.0)
     let accentBlueDark = NSColor(red: 0.25, green: 0.45, blue: 0.90, alpha: 1.0)

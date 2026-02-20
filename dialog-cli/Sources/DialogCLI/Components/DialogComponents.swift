@@ -45,6 +45,12 @@ struct MarkdownText: View {
         self.color = color
     }
 
+    // Static regex constants — compiled once, reused across all calls
+    private static let linkRegex = try! NSRegularExpression(pattern: "\\[([^\\]]+)\\]\\(([^)]+)\\)")
+    private static let boldRegex = try! NSRegularExpression(pattern: "\\*\\*([^*]+)\\*\\*")
+    private static let italicRegex = try! NSRegularExpression(pattern: "(?<!\\*)\\*([^*]+)\\*(?!\\*)")
+    private static let codeRegex = try! NSRegularExpression(pattern: "`([^`]+)`")
+
     var body: some View {
         Text(parseMarkdown(text))
             .font(font)
@@ -59,82 +65,66 @@ struct MarkdownText: View {
         let str = String(result.characters)
 
         // Links: [text](url) - process first to avoid conflicts
-        if let linkRegex = try? NSRegularExpression(pattern: "\\[([^\\]]+)\\]\\(([^)]+)\\)") {
-            let matches = linkRegex.matches(in: str, range: NSRange(str.startIndex..., in: str))
-            for match in matches.reversed() {
-                guard let fullRange = Range(match.range, in: str),
-                      let textRange = Range(match.range(at: 1), in: str),
-                      let urlRange = Range(match.range(at: 2), in: str) else { continue }
-                let linkText = String(str[textRange])
-                let urlString = String(str[urlRange])
-                if let attrRange = result.range(of: String(str[fullRange])),
-                   let url = URL(string: urlString) {
-                    var replacement = AttributedString(linkText)
-                    replacement.link = url
-                    replacement.foregroundColor = Theme.Colors.accentBlue
-                    result.replaceSubrange(attrRange, with: replacement)
-                }
+        let linkMatches = Self.linkRegex.matches(in: str, range: NSRange(str.startIndex..., in: str))
+        for match in linkMatches.reversed() {
+            guard let fullRange = Range(match.range, in: str),
+                  let textRange = Range(match.range(at: 1), in: str),
+                  let urlRange = Range(match.range(at: 2), in: str) else { continue }
+            let linkText = String(str[textRange])
+            let urlString = String(str[urlRange])
+            if let attrRange = result.range(of: String(str[fullRange])),
+               let url = URL(string: urlString) {
+                var replacement = AttributedString(linkText)
+                replacement.link = url
+                replacement.foregroundColor = Theme.Colors.accentBlue
+                result.replaceSubrange(attrRange, with: replacement)
             }
         }
 
         // Bold: **text**
-        if let boldRegex = try? NSRegularExpression(pattern: "\\*\\*([^*]+)\\*\\*") {
-            var currentStr = String(result.characters)
-            var matches = boldRegex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
-            while !matches.isEmpty {
-                let match = matches[0]
-                guard let fullRange = Range(match.range, in: currentStr),
-                      let textRange = Range(match.range(at: 1), in: currentStr) else { break }
-                let boldText = String(currentStr[textRange])
-                if let attrRange = result.range(of: String(currentStr[fullRange])) {
-                    var replacement = AttributedString(boldText)
-                    replacement.font = font.bold()
-                    result.replaceSubrange(attrRange, with: replacement)
-                }
-                currentStr = String(result.characters)
-                matches = boldRegex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
-            }
+        result = applyInlinePattern(Self.boldRegex, to: result) { text in
+            var replacement = AttributedString(text)
+            replacement.font = font.bold()
+            return replacement
         }
 
         // Italic: *text* (single asterisks only)
-        if let italicRegex = try? NSRegularExpression(pattern: "(?<!\\*)\\*([^*]+)\\*(?!\\*)") {
-            var currentStr = String(result.characters)
-            var matches = italicRegex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
-            while !matches.isEmpty {
-                let match = matches[0]
-                guard let fullRange = Range(match.range, in: currentStr),
-                      let textRange = Range(match.range(at: 1), in: currentStr) else { break }
-                let italicText = String(currentStr[textRange])
-                if let attrRange = result.range(of: String(currentStr[fullRange])) {
-                    var replacement = AttributedString(italicText)
-                    replacement.font = font.italic()
-                    result.replaceSubrange(attrRange, with: replacement)
-                }
-                currentStr = String(result.characters)
-                matches = italicRegex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
-            }
+        result = applyInlinePattern(Self.italicRegex, to: result) { text in
+            var replacement = AttributedString(text)
+            replacement.font = font.italic()
+            return replacement
         }
 
         // Inline code: `code` - use monospace font
-        if let codeRegex = try? NSRegularExpression(pattern: "`([^`]+)`") {
-            var currentStr = String(result.characters)
-            var matches = codeRegex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
-            while !matches.isEmpty {
-                let match = matches[0]
-                guard let fullRange = Range(match.range, in: currentStr),
-                      let textRange = Range(match.range(at: 1), in: currentStr) else { break }
-                let codeText = String(currentStr[textRange])
-                if let attrRange = result.range(of: String(currentStr[fullRange])) {
-                    var replacement = AttributedString(codeText)
-                    replacement.font = .system(size: 12, design: .monospaced)
-                    replacement.backgroundColor = Theme.Colors.inputBackground
-                    result.replaceSubrange(attrRange, with: replacement)
-                }
-                currentStr = String(result.characters)
-                matches = codeRegex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
-            }
+        result = applyInlinePattern(Self.codeRegex, to: result) { text in
+            var replacement = AttributedString(text)
+            replacement.font = .system(size: 12, design: .monospaced)
+            replacement.backgroundColor = Theme.Colors.inputBackground
+            return replacement
         }
 
+        return result
+    }
+
+    private func applyInlinePattern(
+        _ regex: NSRegularExpression,
+        to attributed: AttributedString,
+        transform: (String) -> AttributedString
+    ) -> AttributedString {
+        var result = attributed
+        var currentStr = String(result.characters)
+        var matches = regex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
+        while !matches.isEmpty {
+            let match = matches[0]
+            guard let fullRange = Range(match.range, in: currentStr),
+                  let textRange = Range(match.range(at: 1), in: currentStr) else { break }
+            let innerText = String(currentStr[textRange])
+            if let attrRange = result.range(of: String(currentStr[fullRange])) {
+                result.replaceSubrange(attrRange, with: transform(innerText))
+            }
+            currentStr = String(result.characters)
+            matches = regex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
+        }
         return result
     }
 }

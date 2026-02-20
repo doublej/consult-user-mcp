@@ -201,10 +201,12 @@ class FocusableButtonView: NSView {
             needsDisplay = true
             return
         }
-        if isPressed && isHovered {
+        let localPoint = convert(event.locationInWindow, from: nil)
+        if isPressed && bounds.contains(localPoint) {
             onClick?()
         }
         isPressed = false
+        isHovered = bounds.contains(localPoint)
         needsDisplay = true
     }
 

@@ -15,7 +15,10 @@
     "start": "cd mcp-server && bun run start",
     "changelog": "bun run scripts/generate-changelog.ts",
     "build:windows": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1",
-    "release:windows": "powershell -ExecutionPolicy Bypass -File scripts/release-windows.ps1"
+    "release:windows": "powershell -ExecutionPolicy Bypass -File scripts/release-windows.ps1",
+    "test": "cd mcp-server && bun test",
+    "test:visual": "bash test-cases/test-runner.sh",
+    "test:screenshots": "cd docs && bun run screenshots"
   },
   "workspaces": [
     "mcp-server"

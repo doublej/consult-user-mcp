@@ -1,0 +1,8 @@
+<svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+  <title>Consult User MCP Icon</title>
+  <!-- Simplified for small sizes: no fillets, bolder stroke (4m), thicker cursor (3m) -->
+  <rect width="1000" height="1000" rx="225" fill="#f5f5f7"/>
+  <path d="M200 150 L375 150 L375 250 L300 250 L300 750 L375 750 L375 850 L200 850Z" fill="#2a2a2e"/>
+  <path d="M800 150 L625 150 L625 250 L700 250 L700 750 L625 750 L625 850 L800 850Z" fill="#2a2a2e"/>
+  <rect x="462.5" y="300" width="75" height="400" rx="37.5" fill="#007aff"/>
+</svg>

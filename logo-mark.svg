@@ -1,0 +1,7 @@
+<svg viewBox="150 100 700 900" xmlns="http://www.w3.org/2000/svg">
+  <title>Consult User MCP Logomark</title>
+  <!-- Mark only — no background, tight viewBox -->
+  <path d="M225 175 L375 175 L375 250 L325 250 A25 25 0 0 0 300 275 L300 725 A25 25 0 0 0 325 750 L375 750 L375 825 L225 825Z" fill="#2a2a2e"/>
+  <path d="M775 175 L625 175 L625 250 L675 250 A25 25 0 0 1 700 275 L700 725 A25 25 0 0 1 675 750 L625 750 L625 825 L775 825Z" fill="#2a2a2e"/>
+  <rect x="487.5" y="300" width="25" height="400" rx="12.5" fill="#007aff"/>
+</svg>

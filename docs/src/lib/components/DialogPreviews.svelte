@@ -5,8 +5,15 @@
 		{ name: 'ask type=confirm', content: 'confirm' },
 		{ name: 'ask type=pick', content: 'choices' },
 		{ name: 'ask type=form', content: 'wizard' },
-		{ name: 'ask type=text', content: 'text' }
+		{ name: 'ask type=text', content: 'text' },
+		{ name: 'tweak', content: 'tweak' }
 	] as const;
+
+	const tweakParams = [
+		{ label: 'Card Scale', value: '1.58', unit: 'x', fill: 62 },
+		{ label: 'Duration', value: '388', unit: 'ms', fill: 39 },
+		{ label: 'Vertical Offset', value: '24.8', unit: 'px', fill: 50 }
+	];
 
 	const choiceItems = [
 		{ label: 'Dark mode', checked: true },
@@ -96,13 +103,40 @@
 								<button class="btn secondary">Cancel</button>
 								<button class="btn primary">Submit <span class="key-hint">&#x23CE;</span></button>
 							</div>
+
+						{:else if dialog.content === 'tweak'}
+							<div class="icon-circle small">
+								<span class="icon slider-icon">≡</span>
+							</div>
+							<div class="dialog-title">Debug</div>
+							<div class="dialog-text">Tweaking card animation values</div>
+							<div class="tweak-params">
+								{#each tweakParams as param}
+									<div class="tweak-param">
+										<div class="param-header">
+											<span class="param-label">{param.label}</span>
+											<span class="param-value">{param.value}<span class="param-unit">{param.unit}</span></span>
+										</div>
+										<div class="slider-track">
+											<div class="slider-fill" style="width: {param.fill}%"></div>
+											<div class="slider-thumb" style="left: {param.fill}%"></div>
+										</div>
+									</div>
+								{/each}
+							</div>
 						{/if}
 					</div>
 
 					<div class="keyboard-hints">
-						<span class="hint"><kbd>&#x23CE;</kbd> confirm</span>
-						<span class="hint"><kbd>Esc</kbd> cancel</span>
-						<span class="hint"><kbd>S</kbd> snooze</span>
+						{#if dialog.content === 'tweak'}
+							<span class="hint"><kbd>&uarr;&darr;</kbd> navigate</span>
+							<span class="hint"><kbd>&larr;&rarr;</kbd> adjust</span>
+							<span class="hint"><kbd>Esc</kbd> close</span>
+						{:else}
+							<span class="hint"><kbd>&#x23CE;</kbd> confirm</span>
+							<span class="hint"><kbd>Esc</kbd> cancel</span>
+							<span class="hint"><kbd>S</kbd> snooze</span>
+						{/if}
 					</div>
 				</div>
 				<code class="tool-name">{dialog.name}</code>
@@ -122,20 +156,27 @@
 
 	.dialog-previews {
 		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
+		grid-template-columns: repeat(5, minmax(0, 1fr));
 		gap: 28px;
-		max-width: 1400px;
+		max-width: 1600px;
 		margin: 0 auto;
 	}
 
-	@media (max-width: 1200px) {
+	@media (max-width: 1300px) {
 		.dialog-previews {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			max-width: 720px;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			max-width: 960px;
 		}
 	}
 
-	@media (max-width: 600px) {
+	@media (max-width: 800px) {
+		.dialog-previews {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			max-width: 640px;
+		}
+	}
+
+	@media (max-width: 500px) {
 		.dialog-previews {
 			grid-template-columns: minmax(0, 1fr);
 			max-width: 340px;
@@ -244,6 +285,73 @@
 	@keyframes blink {
 		0%, 100% { opacity: 1; }
 		50% { opacity: 0; }
+	}
+
+	/* Tweak slider styles */
+	.slider-icon {
+		font-size: 18px;
+		letter-spacing: -1px;
+	}
+
+	.tweak-params {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.tweak-param {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	.param-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+	}
+
+	.param-label {
+		color: #BFBFBF;
+		font-size: 12px;
+	}
+
+	.param-value {
+		color: white;
+		font-size: 13px;
+		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.param-unit {
+		color: #666;
+		font-size: 11px;
+		font-weight: 400;
+		margin-left: 2px;
+	}
+
+	.slider-track {
+		height: 6px;
+		background: #2a2a30;
+		border-radius: 3px;
+		position: relative;
+	}
+
+	.slider-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #5A8CFF 0%, #4a7cf0 100%);
+		border-radius: 3px;
+	}
+
+	.slider-thumb {
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		width: 12px;
+		height: 12px;
+		background: white;
+		border-radius: 50%;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 	}
 
 	/* Non-interactive buttons */

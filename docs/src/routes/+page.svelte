@@ -180,22 +180,22 @@
 					<li>
 						<span class="step-num">1</span>
 						<div class="step-content">
-							<strong>Download the latest release</strong>
-							<p>Get the Windows zip from the <a href="https://github.com/doublej/consult-user-mcp/releases" target="_blank" rel="noopener">GitHub releases page</a> (the release tagged <code>windows/v...</code>)</p>
+							<strong>Download the installer</strong>
+							<p>Get the Windows installer from the <a href="https://github.com/doublej/consult-user-mcp/releases" target="_blank" rel="noopener">GitHub releases page</a> (the release tagged <code>windows/v...</code>)</p>
 						</div>
 					</li>
 					<li>
 						<span class="step-num">2</span>
 						<div class="step-content">
-							<strong>Extract and run</strong>
-							<p>Unzip to a folder (e.g. <code>C:\Program Files\ConsultUserMCP</code>) and run <code>consult-user-mcp.exe</code>. A system tray icon will appear.</p>
+							<strong>Run the installer</strong>
+							<p>The installer automatically configures the Claude Code MCP server. A system tray icon will appear when complete.</p>
 						</div>
 					</li>
 					<li>
 						<span class="step-num">3</span>
 						<div class="step-content">
-							<strong>Configure your MCP client</strong>
-							<p>Right-click the tray icon, open Settings, and copy the MCP server path. Add it to your Claude Code or Claude Desktop config. See the <a href="https://github.com/doublej/consult-user-mcp#windows" target="_blank" rel="noopener">README</a> for details.</p>
+							<strong>Launch from Start Menu</strong>
+							<p>Open "Consult User MCP" from the Start Menu. The app runs in the system tray.</p>
 						</div>
 					</li>
 					<li>
@@ -301,7 +301,7 @@
 	.nav-link {
 		color: #707070;
 		text-decoration: none;
-		font-size: 0.9rem;
+		font-size: 0.90rem;
 		font-weight: 500;
 	}
 
@@ -336,7 +336,7 @@
 		font-weight: 600;
 		color: #1a1a1a;
 		margin: 0 0 20px;
-		letter-spacing: -0.03em;
+		letter-spacing: -0.030em;
 		line-height: 1.15;
 	}
 
@@ -345,7 +345,7 @@
 	}
 
 	.lead {
-		font-size: 1.1rem;
+		font-size: 1.10rem;
 		color: #606060;
 		max-width: 600px;
 		margin: 0 0 40px;

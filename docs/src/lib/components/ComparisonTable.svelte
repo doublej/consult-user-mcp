@@ -34,8 +34,9 @@
 		{ name: 'Multi-line text', category: 'Dialog types', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'Dedicated tool', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Hidden / password input', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Multi-question wizard', category: 'Dialog types', values: { 'consult-user-mcp': 'Wizard + accordion', 'interactive-mcp': 'no', 'ask-user-questions': 'Question sets', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
-		{ name: 'Typed input (int / float)', category: 'Dialog types', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'yes', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
-		{ name: 'Markdown in prompts', category: 'Dialog types', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'Discord native', 'mcp-interactive': 'yes' } },
+		{ name: 'Typed input (int / float)', category: 'Dialog types', values: { 'consult-user-mcp': 'Tweak sliders', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'yes', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
+		{ name: 'Markdown in prompts', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'Discord native', 'mcp-interactive': 'yes' } },
+		{ name: 'Real-time value tweak', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'System notification', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'yes', 'ask-user-questions': 'no', 'HITL GUI': 'Info message tool', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 
 		// UX & interaction

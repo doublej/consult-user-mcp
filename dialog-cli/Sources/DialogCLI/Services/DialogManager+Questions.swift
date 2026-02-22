@@ -65,10 +65,15 @@ extension DialogManager {
             NSApp.stopModal()
         }
 
+        let dialogTitle = request.title ?? buildTitle()
+        let dialogBody = request.body
+
         let dialogContent: AnyView
         switch request.mode {
         case "wizard":
             dialogContent = AnyView(SwiftUIWizardDialog(
+                title: dialogTitle,
+                bodyText: dialogBody,
                 questions: request.questions,
                 onComplete: onComplete,
                 onCancel: onCancel,
@@ -78,6 +83,8 @@ extension DialogManager {
             ))
         default:
             dialogContent = AnyView(SwiftUIAccordionDialog(
+                title: dialogTitle,
+                bodyText: dialogBody,
                 questions: request.questions,
                 onComplete: onComplete,
                 onCancel: onCancel,

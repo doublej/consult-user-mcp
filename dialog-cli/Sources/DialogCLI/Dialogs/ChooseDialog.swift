@@ -4,6 +4,7 @@ import SwiftUI
 // MARK: - SwiftUI Choose Dialog
 
 struct SwiftUIChooseDialog: View {
+    let title: String
     let bodyText: String
     let choices: [String]
     let descriptions: [String]?
@@ -18,7 +19,8 @@ struct SwiftUIChooseDialog: View {
     @State private var selectedIndices: Set<Int> = []
     @State private var focusedIndex: Int = 0
 
-    init(body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String, Set<Int>) -> Void, onAskDifferently: @escaping (String) -> Void) {
+    init(title: String, body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, defaultSelection: String?, onComplete: @escaping (Set<Int>) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String, Set<Int>) -> Void, onAskDifferently: @escaping (String) -> Void) {
+        self.title = title
         self.bodyText = body
         self.choices = choices
         self.descriptions = descriptions
@@ -64,12 +66,12 @@ struct SwiftUIChooseDialog: View {
     }
 
     private var headerView: some View {
-        MarkdownText(bodyText, font: .system(size: 17, weight: .bold), color: Theme.Colors.textPrimary)
-            .frame(width: 380, alignment: .leading)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, 20)
-            .padding(.top, 20)
-            .padding(.bottom, 16)
+        DialogHeader(
+            icon: allowMultiple ? "checklist" : "list.bullet",
+            title: title,
+            body: bodyText
+        )
+        .padding(.bottom, 4)
     }
 
     private var choicesScrollView: some View {

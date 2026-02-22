@@ -45,6 +45,7 @@ final class DialogSettings: ObservableObject {
     @Published var updateAvailable: UpdateManager.Release? = nil
     @Published var updateDownloadProgress: Double? = nil  // nil = not downloading, 0-1 = progress
     @Published var updateStatus: String? = nil  // Status message during update
+    @Published var pendingSettingsSection: SettingsSection? = nil
 
     // MARK: - Update Computed Properties
 

@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var debugMenu: NSMenu!
     private var contextMenu: NSMenu!
     private var snoozeObserver: AnyCancellable?
+    private var updateObserver: AnyCancellable?
     private var isPresentingUpdateDecision = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -17,7 +18,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupContextMenu()
         observeSnooze()
         observeSnoozeEnd()
+        observeUpdateAvailable()
         observeProjectNotifications()
+        checkBasePromptUpdate()
         checkForUpdatesAutomatically()
     }
 
@@ -47,13 +50,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let button = statusItem.button else { return }
 
         let isSnoozed = DialogSettings.shared.snoozeRemaining > 0
+        let hasUpdate = DialogSettings.shared.updateAvailable != nil
         let iconName = isSnoozed ? "moon.zzz.fill" : "bubble.left.and.bubble.right"
 
-        if let image = NSImage(systemSymbolName: iconName, accessibilityDescription: isSnoozed ? "Snooze Active" : "Settings") {
-            image.isTemplate = !isSnoozed
-            button.image = image
+        guard let baseImage = NSImage(systemSymbolName: iconName, accessibilityDescription: isSnoozed ? "Snooze Active" : "Settings") else { return }
+
+        if hasUpdate && !isSnoozed {
+            button.image = addBadgeDot(to: baseImage)
+            button.contentTintColor = nil
+        } else {
+            baseImage.isTemplate = !isSnoozed
+            button.image = baseImage
+            button.contentTintColor = isSnoozed ? .orange : nil
         }
-        button.contentTintColor = isSnoozed ? .orange : nil
+    }
+
+    private func addBadgeDot(to image: NSImage) -> NSImage {
+        let size = image.size
+        let badged = NSImage(size: size, flipped: false) { rect in
+            image.draw(in: rect)
+
+            let dotSize: CGFloat = 5
+            let dotRect = NSRect(x: size.width - dotSize - 0.5, y: size.height - dotSize - 0.5, width: dotSize, height: dotSize)
+            NSColor.systemOrange.setFill()
+            NSBezierPath(ovalIn: dotRect).fill()
+
+            return true
+        }
+        badged.isTemplate = false
+        return badged
     }
 
     @objc private func handleClick(_ sender: NSStatusBarButton) {
@@ -69,6 +94,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             statusItem.menu = contextMenu
             statusItem.button?.performClick(nil)
             statusItem.menu = nil
+        } else if DialogSettings.shared.updateAvailable != nil {
+            showSettingsWindow(section: .updates)
         } else {
             showSettingsWindow()
         }
@@ -76,8 +103,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Settings Window
 
-    private func showSettingsWindow() {
-        SettingsWindowController.shared.showWindow()
+    private func showSettingsWindow(section: SettingsSection? = nil) {
+        SettingsWindowController.shared.showWindow(section: section)
         checkForUpdatesAutomatically()
     }
 
@@ -246,7 +273,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: cliPath)
             process.arguments = [command, json]
-            process.environment = ProcessInfo.processInfo.environment.merging(["MCP_CLIENT_NAME": clientName]) { _, new in new }
+            let env: [String: String] = [
+                "MCP_CLIENT_NAME": clientName,
+                "MCP_PROJECT_PATH": NSHomeDirectory() + "/projects/my-app",
+            ]
+            process.environment = ProcessInfo.processInfo.environment.merging(env) { _, new in new }
 
             let outPipe = Pipe()
             process.standardOutput = outPipe
@@ -300,7 +331,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testChooseSingle() {
         let settings = DialogSettings.shared
         let json = """
-        {"body":"Select your preferred option from the list below:","choices":["Option Alpha","Option Beta","Option Gamma","Option Delta"],"descriptions":["First choice with description","Second choice - recommended","Third alternative option","Fourth fallback option"],"allowMultiple":false,"position":"\(settings.position.rawValue)"}
+        {"body":"Select your preferred option from the list below:","title":"Single Select","choices":["Option Alpha","Option Beta","Option Gamma","Option Delta"],"descriptions":["First choice with description","Second choice - recommended","Third alternative option","Fourth fallback option"],"allowMultiple":false,"position":"\(settings.position.rawValue)"}
         """
         runDialogCli(command: "choose", json: json)
     }
@@ -308,7 +339,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testChooseMulti() {
         let settings = DialogSettings.shared
         let json = """
-        {"body":"Select one or more features to enable:","choices":["Authentication","Database","API Endpoints","Logging"],"allowMultiple":true,"position":"\(settings.position.rawValue)"}
+        {"body":"Select one or more features to enable:","title":"Multi Select","choices":["Authentication","Database","API Endpoints","Logging"],"allowMultiple":true,"position":"\(settings.position.rawValue)"}
         """
         runDialogCli(command: "choose", json: json)
     }
@@ -316,7 +347,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testChooseMultiDescriptions() {
         let settings = DialogSettings.shared
         let json = """
-        {"body":"Select one or more features to enable:","choices":["Authentication","Database","API Endpoints","Logging"],"descriptions":["OAuth2 + JWT tokens","PostgreSQL with migrations","REST + GraphQL","Structured JSON output"],"allowMultiple":true,"position":"\(settings.position.rawValue)"}
+        {"body":"Select one or more features to enable:","title":"Multi Select","choices":["Authentication","Database","API Endpoints","Logging"],"descriptions":["OAuth2 + JWT tokens","PostgreSQL with migrations","REST + GraphQL","Structured JSON output"],"allowMultiple":true,"position":"\(settings.position.rawValue)"}
         """
         runDialogCli(command: "choose", json: json)
     }
@@ -348,7 +379,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testQuestionsWizard() {
         let settings = DialogSettings.shared
         let json = """
-        {"questions":[{"id":"language","question":"What programming language?","options":[{"label":"TypeScript","description":"Strongly typed JavaScript"},{"label":"Python","description":"Dynamic scripting language"},{"label":"Go","description":"Fast compiled language"}],"type":"choice","multiSelect":false},{"id":"framework","question":"Which framework?","options":[{"label":"Express","description":"Minimal Node.js framework"},{"label":"FastAPI","description":"Modern Python API framework"},{"label":"Gin","description":"High-performance Go framework"}],"type":"choice","multiSelect":false}],"mode":"wizard","position":"\(settings.position.rawValue)"}
+        {"body":"Configure your new project stack.","title":"Project Setup","questions":[{"id":"language","question":"What programming language?","options":[{"label":"TypeScript","description":"Strongly typed JavaScript"},{"label":"Python","description":"Dynamic scripting language"},{"label":"Go","description":"Fast compiled language"}],"type":"choice","multiSelect":false},{"id":"framework","question":"Which framework?","options":[{"label":"Express","description":"Minimal Node.js framework"},{"label":"FastAPI","description":"Modern Python API framework"},{"label":"Gin","description":"High-performance Go framework"}],"type":"choice","multiSelect":false}],"mode":"wizard","position":"\(settings.position.rawValue)"}
         """
         runDialogCli(command: "questions", json: json)
     }
@@ -356,7 +387,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testQuestionsAccordion() {
         let settings = DialogSettings.shared
         let json = """
-        {"questions":[{"id":"database","question":"Select database type:","options":[{"label":"PostgreSQL","description":"Advanced relational database"},{"label":"MongoDB","description":"Document-oriented NoSQL"},{"label":"Redis","description":"In-memory key-value store"}],"type":"choice","multiSelect":false},{"id":"auth","question":"Authentication method:","options":[{"label":"OAuth 2.0","description":"Third-party providers"},{"label":"JWT","description":"Stateless tokens"},{"label":"Session","description":"Server-side sessions"}],"type":"choice","multiSelect":true},{"id":"hosting","question":"Deployment platform:","options":[{"label":"AWS","description":"Amazon Web Services"},{"label":"Vercel","description":"Edge-first platform"},{"label":"Self-hosted","description":"Your own infrastructure"}],"type":"choice","multiSelect":false}],"mode":"accordion","position":"\(settings.position.rawValue)"}
+        {"body":"Choose your infrastructure preferences.","title":"Infrastructure","questions":[{"id":"database","question":"Select database type:","options":[{"label":"PostgreSQL","description":"Advanced relational database"},{"label":"MongoDB","description":"Document-oriented NoSQL"},{"label":"Redis","description":"In-memory key-value store"}],"type":"choice","multiSelect":false},{"id":"auth","question":"Authentication method:","options":[{"label":"OAuth 2.0","description":"Third-party providers"},{"label":"JWT","description":"Stateless tokens"},{"label":"Session","description":"Server-side sessions"}],"type":"choice","multiSelect":true},{"id":"hosting","question":"Deployment platform:","options":[{"label":"AWS","description":"Amazon Web Services"},{"label":"Vercel","description":"Edge-first platform"},{"label":"Self-hosted","description":"Your own infrastructure"}],"type":"choice","multiSelect":false}],"mode":"accordion","position":"\(settings.position.rawValue)"}
         """
         runDialogCli(command: "questions", json: json)
     }
@@ -581,6 +612,114 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         alert.runModal()
     }
 
+    // MARK: - Base Prompt Update Check
+
+    private func checkBasePromptUpdate() {
+        // Targets with an outdated versioned prompt
+        let outdatedTargets = InstallTarget.allCases.filter { target in
+            target.supportsBasePrompt && ClaudeMdInstaller.isUpdateAvailable(for: target)
+        }
+
+        // Targets with a file but no prompt detected at all
+        let missingTargets = InstallTarget.allCases.filter { target in
+            target.supportsBasePrompt
+                && ClaudeMdInstaller.detectExisting(for: target)
+                && ClaudeMdInstaller.detectInstalledInfo(for: target) == nil
+        }
+
+        if !outdatedTargets.isEmpty {
+            promptOutdatedUpdate(targets: outdatedTargets)
+        } else if !missingTargets.isEmpty {
+            promptMissingInstall(targets: missingTargets)
+        }
+    }
+
+    private func promptOutdatedUpdate(targets: [InstallTarget]) {
+        let targetNames = targets.map(\.displayName).joined(separator: " and ")
+        let installedVersion = targets.compactMap { ClaudeMdInstaller.detectInstalledInfo(for: $0)?.version }.first ?? "?"
+
+        let body = "The usage hints in your \(targetNames) instructions are outdated (v\(installedVersion) → v\(ClaudeMdInstaller.bundledVersion)).\n\nWould you like to update them now?"
+
+        let payload: [String: Any] = [
+            "body": body,
+            "title": "Usage Hints Update",
+            "confirmLabel": "Update now",
+            "cancelLabel": "Skip",
+            "position": DialogSettings.shared.position.rawValue
+        ]
+
+        guard let json = encodeJSON(payload) else { return }
+
+        runDialogCli(command: "confirm", json: json, clientName: "Consult User MCP") { [weak self] output in
+            guard let data = output.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let confirmed = json["confirmed"] as? Bool, confirmed else { return }
+
+            self?.performPromptUpdate(targets: targets, mode: .update)
+        }
+    }
+
+    private func promptMissingInstall(targets: [InstallTarget]) {
+        let targetNames = targets.map(\.displayName).joined(separator: " and ")
+        let fileNames = targets.compactMap { $0.claudeMdPath?.components(separatedBy: "/").last }.joined(separator: ", ")
+
+        let body = "No usage hints detected in your \(targetNames) instructions.\n\nEarlier versions of the prompt may need to be removed manually from \(fileNames).\n\nInstall the latest hints (v\(ClaudeMdInstaller.bundledVersion)) and open the file for review?"
+
+        let payload: [String: Any] = [
+            "body": body,
+            "title": "Usage Hints Missing",
+            "confirmLabel": "Install & Open",
+            "cancelLabel": "Skip",
+            "position": DialogSettings.shared.position.rawValue
+        ]
+
+        guard let json = encodeJSON(payload) else { return }
+
+        runDialogCli(command: "confirm", json: json, clientName: "Consult User MCP") { [weak self] output in
+            guard let data = output.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let confirmed = json["confirmed"] as? Bool, confirmed else { return }
+
+            self?.performPromptUpdate(targets: targets, mode: .appendSection)
+
+            // Open files for manual review
+            for target in targets {
+                if let path = target.claudeMdExpandedPath {
+                    NSWorkspace.shared.open(URL(fileURLWithPath: path))
+                }
+            }
+        }
+    }
+
+    private func performPromptUpdate(targets: [InstallTarget], mode: BasePromptInstallMode) {
+        var updated: [String] = []
+        var failed: [String] = []
+
+        for target in targets {
+            do {
+                try ClaudeMdInstaller.install(for: target, mode: mode)
+                updated.append(target.displayName)
+            } catch {
+                failed.append(target.displayName)
+            }
+        }
+
+        if !updated.isEmpty {
+            let names = updated.joined(separator: ", ")
+            showPaneNotification(
+                title: "Usage Hints Installed",
+                body: "Installed v\(ClaudeMdInstaller.bundledVersion) for \(names)."
+            )
+        }
+        if !failed.isEmpty {
+            let names = failed.joined(separator: ", ")
+            showPaneNotification(
+                title: "Install Failed",
+                body: "Could not install hints for \(names). Try manually via Settings → Install."
+            )
+        }
+    }
+
     // MARK: - Auto Update Check
 
     private func checkForUpdatesAutomatically() {
@@ -588,6 +727,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // MARK: - Snooze Observer
+
+    private func observeUpdateAvailable() {
+        updateObserver = DialogSettings.shared.$updateAvailable
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.updateStatusIcon()
+            }
+    }
 
     private func observeSnooze() {
         snoozeObserver = DialogSettings.shared.$snoozeRemaining

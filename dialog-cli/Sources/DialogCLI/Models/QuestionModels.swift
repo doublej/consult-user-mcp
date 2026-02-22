@@ -43,6 +43,8 @@ enum QuestionAnswer {
 }
 
 struct QuestionsRequest: Codable {
+    let body: String?
+    let title: String?
     let questions: [QuestionItem]
     let mode: String  // "wizard" | "accordion"
     let position: DialogPosition

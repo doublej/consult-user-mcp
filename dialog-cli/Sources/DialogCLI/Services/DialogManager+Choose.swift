@@ -23,6 +23,7 @@ extension DialogManager {
         var result: ChoiceResponse?
 
         let swiftUIDialog = SwiftUIChooseDialog(
+            title: request.title ?? buildTitle(),
             body: request.body,
             choices: request.choices,
             descriptions: normalizedDescriptions,

@@ -124,6 +124,8 @@ struct AccordionSection: View {
 }
 
 struct SwiftUIAccordionDialog: View {
+    let title: String
+    let bodyText: String?
     let questions: [QuestionItem]
     let onComplete: ([String: QuestionAnswer]) -> Void
     let onCancel: () -> Void
@@ -159,21 +161,22 @@ struct SwiftUIAccordionDialog: View {
             onAskDifferently: onAskDifferently
         ) { expandedTool in
             VStack(spacing: 0) {
-                // Header with progress
+                DialogHeader(
+                    icon: "rectangle.stack",
+                    title: title,
+                    body: bodyText
+                )
+                .padding(.bottom, 4)
+
+                // Progress
                 HStack {
-                    Text("Questions")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(Theme.Colors.textPrimary)
-
                     Spacer()
-
                     Text("\(answeredCount)/\(questions.count) answered")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(Theme.Colors.textSecondary)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 20)
-                .padding(.bottom, 12)
+                .padding(.bottom, 8)
 
                 // Accordion sections
                 ScrollViewReader { proxy in

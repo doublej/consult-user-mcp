@@ -11,7 +11,11 @@ final class SettingsWindowController {
 
     private init() {}
 
-    func showWindow() {
+    func showWindow(section: SettingsSection? = nil) {
+        if let section = section {
+            DialogSettings.shared.pendingSettingsSection = section
+        }
+
         if let window = window {
             window.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)

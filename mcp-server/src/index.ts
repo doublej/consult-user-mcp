@@ -118,7 +118,7 @@ server.registerTool("ask", {
       if (!p.choices?.length) throw new Error("choices required for type=pick");
       validateNoAllOfAbove(p.choices);
       raw = await tracked(provider.choose({
-        body, choices: p.choices, descriptions: p.descriptions,
+        body, title: p.title, choices: p.choices, descriptions: p.descriptions,
         allowMultiple: p.multi, defaultSelection: p.default,
         position, projectPath,
       }), extra);
@@ -136,6 +136,7 @@ server.registerTool("ask", {
       if (!p.questions?.length) throw new Error("questions required for type=form");
       for (const q of p.questions) validateNoAllOfAbove(q.options);
       raw = await tracked(provider.questions({
+        body, title: p.title,
         questions: p.questions.map(q => ({
           id: q.id, question: unescLiterals(q.question),
           options: q.options.map((label, i) => ({ label, description: q.descriptions?.[i] })),

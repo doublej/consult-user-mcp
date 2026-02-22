@@ -14,6 +14,10 @@ struct MainSettingsView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(minWidth: 680, minHeight: 500)
+        .onReceive(settings.$pendingSettingsSection.compactMap { $0 }) { section in
+            selectedSection = section
+            settings.pendingSettingsSection = nil
+        }
     }
 
     @ViewBuilder

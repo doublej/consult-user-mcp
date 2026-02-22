@@ -68,6 +68,7 @@ export interface ConfirmOptions {
 // Options for choice dialog
 export interface ChooseOptions {
   body: string;
+  title?: string;
   choices: string[];
   descriptions?: string[];
   allowMultiple: boolean;
@@ -118,6 +119,8 @@ export type QuestionsMode = "wizard" | "accordion";
 
 // Options for multi-question dialog
 export interface QuestionsOptions {
+  body?: string;
+  title?: string;
   questions: Question[];
   mode: QuestionsMode;
   position: DialogPosition;

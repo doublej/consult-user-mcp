@@ -46,6 +46,7 @@ enum VersionInfo {
 
 struct UpdatesSettingsView: View {
     @ObservedObject private var settings = DialogSettings.shared
+    @State private var promptUpdateResult: [String: Bool] = [:]
 
     private var isDownloading: Bool {
         settings.updateDownloadProgress != nil
@@ -62,6 +63,7 @@ struct UpdatesSettingsView: View {
 
                 updateAutomationSection
                 updateStatusSection
+                promptUpdateSection
 
                 Spacer()
             }
@@ -259,6 +261,240 @@ struct UpdatesSettingsView: View {
             }
             .buttonStyle(.bordered)
             .disabled(settings.updateCheckInProgress)
+        }
+    }
+
+    // MARK: - Prompt Update
+
+    private enum PromptTargetState {
+        case installed(BasePromptInfo)
+        case notDetected
+    }
+
+    private var promptTargets: [(target: InstallTarget, state: PromptTargetState)] {
+        InstallTarget.allCases.compactMap { target in
+            guard target.supportsBasePrompt, ClaudeMdInstaller.detectExisting(for: target) else { return nil }
+            if let info = ClaudeMdInstaller.detectInstalledInfo(for: target) {
+                return (target, .installed(info))
+            }
+            return (target, .notDetected)
+        }
+    }
+
+    private var promptUpdateSection: some View {
+        SettingsSectionContainer(title: "Usage Hints") {
+            VStack(spacing: 0) {
+                let targets = promptTargets
+                if targets.isEmpty {
+                    promptEmptyRow
+                        .padding(16)
+                } else {
+                    ForEach(Array(targets.enumerated()), id: \.element.target) { index, entry in
+                        if index > 0 {
+                            Divider().padding(.leading, 40)
+                        }
+                        switch entry.state {
+                        case .installed(let info):
+                            promptRow(for: entry.target, info: info)
+                                .padding(16)
+                        case .notDetected:
+                            promptNotDetectedRow(for: entry.target)
+                                .padding(16)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private var promptEmptyRow: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "text.bubble")
+                .font(.system(size: 22))
+                .foregroundColor(.secondary)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("No usage hints installed")
+                    .font(.system(size: 13, weight: .medium))
+                Text("Install via the Install tab")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer(minLength: 8)
+        }
+    }
+
+    // MARK: Prompt — Installed
+
+    private func promptRow(for target: InstallTarget, info: BasePromptInfo) -> some View {
+        let isOutdated = ClaudeMdInstaller.isUpdateAvailable(for: target)
+        let didUpdate = promptUpdateResult[target.rawValue] == true
+        let didFail = promptUpdateResult[target.rawValue] == false
+
+        return HStack(spacing: 12) {
+            promptIcon(isOutdated: isOutdated, didUpdate: didUpdate, didFail: didFail)
+
+            VStack(alignment: .leading, spacing: 2) {
+                promptTitle(target: target, info: info, isOutdated: isOutdated, didUpdate: didUpdate, didFail: didFail)
+                promptSubtitle(target: target, info: info, isOutdated: isOutdated, didUpdate: didUpdate)
+            }
+
+            Spacer(minLength: 8)
+
+            if isOutdated && !didUpdate {
+                Button("Update") {
+                    updatePrompt(for: target)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func promptIcon(isOutdated: Bool, didUpdate: Bool, didFail: Bool) -> some View {
+        if didFail {
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 22))
+                .foregroundColor(.red)
+        } else if didUpdate {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 22))
+                .foregroundColor(.green)
+        } else if isOutdated {
+            Image(systemName: "arrow.up.circle.fill")
+                .font(.system(size: 22))
+                .foregroundColor(.orange)
+        } else {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 22))
+                .foregroundColor(.green)
+        }
+    }
+
+    @ViewBuilder
+    private func promptTitle(target: InstallTarget, info: BasePromptInfo, isOutdated: Bool, didUpdate: Bool, didFail: Bool) -> some View {
+        if didFail {
+            Text("\(target.displayName) — update failed")
+                .font(.system(size: 13, weight: .medium))
+        } else if didUpdate {
+            Text("\(target.displayName) — updated to v\(ClaudeMdInstaller.bundledVersion)")
+                .font(.system(size: 13, weight: .medium))
+        } else if isOutdated {
+            Text("\(target.displayName) — update available")
+                .font(.system(size: 13, weight: .medium))
+        } else {
+            Text("\(target.displayName) — up to date")
+                .font(.system(size: 13, weight: .medium))
+        }
+    }
+
+    @ViewBuilder
+    private func promptSubtitle(target: InstallTarget, info: BasePromptInfo, isOutdated: Bool, didUpdate: Bool) -> some View {
+        if didUpdate {
+            Text("Restart Claude Code to pick up changes")
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+        } else if isOutdated {
+            Text("v\(info.version) → v\(ClaudeMdInstaller.bundledVersion)")
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+        } else {
+            Text("v\(info.version)")
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+        }
+    }
+
+    private func updatePrompt(for target: InstallTarget) {
+        do {
+            try ClaudeMdInstaller.install(for: target, mode: .update)
+            promptUpdateResult[target.rawValue] = true
+        } catch {
+            promptUpdateResult[target.rawValue] = false
+        }
+    }
+
+    // MARK: Prompt — Not Detected
+
+    private func promptNotDetectedRow(for target: InstallTarget) -> some View {
+        let didInstall = promptUpdateResult[target.rawValue] == true
+        let didFail = promptUpdateResult[target.rawValue] == false
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                if didInstall {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundColor(.green)
+                } else if didFail {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundColor(.red)
+                } else {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 22))
+                        .foregroundColor(.orange)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    if didInstall {
+                        Text("\(target.displayName) — installed v\(ClaudeMdInstaller.bundledVersion)")
+                            .font(.system(size: 13, weight: .medium))
+                        Text("Review the file to remove any old prompt content")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    } else if didFail {
+                        Text("\(target.displayName) — install failed")
+                            .font(.system(size: 13, weight: .medium))
+                    } else {
+                        Text("\(target.displayName) — not detected")
+                            .font(.system(size: 13, weight: .medium))
+                        Text("File exists but no versioned usage hints found")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Spacer(minLength: 8)
+
+                if !didInstall {
+                    Button("Install & Open") {
+                        installAndOpenPrompt(for: target)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                }
+            }
+
+            if !didInstall && !didFail {
+                HStack(spacing: 6) {
+                    Image(systemName: "info.circle")
+                        .font(.system(size: 11))
+                    Text("Earlier versions may need to be removed manually from \(target.claudeMdPath?.components(separatedBy: "/").last ?? "CLAUDE.md").")
+                        .font(.system(size: 11))
+                }
+                .foregroundColor(.secondary)
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.orange.opacity(0.08))
+                )
+            }
+        }
+    }
+
+    private func installAndOpenPrompt(for target: InstallTarget) {
+        do {
+            try ClaudeMdInstaller.install(for: target, mode: .appendSection)
+            promptUpdateResult[target.rawValue] = true
+            if let path = target.claudeMdExpandedPath {
+                NSWorkspace.shared.open(URL(fileURLWithPath: path))
+            }
+        } catch {
+            promptUpdateResult[target.rawValue] = false
         }
     }
 

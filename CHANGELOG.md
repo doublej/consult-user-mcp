@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.14.0] (macOS) - 2026-02-22
+
+### Added
+- App checks on launch if usage hints in CLAUDE.md are outdated and offers to update them
+- Menu bar icon shows an orange badge dot when an app update is available
+- Clicking the menu bar icon while an update is available opens the Updates tab directly
+- Updates settings now show a Usage Hints section with per-target version status and update buttons
+- Form dialogs (wizard and accordion) now support body text for additional context
+
+### Changed
+- Choose and form dialogs now display a proper header with icon and title instead of plain text
+
 ## [1.13.0] (macOS) - 2026-02-22
 
 ### Added

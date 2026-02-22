@@ -3,6 +3,20 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.14.0",
+      "platform": "macos",
+      "date": "2026-02-22",
+      "highlight": "Automatic prompt update checks and dialog titles",
+      "changes": [
+        { "text": "App checks on launch if usage hints in CLAUDE.md are outdated and offers to update them", "type": "added", "scope": "app", "featured": true },
+        { "text": "Menu bar icon shows an orange badge dot when an app update is available", "type": "added", "scope": "app", "featured": true },
+        { "text": "Clicking the menu bar icon while an update is available opens the Updates tab directly", "type": "added", "scope": "app" },
+        { "text": "Updates settings now show a Usage Hints section with per-target version status and update buttons", "type": "added", "scope": "app", "featured": true },
+        { "text": "Choose and form dialogs now display a proper header with icon and title instead of plain text", "type": "changed", "scope": "cli" },
+        { "text": "Form dialogs (wizard and accordion) now support body text for additional context", "type": "added", "scope": "cli" }
+      ]
+    },
+    {
       "version": "1.13.0",
       "platform": "macos",
       "date": "2026-02-22",

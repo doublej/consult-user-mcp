@@ -22,6 +22,7 @@ struct ConfirmRequest: Codable {
 
 struct ChooseRequest: Codable {
     let body: String
+    let title: String?
     let choices: [String]
     let descriptions: [String]?
     let allowMultiple: Bool

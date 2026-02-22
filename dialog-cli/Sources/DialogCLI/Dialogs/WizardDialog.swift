@@ -84,6 +84,8 @@ struct QuestionSection: View {
 // MARK: - Wizard Mode Dialog
 
 struct SwiftUIWizardDialog: View {
+    let title: String
+    let bodyText: String?
     let questions: [QuestionItem]
     let onComplete: ([String: QuestionAnswer]) -> Void
     let onCancel: () -> Void
@@ -108,10 +110,16 @@ struct SwiftUIWizardDialog: View {
             onAskDifferently: onAskDifferently
         ) { expandedTool in
             VStack(spacing: 0) {
+                DialogHeader(
+                    icon: "list.number",
+                    title: title,
+                    body: bodyText
+                )
+                .padding(.bottom, 8)
+
                 // Progress bar
                 ProgressBar(current: currentIndex + 1, total: questions.count)
                     .padding(.horizontal, 20)
-                    .padding(.top, 20)
                     .padding(.bottom, 8)
 
                 // Progress text

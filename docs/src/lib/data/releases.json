@@ -3,6 +3,18 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.13.0",
+      "platform": "macos",
+      "date": "2026-02-22",
+      "highlight": "Tweak tool for real-time value adjustment",
+      "changes": [
+        { "text": "New tweak tool opens a slider panel for real-time numeric value tuning with live file writes", "type": "added", "scope": "server", "featured": true },
+        { "text": "Three parameter formats: text search patterns, CSS selector references, and direct file locations", "type": "added", "scope": "server", "featured": true },
+        { "text": "Save to File keeps live edits, Tell Agent reverts files and returns values for the agent to apply", "type": "added", "scope": "cli", "featured": true },
+        { "text": "Base prompt restructured to v2.7.0 with 25% fewer tokens and tweak documentation", "type": "changed", "scope": "server" }
+      ]
+    },
+    {
       "version": "1.12.0",
       "platform": "macos",
       "date": "2026-02-16",

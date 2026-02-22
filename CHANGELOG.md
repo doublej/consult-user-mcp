@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.13.0] (macOS) - 2026-02-22
+
+### Added
+- New tweak tool opens a slider panel for real-time numeric value tuning with live file writes
+- Three parameter formats: text search patterns, CSS selector references, and direct file locations
+- Save to File keeps live edits, Tell Agent reverts files and returns values for the agent to apply
+
+### Changed
+- Base prompt restructured to v2.7.0 with 25% fewer tokens and tweak documentation
+
 ## [1.12.0] (macOS) - 2026-02-16
 
 ### Added

@@ -11,6 +11,8 @@ import type {
   PreviewResult,
   QuestionsOptions,
   QuestionsResult,
+  TweakOptions,
+  TweakResult,
 } from "../types.js";
 
 /**
@@ -60,4 +62,9 @@ export interface DialogProvider {
    * Supports wizard and accordion modes.
    */
   questions(opts: QuestionsOptions): Promise<QuestionsResult>;
+
+  /**
+   * Display a tweak pane for real-time numeric value adjustment.
+   */
+  tweak(opts: TweakOptions): Promise<TweakResult>;
 }

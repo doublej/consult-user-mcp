@@ -17,6 +17,8 @@ import type {
   PreviewResult,
   QuestionsOptions,
   QuestionsResult,
+  TweakOptions,
+  TweakResult,
 } from "../types.js";
 
 const execFileAsync = promisify(execFile);
@@ -29,9 +31,12 @@ function findDialogCli(): string | null {
   const appBundlePath = join(__dirname, "..", "..", "..", "dialog-cli", "dialog-cli");
   if (existsSync(appBundlePath)) return appBundlePath;
 
-  // Dev: speak/mcp-server/dist/providers -> speak/dialog-cli/.build/release/DialogCLI
-  const devPath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "release", "DialogCLI");
-  if (existsSync(devPath)) return devPath;
+  // Dev: mcp-server/dist/providers -> dialog-cli/.build/{debug,release}/DialogCLI
+  const devDebugPath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "debug", "DialogCLI");
+  if (existsSync(devDebugPath)) return devDebugPath;
+
+  const devReleasePath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "release", "DialogCLI");
+  if (existsSync(devReleasePath)) return devReleasePath;
 
   return null;
 }
@@ -139,6 +144,11 @@ export class SwiftDialogProvider implements DialogProvider {
   async questions(opts: QuestionsOptions): Promise<QuestionsResult> {
     const { projectPath, ...args } = opts;
     return this.runCli<QuestionsResult>("questions", args, projectPath);
+  }
+
+  async tweak(opts: TweakOptions): Promise<TweakResult> {
+    const { projectPath, ...args } = opts;
+    return this.runCli<TweakResult>("tweak", args, projectPath);
   }
 
   async pulse(): Promise<void> {

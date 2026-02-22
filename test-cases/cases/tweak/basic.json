@@ -1,0 +1,102 @@
+{
+  "body": "Tweaking card animation values",
+  "parameters": [
+    {
+      "id": "h1-font-size",
+      "label": "font-size",
+      "element": "H1",
+      "file": "/tmp/tweak-test.css",
+      "line": 2,
+      "column": 10,
+      "expectedText": "32",
+      "current": 32,
+      "min": 12,
+      "max": 72,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "id": "h1-letter-spacing",
+      "label": "letter-spacing",
+      "element": "H1",
+      "file": "/tmp/tweak-test.css",
+      "line": 3,
+      "column": 15,
+      "expectedText": "-0.5",
+      "current": -0.5,
+      "min": -2,
+      "max": 5,
+      "step": 0.1,
+      "unit": "px"
+    },
+    {
+      "id": "h1-line-height",
+      "label": "line-height",
+      "element": "H1",
+      "file": "/tmp/tweak-test.css",
+      "line": 4,
+      "column": 16,
+      "expectedText": "1.20",
+      "current": 1.2,
+      "min": 0.8,
+      "max": 3,
+      "step": 0.05
+    },
+    {
+      "id": "span-font-size",
+      "label": "font-size",
+      "element": "span",
+      "file": "/tmp/tweak-test.css",
+      "line": 8,
+      "column": 10,
+      "expectedText": "14",
+      "current": 14,
+      "min": 8,
+      "max": 48,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "id": "span-height",
+      "label": "height",
+      "element": "span",
+      "file": "/tmp/tweak-test.css",
+      "line": 9,
+      "column": 10,
+      "expectedText": "24",
+      "current": 24,
+      "min": 8,
+      "max": 100,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "id": "span-width",
+      "label": "width",
+      "element": "span",
+      "file": "/tmp/tweak-test.css",
+      "line": 10,
+      "column": 10,
+      "expectedText": "120",
+      "current": 120,
+      "min": 20,
+      "max": 500,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "id": "duration",
+      "label": "Duration",
+      "file": "/tmp/tweak-test.css",
+      "line": 14,
+      "column": 15,
+      "expectedText": "300",
+      "current": 300,
+      "min": 50,
+      "max": 2000,
+      "step": 10,
+      "unit": "ms"
+    }
+  ],
+  "position": "center"
+}

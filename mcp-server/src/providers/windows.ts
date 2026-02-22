@@ -17,6 +17,8 @@ import type {
   PreviewResult,
   QuestionsOptions,
   QuestionsResult,
+  TweakOptions,
+  TweakResult,
 } from "../types.js";
 
 const execFileAsync = promisify(execFile);
@@ -126,6 +128,10 @@ export class WindowsDialogProvider implements DialogProvider {
   async questions(opts: QuestionsOptions): Promise<QuestionsResult> {
     const { projectPath, ...args } = opts;
     return this.runCli<QuestionsResult>("questions", args, projectPath);
+  }
+
+  async tweak(_opts: TweakOptions): Promise<TweakResult> {
+    throw new Error("Tweak tool is not yet supported on Windows");
   }
 
   async pulse(): Promise<void> {

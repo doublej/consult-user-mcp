@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tweak Test Page</title>
+<style>
+    body {
+        max-width: 720px;
+        margin: 60px auto;
+        padding: 0 20px;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #1a1a2e;
+        color: #e0e0e0;
+    }
+    h1 {
+        font-size: 2.5rem;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        color: #ffffff;
+    }
+    p {
+        font-size: 1.1rem;
+        letter-spacing: 0.01em;
+        line-height: 1.6;
+    }
+    .caption {
+        font-size: 0.85rem;
+        letter-spacing: 0.03em;
+        color: #888;
+    }
+    .columns {
+        display: grid;
+        grid-template-columns: 1fr 1px 1fr;
+        gap: 24px;
+        margin-top: 40px;
+    }
+    .divider {
+        background: #444;
+        opacity: 0.6;
+        border-radius: 1px;
+    }
+    .card {
+        background: #24243e;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #333;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .card h3 {
+        font-size: 1rem;
+        margin: 0 0 8px;
+        color: #ffffff;
+    }
+    .card p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin: 0;
+        color: #aaa;
+    }
+</style>
+</head>
+<body>
+    <h1>The Quick Brown Fox</h1>
+    <p>Jumps over the lazy dog. This paragraph tests body text sizing, letter spacing, and line height across multiple lines of content.</p>
+    <p class="caption">Caption text — smaller, with wider letter spacing for readability at small sizes.</p>
+
+    <div class="columns">
+        <div>
+            <div class="card">
+                <h3>Left Column</h3>
+                <p>Card content with adjustable padding, border radius, and shadow depth.</p>
+            </div>
+        </div>
+        <div class="divider"></div>
+        <div>
+            <div class="card">
+                <h3>Right Column</h3>
+                <p>Same card styling on the other side of the column divider.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

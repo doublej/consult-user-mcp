@@ -1,7 +1,7 @@
-import type { ConfirmResult, ChoiceResult, TextInputResult, QuestionsResult } from "./types.js";
+import type { ConfirmResult, ChoiceResult, TextInputResult, QuestionsResult, TweakResult } from "./types.js";
 
-type AskType = "confirm" | "pick" | "text" | "form";
-type RawResult = ConfirmResult | ChoiceResult | TextInputResult | QuestionsResult;
+type AskType = "confirm" | "pick" | "text" | "form" | "tweak";
+type RawResult = ConfirmResult | ChoiceResult | TextInputResult | QuestionsResult | TweakResult;
 
 function stripNulls(obj: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -38,6 +38,10 @@ export function compactResponse(type: AskType, raw: unknown): Record<string, unk
     const f = r as QuestionsResult;
     if (f.answers && Object.keys(f.answers).length > 0) out.answer = f.answers;
     if (f.completedCount > 0) out.completedCount = f.completedCount;
+  } else if (type === "tweak") {
+    const t = r as TweakResult;
+    if (t.answers && Object.keys(t.answers).length > 0) out.answer = t.answers;
+    if (t.action) out.action = t.action;
   } else {
     // pick + text: same shape
     const answer = (r as ChoiceResult | TextInputResult).answer;

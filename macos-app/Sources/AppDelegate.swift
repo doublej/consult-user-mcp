@@ -145,6 +145,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         questionsItem.submenu = questionsSubmenu
         debugMenu.addItem(questionsItem)
 
+        let tweakItem = NSMenuItem(title: "Test Tweak", action: #selector(testTweak), keyEquivalent: "6")
+        tweakItem.target = self
+        debugMenu.addItem(tweakItem)
+
         let notifyToolItem = NSMenuItem(title: "Test Notification", action: #selector(testNotifyTool), keyEquivalent: "4")
         notifyToolItem.target = self
         debugMenu.addItem(notifyToolItem)
@@ -357,6 +361,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         runDialogCli(command: "questions", json: json)
     }
 
+    @objc private func testTweak() {
+        // Create a temp test file with known values
+        let testContent = """
+        .card {
+          scale: 1.50;
+          transition: 300ms ease;
+          translate-y: 24.0px;
+        }
+        """
+        let testFile = NSTemporaryDirectory() + "tweak-test.css"
+        try? testContent.write(toFile: testFile, atomically: true, encoding: .utf8)
+
+        let settings = DialogSettings.shared
+        let json = """
+        {"body":"Tweaking card animation values","parameters":[{"id":"card-scale","label":"Card Scale","file":"\(testFile)","line":2,"column":10,"expectedText":"1.50","current":1.5,"min":0.1,"max":5.0,"step":0.01,"unit":"x"},{"id":"duration","label":"Duration","file":"\(testFile)","line":3,"column":15,"expectedText":"300","current":300,"min":50,"max":2000,"step":10,"unit":"ms"},{"id":"offset-y","label":"Vertical Offset","file":"\(testFile)","line":4,"column":16,"expectedText":"24.0","current":24.0,"min":0,"max":100,"step":0.5,"unit":"px"}],"position":"\(settings.position.rawValue)"}
+        """
+        runDialogCli(command: "tweak", json: json)
+    }
+
     @objc private func testNotifyTool() {
         showPaneNotification(
             title: "Notification Test",
@@ -383,8 +406,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 9.0) { self.testTextInputMarkdown() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 10.5) { self.testQuestionsWizard() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 12.0) { self.testQuestionsAccordion() }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 13.5) { self.testNotifyTool() }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 14.5) { self.testNotifyUpdate() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 13.5) { self.testTweak() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15.0) { self.testNotifyTool() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 16.0) { self.testNotifyUpdate() }
     }
 
     // MARK: - Update

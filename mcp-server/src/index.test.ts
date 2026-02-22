@@ -4,6 +4,8 @@ import { SwiftDialogProvider } from "./providers/swift.js";
 import { compactResponse } from "./compact.js";
 import { humanize } from "./humanize.js";
 import { isAllOfTheAbove, validateNoAllOfAbove } from "./validate-choices.js";
+import { resolveCSS } from "./css-resolver.js";
+import { resolveTextSearch } from "./text-search-resolver.js";
 
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000;
 
@@ -528,5 +530,342 @@ describe("withHeartbeat", () => {
     await expect(
       withHeartbeat(failing, { _meta: { progressToken: "tok" }, sendNotification: send }),
     ).rejects.toThrow("boom");
+  });
+});
+
+describe("resolveCSS", () => {
+  const cssFile = "test.css";
+  const css = `h1 {
+  font-size: 2.5rem;
+  letter-spacing: -0.03em;
+  color: #1a1a1a;
+}
+
+.lead {
+  margin: 10px 20px;
+  line-height: 1.6;
+}
+
+.card {
+  transform: rotateY(-25deg) translateX(10px);
+  z-index: 10;
+}
+`;
+
+  test("simple property", () => {
+    const r = resolveCSS(cssFile, "h1", "font-size", { content: css });
+    expect(r.current).toBe(2.5);
+    expect(r.unit).toBe("rem");
+    expect(r.expectedText).toBe("2.5rem");
+    expect(r.line).toBe(2);
+  });
+
+  test("negative value", () => {
+    const r = resolveCSS(cssFile, "h1", "letter-spacing", { content: css });
+    expect(r.current).toBe(-0.03);
+    expect(r.unit).toBe("em");
+    expect(r.expectedText).toBe("-0.03em");
+  });
+
+  test("multi-value property index 0", () => {
+    const r = resolveCSS(cssFile, ".lead", "margin", { content: css, index: 0 });
+    expect(r.current).toBe(10);
+    expect(r.unit).toBe("px");
+    expect(r.expectedText).toBe("10px");
+  });
+
+  test("multi-value property index 1", () => {
+    const r = resolveCSS(cssFile, ".lead", "margin", { content: css, index: 1 });
+    expect(r.current).toBe(20);
+    expect(r.unit).toBe("px");
+    expect(r.expectedText).toBe("20px");
+  });
+
+  test("unitless value", () => {
+    const r = resolveCSS(cssFile, ".card", "z-index", { content: css });
+    expect(r.current).toBe(10);
+    expect(r.unit).toBe("");
+  });
+
+  test("CSS function value", () => {
+    const r = resolveCSS(cssFile, ".card", "transform", { content: css, fn: "rotateY" });
+    expect(r.current).toBe(-25);
+    expect(r.unit).toBe("deg");
+    expect(r.expectedText).toBe("-25deg");
+  });
+
+  test("svelte file extracts style block", () => {
+    const svelte = `<script>let x = 1;</script>
+<div>hello</div>
+<style>
+.hero {
+  font-size: 3rem;
+}
+</style>`;
+    const r = resolveCSS("test.svelte", ".hero", "font-size", { content: svelte });
+    expect(r.current).toBe(3);
+    expect(r.unit).toBe("rem");
+    expect(r.line).toBe(5);
+  });
+
+  test("throws on missing selector", () => {
+    expect(() => resolveCSS(cssFile, ".missing", "font-size", { content: css })).toThrow('Selector ".missing" not found');
+  });
+
+  test("throws on missing property", () => {
+    expect(() => resolveCSS(cssFile, "h1", "padding", { content: css })).toThrow('Property "padding" not found');
+  });
+});
+
+describe("resolveTextSearch", () => {
+  test("CSS value with px unit", () => {
+    const content = "div { padding: 16px; }";
+    const r = resolveTextSearch("test.css", "padding: {v}px", { content });
+    expect(r.current).toBe(16);
+    expect(r.unit).toBe("px");
+    expect(r.expectedText).toBe("16px");
+    expect(r.line).toBe(1);
+  });
+
+  test("CSS value with rem unit", () => {
+    const content = ".hero {\n  font-size: 2.5rem;\n}";
+    const r = resolveTextSearch("test.css", "font-size: {v}rem", { content });
+    expect(r.current).toBe(2.5);
+    expect(r.unit).toBe("rem");
+    expect(r.expectedText).toBe("2.5rem");
+    expect(r.line).toBe(2);
+  });
+
+  test("unitless value", () => {
+    const content = "div { z-index: 10; }";
+    const r = resolveTextSearch("test.css", "z-index: {v};", { content });
+    expect(r.current).toBe(10);
+    expect(r.unit).toBe("");
+    expect(r.expectedText).toBe("10");
+  });
+
+  test("negative value", () => {
+    const content = "h1 { letter-spacing: -0.03em; }";
+    const r = resolveTextSearch("test.css", "letter-spacing: {v}em", { content });
+    expect(r.current).toBe(-0.03);
+    expect(r.unit).toBe("em");
+    expect(r.expectedText).toBe("-0.03em");
+  });
+
+  test("decimal-only value", () => {
+    const content = "p { line-height: .8; }";
+    const r = resolveTextSearch("test.css", "line-height: {v};", { content });
+    expect(r.current).toBe(0.8);
+    expect(r.expectedText).toBe(".8");
+  });
+
+  test("CSS function value", () => {
+    const content = ".card { transform: rotateY(-25deg); }";
+    const r = resolveTextSearch("test.css", "rotateY({v}deg)", { content });
+    expect(r.current).toBe(-25);
+    expect(r.unit).toBe("deg");
+    expect(r.expectedText).toBe("-25deg");
+  });
+
+  test("percentage value", () => {
+    const content = ".overlay { opacity: 80%; }";
+    const r = resolveTextSearch("test.css", "opacity: {v}%", { content });
+    expect(r.current).toBe(80);
+    expect(r.unit).toBe("%");
+    expect(r.expectedText).toBe("80%");
+  });
+
+  test("uses first match", () => {
+    const content = "a { margin: 10px; }\nb { margin: 20px; }";
+    const r = resolveTextSearch("test.css", "margin: {v}px", { content });
+    expect(r.current).toBe(10);
+    expect(r.line).toBe(1);
+  });
+
+  test("throws on missing {v} placeholder", () => {
+    expect(() => resolveTextSearch("test.css", "padding: 10px", { content: "" }))
+      .toThrow('must contain exactly one "{v}" placeholder');
+  });
+
+  test("throws on multiple {v} placeholders", () => {
+    expect(() => resolveTextSearch("test.css", "{v}px {v}px", { content: "" }))
+      .toThrow('must contain exactly one "{v}" placeholder');
+  });
+
+  test("throws when pattern not found", () => {
+    expect(() => resolveTextSearch("test.css", "padding: {v}px", { content: "div { color: red; }" }))
+      .toThrow('Pattern "padding: {v}px" not found');
+  });
+});
+
+describe("toKebabCase", () => {
+  // Inline the function for testing (mirrors index.ts implementation)
+  function toKebabCase(label: string): string {
+    return label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+
+  test("simple label", () => expect(toKebabCase("Padding")).toBe("padding"));
+  test("two words", () => expect(toKebabCase("Font Size")).toBe("font-size"));
+  test("with parenthetical", () => expect(toKebabCase("Line Height (px)")).toBe("line-height-px"));
+  test("already kebab", () => expect(toKebabCase("font-size")).toBe("font-size"));
+  test("camelCase", () => expect(toKebabCase("fontSize")).toBe("fontsize"));
+  test("special chars", () => expect(toKebabCase("  Top & Bottom  ")).toBe("top-bottom"));
+});
+
+describe("tweak schema", () => {
+  const tweakParameterSchema = z.object({
+    id: z.string().min(1).max(50).optional(),
+    label: z.string().min(1).max(100),
+    element: z.string().max(100).optional(),
+    file: z.string().min(1),
+    selector: z.string().max(200).optional(),
+    property: z.string().max(100).optional(),
+    index: z.number().int().min(0).optional(),
+    fn: z.string().max(50).optional(),
+    search: z.string().max(500).optional(),
+    line: z.number().int().min(1).optional(),
+    column: z.number().int().min(1).optional(),
+    expectedText: z.string().min(1).max(50).optional(),
+    current: z.number().optional(),
+    min: z.number(),
+    max: z.number(),
+    step: z.number().positive().optional(),
+    unit: z.string().max(10).optional(),
+  }).refine(
+    (p) => (p.selector && p.property) || (p.line != null && p.column != null && p.expectedText && p.current != null) || p.search,
+    { message: "Provide selector+property (CSS), search (text search), or line+column+expectedText+current (direct)" },
+  );
+
+  test("search mode accepted", () => {
+    const r = tweakParameterSchema.parse({
+      label: "Padding", file: "style.css", search: "padding: {v}px", min: 0, max: 60,
+    });
+    expect(r.search).toBe("padding: {v}px");
+    expect(r.id).toBeUndefined();
+  });
+
+  test("CSS mode accepted", () => {
+    const r = tweakParameterSchema.parse({
+      id: "fs", label: "Font Size", file: "style.css",
+      selector: "h1", property: "font-size", min: 1, max: 10,
+    });
+    expect(r.selector).toBe("h1");
+  });
+
+  test("direct mode accepted", () => {
+    const r = tweakParameterSchema.parse({
+      id: "pad", label: "Padding", file: "style.css",
+      line: 5, column: 12, expectedText: "16px", current: 16, min: 0, max: 60,
+    });
+    expect(r.line).toBe(5);
+  });
+
+  test("rejects when no resolution mode provided", () => {
+    expect(() => tweakParameterSchema.parse({
+      label: "Padding", file: "style.css", min: 0, max: 60,
+    })).toThrow();
+  });
+
+  test("id is optional", () => {
+    const r = tweakParameterSchema.parse({
+      label: "Padding", file: "style.css", search: "padding: {v}px", min: 0, max: 60,
+    });
+    expect(r.id).toBeUndefined();
+  });
+});
+
+describe("resolveTextSearch roundtrip (simulates FileRewriter)", () => {
+  /**
+   * Simulates what the Swift FileRewriter does: find expectedText at line:column,
+   * replace with newValue + unit, return the modified content.
+   */
+  function simulateWrite(
+    content: string,
+    resolved: { line: number; column: number; expectedText: string; unit: string },
+    newValue: number,
+  ): string {
+    const lines = content.split("\n");
+    const line = lines[resolved.line - 1];
+    const colIdx = resolved.column - 1;
+    const found = line.substring(colIdx, colIdx + resolved.expectedText.length);
+    if (found !== resolved.expectedText) {
+      throw new Error(`Verification failed: expected '${resolved.expectedText}' at L${resolved.line}:C${resolved.column}, found '${found}'`);
+    }
+    // Format: integer if no decimal, otherwise preserve decimal places (mirrors Swift formatValue)
+    const isInteger = !resolved.expectedText.replace(/[a-zA-Z%]+$/, "").includes(".");
+    const numStr = isInteger ? String(Math.round(newValue)) : String(newValue);
+    const newText = numStr + resolved.unit;
+    lines[resolved.line - 1] = line.substring(0, colIdx) + newText + line.substring(colIdx + resolved.expectedText.length);
+    return lines.join("\n");
+  }
+
+  test("single value: resolve → write → verify file", () => {
+    const content = ".hero {\n\tpadding: 20px;\n}";
+    const r = resolveTextSearch("f", "padding: {v}px", { content });
+    expect(r).toEqual({ line: 2, column: 11, expectedText: "20px", current: 20, unit: "px" });
+
+    const written = simulateWrite(content, r, 40);
+    expect(written).toBe(".hero {\n\tpadding: 40px;\n}");
+  });
+
+  test("write changes length, then re-resolve still finds value", () => {
+    const content = "div { margin: 8px; }";
+    const r = resolveTextSearch("f", "margin: {v}px", { content });
+    expect(r.expectedText).toBe("8px");
+
+    const written = simulateWrite(content, r, 120);
+    expect(written).toBe("div { margin: 120px; }");
+
+    // Re-resolve on the modified content
+    const r2 = resolveTextSearch("f", "margin: {v}px", { content: written });
+    expect(r2.current).toBe(120);
+    expect(r2.expectedText).toBe("120px");
+  });
+
+  test("two params on same line: write first, sibling column shifts", () => {
+    const content = "\t\ttransform: rotateY(-25deg) rotateX(6deg) translateZ(0);";
+    const ry = resolveTextSearch("f", "rotateY({v}deg)", { content });
+    const rx = resolveTextSearch("f", "rotateX({v}deg)", { content });
+
+    // Write rotateY from -25 to 5 (shorter: "-25deg" → "5deg", -2 chars)
+    const after1 = simulateWrite(content, ry, 5);
+    expect(after1).toContain("rotateY(5deg)");
+    expect(after1).toContain("rotateX(6deg)");
+
+    // rotateX column must shift — re-resolve to get new position
+    const rx2 = resolveTextSearch("f", "rotateX({v}deg)", { content: after1 });
+    expect(rx2.current).toBe(6);
+    expect(rx2.column).toBe(rx.column - 2); // shifted left by 2 chars
+
+    // Write rotateX
+    const after2 = simulateWrite(after1, rx2, -10);
+    expect(after2).toContain("rotateY(5deg)");
+    expect(after2).toContain("rotateX(-10deg)");
+  });
+
+  test("negative to positive value", () => {
+    const content = "div { left: -50px; }";
+    const r = resolveTextSearch("f", "left: {v}px", { content });
+    expect(r.expectedText).toBe("-50px");
+
+    const written = simulateWrite(content, r, 10);
+    expect(written).toBe("div { left: 10px; }");
+  });
+
+  test("value with percentage unit", () => {
+    const content = "div { width: 80%; }";
+    const r = resolveTextSearch("f", "width: {v}%", { content });
+    const written = simulateWrite(content, r, 100);
+    expect(written).toBe("div { width: 100%; }");
+  });
+
+  test("decimal value roundtrip", () => {
+    const content = "p { line-height: 1.5; }";
+    const r = resolveTextSearch("f", "line-height: {v};", { content });
+    expect(r.expectedText).toBe("1.5");
+    expect(r.unit).toBe("");
+
+    const written = simulateWrite(content, r, 2.0);
+    expect(written).toBe("p { line-height: 2; }");
   });
 });

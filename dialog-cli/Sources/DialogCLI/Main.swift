@@ -65,7 +65,7 @@ static func run() {
 
     guard args.count >= 2 else {
         fputs("Usage: dialog-cli <command> [json]\n", stderr)
-        fputs("Commands: confirm, choose, textInput, notify, preview, questions, pulse\n", stderr)
+        fputs("Commands: confirm, choose, textInput, notify, preview, questions, tweak, pulse\n", stderr)
         fputs("Options: --version, -v\n", stderr)
         exit(1)
     }
@@ -90,7 +90,7 @@ static func run() {
 
     guard args.count >= 3 else {
         fputs("Usage: dialog-cli <command> <json>\n", stderr)
-        fputs("Commands: confirm, choose, textInput, notify, preview, questions, pulse\n", stderr)
+        fputs("Commands: confirm, choose, textInput, notify, preview, questions, tweak, pulse\n", stderr)
         exit(1)
     }
 
@@ -176,6 +176,14 @@ static func run() {
             exit(1)
         }
         let response = manager.questions(request)
+        outputData = try? encoder.encode(response)
+
+    case "tweak":
+        guard let request = try? decoder.decode(TweakRequest.self, from: jsonData) else {
+            fputs("Invalid tweak request\n", stderr)
+            exit(1)
+        }
+        let response = manager.tweak(request)
         outputData = try? encoder.encode(response)
 
     default:

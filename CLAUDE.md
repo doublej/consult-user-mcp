@@ -31,7 +31,7 @@ Use `--dry-run` to validate preconditions without executing.
 
 ## Dialog Types & MCP Tools
 
-2 MCP tools: `ask` (interactive) and `notify` (fire-and-forget). When adding features, fixing bugs, or writing tests — **ALL dialog types MUST be considered**.
+3 MCP tools: `ask` (interactive), `notify` (fire-and-forget), and `tweak` (value adjustment pane). When adding features, fixing bugs, or writing tests — **ALL dialog types MUST be considered**.
 
 **Invariant:** The debug menu (`macos-app/Sources/AppDelegate.swift`) and visual test fixtures (`test-cases/cases/`) MUST cover every dialog type. When adding a new type, update both.
 
@@ -47,16 +47,19 @@ Use `--dry-run` to validate preconditions without executing.
 | 6 | **Wizard form** | `form` | `questions` | `body`, `questions[]`, `mode: "wizard"` | `answer: Record<id, string\|string[]>` |
 | 7 | **Accordion form** | `form` | `questions` | `body`, `questions[]`, `mode: "accordion"` | `answer: Record<id, string\|string[]>` |
 | 8 | **Notification** | — (`notify`) | `notify` | `body`, `title`, `sound` | fire-and-forget |
+| 9 | **Value tweak** | — (`tweak`) | `tweak` | `body`, `parameters[]` | `answer: Record<id, number>` |
 
 `questions[]` items: `id`, `question`, `options[]`, `descriptions[]?`, `multi`.
 
-### Shared parameters (all `ask` types)
+`parameters[]` items: `id`, `label`, `file`, `line`, `column`, `expectedText`, `current`, `min`, `max`, `step?`, `unit?`.
+
+### Shared parameters (all `ask` and `tweak` types)
 
 `position` (`"left"` / `"center"` / `"right"`), `project_path` (shows project badge), `MCP_CLIENT_NAME` env var (prefixes title), `DIALOG_THEME` env var (`"sunset"` / `"midnight"` / system default).
 
 ### Shared response states (all interactive dialogs)
 
-Every `ask` dialog can return: normal `answer`, `snoozed: true`, `askDifferently: "<type>"`, `feedbackText`, or `cancelled: true`. Responses compacted by `compact.ts` (strips null fields, maps `confirmed` → `answer: bool`, merges `dismissed` into `cancelled`). Compact priority: snoozed > askDifferently > feedbackText > cancelled > answer.
+Every `ask` and `tweak` dialog can return: normal `answer`, `snoozed: true`, `askDifferently: "<type>"`, `feedbackText`, or `cancelled: true`. Responses compacted by `compact.ts` (strips null fields, maps `confirmed` → `answer: bool`, merges `dismissed` into `cancelled`). Compact priority: snoozed > askDifferently > feedbackText > cancelled > answer.
 
 ### Windows (MUST run on Windows machine)
 
@@ -94,7 +97,7 @@ Repo: `C:\Users\jurre\PycharmProjects\consult-user-mcp`. Commands run via `cmd.e
 The base prompt has an independent version number.
 
 - **Location:** `macos-app/Sources/Resources/base-prompt.md` (first line: `<!-- version: X.Y.Z -->`)
-- **Current:** v2.0.0
+- **Current:** v2.3.0
 - **Validate:** `bash scripts/validate-baseprompt-version.sh` (also runs in CI)
 - **Bump:** Major = breaking tool/workflow changes, Minor = new features/guidance, Patch = fixes/typos
 

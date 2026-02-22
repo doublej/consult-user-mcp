@@ -1,19 +1,19 @@
-<!-- version: 2.2.0 -->
-# Consult User MCP - Required Usage
+<!-- version: 2.7.0 -->
+# Consult User MCP — Required Usage
 
-## Critical Rules
-
-**NEVER use the built-in `AskUserQuestion` tool.** That tool is DISABLED. Use only consult-user-mcp tools.
+<critical_rules>
+**NEVER use the built-in `AskUserQuestion` tool.** It is DISABLED. Use only consult-user-mcp tools.
 
 **BATCH questions when you have 2+ questions.** Use `ask` with `type: "form"` to ask multiple questions at once.
 
-**CONTINUE smoothly after getting answers.** Don't check back in or ask "should I proceed?" - just use the answers and keep working.
+**CONTINUE smoothly after getting answers.** Don't check back in or ask "should I proceed?" — just use the answers and keep working.
 
-**ALWAYS pass `project_path`** on your first `ask` or `notify` call. It's cached for the session — subsequent calls can omit it.
+**ALWAYS pass `project_path`** on your first `ask`, `notify`, or `tweak` call. It's cached for the session — subsequent calls can omit it.
+</critical_rules>
 
 ## Tools
 
-Two tools: `ask` (interactive dialogs) and `notify` (fire-and-forget notifications).
+Three tools: `ask` (interactive dialogs), `notify` (fire-and-forget notifications), and `tweak` (real-time value adjustment).
 
 ### ask — Interactive Dialog
 
@@ -22,93 +22,101 @@ Two tools: `ask` (interactive dialogs) and `notify` (fire-and-forget notificatio
 | `confirm` | Yes/no decision | `yes`, `no` (custom labels) |
 | `pick` | Select from list | `choices`, `multi`, `descriptions`, `default` |
 | `text` | Free-form input | `hidden`, `default` |
-| `form` | Multi-question | `questions`, `mode` |
+| `form` | Multi-question | `questions`, `mode` (`"wizard"` \| `"accordion"`) |
 
-All types share: `body` (required), `title`, `position`, `project_path`.
+All types share: `body` (required), `title`, `position` (`"left"` \| `"center"` \| `"right"`), `project_path`.
 
 ### notify — Notification
 
 Params: `body` (required), `title`, `sound`, `project_path`.
 
+### tweak — Value Adjustment Pane
+
+Opens a slider panel for real-time numeric value adjustment with live file writes.
+
+**Offer tweak when:**
+1. User adjusts visual/layout values — subjective choices benefit from interactive tuning
+2. User rejects your numeric guess — offer tweak instead of guessing again
+3. Multiple related values need coordinated tuning
+
+**Workflow:** Confirm first, then open if accepted:
+1. `ask` → `{"type": "confirm", "body": "Adjust font-size and line-height interactively?", "yes": "Open tweak", "no": "Just pick values"}`
+2. If confirmed → call `tweak` with parameters
+3. `action: "file"` → values already written to disk. `action: "agent"` → files reverted, apply returned values yourself.
+
+**Parameter formats** (one per slider):
+
+| Format | When to use | Required fields |
+|--------|-------------|----------------|
+| **Text search** | Any file type | `label`, `file`, `search` (pattern with `{v}`), `min`, `max` |
+| **CSS reference** | Stylesheets (preferred) | `label`, `file`, `selector`, `property`, `min`, `max` |
+| **Direct** | Fallback / computed locations | `label`, `file`, `line`, `column`, `expectedText`, `current`, `min`, `max` |
+
+- `label` is required for all formats; `id` auto-derives as kebab-case if omitted.
+- Optional: `step`, `unit`, `index` (for multi-value CSS like `margin: 10px 20px`), `fn` (for CSS functions like `rotateY`).
+- CSS reference auto-resolves `line`, `column`, `expectedText`, `current`, `unit`.
+
+**Response:** `{"answer": {"<id>": <number>}, "action": "file" | "agent"}`
+
 ## Examples
 
 ```jsonc
-// Yes/no
-{"type": "confirm", "body": "Delete all files?", "project_path": "/path/to/project"}
+// Confirm with custom labels
+{"type": "confirm", "body": "Deploy to production?", "yes": "Deploy", "no": "Cancel", "project_path": "/path/to/project"}
 
-// Custom labels
-{"type": "confirm", "body": "Deploy to production?", "yes": "Deploy", "no": "Cancel"}
+// Pick with descriptions
+{"type": "pick", "body": "Which database?", "choices": ["PostgreSQL", "MySQL", "SQLite"], "descriptions": ["Best for complex queries", "Widely supported", "Zero config"]}
 
-// Pick one
-{"type": "pick", "body": "Which database?", "choices": ["PostgreSQL", "MySQL", "SQLite"]}
-
-// Pick multiple
+// Multi-select
 {"type": "pick", "body": "Select features:", "choices": ["Auth", "API", "UI"], "multi": true}
 
-// Text input
-{"type": "text", "body": "Enter commit message:"}
-
-// Password
+// Password input
 {"type": "text", "body": "Enter API key:", "hidden": true}
 
-// Form (batch questions)
+// Batch questions as form
 {"type": "form", "body": "Project setup", "questions": [
   {"id": "lang", "question": "Language?", "options": ["TypeScript", "Python"]},
   {"id": "test", "question": "Test framework?", "options": ["Jest", "Vitest"]}
 ]}
+
+// Tweak (text search format)
+// tweak tool: {"body": "Adjust card layout", "parameters": [
+//   {"label": "Padding", "file": "style.css", "search": "padding: {v}px", "min": 0, "max": 60},
+//   {"label": "Border Radius", "file": "style.css", "search": "border-radius: {v}px", "min": 0, "max": 24}
+// ]}
 ```
 
-## Batching Questions
+## Batching
 
-Use `type: "form"` whenever you have 2+ questions, even if they seem unrelated. Sequential questions create friction and interrupt user flow.
-
-**When NOT to batch:**
-- You need answer #1 to determine whether to ask #2
-- Questions are separated by significant work
+Use `type: "form"` for 2+ questions. Only ask sequentially when answer #1 determines whether to ask #2, or questions are separated by significant work.
 
 ## Responses
 
-Normal: `{"answer": true}`, `{"answer": "PostgreSQL"}`, `{"answer": ["Auth", "UI"]}`
-Form: `{"answer": {"lang": "TypeScript", "test": "Vitest"}, "completedCount": 2}`
-Cancelled: `{"cancelled": true}`
-Snoozed: `{"snoozed": true, "remainingSeconds": 300}`
-Ask differently: `{"askDifferently": "text"}`
-Feedback: `{"feedbackText": "Actually, I need more context"}`
+| Type | Normal answer |
+|------|---------------|
+| confirm | `{"answer": true}` or `{"answer": false}` |
+| pick | `{"answer": "PostgreSQL"}` or `{"answer": ["Auth", "UI"]}` |
+| text | `{"answer": "user input"}` |
+| form | `{"answer": {"lang": "TypeScript"}, "completedCount": 2}` |
+| tweak | `{"answer": {"font-size": 18}, "action": "file"}` |
 
-## Handling Snooze
+### Special responses (priority order — only one per response)
 
-When ANY tool returns `snoozed: true`:
-1. Call `Bash` tool: `sleep <remainingSeconds>`
-2. Wait for sleep to complete
-3. Retry the EXACT same question
+| State | Shape | Action required |
+|-------|-------|-----------------|
+| Snoozed | `{"snoozed": true, "remainingSeconds": N}` | Run `sleep N` via Bash, then retry the **exact** same question. Do NOT proceed or ask something else. |
+| Ask differently | `{"askDifferently": "<type>"}` | Re-ask the **same question** as the requested type. Do NOT skip or change topic. |
+| Feedback | `{"feedbackText": "..."}` | Read feedback and adjust. If it asks for context, provide it. If it says "cancel"/"skip", use a reasonable default. |
+| Cancelled | `{"cancelled": true}` | Proceed with a reasonable default. |
 
-**Do NOT** proceed without waiting or ask a different question.
-
-## Handling Ask Differently
-
-When `askDifferently` is returned, the user wants you to re-ask the **same question** using the requested dialog type.
+### askDifferently type mapping
 
 | Value | Re-ask as |
 |-------|-----------|
-| `confirm` | Yes/no confirmation with appropriate labels |
-| `pick` | Single-select list with reasonable choices |
+| `confirm` | Yes/no confirmation |
+| `pick` | Single-select list |
 | `pick-multi` | Multi-select list (`multi: true`) |
 | `text` | Free-form text input |
-| `text-hidden` | Hidden/password text input (`hidden: true`) |
-| `form-wizard` | Step-by-step wizard form (`mode: "wizard"`) |
-| `form-accordion` | Accordion form with all questions visible (`mode: "accordion"`) |
-
-Re-ask the same question immediately, adapting your parameters to fit the new type.
-
-**Do NOT** change the topic or skip the question. The user wants the same information asked in a different format.
-
-## Handling Feedback
-
-When `feedbackText` is returned: read and adjust your approach. If it asks for more context, provide it before re-asking. If it says "cancel" or "skip", move on with a reasonable default.
-
-## Anti-Patterns
-
-- Serial single questions when they could be batched as `type: "form"`
-- Re-asking for confirmation after getting answers
-- Using disabled `AskUserQuestion`
-- Ignoring snooze (must `sleep` then retry)
+| `text-hidden` | Password input (`hidden: true`) |
+| `form-wizard` | Wizard form (`mode: "wizard"`) |
+| `form-accordion` | Accordion form (`mode: "accordion"`) |

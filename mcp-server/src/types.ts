@@ -138,3 +138,52 @@ export interface QuestionsResult {
   askDifferently?: string;
   instruction?: string;
 }
+
+// Tweak parameter definition
+export interface TweakParameter {
+  id: string;
+  label: string;
+  element?: string;
+  file: string;
+  // CSS reference (resolved by server)
+  selector?: string;
+  property?: string;
+  index?: number;
+  fn?: string;
+  // Text search (resolved by server)
+  search?: string;
+  // Direct location — filled by resolver if using CSS reference or text search
+  line?: number;
+  column?: number;
+  expectedText?: string;
+  current?: number;
+  // Range (always required)
+  min: number;
+  max: number;
+  step?: number;
+  unit?: string;
+}
+
+// Options for tweak dialog
+export interface TweakOptions {
+  body: string;
+  parameters: TweakParameter[];
+  title?: string;
+  position?: DialogPosition;
+  projectPath?: string;
+}
+
+// Result for tweak dialog
+export interface TweakResult {
+  dialogType: string;
+  answers: Record<string, number>;
+  action?: "file" | "agent";
+  cancelled: boolean;
+  dismissed: boolean;
+  snoozed?: boolean;
+  snoozeMinutes?: number;
+  remainingSeconds?: number;
+  feedbackText?: string;
+  askDifferently?: string;
+  instruction?: string;
+}

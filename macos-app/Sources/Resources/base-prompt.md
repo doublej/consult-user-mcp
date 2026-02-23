@@ -1,4 +1,4 @@
-<!-- version: 2.7.0 -->
+<!-- version: 2.8.0 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
@@ -57,6 +57,19 @@ Opens a slider panel for real-time numeric value adjustment with live file write
 - CSS reference auto-resolves `line`, `column`, `expectedText`, `current`, `unit`.
 
 **Response:** `{"answer": {"<id>": <number>}, "action": "file" | "agent"}`
+
+**CSS animations:** HMR updates styles but doesn't replay completed animations. Wrap animated elements in a `{#key}` block that increments on HMR:
+
+```svelte
+<script>
+  let hmrKey = 0;
+  if (import.meta.hot) {
+    import.meta.hot.data.count = (import.meta.hot.data.count ?? 0) + 1;
+    hmrKey = import.meta.hot.data.count;
+  }
+</script>
+{#key hmrKey}<div class="animated">...</div>{/key}
+```
 
 **Trigger patterns** — User says something like:
 

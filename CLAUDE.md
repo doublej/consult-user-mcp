@@ -97,7 +97,7 @@ Repo: `C:\Users\jurre\PycharmProjects\consult-user-mcp`. Commands run via `cmd.e
 The base prompt has an independent version number.
 
 - **Location:** `macos-app/Sources/Resources/base-prompt.md` (first line: `<!-- version: X.Y.Z -->`)
-- **Current:** v2.7.0
+- **Current:** v2.8.0
 - **Validate:** `bash scripts/validate-baseprompt-version.sh` (also runs in CI)
 - **Bump:** Major = breaking tool/workflow changes, Minor = new features/guidance, Patch = fixes/typos
 

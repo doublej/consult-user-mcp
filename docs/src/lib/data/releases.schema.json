@@ -55,6 +55,10 @@
                 "featured": {
                   "type": "boolean",
                   "description": "Show this change in the hero dialog (only mark interesting/big updates)"
+                },
+                "starred": {
+                  "type": "boolean",
+                  "description": "Highlight this change in the homepage hero pane (last 5 starred changes shown)"
                 }
               }
             }

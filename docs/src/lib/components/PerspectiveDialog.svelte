@@ -10,10 +10,29 @@
 		animationKey = import.meta.hot.data.count;
 	}
 
-	// Get latest macOS release from JSON (hero renders macOS-styled window)
+	// Collect all starred changes across all releases with their version info
+	interface Change {
+		text: string;
+		type: string;
+		starred?: boolean;
+		featured?: boolean;
+	}
+	interface StarredChange extends Change {
+		version: string;
+	}
+	const starredChanges: StarredChange[] = releasesData.releases
+		.flatMap((release: { version: string; changes: Change[] }) =>
+			release.changes
+				.filter((c) => c.starred)
+				.map((c) => ({ ...c, version: release.version }))
+		)
+		.slice(0, 5);
+
+	// Fallback: if no starred changes yet, show featured from latest macOS release
 	const latestRelease = releasesData.releases.find((r: { platform?: string }) => r.platform === 'macos') ?? releasesData.releases[0];
-	// Show only featured (interesting/big) changes in the hero preview
-	const changes = latestRelease.changes.filter((c: { featured?: boolean }) => c.featured);
+	const changes = starredChanges.length > 0
+		? starredChanges
+		: latestRelease.changes.filter((c: { featured?: boolean }) => c.featured).map((c: Change) => ({ ...c, version: latestRelease.version }));
 
 	const typeLabels: Record<string, string> = {
 		added: 'New',
@@ -38,16 +57,17 @@
 
 				<div class="dialog-body">
 					<div class="icon-circle">
-						<span class="icon">↑</span>
+						<span class="icon">★</span>
 					</div>
-					<div class="dialog-title">Update Consult User MCP?</div>
-					<div class="dialog-text">Version {latestRelease.version} is now available</div>
+					<div class="dialog-title">Recent Highlights</div>
+					<div class="dialog-text">Latest updates across versions</div>
 
 					<div class="changelog">
 						{#each changes as change}
 							<div class="change-item {change.type}">
 								<span class="change-badge">{typeLabels[change.type]}</span>
 								<span class="change-text">{change.text}</span>
+								<span class="version-tag">v{change.version}</span>
 							</div>
 						{/each}
 					</div>
@@ -124,12 +144,12 @@
 		width: 48px;
 		height: 48px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #34C759 0%, #30B350 100%);
+		background: linear-gradient(135deg, #FFD60A 0%, #FFCC00 100%);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin: 0 auto 10px;
-		box-shadow: 0 6px 20px rgba(52, 199, 89, 0.35);
+		box-shadow: 0 6px 20px rgba(255, 204, 0, 0.35);
 	}
 
 	.icon {
@@ -198,6 +218,18 @@
 
 	.change-text {
 		color: #c0c0c5;
+		flex: 1;
+	}
+
+	.version-tag {
+		font-size: 9px;
+		font-weight: 500;
+		padding: 2px 5px;
+		border-radius: 4px;
+		background: rgba(255, 255, 255, 0.08);
+		color: #8a8a8f;
+		flex-shrink: 0;
+		margin-left: auto;
 	}
 
 	/* Make secondary button clickable */

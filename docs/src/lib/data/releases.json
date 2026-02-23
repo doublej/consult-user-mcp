@@ -43,7 +43,7 @@
       "date": "2026-02-22",
       "highlight": "Tweak tool for real-time value adjustment",
       "changes": [
-        { "text": "New tweak tool opens a slider panel for real-time numeric value tuning with live file writes", "type": "added", "scope": "server", "featured": true },
+        { "text": "New tweak tool opens a slider panel for real-time numeric value tuning with live file writes", "type": "added", "scope": "server", "featured": true, "starred": true },
         { "text": "Three parameter formats: text search patterns, CSS selector references, and direct file locations", "type": "added", "scope": "server", "featured": true },
         { "text": "Save to File keeps live edits, Tell Agent reverts files and returns values for the agent to apply", "type": "added", "scope": "cli", "featured": true },
         { "text": "Base prompt restructured to v2.7.0 with 25% fewer tokens and tweak documentation", "type": "changed", "scope": "server" }
@@ -55,8 +55,8 @@
       "date": "2026-02-16",
       "highlight": "Ask differently, humanize responses, and review before send",
       "changes": [
-        { "text": "Ask differently: toolbar button lets you request a different dialog type mid-conversation", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Humanize responses: answers returned as plain text instead of JSON (e.g. \"The user confirmed.\" instead of {\"answer\": true})", "type": "added", "scope": "server", "featured": true },
+        { "text": "Ask differently: toolbar button lets you request a different dialog type mid-conversation", "type": "added", "scope": "cli", "featured": true, "starred": true },
+        { "text": "Humanize responses: answers returned as plain text instead of JSON (e.g. \"The user confirmed.\" instead of {\"answer\": true})", "type": "added", "scope": "server", "featured": true, "starred": true },
         { "text": "Review before send: preview exactly what gets returned to the agent before it's sent", "type": "added", "scope": "cli", "featured": true },
         { "text": "Validate choices: agents can no longer offer \"All of the above\" options — must use multi-select instead", "type": "added", "scope": "server" },
         { "text": "Base prompt updated to v2.2.0 with ask-differently and humanize guidance", "type": "changed", "scope": "server" }
@@ -180,7 +180,7 @@
       "date": "2026-01-31",
       "highlight": "Searchable history & per-day storage",
       "changes": [
-        { "text": "History view now includes a search field to filter entries by question, answer, or client name", "type": "added", "scope": "app", "featured": true },
+        { "text": "History view now includes a search field to filter entries by question, answer, or client name", "type": "added", "scope": "app", "featured": true, "starred": true },
         { "text": "Day sections in history are now collapsible, with today expanded by default", "type": "added", "scope": "app", "featured": true },
         { "text": "History entries are now stored in per-day files for better performance and organization", "type": "changed", "scope": "app" },
         { "text": "Existing history is automatically migrated to the new per-day format", "type": "changed", "scope": "app" },

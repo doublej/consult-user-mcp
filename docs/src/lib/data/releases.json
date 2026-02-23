@@ -3,6 +3,18 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.15.0",
+      "platform": "macos",
+      "date": "2026-02-23",
+      "highlight": "Uninstall UI and CLI scripts",
+      "changes": [
+        { "text": "Settings now includes an Uninstall section to completely remove the app and all MCP configurations", "type": "added", "scope": "app", "featured": true },
+        { "text": "Uninstaller shows exactly what will be removed before proceeding", "type": "added", "scope": "app" },
+        { "text": "Option to keep settings and dialog history when uninstalling", "type": "added", "scope": "app" },
+        { "text": "CLI uninstall scripts (uninstall.sh for macOS, uninstall.ps1 for Windows) as fallback options", "type": "added", "scope": "app" }
+      ]
+    },
+    {
       "version": "1.14.0",
       "platform": "macos",
       "date": "2026-02-22",

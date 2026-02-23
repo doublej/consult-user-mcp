@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.15.0] (macOS) - 2026-02-23
+
+### Added
+- Settings now includes an Uninstall section to completely remove the app and all MCP configurations
+- Uninstaller shows exactly what will be removed before proceeding
+- Option to keep settings and dialog history when uninstalling
+- CLI uninstall scripts (uninstall.sh for macOS, uninstall.ps1 for Windows) as fallback options
+
 ## [1.14.0] (macOS) - 2026-02-22
 
 ### Added

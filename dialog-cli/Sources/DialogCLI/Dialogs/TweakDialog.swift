@@ -7,6 +7,7 @@ struct SwiftUITweakDialog: View {
     let bodyText: String
     let parameters: [TweakParameter]
     let fileRewriter: FileRewriter
+    let detectedFramework: DetectedFramework?
     let onSaveToFile: ([String: Double]) -> Void
     let onTellAgent: ([String: Double]) -> Void
     let onCancel: () -> Void
@@ -33,6 +34,7 @@ struct SwiftUITweakDialog: View {
         self.bodyText = bodyText
         self.parameters = parameters
         self.fileRewriter = fileRewriter
+        self.detectedFramework = FrameworkDetector.detect(from: parameters)
         self.onSaveToFile = onSaveToFile
         self.onTellAgent = onTellAgent
         self.onCancel = onCancel
@@ -58,6 +60,12 @@ struct SwiftUITweakDialog: View {
                     body: bodyText
                 )
                 .padding(.bottom, 8)
+
+                if let framework = detectedFramework {
+                    FrameworkBadge(framework: framework)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 8)
+                }
 
                 parameterList
                     .clipped()
@@ -472,4 +480,53 @@ private struct NonDraggableArea: NSViewRepresentable {
 
 private class NonDraggableNSView: NSView {
     override var mouseDownCanMoveWindow: Bool { false }
+}
+
+// MARK: - Framework Badge
+
+private struct FrameworkBadge: View {
+    let framework: DetectedFramework
+
+    private var icon: String {
+        switch framework {
+        case .svelte: return "s.circle.fill"
+        case .react: return "atom"
+        case .vue: return "v.circle.fill"
+        case .css: return "paintbrush.fill"
+        case .vanilla: return "doc.text.fill"
+        }
+    }
+
+    private var color: Color {
+        switch framework {
+        case .svelte: return Color(red: 1.0, green: 0.24, blue: 0.0) // #FF3E00
+        case .react: return Color(red: 0.38, green: 0.85, blue: 1.0) // #61DAFB
+        case .vue: return Color(red: 0.25, green: 0.78, blue: 0.45) // #42B883
+        case .css: return Color(red: 0.0, green: 0.60, blue: 0.86) // #0099DB
+        case .vanilla: return Color(red: 0.95, green: 0.85, blue: 0.31) // #F3D950
+        }
+    }
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(color)
+
+            Text("Framework detected: \(framework.rawValue)")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(Theme.Colors.textMuted)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 5)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(color.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .strokeBorder(color.opacity(0.3), lineWidth: 0.5)
+                )
+        )
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
 }

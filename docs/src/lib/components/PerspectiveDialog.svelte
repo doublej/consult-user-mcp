@@ -3,11 +3,15 @@
 	import '../styles/dialog.css';
 	import releasesData from '$lib/data/releases.json';
 
-	// Bump to replay animation on HMR
-	let animationKey = 0;
+	// Bump to replay animation on HMR (Svelte/Vite-specific)
+	let animationKey = $state(0);
 	if (import.meta.hot) {
-		import.meta.hot.data.count = (import.meta.hot.data.count ?? 0) + 1;
-		animationKey = import.meta.hot.data.count;
+		const thisModule = import.meta.url;
+		import.meta.hot.on('vite:beforeUpdate', (payload: { updates: Array<{ acceptedPath: string }> }) => {
+			if (payload.updates.some((u) => thisModule.endsWith(u.acceptedPath))) {
+				animationKey++;
+			}
+		});
 	}
 
 	// Collect all starred changes across all releases with their version info
@@ -107,13 +111,13 @@
 		position: relative;
 		transform-style: preserve-3d;
 		transform: rotateY(-25deg) rotateX(6deg) translateZ(0);
-		animation: floatIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+		animation: floatIn 3.0s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 	}
 
 	@keyframes floatIn {
 		from {
 			opacity: 0;
-			transform: rotateY(-40deg) rotateX(12deg) translateZ(-100px) translateY(30px);
+			transform: rotateY(-60deg) rotateX(12deg) translateZ(-100px) translateY(30px);
 		}
 		to {
 			opacity: 1;

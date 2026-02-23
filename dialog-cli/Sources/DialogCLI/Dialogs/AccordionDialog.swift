@@ -261,12 +261,8 @@ struct SwiftUIAccordionDialog: View {
     }
 
     private func toggleExpanded(_ questionId: String) {
-        if reduceMotion {
+        withConditionalAnimation {
             expandedId = expandedId == questionId ? nil : questionId
-        } else {
-            withAnimation(.easeOut(duration: 0.2)) {
-                expandedId = expandedId == questionId ? nil : questionId
-            }
         }
     }
 
@@ -274,12 +270,8 @@ struct SwiftUIAccordionDialog: View {
         guard let currentIdx = questions.firstIndex(where: { $0.id == questionId }) else { return }
         let nextIdx = currentIdx + 1
         if nextIdx < questions.count {
-            if reduceMotion {
+            withConditionalAnimation {
                 expandedId = questions[nextIdx].id
-            } else {
-                withAnimation(.easeOut(duration: 0.2)) {
-                    expandedId = questions[nextIdx].id
-                }
             }
         }
     }
@@ -300,12 +292,8 @@ struct SwiftUIAccordionDialog: View {
                    let currentIdx = questions.firstIndex(where: { $0.id == currentId }),
                    currentIdx > 0 {
                     let prevIdx = currentIdx - 1
-                    if reduceMotion {
+                    withConditionalAnimation {
                         expandedId = questions[prevIdx].id
-                    } else {
-                        withAnimation(.easeOut(duration: 0.2)) {
-                            expandedId = questions[prevIdx].id
-                        }
                     }
                     return true
                 }
@@ -314,12 +302,8 @@ struct SwiftUIAccordionDialog: View {
                    let currentIdx = questions.firstIndex(where: { $0.id == currentId }) {
                     if currentIdx < questions.count - 1 {
                         let nextIdx = currentIdx + 1
-                        if reduceMotion {
+                        withConditionalAnimation {
                             expandedId = questions[nextIdx].id
-                        } else {
-                            withAnimation(.easeOut(duration: 0.2)) {
-                                expandedId = questions[nextIdx].id
-                            }
                         }
                         return true
                     }

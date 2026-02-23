@@ -1,4 +1,16 @@
 import AppKit
+import SwiftUI
+
+// MARK: - Animation Helpers
+
+@MainActor
+func withConditionalAnimation<Result>(_ body: () -> Result) -> Result {
+    if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+        return body()
+    } else {
+        return withAnimation(.easeInOut(duration: 0.2)) { body() }
+    }
+}
 
 // MARK: - Extensions
 

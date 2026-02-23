@@ -75,3 +75,10 @@ C:\Users\<user>\AppData\Local\ConsultUserMCP\
 ```
 
 User data is stored at `%APPDATA%\ConsultUserMCP\` (settings, snooze state, history).
+
+## Uninstall
+
+- Standard uninstall: Windows **Installed apps** (Velopack)
+- Scripted cleanup: `powershell -ExecutionPolicy Bypass -File .\uninstall.ps1`
+
+The scripted path also removes MCP config entries and the installed base-prompt section.

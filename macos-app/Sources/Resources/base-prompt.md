@@ -58,6 +58,44 @@ Opens a slider panel for real-time numeric value adjustment with live file write
 
 **Response:** `{"answer": {"<id>": <number>}, "action": "file" | "agent"}`
 
+**Trigger patterns** — User says something like:
+
+| User prompt | Why tweak? |
+|-------------|-----------|
+| "Make the padding feel right" | Subjective — no correct answer |
+| "The spacing looks off" | Visual judgment needed |
+| "Hmm, that's too small" | Rejected your guess |
+| "Balance the margins and padding together" | Multiple related values |
+| "Let me adjust this interactively" | Explicit request |
+
+**Full workflow example:**
+
+```jsonc
+// 1. User: "The card padding doesn't feel balanced"
+// 2. Agent confirms before opening tweak pane:
+// ask tool:
+{"type": "confirm", "body": "Adjust padding values interactively?", "yes": "Open tweak", "no": "I'll pick values"}
+
+// 3. User confirms → Agent calls tweak:
+// tweak tool:
+{"body": "Card padding", "parameters": [
+  {"label": "Top/Bottom", "file": "Card.module.css", "selector": ".card", "property": "padding-block", "min": 4, "max": 48},
+  {"label": "Left/Right", "file": "Card.module.css", "selector": ".card", "property": "padding-inline", "min": 8, "max": 64}
+]}
+
+// 4. Response: {"answer": {"top-bottom": 24, "left-right": 32}, "action": "file"}
+// 5. action: "file" → values already saved. Agent continues with next task.
+```
+
+**Rejected guess → offer tweak:**
+
+```jsonc
+// Agent set border-radius, user says: "That doesn't look right"
+// DON'T guess again — offer tweak:
+// ask tool:
+{"type": "confirm", "body": "Want to adjust the border radius interactively?", "yes": "Open tweak", "no": "Try another value"}
+```
+
 ## Examples
 
 ```jsonc

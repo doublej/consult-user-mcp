@@ -68,7 +68,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func addBadgeDot(to image: NSImage) -> NSImage {
         let size = image.size
         let badged = NSImage(size: size, flipped: false) { rect in
-            image.draw(in: rect)
+            // Draw base image tinted for menu bar (adapts to light/dark mode)
+            NSColor.labelColor.set()
+            image.draw(in: rect, from: .zero, operation: .sourceOver, fraction: 1.0)
+            rect.fill(using: .sourceAtop)
 
             let dotSize: CGFloat = 5
             let dotRect = NSRect(x: size.width - dotSize - 0.5, y: size.height - dotSize - 0.5, width: dotSize, height: dotSize)
@@ -110,6 +113,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Debug Menu
 
+    private func addDebugMenuItem(_ menu: NSMenu, title: String, action: Selector, key: String = "") {
+        let item = NSMenuItem(title: title, action: action, keyEquivalent: key)
+        item.target = self
+        menu.addItem(item)
+    }
+
     private func setupDebugMenu() {
         debugMenu = NSMenu()
 
@@ -118,77 +127,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         debugMenu.addItem(headerItem)
         debugMenu.addItem(NSMenuItem.separator())
 
-        let confirmItem = NSMenuItem(title: "Test Confirmation", action: #selector(testConfirm), keyEquivalent: "1")
-        confirmItem.target = self
-        debugMenu.addItem(confirmItem)
+        addDebugMenuItem(debugMenu, title: "Test Confirmation", action: #selector(testConfirm), key: "1")
 
         let chooseItem = NSMenuItem(title: "Test Multiple Choice", action: nil, keyEquivalent: "")
         let chooseSubmenu = NSMenu()
-
-        let chooseSingle = NSMenuItem(title: "Single Select", action: #selector(testChooseSingle), keyEquivalent: "")
-        chooseSingle.target = self
-        chooseSubmenu.addItem(chooseSingle)
-
-        let chooseMulti = NSMenuItem(title: "Multi Select", action: #selector(testChooseMulti), keyEquivalent: "")
-        chooseMulti.target = self
-        chooseSubmenu.addItem(chooseMulti)
-
-        let chooseMultiDesc = NSMenuItem(title: "Multi Select + Descriptions", action: #selector(testChooseMultiDescriptions), keyEquivalent: "")
-        chooseMultiDesc.target = self
-        chooseSubmenu.addItem(chooseMultiDesc)
-
+        addDebugMenuItem(chooseSubmenu, title: "Single Select", action: #selector(testChooseSingle))
+        addDebugMenuItem(chooseSubmenu, title: "Multi Select", action: #selector(testChooseMulti))
+        addDebugMenuItem(chooseSubmenu, title: "Multi Select + Descriptions", action: #selector(testChooseMultiDescriptions))
         chooseItem.submenu = chooseSubmenu
         debugMenu.addItem(chooseItem)
 
         let textItem = NSMenuItem(title: "Test Text Input", action: nil, keyEquivalent: "")
         let textSubmenu = NSMenu()
-
-        let textPlain = NSMenuItem(title: "Plain", action: #selector(testTextInput), keyEquivalent: "")
-        textPlain.target = self
-        textSubmenu.addItem(textPlain)
-
-        let textPassword = NSMenuItem(title: "Password", action: #selector(testTextInputPassword), keyEquivalent: "")
-        textPassword.target = self
-        textSubmenu.addItem(textPassword)
-
-        let textMarkdown = NSMenuItem(title: "Markdown", action: #selector(testTextInputMarkdown), keyEquivalent: "")
-        textMarkdown.target = self
-        textSubmenu.addItem(textMarkdown)
-
+        addDebugMenuItem(textSubmenu, title: "Plain", action: #selector(testTextInput))
+        addDebugMenuItem(textSubmenu, title: "Password", action: #selector(testTextInputPassword))
+        addDebugMenuItem(textSubmenu, title: "Markdown", action: #selector(testTextInputMarkdown))
         textItem.submenu = textSubmenu
         debugMenu.addItem(textItem)
 
         let questionsItem = NSMenuItem(title: "Test Questions", action: nil, keyEquivalent: "")
         let questionsSubmenu = NSMenu()
-
-        let questionsWizard = NSMenuItem(title: "Wizard", action: #selector(testQuestionsWizard), keyEquivalent: "")
-        questionsWizard.target = self
-        questionsSubmenu.addItem(questionsWizard)
-
-        let questionsAccordion = NSMenuItem(title: "Accordion", action: #selector(testQuestionsAccordion), keyEquivalent: "")
-        questionsAccordion.target = self
-        questionsSubmenu.addItem(questionsAccordion)
-
+        addDebugMenuItem(questionsSubmenu, title: "Wizard", action: #selector(testQuestionsWizard))
+        addDebugMenuItem(questionsSubmenu, title: "Accordion", action: #selector(testQuestionsAccordion))
         questionsItem.submenu = questionsSubmenu
         debugMenu.addItem(questionsItem)
 
-        let tweakItem = NSMenuItem(title: "Test Tweak", action: #selector(testTweak), keyEquivalent: "6")
-        tweakItem.target = self
-        debugMenu.addItem(tweakItem)
-
-        let notifyToolItem = NSMenuItem(title: "Test Notification", action: #selector(testNotifyTool), keyEquivalent: "4")
-        notifyToolItem.target = self
-        debugMenu.addItem(notifyToolItem)
-
-        let notifyUpdateItem = NSMenuItem(title: "Test Update Notification", action: #selector(testNotifyUpdate), keyEquivalent: "5")
-        notifyUpdateItem.target = self
-        debugMenu.addItem(notifyUpdateItem)
+        addDebugMenuItem(debugMenu, title: "Test Tweak", action: #selector(testTweak), key: "6")
+        addDebugMenuItem(debugMenu, title: "Test Notification", action: #selector(testNotifyTool), key: "4")
+        addDebugMenuItem(debugMenu, title: "Test Update Notification", action: #selector(testNotifyUpdate), key: "5")
 
         debugMenu.addItem(NSMenuItem.separator())
 
-        let allItem = NSMenuItem(title: "Run All Tests", action: #selector(testAll), keyEquivalent: "a")
-        allItem.target = self
-        debugMenu.addItem(allItem)
+        addDebugMenuItem(debugMenu, title: "Run All Tests", action: #selector(testAll), key: "a")
     }
 
     private func setupContextMenu() {

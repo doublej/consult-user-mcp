@@ -66,9 +66,9 @@ struct UninstallSettingsView: View {
                 Text(item.title)
                     .font(.system(size: 13))
                 Text(item.detail)
-                    .font(.system(size: 11, design: .monospaced))
+                    .font(.system(size: 11))
                     .foregroundColor(.secondary)
-                    .lineLimit(1)
+                    .lineLimit(2)
             }
 
             Spacer()

@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.15.1] (macOS) - 2026-02-23
+
+### Fixed
+- Uninstall UI now clarifies that only consult-user-mcp entries are removed from config files, not the entire files
+
 ## [1.15.0] (macOS) - 2026-02-23
 
 ### Added

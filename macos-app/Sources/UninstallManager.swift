@@ -19,14 +19,14 @@ enum UninstallManager {
                 items.append(RemovalItem(
                     icon: "doc.text",
                     title: "MCP config: \(target.displayName)",
-                    detail: target.configPath
+                    detail: "Removes consult-user-mcp entry from \(target.configPath)"
                 ))
             }
             if target.supportsBasePrompt, isBasePromptInstalled(for: target) {
                 items.append(RemovalItem(
                     icon: "text.bubble",
                     title: "Base prompt: \(target.displayName)",
-                    detail: target.claudeMdPath ?? ""
+                    detail: "Removes consult-user-mcp section from \(target.claudeMdPath ?? "")"
                 ))
             }
         }

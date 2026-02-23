@@ -3,8 +3,12 @@
 	import '../styles/dialog.css';
 	import releasesData from '$lib/data/releases.json';
 
-	// Bump to replay animation (tweak pane can modify this)
-	let animationKey = 1;
+	// Bump to replay animation on HMR
+	let animationKey = 0;
+	if (import.meta.hot) {
+		import.meta.hot.data.count = (import.meta.hot.data.count ?? 0) + 1;
+		animationKey = import.meta.hot.data.count;
+	}
 
 	// Get latest macOS release from JSON (hero renders macOS-styled window)
 	const latestRelease = releasesData.releases.find((r: { platform?: string }) => r.platform === 'macos') ?? releasesData.releases[0];

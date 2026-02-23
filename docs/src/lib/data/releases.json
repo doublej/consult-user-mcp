@@ -3,6 +3,15 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.15.1",
+      "platform": "macos",
+      "date": "2026-02-23",
+      "highlight": "Clearer uninstall descriptions",
+      "changes": [
+        { "text": "Uninstall UI now clarifies that only consult-user-mcp entries are removed from config files, not the entire files", "type": "fixed", "scope": "app" }
+      ]
+    },
+    {
       "version": "1.15.0",
       "platform": "macos",
       "date": "2026-02-23",

@@ -233,103 +233,68 @@ class FocusableButtonView: NSView {
         NSSize(width: NSView.noIntrinsicMetric, height: 48)
     }
 
-    override func draw(_ dirtyRect: NSRect) {
-        let rect = bounds.insetBy(dx: 1, dy: 1)
-        let path = NSBezierPath(roundedRect: rect, xRadius: 12, yRadius: 12)
+    // MARK: - Color Properties
 
-        // Background
-        var bgColor: NSColor
+    private var backgroundColor: NSColor {
+        var color: NSColor
         if isDisabled {
-            bgColor = Theme.cardBackground.withAlphaComponent(0.5)
+            color = Theme.cardBackground.withAlphaComponent(0.5)
         } else if isPrimary {
-            if isPressed {
-                bgColor = Theme.accentBlueDark
-            } else if isHovered {
-                bgColor = Theme.accentBlue.blended(withFraction: 0.1, of: .white) ?? Theme.accentBlue
-            } else {
-                bgColor = Theme.accentBlue
-            }
+            if isPressed { color = Theme.accentBlueDark }
+            else if isHovered { color = Theme.accentBlue.blended(withFraction: 0.1, of: .white) ?? Theme.accentBlue }
+            else { color = Theme.accentBlue }
         } else if isDestructive {
-            if isPressed {
-                bgColor = Theme.accentRed.withAlphaComponent(0.4)
-            } else if isHovered {
-                bgColor = Theme.accentRed.withAlphaComponent(0.3)
-            } else {
-                bgColor = Theme.accentRed.withAlphaComponent(0.2)
-            }
+            if isPressed { color = Theme.accentRed.withAlphaComponent(0.4) }
+            else if isHovered { color = Theme.accentRed.withAlphaComponent(0.3) }
+            else { color = Theme.accentRed.withAlphaComponent(0.2) }
         } else {
-            if isPressed {
-                bgColor = Theme.cardSelected
-            } else if isHovered {
-                bgColor = Theme.cardHover
-            } else {
-                bgColor = Theme.cardBackground
-            }
+            if isPressed { color = Theme.cardSelected }
+            else if isHovered { color = Theme.cardHover }
+            else { color = Theme.cardBackground }
         }
+        return isCoolingDown ? color.withAlphaComponent(0.4) : color
+    }
 
-        // Grey out during cooldown
-        if isCoolingDown {
-            bgColor = bgColor.withAlphaComponent(0.4)
-        }
+    private var textColor: NSColor {
+        var color: NSColor
+        if isDisabled { color = Theme.textMuted }
+        else if isPrimary { color = .white }
+        else if isDestructive { color = Theme.accentRed }
+        else { color = Theme.textPrimary }
+        return isCoolingDown ? color.withAlphaComponent(0.5) : color
+    }
 
-        bgColor.setFill()
+    // MARK: - Draw Helpers
+
+    private func drawBackground(in rect: NSRect) {
+        let path = NSBezierPath(roundedRect: rect, xRadius: 12, yRadius: 12)
+        backgroundColor.setFill()
         path.fill()
-
-        // Border for non-primary buttons
         if !isPrimary {
             Theme.border.setStroke()
             path.lineWidth = 1
             path.stroke()
         }
+    }
 
-        // Cooldown progress bar
-        if isCoolingDown {
-            let barHeight: CGFloat = 3
-            let barInset: CGFloat = 8
-            let barY = rect.minY + 6
-            let maxWidth = rect.width - (barInset * 2)
-            let barWidth = maxWidth * cooldownProgress
+    private func drawCooldownBar(in rect: NSRect) {
+        guard isCoolingDown else { return }
+        let barHeight: CGFloat = 3
+        let barInset: CGFloat = 8
+        let barY = rect.minY + 6
+        let barWidth = (rect.width - barInset * 2) * cooldownProgress
+        let barRect = NSRect(x: rect.minX + barInset, y: barY, width: barWidth, height: barHeight)
+        let barPath = NSBezierPath(roundedRect: barRect, xRadius: 1.5, yRadius: 1.5)
+        let barColor = isPrimary ? NSColor.white.withAlphaComponent(0.7) : Theme.accentBlue.withAlphaComponent(0.6)
+        barColor.setFill()
+        barPath.fill()
+    }
 
-            let barRect = NSRect(
-                x: rect.minX + barInset,
-                y: barY,
-                width: barWidth,
-                height: barHeight
-            )
-            let barPath = NSBezierPath(roundedRect: barRect, xRadius: 1.5, yRadius: 1.5)
-            let barColor = isPrimary ? NSColor.white.withAlphaComponent(0.7) : Theme.accentBlue.withAlphaComponent(0.6)
-            barColor.setFill()
-            barPath.fill()
-        }
-
-        // Text
-        var textColor: NSColor
-        if isDisabled {
-            textColor = Theme.textMuted
-        } else if isPrimary {
-            textColor = .white
-        } else if isDestructive {
-            textColor = Theme.accentRed
-        } else {
-            textColor = Theme.textPrimary
-        }
-
-        // Dim text during cooldown
-        if isCoolingDown {
-            textColor = textColor.withAlphaComponent(0.5)
-        }
-
+    private func drawText(in rect: NSRect) {
         let font = NSFont.systemFont(ofSize: 15, weight: isPrimary ? .semibold : .medium)
-        let attrs: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .foregroundColor: textColor
-        ]
-
+        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: textColor]
         var displayText = title
-        if showReturnHint && isPrimary && !isDisabled {
-            displayText += " ⏎"
-        }
-
+        if showReturnHint && isPrimary && !isDisabled { displayText += " ⏎" }
         let size = (displayText as NSString).size(withAttributes: attrs)
         let textRect = NSRect(
             x: (bounds.width - size.width) / 2,
@@ -337,8 +302,14 @@ class FocusableButtonView: NSView {
             width: size.width,
             height: size.height
         )
-
         (displayText as NSString).draw(in: textRect, withAttributes: attrs)
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let rect = bounds.insetBy(dx: 1, dy: 1)
+        drawBackground(in: rect)
+        drawCooldownBar(in: rect)
+        drawText(in: rect)
     }
 }
 

@@ -33,6 +33,8 @@ struct MainSettingsView: View {
             UpdatesSettingsView()
         case .install:
             InstallDetailView()
+        case .uninstall:
+            UninstallSettingsView()
         case .about:
             AboutSettingsView()
         }

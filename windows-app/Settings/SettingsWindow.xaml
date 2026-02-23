@@ -55,6 +55,7 @@
                     <ListBoxItem Content="Projects" />
                     <ListBoxItem Content="About" />
                     <ListBoxItem Content="History" />
+                    <ListBoxItem Content="Uninstall" />
                 </ListBox>
             </StackPanel>
         </Border>

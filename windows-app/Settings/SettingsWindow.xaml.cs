@@ -12,6 +12,7 @@ public partial class SettingsWindow : Window
     private readonly ProjectsSettingsView _projectsView = new();
     private readonly AboutSettingsView _aboutView = new();
     private readonly HistorySettingsView _historyView = new();
+    private readonly UninstallSettingsView _uninstallView = new();
 
     public SettingsWindow()
     {
@@ -33,6 +34,7 @@ public partial class SettingsWindow : Window
             3 => _projectsView,
             4 => _aboutView,
             5 => _historyView,
+            6 => _uninstallView,
             _ => _installView,
         };
     }

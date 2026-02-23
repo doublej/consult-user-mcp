@@ -6,6 +6,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
     case history
     case updates
     case install
+    case uninstall
     case about
 
     var id: String { rawValue }
@@ -17,6 +18,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .history: return "History"
         case .updates: return "Updates"
         case .install: return "Install"
+        case .uninstall: return "Uninstall"
         case .about: return "About"
         }
     }
@@ -28,6 +30,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .history: return "clock.arrow.circlepath"
         case .updates: return "arrow.triangle.2.circlepath"
         case .install: return "plus.circle"
+        case .uninstall: return "trash"
         case .about: return "info.circle"
         }
     }
@@ -39,6 +42,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         case .history: return "Dialog interactions"
         case .updates: return "Update checks and installs"
         case .install: return "MCP integration wizard"
+        case .uninstall: return "Remove app and MCP configs"
         case .about: return "Version, feedback, credits"
         }
     }

@@ -2,11 +2,42 @@ import AppKit
 import SwiftUI
 
 extension DialogManager {
+    private func makeChoiceResponse(
+        answer: StringOrStrings? = nil,
+        cancelled: Bool = false,
+        dismissed: Bool = false,
+        description: String? = nil,
+        descriptions: [String?]? = nil,
+        comment: String? = nil,
+        snoozed: Bool? = nil,
+        snoozeMinutes: Int? = nil,
+        remainingSeconds: Int? = nil,
+        feedbackText: String? = nil,
+        askDifferently: String? = nil,
+        instruction: String? = nil
+    ) -> ChoiceResponse {
+        ChoiceResponse(
+            dialogType: "choose",
+            answer: answer,
+            cancelled: cancelled,
+            dismissed: dismissed,
+            description: description,
+            descriptions: descriptions,
+            comment: comment,
+            snoozed: snoozed,
+            snoozeMinutes: snoozeMinutes,
+            remainingSeconds: remainingSeconds,
+            feedbackText: feedbackText,
+            askDifferently: askDifferently,
+            instruction: instruction
+        )
+    }
+
     func choose(_ request: ChooseRequest) -> ChoiceResponse {
         let snoozeCheck = UserSettings.isSnoozeActive()
         if snoozeCheck.active, let remaining = snoozeCheck.remainingSeconds {
             SnoozedRequestsManager.append(clientName: getClientName(), dialogType: "choose", summary: request.body)
-            return ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: true, snoozeMinutes: nil, remainingSeconds: remaining, feedbackText: nil, askDifferently: nil, instruction: snoozeActiveInstruction(remaining: remaining))
+            return makeChoiceResponse(cancelled: false, snoozed: true, remainingSeconds: remaining, instruction: snoozeActiveInstruction(remaining: remaining))
         }
 
         // Validate descriptions length matches choices
@@ -31,23 +62,23 @@ extension DialogManager {
             defaultSelection: request.defaultSelection,
             onComplete: { selectedIndices in
                 if selectedIndices.isEmpty {
-                    result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+                    result = self.makeChoiceResponse(cancelled: true)
                 } else if request.allowMultiple {
                     let selected = selectedIndices.sorted().map { request.choices[$0] }
                     let descs = selectedIndices.sorted().map { request.descriptions?[safe: $0] }
-                    result = ChoiceResponse(dialogType: "choose", answer: .multiple(selected), cancelled: false, dismissed: false, description: nil, descriptions: descs, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+                    result = self.makeChoiceResponse(answer: .multiple(selected), descriptions: descs)
                 } else if let idx = selectedIndices.first {
-                    result = ChoiceResponse(dialogType: "choose", answer: .single(request.choices[idx]), cancelled: false, dismissed: false, description: request.descriptions?[safe: idx], descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+                    result = self.makeChoiceResponse(answer: .single(request.choices[idx]), description: request.descriptions?[safe: idx])
                 }
                 NSApp.stopModal()
             },
             onCancel: {
-                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+                result = self.makeChoiceResponse(cancelled: true)
                 NSApp.stopModal()
             },
             onSnooze: { minutes in
                 UserSettings.setSnooze(minutes: minutes)
-                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, askDifferently: nil, instruction: self.snoozeInstruction(minutes: minutes))
+                result = self.makeChoiceResponse(snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, instruction: self.snoozeInstruction(minutes: minutes))
                 NSApp.stopModal()
             },
             onFeedback: { feedback, selectedIndices in
@@ -74,11 +105,11 @@ extension DialogManager {
                     desc = nil
                     descs = nil
                 }
-                result = ChoiceResponse(dialogType: "choose", answer: answer, cancelled: false, dismissed: false, description: desc, descriptions: descs, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
+                result = self.makeChoiceResponse(answer: answer, description: desc, descriptions: descs, feedbackText: feedback)
                 NSApp.stopModal()
             },
             onAskDifferently: { type in
-                result = ChoiceResponse(dialogType: "choose", answer: nil, cancelled: false, dismissed: false, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: type, instruction: nil)
+                result = self.makeChoiceResponse(askDifferently: type)
                 NSApp.stopModal()
             }
         )
@@ -98,7 +129,7 @@ extension DialogManager {
         FocusManager.shared.reset()
         window.close()
 
-        let response = result ?? ChoiceResponse(dialogType: "choose", answer: nil, cancelled: true, dismissed: true, description: nil, descriptions: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+        let response = result ?? makeChoiceResponse(cancelled: true, dismissed: true)
 
         // Record to history (skip if snoozed)
         if response.snoozed != true {

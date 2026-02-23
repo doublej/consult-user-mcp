@@ -24,10 +24,11 @@ public class TrayManager : IDisposable
             ),
         };
 
-        SetNormalIcon();
+        UpdateIcon();
         _trayIcon.TrayMouseDoubleClick += (_, _) => OpenSettings();
 
         SnoozeManager.Shared.SnoozeChanged += OnSnoozeChanged;
+        Services.UpdateManager.Shared.StateChanged += OnUpdateStateChanged;
     }
 
     public void SetNormalIcon()
@@ -35,6 +36,13 @@ public class TrayManager : IDisposable
         if (_trayIcon is null) return;
         _trayIcon.Icon = CreateIconFromText("\U0001F4AC");
         _trayIcon.ToolTipText = "Consult User MCP";
+    }
+
+    public void SetUpdateAvailableIcon(string version)
+    {
+        if (_trayIcon is null) return;
+        _trayIcon.Icon = CreateIconWithBadge("\U0001F4AC");
+        _trayIcon.ToolTipText = $"Consult User MCP - Update available: v{version}";
     }
 
     public void SetSnoozedIcon(int remainingSeconds)
@@ -53,8 +61,29 @@ public class TrayManager : IDisposable
             if (isActive)
                 SetSnoozedIcon(remainingSeconds);
             else
-                SetNormalIcon();
+                UpdateIcon();
         });
+    }
+
+    private void OnUpdateStateChanged()
+    {
+        Application.Current.Dispatcher.Invoke(UpdateIcon);
+    }
+
+    private void UpdateIcon()
+    {
+        if (SnoozeManager.Shared.IsActive)
+            return; // Snooze icon takes priority
+
+        if (Services.UpdateManager.Shared.IsUpdateAvailable)
+        {
+            var version = SettingsManager.Shared.Settings.LatestKnownVersion ?? "";
+            SetUpdateAvailableIcon(version);
+        }
+        else
+        {
+            SetNormalIcon();
+        }
     }
 
     private void OpenSettings()
@@ -102,9 +131,29 @@ public class TrayManager : IDisposable
         return System.Drawing.Icon.FromHandle(bmp.GetHicon());
     }
 
+    private static Icon CreateIconWithBadge(string text)
+    {
+        using var bmp = new Bitmap(32, 32);
+        using var g = Graphics.FromImage(bmp);
+        g.Clear(Color.Transparent);
+        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+        // Draw base emoji
+        using var font = new Font("Segoe UI Emoji", 20, System.Drawing.FontStyle.Regular);
+        using var brush = new SolidBrush(Color.White);
+        g.DrawString(text, font, brush, -2, 0);
+
+        // Draw orange badge dot in top-right corner
+        using var badgeBrush = new SolidBrush(Color.FromArgb(255, 140, 0)); // Orange
+        g.FillEllipse(badgeBrush, 22, 0, 10, 10);
+
+        return System.Drawing.Icon.FromHandle(bmp.GetHicon());
+    }
+
     public void Dispose()
     {
         SnoozeManager.Shared.SnoozeChanged -= OnSnoozeChanged;
+        Services.UpdateManager.Shared.StateChanged -= OnUpdateStateChanged;
         _trayIcon?.Dispose();
         _settingsWindow?.Close();
     }

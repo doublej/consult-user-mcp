@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace ConsultUserMCP.Models;
 
 public enum InstallTarget

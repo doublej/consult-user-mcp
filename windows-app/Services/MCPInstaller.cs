@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using ConsultUserMCP.Models;
 
 namespace ConsultUserMCP.Services;
@@ -43,6 +44,23 @@ public static class MCPInstaller
 
     /// <summary>Legacy overload for existing callers.</summary>
     public static bool IsConfigured() => IsConfigured(InstallTarget.ClaudeDesktop);
+
+    public static bool UnconfigureTarget(InstallTarget target)
+    {
+        var path = target.ConfigPath();
+        if (!File.Exists(path)) return true;
+
+        try
+        {
+            return target.ConfigFormat() == ConfigFormat.Toml
+                ? UnconfigureToml(path)
+                : UnconfigureJson(path);
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     public static string? FindMCPServerPath()
     {
@@ -154,6 +172,45 @@ public static class MCPInstaller
         }
 
         File.WriteAllText(path, content);
+        return true;
+    }
+
+    private static bool UnconfigureJson(string path)
+    {
+        var existing = File.ReadAllText(path);
+        var config = JsonNode.Parse(existing)?.AsObject();
+        if (config is null) return false;
+
+        var mcpServers = config["mcpServers"]?.AsObject();
+        if (mcpServers is null) return true;
+
+        if (!mcpServers.Remove("consult-user-mcp"))
+            return true;
+
+        if (mcpServers.Count == 0)
+            config.Remove("mcpServers");
+
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        File.WriteAllText(path, config.ToJsonString(options));
+        return true;
+    }
+
+    private static bool UnconfigureToml(string path)
+    {
+        var existing = File.ReadAllText(path);
+        var updated = Regex.Replace(
+            existing,
+            @"(?ms)^\s*\[mcp_servers\.consult-user-mcp\][\s\S]*?(?=^\s*\[|\z)",
+            "");
+
+        if (updated == existing)
+            return true;
+
+        var cleaned = Regex.Replace(updated, @"(\r?\n){3,}", "\n\n").Trim();
+        if (!string.IsNullOrEmpty(cleaned))
+            cleaned += "\n";
+
+        File.WriteAllText(path, cleaned);
         return true;
     }
 

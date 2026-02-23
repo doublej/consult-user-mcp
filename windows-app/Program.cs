@@ -9,7 +9,7 @@ public static class Program
     {
         VelopackApp.Build()
             .OnFirstRun(v => Services.MCPInstaller.Configure())
-            .OnBeforeUninstallFastCallback(v => Services.StartupManager.SetEnabled(false))
+            .OnBeforeUninstallFastCallback(v => Services.UninstallManager.RunFastCleanup())
             .Run();
 
         var app = new App();

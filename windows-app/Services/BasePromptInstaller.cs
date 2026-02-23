@@ -126,11 +126,60 @@ public static class BasePromptInstaller
         File.WriteAllText(path, finalContent);
     }
 
+    public static bool Uninstall(InstallTarget target)
+    {
+        var path = target.BasePromptPath();
+        if (path is null || !File.Exists(path))
+            return true;
+
+        try
+        {
+            var content = File.ReadAllText(path);
+            var updated = RemoveInstalledPromptSections(content);
+
+            if (updated == content)
+                return true;
+
+            if (string.IsNullOrWhiteSpace(updated))
+            {
+                File.Delete(path);
+                return true;
+            }
+
+            File.WriteAllText(path, updated);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private static string? WrappedBasePromptContent()
     {
         var content = BasePromptContent();
         if (content is null) return null;
         return $"<{TagName} version=\"{BundledVersion}\">\n{content.Trim()}\n</{TagName}>";
+    }
+
+    private static string RemoveInstalledPromptSections(string content)
+    {
+        var cleaned = Regex.Replace(
+            content,
+            $@"\s*<{TagName} version=""[^""]+"">\s*[\s\S]*?\s*</{TagName}>\s*",
+            "\n\n",
+            RegexOptions.Singleline);
+
+        cleaned = Regex.Replace(
+            cleaned,
+            @"(?ms)^\s*# Consult User MCP[\s\S]*?(?=^#[^#]|\z)",
+            "");
+
+        cleaned = Regex.Replace(cleaned, @"(\r?\n){3,}", "\n\n").Trim();
+        if (!string.IsNullOrEmpty(cleaned))
+            cleaned += "\n";
+
+        return cleaned;
     }
 
     private static int CompareVersions(string v1, string v2)

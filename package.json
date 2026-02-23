@@ -11,6 +11,8 @@
     "dev:windows-tray": "cd windows-app && dotnet build",
     "build:windows-tray": "cd windows-app && dotnet publish -c Release -r win-x64 --self-contained",
     "build:bundle": "bash scripts/build-app.sh",
+    "uninstall:macos": "bash uninstall.sh",
+    "uninstall:windows": "powershell -ExecutionPolicy Bypass -File uninstall.ps1",
     "dev": "bash scripts/dev-install.sh",
     "start": "cd mcp-server && bun run start",
     "changelog": "bun run scripts/generate-changelog.ts",

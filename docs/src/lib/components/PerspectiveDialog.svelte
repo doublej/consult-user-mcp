@@ -3,6 +3,9 @@
 	import '../styles/dialog.css';
 	import releasesData from '$lib/data/releases.json';
 
+	// Bump to replay animation (tweak pane can modify this)
+	let animationKey = 1;
+
 	// Get latest macOS release from JSON (hero renders macOS-styled window)
 	const latestRelease = releasesData.releases.find((r: { platform?: string }) => r.platform === 'macos') ?? releasesData.releases[0];
 	// Show only featured (interesting/big) changes in the hero preview
@@ -18,6 +21,7 @@
 
 <div class="perspective-container">
 	<div class="perspective-scene">
+		{#key animationKey}
 		<div class="dialog-wrapper">
 			<div class="dialog-window update-dialog">
 				<div class="window-header">
@@ -57,6 +61,7 @@
 				</div>
 			</div>
 		</div>
+		{/key}
 	</div>
 </div>
 

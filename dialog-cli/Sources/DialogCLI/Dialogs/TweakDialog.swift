@@ -121,6 +121,7 @@ struct SwiftUITweakDialog: View {
                 .padding(.top, 4)
                 .padding(.bottom, 8)
             }
+            .background(NonDraggableArea())
             .onChange(of: focusedIndex) { _, newIndex in
                 guard let newIndex else { return }
                 withAnimation(.easeOut(duration: 0.15)) {
@@ -132,56 +133,38 @@ struct SwiftUITweakDialog: View {
 
     @ViewBuilder
     private func parameterGroupView(_ group: (element: String?, params: [(index: Int, param: TweakParameter)])) -> some View {
-        let isGrouped = group.params.count > 1
-        let hasFocus = focusedIndex.map { f in group.params.contains { $0.index == f } } ?? false
-        let hasDisabled = group.params.contains { disabledParams.contains($0.param.id) }
-
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 6) {
+            // Shared element label for the group
             if let element = group.element {
                 Text(element)
                     .font(.system(size: 11, weight: .semibold, design: .monospaced))
                     .foregroundColor(Theme.Colors.textMuted)
                     .textCase(.uppercase)
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 4)
+                    .padding(.leading, 4)
             }
-            VStack(spacing: 0) {
-                ForEach(Array(group.params.enumerated()), id: \.element.param.id) { groupIdx, entry in
-                    parameterRow(entry: entry, groupIdx: groupIdx, isGrouped: isGrouped)
-                }
-            }
-            .background(RoundedRectangle(cornerRadius: 10).fill(Theme.Colors.cardBackground))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(
-                        hasDisabled ? Theme.Colors.accentRed.opacity(0.5) : hasFocus ? Theme.Colors.accentBlue : Theme.Colors.border,
-                        lineWidth: hasFocus ? 2 : 1
-                    )
-            )
-        }
-    }
 
-    @ViewBuilder
-    private func parameterRow(entry: (index: Int, param: TweakParameter), groupIdx: Int, isGrouped: Bool) -> some View {
-        if groupIdx > 0 {
-            Divider().background(Theme.Colors.border).padding(.horizontal, 12)
-        }
-        TweakParameterCard(
-            param: entry.param,
-            value: Binding(
-                get: { values[entry.param.id] ?? entry.param.current },
-                set: { newValue in
-                    values[entry.param.id] = newValue
-                    debouncedWrite(paramId: entry.param.id, value: newValue)
+            // Parameter cards with nested border radius
+            VStack(spacing: 4) {
+                ForEach(group.params, id: \.param.id) { entry in
+                    TweakParameterCard(
+                        param: entry.param,
+                        value: Binding(
+                            get: { values[entry.param.id] ?? entry.param.current },
+                            set: { newValue in
+                                values[entry.param.id] = newValue
+                                debouncedWrite(paramId: entry.param.id, value: newValue)
+                            }
+                        ),
+                        isDisabled: disabledParams.contains(entry.param.id),
+                        isFocused: focusedIndex == entry.index,
+                        isGrouped: group.params.count > 1,
+                        onReset: { resetParam(entry.param.id) }
+                    )
+                    .onTapGesture { focusedIndex = entry.index }
+                    .id(entry.index)
                 }
-            ),
-            isDisabled: disabledParams.contains(entry.param.id),
-            isFocused: focusedIndex == entry.index,
-            isGrouped: isGrouped,
-            onReset: { resetParam(entry.param.id) }
-        )
-        .onTapGesture { focusedIndex = entry.index }
-        .id(entry.index)
+            }
+        }
     }
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
@@ -313,44 +296,19 @@ private struct TweakParameterCard: View {
 
     @State private var textValue: String = ""
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Top row: label + value + unit + reset
-            HStack {
-                Text(param.label)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(isDisabled ? Theme.Colors.textMuted : Theme.Colors.textPrimary)
-                    .lineLimit(1)
-                    .help("\(param.file):\(param.line)")
-
-                Spacer()
-
-                HStack(spacing: 4) {
-                    TextField("", text: $textValue)
-                        .font(.system(size: 14, weight: .medium, design: .monospaced))
-                        .foregroundColor(isDisabled ? Theme.Colors.textMuted : Theme.Colors.accentBlue)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 80)
-                        .textFieldStyle(.plain)
-                        .disabled(isDisabled)
-                        .onSubmit { commitTextValue() }
-
-                    if let unit = param.unit {
-                        Text(unit)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(Theme.Colors.textMuted)
-                    }
-
-                    Button(action: onReset) {
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundColor(Theme.Colors.textSecondary)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Reset to original value")
-                }
+    private var steppedBinding: Binding<Double> {
+        Binding(
+            get: { value },
+            set: { newValue in
+                let step = param.effectiveStep
+                let snapped = (newValue / step).rounded() * step
+                value = min(max(snapped, param.min), param.max)
             }
+        )
+    }
 
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
             // Disabled warning
             if isDisabled {
                 HStack(spacing: 4) {
@@ -363,23 +321,57 @@ private struct TweakParameterCard: View {
                 }
             }
 
-            // Slider
-            Slider(value: $value, in: param.min...param.max, step: param.effectiveStep)
-                .disabled(isDisabled)
-                .tint(Theme.Colors.accentBlue)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(isFocused && isGrouped ? Theme.Colors.cardBackground.opacity(0.5) : Color.clear)
-        .background(isGrouped ? Color.clear : Theme.Colors.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: isGrouped ? 0 : 10))
-        .overlay(
-            Group {
-                if !isGrouped {
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(borderColor, lineWidth: isFocused ? 2 : 1)
+            // Single row: label | slider+ticks | input | unit | reset
+            HStack(spacing: 8) {
+                Text(param.label)
+                    .font(.system(size: 12, weight: .regular))
+                    .foregroundColor(isDisabled ? Theme.Colors.textMuted : Theme.Colors.textSecondary)
+                    .lineLimit(1)
+                    .frame(width: 100, alignment: .leading)
+                    .help("\(param.file):\(param.line)")
+
+                // Slider with tick marks
+                VStack(spacing: 2) {
+                    Slider(value: steppedBinding, in: param.min...param.max)
+                        .disabled(isDisabled)
+                        .tint(Theme.Colors.accentBlue)
+
+                    SliderTickMarks(min: param.min, max: param.max, step: param.effectiveStep)
                 }
+
+                // Fixed-width value section for alignment
+                HStack(spacing: 4) {
+                    TextField("", text: $textValue)
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .foregroundColor(isDisabled ? Theme.Colors.textMuted : Theme.Colors.accentBlue)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 56)
+                        .textFieldStyle(.plain)
+                        .disabled(isDisabled)
+                        .onSubmit { commitTextValue() }
+
+                    Text(param.unit ?? "")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(Theme.Colors.textMuted)
+                        .frame(width: 24, alignment: .leading)
+
+                    Button(action: onReset) {
+                        Image(systemName: "arrow.counterclockwise")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(Theme.Colors.textMuted)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Reset to original value")
+                }
+                .frame(width: 110, alignment: .trailing)
             }
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(RoundedRectangle(cornerRadius: 6).fill(Theme.Colors.cardBackground.opacity(0.5)))
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .strokeBorder(borderColor, lineWidth: isFocused ? 1.5 : 0.5)
         )
         .opacity(isDisabled ? 0.7 : 1.0)
         .onAppear { textValue = formatDisplay(value) }
@@ -391,7 +383,7 @@ private struct TweakParameterCard: View {
     private var borderColor: Color {
         if isDisabled { return Theme.Colors.accentRed.opacity(0.5) }
         if isFocused { return Theme.Colors.accentBlue }
-        return Theme.Colors.border
+        return Theme.Colors.border.opacity(0.5)
     }
 
     private func commitTextValue() {
@@ -420,4 +412,64 @@ private struct TweakParameterCard: View {
         let trimmed = afterDot.replacingOccurrences(of: "0+$", with: "", options: .regularExpression)
         return trimmed.count
     }
+}
+
+// MARK: - Slider Tick Marks
+
+private struct SliderTickMarks: View {
+    let min: Double
+    let max: Double
+    let step: Double
+
+    private let minPixelsPerTick: CGFloat = 10
+
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let tickCount = tickCount(for: width)
+
+            if tickCount > 1 {
+                HStack(spacing: 0) {
+                    ForEach(0..<tickCount, id: \.self) { index in
+                        if index > 0 { Spacer(minLength: 0) }
+                        Rectangle()
+                            .fill(Theme.Colors.textMuted.opacity(0.4))
+                            .frame(width: 1, height: 4)
+                    }
+                }
+            }
+        }
+        .frame(height: 4)
+    }
+
+    private func tickCount(for width: CGFloat) -> Int {
+        let range = max - min
+        guard range > 0, step > 0 else { return 0 }
+
+        // Start with natural tick count based on step
+        var count = Int((range / step).rounded()) + 1
+
+        // Halve until we meet density constraint
+        while count > 1 {
+            let spacing = width / CGFloat(count - 1)
+            if spacing >= minPixelsPerTick { break }
+            count = (count + 1) / 2
+        }
+
+        return count
+    }
+}
+
+// MARK: - Non-Draggable Area
+
+private struct NonDraggableArea: NSViewRepresentable {
+    func makeNSView(context: Context) -> NonDraggableNSView {
+        NonDraggableNSView()
+    }
+
+    func updateNSView(_ nsView: NonDraggableNSView, context: Context) {}
+}
+
+private class NonDraggableNSView: NSView {
+    override var mouseDownCanMoveWindow: Bool { false }
 }

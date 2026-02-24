@@ -159,6 +159,10 @@ struct InstallDetailView: View {
             ClaudeLogo(size: 32, showTerminalBadge: true)
         case .codex:
             OpenAILogo(size: 32)
+        case .gemini:
+            GeminiLogo(size: 32)
+        case .antigravity:
+            AntigravityLogo(size: 32)
         }
     }
 

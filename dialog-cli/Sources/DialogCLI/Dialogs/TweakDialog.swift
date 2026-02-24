@@ -8,8 +8,8 @@ struct SwiftUITweakDialog: View {
     let parameters: [TweakParameter]
     let fileRewriter: FileRewriter
     let detectedFramework: DetectedFramework?
-    let onSaveToFile: ([String: Double]) -> Void
-    let onTellAgent: ([String: Double]) -> Void
+    let onSaveToFile: ([String: Double], Bool) -> Void
+    let onTellAgent: ([String: Double], Bool) -> Void
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
     let onFeedback: (String, [String: Double]) -> Void
@@ -19,13 +19,14 @@ struct SwiftUITweakDialog: View {
     @State private var disabledParams: Set<String> = []
     @State private var debounceTimers: [String: DispatchWorkItem] = [:]
     @State private var focusedIndex: Int?
+    @State private var replayAnimations: Bool = true
 
     init(
         bodyText: String,
         parameters: [TweakParameter],
         fileRewriter: FileRewriter,
-        onSaveToFile: @escaping ([String: Double]) -> Void,
-        onTellAgent: @escaping ([String: Double]) -> Void,
+        onSaveToFile: @escaping ([String: Double], Bool) -> Void,
+        onTellAgent: @escaping ([String: Double], Bool) -> Void,
         onCancel: @escaping () -> Void,
         onSnooze: @escaping (Int) -> Void,
         onFeedback: @escaping (String, [String: Double]) -> Void,
@@ -62,9 +63,13 @@ struct SwiftUITweakDialog: View {
                 .padding(.bottom, 8)
 
                 if let framework = detectedFramework {
-                    FrameworkBadge(framework: framework)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 8)
+                    HStack(spacing: 12) {
+                        FrameworkBadge(framework: framework)
+                        Spacer()
+                        ReplayAnimationsToggle(isOn: $replayAnimations)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
                 }
 
                 parameterList
@@ -119,7 +124,7 @@ struct SwiftUITweakDialog: View {
 
     private var parameterList: some View {
         ScrollViewReader { proxy in
-            ScrollView {
+            AutoSizingScrollView {
                 VStack(spacing: 12) {
                     ForEach(Array(parameterGroups.enumerated()), id: \.offset) { _, group in
                         parameterGroupView(group)
@@ -222,13 +227,13 @@ struct SwiftUITweakDialog: View {
 
     private func saveToFile() {
         flushPendingWrites()
-        onSaveToFile(values)
+        onSaveToFile(values, replayAnimations)
     }
 
     private func tellAgent() {
         let desiredValues = values
         cancelPendingWrites()
-        onTellAgent(desiredValues)
+        onTellAgent(desiredValues, replayAnimations)
     }
 
     private func revertAll() {
@@ -258,16 +263,27 @@ struct SwiftUITweakDialog: View {
 
     private func debouncedWrite(paramId: String, value: Double) {
         debounceTimers[paramId]?.cancel()
+        let shouldReplay = replayAnimations
         let work = DispatchWorkItem { [fileRewriter] in
             let result = fileRewriter.applyChange(paramId: paramId, newValue: value)
             if case .failure = result {
                 DispatchQueue.main.async {
                     disabledParams.insert(paramId)
                 }
+            } else if shouldReplay {
+                Self.triggerBrowserReplay()
             }
         }
         debounceTimers[paramId] = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15, execute: work)
+    }
+
+    private static func triggerBrowserReplay() {
+        guard let url = URL(string: "http://localhost:19877/__replay") else { return }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 0.5
+        URLSession.shared.dataTask(with: request) { _, _, _ in }.resume()
     }
 
     private func flushPendingWrites() {
@@ -527,6 +543,27 @@ private struct FrameworkBadge: View {
                         .strokeBorder(color.opacity(0.3), lineWidth: 0.5)
                 )
         )
-        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+// MARK: - Replay Animations Toggle
+
+private struct ReplayAnimationsToggle: View {
+    @Binding var isOn: Bool
+
+    var body: some View {
+        Button(action: { isOn.toggle() }) {
+            HStack(spacing: 5) {
+                Image(systemName: isOn ? "checkmark.square.fill" : "square")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(isOn ? Theme.Colors.accentBlue : Theme.Colors.textMuted)
+
+                Text("Replay animations")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(Theme.Colors.textMuted)
+            }
+        }
+        .buttonStyle(.plain)
+        .help("Trigger animation replay after changes (requires browser hook)")
     }
 }

@@ -22,7 +22,7 @@ enum InstallHelper {
 
         var promptSuccess = true
         var promptError: String?
-        if answers.includeBasePrompt && answers.basePromptMode != .skip {
+        if answers.target.supportsBasePrompt && answers.includeBasePrompt && answers.basePromptMode != .skip {
             do {
                 try ClaudeMdInstaller.install(for: target, mode: answers.basePromptMode)
             } catch {

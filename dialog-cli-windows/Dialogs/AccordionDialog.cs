@@ -151,14 +151,14 @@ public class AccordionDialog : DialogBase
             DockPanel.SetDock(chevron, Dock.Right);
             headerRow.Children.Add(chevron);
 
-            headerRow.Children.Add(new TextBlock
-            {
-                Text = q.Question,
-                FontSize = DialogTheme.BodyFontSize,
-                Foreground = DialogTheme.TextBrush,
-                TextTrimming = TextTrimming.CharacterEllipsis,
-                VerticalAlignment = VerticalAlignment.Center,
-            });
+            var questionText = SelectableTextBlock.Create(
+                q.Question,
+                DialogTheme.BodyFontSize,
+                DialogTheme.TextBrush
+            );
+            questionText.TextTrimming = TextTrimming.CharacterEllipsis;
+            questionText.VerticalAlignment = VerticalAlignment.Center;
+            headerRow.Children.Add(questionText);
 
             headerBorder.Child = headerRow;
             var qId = q.Id;
@@ -241,13 +241,12 @@ public class AccordionDialog : DialogBase
                         });
                         if (!string.IsNullOrEmpty(opt.Description))
                         {
-                            textStack.Children.Add(new TextBlock
-                            {
-                                Text = opt.Description,
-                                FontSize = DialogTheme.SmallFontSize,
-                                Foreground = DialogTheme.SecondaryTextBrush,
-                                Margin = new Thickness(0, 3, 0, 0),
-                            });
+                            textStack.Children.Add(SelectableTextBlock.Create(
+                                opt.Description,
+                                DialogTheme.SmallFontSize,
+                                DialogTheme.SecondaryTextBrush,
+                                new Thickness(0, 3, 0, 0)
+                            ));
                         }
 
                         var optCard = new Border

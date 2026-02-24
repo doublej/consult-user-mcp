@@ -91,14 +91,12 @@ public class ChooseDialog : DialogBase
 
         if (!string.IsNullOrEmpty(desc))
         {
-            textStack.Children.Add(new TextBlock
-            {
-                Text = desc,
-                FontSize = DialogTheme.SmallFontSize,
-                Foreground = DialogTheme.SecondaryTextBrush,
-                TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(0, 4, 0, 0),
-            });
+            textStack.Children.Add(SelectableTextBlock.Create(
+                desc,
+                DialogTheme.SmallFontSize,
+                DialogTheme.SecondaryTextBrush,
+                new Thickness(0, 4, 0, 0)
+            ));
         }
 
         var border = new Border

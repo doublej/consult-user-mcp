@@ -4,15 +4,10 @@
 	import releasesData from '$lib/data/releases.json';
 
 	// Bump to replay animation on HMR (Svelte/Vite-specific)
-	let animationKey = $state(0);
-	if (import.meta.hot) {
-		const thisModule = import.meta.url;
-		import.meta.hot.on('vite:beforeUpdate', (payload: { updates: Array<{ acceptedPath: string }> }) => {
-			if (payload.updates.some((u) => thisModule.endsWith(u.acceptedPath))) {
-				animationKey++;
-			}
-		});
-	}
+	// Plain const is re-evaluated on each module load; {#key} forces DOM recreation
+	const animationKey = import.meta.hot
+		? (import.meta.hot.data.animKey = (import.meta.hot.data.animKey ?? 0) + 1)
+		: 0;
 
 	// Collect all starred changes across all releases with their version info
 	interface Change {

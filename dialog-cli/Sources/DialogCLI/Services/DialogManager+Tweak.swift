@@ -6,7 +6,7 @@ extension DialogManager {
         let snoozeCheck = UserSettings.isSnoozeActive()
         if snoozeCheck.active, let remaining = snoozeCheck.remainingSeconds {
             SnoozedRequestsManager.append(clientName: getClientName(), dialogType: "tweak", summary: request.body)
-            return TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: false, dismissed: false, snoozed: true, snoozeMinutes: nil, remainingSeconds: remaining, feedbackText: nil, askDifferently: nil, instruction: snoozeActiveInstruction(remaining: remaining))
+            return TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: false, dismissed: false, snoozed: true, snoozeMinutes: nil, remainingSeconds: remaining, feedbackText: nil, askDifferently: nil, instruction: snoozeActiveInstruction(remaining: remaining), replayAnimations: nil)
         }
 
         NSApp.setActivationPolicy(.accessory)
@@ -15,35 +15,35 @@ extension DialogManager {
 
         let fileRewriter = FileRewriter(parameters: request.parameters, projectPath: getProjectPath())
 
-        let onSaveToFile: ([String: Double]) -> Void = { answers in
-            result = TweakResponse(dialogType: "tweak", answers: answers, action: "file", cancelled: false, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+        let onSaveToFile: ([String: Double], Bool) -> Void = { answers, replay in
+            result = TweakResponse(dialogType: "tweak", answers: answers, action: "file", cancelled: false, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil, replayAnimations: replay)
             NSApp.stopModal()
         }
 
-        let onTellAgent: ([String: Double]) -> Void = { answers in
+        let onTellAgent: ([String: Double], Bool) -> Void = { answers, replay in
             _ = fileRewriter.resetAll()
-            result = TweakResponse(dialogType: "tweak", answers: answers, action: "agent", cancelled: false, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+            result = TweakResponse(dialogType: "tweak", answers: answers, action: "agent", cancelled: false, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil, replayAnimations: replay)
             NSApp.stopModal()
         }
 
         let onCancel: () -> Void = {
-            result = TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: true, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+            result = TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: true, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil, replayAnimations: nil)
             NSApp.stopModal()
         }
 
         let onSnooze: (Int) -> Void = { minutes in
             UserSettings.setSnooze(minutes: minutes)
-            result = TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: false, dismissed: false, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, askDifferently: nil, instruction: self.snoozeInstruction(minutes: minutes))
+            result = TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: false, dismissed: false, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, askDifferently: nil, instruction: self.snoozeInstruction(minutes: minutes), replayAnimations: nil)
             NSApp.stopModal()
         }
 
         let onFeedback: (String, [String: Double]) -> Void = { feedback, currentAnswers in
-            result = TweakResponse(dialogType: "tweak", answers: currentAnswers, action: nil, cancelled: false, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
+            result = TweakResponse(dialogType: "tweak", answers: currentAnswers, action: nil, cancelled: false, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil, replayAnimations: nil)
             NSApp.stopModal()
         }
 
         let onAskDifferently: (String) -> Void = { type in
-            result = TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: false, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: type, instruction: nil)
+            result = TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: false, dismissed: false, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: type, instruction: nil, replayAnimations: nil)
             NSApp.stopModal()
         }
 
@@ -74,7 +74,7 @@ extension DialogManager {
         FocusManager.shared.reset()
         window.close()
 
-        let response = result ?? TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: true, dismissed: true, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+        let response = result ?? TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: true, dismissed: true, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil, replayAnimations: nil)
 
         // Record to history (skip if snoozed)
         if response.snoozed != true {

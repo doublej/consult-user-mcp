@@ -50,4 +50,5 @@ struct TweakResponse: Codable {
     let feedbackText: String?
     let askDifferently: String?
     let instruction: String?
+    let replayAnimations: Bool?  // Request browser to replay CSS animations
 }

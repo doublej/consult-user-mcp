@@ -90,15 +90,14 @@ public class WizardDialog : DialogBase
         // Render question content
         _contentPanel.Children.Clear();
 
-        _contentPanel.Children.Add(new TextBlock
-        {
-            Text = q.Question,
-            FontSize = DialogTheme.TitleFontSize,
-            FontWeight = FontWeights.SemiBold,
-            Foreground = DialogTheme.TextBrush,
-            TextWrapping = TextWrapping.Wrap,
-            Margin = new Thickness(0, 0, 0, 12),
-        });
+        var questionText = SelectableTextBlock.Create(
+            q.Question,
+            DialogTheme.TitleFontSize,
+            DialogTheme.TextBrush,
+            new Thickness(0, 0, 0, 12)
+        );
+        questionText.FontWeight = FontWeights.SemiBold;
+        _contentPanel.Children.Add(questionText);
 
         bool hasAnswer;
         if (q.Type == QuestionType.Text)
@@ -198,14 +197,12 @@ public class WizardDialog : DialogBase
             });
             if (!string.IsNullOrEmpty(opt.Description))
             {
-                textStack.Children.Add(new TextBlock
-                {
-                    Text = opt.Description,
-                    FontSize = DialogTheme.SmallFontSize,
-                    Foreground = DialogTheme.SecondaryTextBrush,
-                    TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness(0, 3, 0, 0),
-                });
+                textStack.Children.Add(SelectableTextBlock.Create(
+                    opt.Description,
+                    DialogTheme.SmallFontSize,
+                    DialogTheme.SecondaryTextBrush,
+                    new Thickness(0, 3, 0, 0)
+                ));
             }
 
             var card = new Border

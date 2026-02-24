@@ -42,6 +42,9 @@ Consult User MCP.app/
 # Local dialog-cli binary
 macos-app/dialog-cli/
 
+# Test screenshots
+test-cases/screenshots/
+
 # Local dev files
 .history-analysis/
 .claude-plugin/

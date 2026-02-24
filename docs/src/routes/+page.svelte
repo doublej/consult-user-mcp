@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { onMount } from 'svelte';
+	import { dev } from '$app/environment';
 	import DialogPreviews from '$lib/components/DialogPreviews.svelte';
 	import InteractiveDemo from '$lib/components/InteractiveDemo.svelte';
 	import PerspectiveDialog from '$lib/components/PerspectiveDialog.svelte';
@@ -16,6 +18,54 @@
 		copied = true;
 		setTimeout(() => copied = false, 2000);
 	}
+
+	// Tweak replay: connect to tray app WebSocket in dev mode
+	onMount(() => {
+		if (!dev) return;
+
+		let ws: WebSocket | null = null;
+		let reconnectTimer: ReturnType<typeof setInterval> | null = null;
+
+		function connect() {
+			if (ws?.readyState === WebSocket.OPEN) return;
+			try {
+				ws = new WebSocket('ws://localhost:19876');
+				ws.onopen = () => {
+					console.log('[TweakReplay] Connected');
+					if (reconnectTimer) { clearInterval(reconnectTimer); reconnectTimer = null; }
+				};
+				ws.onmessage = (e) => {
+					const data = JSON.parse(e.data);
+					if (data.type === 'replay') replayAnimations();
+				};
+				ws.onclose = () => { ws = null; scheduleReconnect(); };
+				ws.onerror = () => ws?.close();
+			} catch { scheduleReconnect(); }
+		}
+
+		function scheduleReconnect() {
+			if (!reconnectTimer) reconnectTimer = setInterval(connect, 3000);
+		}
+
+		function replayAnimations() {
+			document.querySelectorAll('*').forEach(el => {
+				const style = getComputedStyle(el);
+				if (style.animationName && style.animationName !== 'none') {
+					const anim = (el as HTMLElement).style.animation;
+					(el as HTMLElement).style.animation = 'none';
+					void (el as HTMLElement).offsetHeight;
+					(el as HTMLElement).style.animation = anim || '';
+				}
+			});
+			console.log('[TweakReplay] Animations replayed');
+		}
+
+		connect();
+		return () => {
+			ws?.close();
+			if (reconnectTimer) clearInterval(reconnectTimer);
+		};
+	});
 </script>
 
 <svelte:head>

@@ -34,7 +34,12 @@ struct FocusableChoiceCard: NSViewRepresentable {
 
 class FocusableChoiceCardView: NSView {
     var title: String = "" { didSet { invalidateCachedSizes() } }
-    var subtitle: String? { didSet { invalidateCachedSizes() } }
+    var subtitle: String? {
+        didSet {
+            invalidateCachedSizes()
+            updateSubtitleField()
+        }
+    }
     var isSelected: Bool = false
     var isMultiSelect: Bool = false
     var onTap: (() -> Void)?
@@ -51,6 +56,23 @@ class FocusableChoiceCardView: NSView {
 
     private static let titleFont = NSFont.systemFont(ofSize: 14, weight: .semibold)
     private static let subtitleFont = NSFont.systemFont(ofSize: 12, weight: .regular)
+
+    // Selectable subtitle field
+    private lazy var subtitleField: NSTextField = {
+        let field = NSTextField()
+        field.isEditable = false
+        field.isSelectable = true
+        field.isBordered = false
+        field.drawsBackground = false
+        field.backgroundColor = .clear
+        field.font = Self.subtitleFont
+        field.textColor = Theme.textSecondary
+        field.lineBreakMode = .byWordWrapping
+        field.maximumNumberOfLines = 0
+        field.cell?.wraps = true
+        field.cell?.isScrollable = false
+        return field
+    }()
 
     private func invalidateCachedSizes() {
         cachedTitleSize = nil
@@ -106,6 +128,19 @@ class FocusableChoiceCardView: NSView {
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         setupTracking()
+        addSubview(subtitleField)
+    }
+
+    private func updateSubtitleField() {
+        if let sub = subtitle, !sub.isEmpty {
+            subtitleField.stringValue = sub
+            subtitleField.isHidden = false
+        } else {
+            subtitleField.stringValue = ""
+            subtitleField.isHidden = true
+        }
+        needsLayout = true
+        needsDisplay = true
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -146,6 +181,25 @@ class FocusableChoiceCardView: NSView {
         if lastBoundsWidth != bounds.width {
             lastBoundsWidth = bounds.width
             invalidateIntrinsicContentSize()
+        }
+
+        // Position subtitle field
+        if let sub = subtitle, !sub.isEmpty {
+            let rect = bounds
+            let contentX: CGFloat = 16
+            let indicatorSize: CGFloat = 24
+            let indicatorX = rect.width - 16 - indicatorSize
+            let contentWidth = indicatorX - contentX - 12
+
+            let (titleSize, subtitleSize) = calculateSizes(for: rect.width)
+            if let subSize = subtitleSize {
+                let totalHeight = titleSize.height + 4 + subSize.height
+                let textY = (rect.height - totalHeight) / 2
+
+                // Position subtitle field below title
+                let subY = textY
+                subtitleField.frame = NSRect(x: contentX, y: subY, width: contentWidth, height: subSize.height)
+            }
         }
     }
 
@@ -244,21 +298,14 @@ class FocusableChoiceCardView: NSView {
             .foregroundColor: Theme.textPrimary
         ]
 
+        // Draw title (subtitle is rendered via NSTextField subview for selectability)
         var textY: CGFloat
-        if let sub = subtitle, !sub.isEmpty, let subSize = subtitleSize {
-            let subtitleAttrs: [NSAttributedString.Key: Any] = [
-                .font: Self.subtitleFont,
-                .foregroundColor: Theme.textSecondary
-            ]
-
+        if let _ = subtitle, !subtitle!.isEmpty, let subSize = subtitleSize {
             let totalHeight = titleSize.height + 4 + subSize.height
             textY = (rect.height - totalHeight) / 2
 
             let titleDrawRect = NSRect(x: contentX, y: rect.height - textY - titleSize.height, width: contentWidth, height: titleSize.height)
             (title as NSString).draw(in: titleDrawRect, withAttributes: titleAttrs)
-
-            let subDrawRect = NSRect(x: contentX, y: rect.height - textY - titleSize.height - 4 - subSize.height, width: contentWidth, height: subSize.height)
-            (sub as NSString).draw(in: subDrawRect, withAttributes: subtitleAttrs)
         } else {
             textY = (rect.height - titleSize.height) / 2
             let titleDrawRect = NSRect(x: contentX, y: textY, width: contentWidth, height: titleSize.height)

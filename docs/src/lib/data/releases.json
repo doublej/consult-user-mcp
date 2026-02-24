@@ -3,6 +3,22 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.16.0",
+      "platform": "macos",
+      "date": "2026-02-24",
+      "highlight": "Tweak pane animation replay and dialog sizing fixes",
+      "changes": [
+        { "text": "Tweak pane now detects CSS framework (Tailwind, Bootstrap, etc.) and shows it in the header", "type": "added", "scope": "cli" },
+        { "text": "Tweak pane replays CSS animations after each value change via WebSocket broadcast", "type": "added", "scope": "cli", "featured": true },
+        { "text": "Debug menu now loads test cases from JSON files instead of hardcoded data", "type": "changed", "scope": "app" },
+        { "text": "Dialog windows now reliably auto-size to fit their content on every step change", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Wizard and form question text now appears immediately on first load", "type": "fixed", "scope": "cli" },
+        { "text": "Choice card subtitles no longer overlap with titles", "type": "fixed", "scope": "cli" },
+        { "text": "Windows dialogs now use selectable text for markdown content", "type": "added", "scope": "cli" },
+        { "text": "Base prompt updated with tweak animation replay instructions (v2.9.0)", "type": "changed", "scope": "prompt" }
+      ]
+    },
+    {
       "version": "1.15.1",
       "platform": "macos",
       "date": "2026-02-23",

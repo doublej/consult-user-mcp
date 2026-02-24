@@ -7,6 +7,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.16.0] (macOS) - 2026-02-24
+
+### Added
+- Tweak pane now detects CSS framework (Tailwind, Bootstrap, etc.) and shows it in the header
+- Tweak pane replays CSS animations after each value change via WebSocket broadcast
+- Windows dialogs now use selectable text for markdown content
+
+### Changed
+- Debug menu now loads test cases from JSON files instead of hardcoded data
+- Base prompt updated with tweak animation replay instructions (v2.9.0)
+
+### Fixed
+- Dialog windows now reliably auto-size to fit their content on every step change
+- Wizard and form question text now appears immediately on first load
+- Choice card subtitles no longer overlap with titles
+
 ## [1.15.1] (macOS) - 2026-02-23
 
 ### Fixed

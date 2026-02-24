@@ -1,6 +1,6 @@
 {
-  "body": "Background sync completed successfully.",
-  "title": "Sync Complete",
+  "body": "This is a test notification from Consult User MCP.",
+  "title": "Notification Test",
   "sound": true,
   "projectPath": "/Users/example/projects/consult-user-mcp"
 }

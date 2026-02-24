@@ -54,6 +54,44 @@ struct OpenAILogo: View {
     }
 }
 
+struct GeminiLogo: View {
+    var size: CGFloat = 20
+
+    var body: some View {
+        logoImage
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: size, height: size)
+    }
+
+    private var logoImage: Image {
+        if let url = Bundle.main.url(forResource: "gemini-logo", withExtension: "png"),
+           let nsImage = NSImage(contentsOf: url) {
+            return Image(nsImage: nsImage)
+        }
+        return Image(systemName: "sparkles")
+    }
+}
+
+struct AntigravityLogo: View {
+    var size: CGFloat = 20
+
+    var body: some View {
+        logoImage
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: size, height: size)
+    }
+
+    private var logoImage: Image {
+        if let url = Bundle.main.url(forResource: "antigravity-logo", withExtension: "png"),
+           let nsImage = NSImage(contentsOf: url) {
+            return Image(nsImage: nsImage)
+        }
+        return Image(systemName: "arrow.up.and.down.circle")
+    }
+}
+
 // MARK: - Wizard Steps
 
 enum InstallWizardStep: Int, WizardStep, CaseIterable {
@@ -225,6 +263,10 @@ private struct TargetSelectionStep: View {
             ClaudeLogo(size: 24, showTerminalBadge: true)
         case .codex:
             OpenAILogo(size: 24)
+        case .gemini:
+            GeminiLogo(size: 24)
+        case .antigravity:
+            AntigravityLogo(size: 24)
         }
     }
 }

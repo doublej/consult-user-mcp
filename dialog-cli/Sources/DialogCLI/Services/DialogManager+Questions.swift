@@ -121,7 +121,20 @@ extension DialogManager {
             ))
         }
 
-        let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460)
+        // Compute initial height from content to avoid fittingSize + ScrollView issues
+        let chromeHeight: CGFloat = 340  // header + progress + toolbar + buttons + padding
+        let maxStepHeight = request.questions.map { question -> CGFloat in
+            let questionTextHeight: CGFloat = 30
+            let hasDescriptions = question.options.contains { $0.description != nil }
+            let optionHeight: CGFloat = hasDescriptions ? 68 : 48
+            let optionsHeight = CGFloat(question.options.count) * optionHeight
+                + CGFloat(max(0, question.options.count - 1)) * 8
+            let padding: CGFloat = 20  // top + bottom
+            return questionTextHeight + optionsHeight + padding
+        }.max() ?? 200
+        let estimatedHeight = chromeHeight + maxStepHeight
+
+        let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460, minHeight: estimatedHeight)
 
         positionWindow(window, position: effectivePosition(request.position))
         window.makeKeyAndOrderFront(nil)

@@ -148,6 +148,8 @@ enum InstallTarget: String, CaseIterable, Identifiable {
     case claudeDesktop
     case claudeCode
     case codex
+    case gemini
+    case antigravity
 
     var id: String { rawValue }
 
@@ -156,6 +158,8 @@ enum InstallTarget: String, CaseIterable, Identifiable {
         case .claudeDesktop: return "Claude"
         case .claudeCode: return "Claude Code"
         case .codex: return "Codex"
+        case .gemini: return "Gemini"
+        case .antigravity: return "Antigravity"
         }
     }
 
@@ -164,6 +168,8 @@ enum InstallTarget: String, CaseIterable, Identifiable {
         case .claudeDesktop: return "Anthropic's desktop app"
         case .claudeCode: return "CLI coding assistant"
         case .codex: return "OpenAI's CLI tool"
+        case .gemini: return "Google's CLI assistant"
+        case .antigravity: return "AI coding assistant"
         }
     }
 
@@ -175,6 +181,10 @@ enum InstallTarget: String, CaseIterable, Identifiable {
             return "~/.claude.json"
         case .codex:
             return "~/.codex/config.toml"
+        case .gemini:
+            return "~/.gemini/settings.json"
+        case .antigravity:
+            return "~/.antigravity/settings.json"
         }
     }
 
@@ -184,7 +194,7 @@ enum InstallTarget: String, CaseIterable, Identifiable {
 
     var configFormat: ConfigFormat {
         switch self {
-        case .claudeDesktop, .claudeCode: return .json
+        case .claudeDesktop, .claudeCode, .gemini, .antigravity: return .json
         case .codex: return .toml
         }
     }
@@ -198,6 +208,8 @@ enum InstallTarget: String, CaseIterable, Identifiable {
         case .claudeDesktop: return nil
         case .claudeCode: return "~/.claude/CLAUDE.md"
         case .codex: return "~/.codex/AGENTS.md"
+        case .gemini: return nil
+        case .antigravity: return nil
         }
     }
 

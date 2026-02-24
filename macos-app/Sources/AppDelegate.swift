@@ -22,6 +22,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         observeProjectNotifications()
         checkBasePromptUpdate()
         checkForUpdatesAutomatically()
+        TweakBroadcastServer.shared.start()
     }
 
     // MARK: - App Icon
@@ -132,8 +133,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let chooseItem = NSMenuItem(title: "Test Multiple Choice", action: nil, keyEquivalent: "")
         let chooseSubmenu = NSMenu()
         addDebugMenuItem(chooseSubmenu, title: "Single Select", action: #selector(testChooseSingle))
+        addDebugMenuItem(chooseSubmenu, title: "With Descriptions", action: #selector(testChooseWithDescriptions))
         addDebugMenuItem(chooseSubmenu, title: "Multi Select", action: #selector(testChooseMulti))
-        addDebugMenuItem(chooseSubmenu, title: "Multi Select + Descriptions", action: #selector(testChooseMultiDescriptions))
         chooseItem.submenu = chooseSubmenu
         debugMenu.addItem(chooseItem)
 
@@ -234,7 +235,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func runDialogCli(
         command: String,
         json: String,
-        clientName: String = "Debug",
+        clientName: String? = nil,
+        projectPath: String? = nil,
         completion: ((String) -> Void)? = nil
     ) {
         let cliPath = dialogCliPath()
@@ -243,10 +245,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let process = Process()
             process.executableURL = URL(fileURLWithPath: cliPath)
             process.arguments = [command, json]
-            let env: [String: String] = [
-                "MCP_CLIENT_NAME": clientName,
-                "MCP_PROJECT_PATH": NSHomeDirectory() + "/projects/my-app",
-            ]
+            var env: [String: String] = [:]
+            if let clientName = clientName {
+                env["MCP_CLIENT_NAME"] = clientName
+            }
+            if let projectPath = projectPath {
+                env["MCP_PROJECT_PATH"] = projectPath
+            }
             process.environment = ProcessInfo.processInfo.environment.merging(env) { _, new in new }
 
             let outPipe = Pipe()
@@ -288,106 +293,88 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return json
     }
 
+    private func projectRoot() -> String? {
+        // #filePath resolves at compile time → .../macos-app/Sources/AppDelegate.swift
+        let sourceDir = (#filePath as NSString).deletingLastPathComponent // Sources/
+        let macosApp = (sourceDir as NSString).deletingLastPathComponent // macos-app/
+        let root = (macosApp as NSString).deletingLastPathComponent // project root
+        guard FileManager.default.fileExists(atPath: "\(root)/test-cases/cases") else { return nil }
+        return root
+    }
+
+    private func loadTestCase(category: String, name: String) -> (json: String, projectPath: String?)? {
+        guard let root = projectRoot() else { return nil }
+        let filePath = "\(root)/test-cases/cases/\(category)/\(name).json"
+        guard let data = FileManager.default.contents(atPath: filePath),
+              let json = String(data: data, encoding: .utf8),
+              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
+
+        let projectPath = dict["projectPath"] as? String
+        return (json: json, projectPath: projectPath)
+    }
+
     // MARK: - Test Actions
 
     @objc private func testConfirm() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"This is a test confirmation dialog.\\n\\nDo you want to proceed with the test?","title":"Confirmation Test","confirmLabel":"Yes, proceed","cancelLabel":"Cancel","position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "confirm", json: json)
+        guard let tc = loadTestCase(category: "confirm", name: "basic") else { return }
+        runDialogCli(command: "confirm", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testChooseSingle() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"Select your preferred option from the list below:","title":"Single Select","choices":["Option Alpha","Option Beta","Option Gamma","Option Delta"],"descriptions":["First choice with description","Second choice - recommended","Third alternative option","Fourth fallback option"],"allowMultiple":false,"position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "choose", json: json)
+        guard let tc = loadTestCase(category: "choose", name: "single-select") else { return }
+        runDialogCli(command: "choose", json: tc.json, projectPath: tc.projectPath)
+    }
+
+    @objc private func testChooseWithDescriptions() {
+        guard let tc = loadTestCase(category: "choose", name: "with-descriptions") else { return }
+        runDialogCli(command: "choose", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testChooseMulti() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"Select one or more features to enable:","title":"Multi Select","choices":["Authentication","Database","API Endpoints","Logging"],"allowMultiple":true,"position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "choose", json: json)
-    }
-
-    @objc private func testChooseMultiDescriptions() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"Select one or more features to enable:","title":"Multi Select","choices":["Authentication","Database","API Endpoints","Logging"],"descriptions":["OAuth2 + JWT tokens","PostgreSQL with migrations","REST + GraphQL","Structured JSON output"],"allowMultiple":true,"position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "choose", json: json)
+        guard let tc = loadTestCase(category: "choose", name: "multi-select") else { return }
+        runDialogCli(command: "choose", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testTextInput() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"Enter your feedback or comments:","title":"Text Input Test","defaultValue":"Sample text...","hidden":false,"position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "textInput", json: json)
+        guard let tc = loadTestCase(category: "text-input", name: "basic") else { return }
+        runDialogCli(command: "textInput", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testTextInputPassword() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"Enter your API key:","title":"API Configuration","defaultValue":"","hidden":true,"position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "textInput", json: json)
+        guard let tc = loadTestCase(category: "text-input", name: "password") else { return }
+        runDialogCli(command: "textInput", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testTextInputMarkdown() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"Provide a **commit message** for the changes.\\n\\nUse `conventional commits` format (e.g. `feat:`, `fix:`).\\n\\nSee [docs](https://conventionalcommits.org) for details.","title":"Commit Message","defaultValue":"","hidden":false,"position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "textInput", json: json)
+        guard let tc = loadTestCase(category: "text-input", name: "markdown") else { return }
+        runDialogCli(command: "textInput", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testQuestionsWizard() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"Configure your new project stack.","title":"Project Setup","questions":[{"id":"language","question":"What programming language?","options":[{"label":"TypeScript","description":"Strongly typed JavaScript"},{"label":"Python","description":"Dynamic scripting language"},{"label":"Go","description":"Fast compiled language"}],"type":"choice","multiSelect":false},{"id":"framework","question":"Which framework?","options":[{"label":"Express","description":"Minimal Node.js framework"},{"label":"FastAPI","description":"Modern Python API framework"},{"label":"Gin","description":"High-performance Go framework"}],"type":"choice","multiSelect":false}],"mode":"wizard","position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "questions", json: json)
+        guard let tc = loadTestCase(category: "questions", name: "wizard-basic") else { return }
+        runDialogCli(command: "questions", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testQuestionsAccordion() {
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"Choose your infrastructure preferences.","title":"Infrastructure","questions":[{"id":"database","question":"Select database type:","options":[{"label":"PostgreSQL","description":"Advanced relational database"},{"label":"MongoDB","description":"Document-oriented NoSQL"},{"label":"Redis","description":"In-memory key-value store"}],"type":"choice","multiSelect":false},{"id":"auth","question":"Authentication method:","options":[{"label":"OAuth 2.0","description":"Third-party providers"},{"label":"JWT","description":"Stateless tokens"},{"label":"Session","description":"Server-side sessions"}],"type":"choice","multiSelect":true},{"id":"hosting","question":"Deployment platform:","options":[{"label":"AWS","description":"Amazon Web Services"},{"label":"Vercel","description":"Edge-first platform"},{"label":"Self-hosted","description":"Your own infrastructure"}],"type":"choice","multiSelect":false}],"mode":"accordion","position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "questions", json: json)
+        guard let tc = loadTestCase(category: "questions", name: "accordion-basic") else { return }
+        runDialogCli(command: "questions", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testTweak() {
-        // Create a temp test file with known values
-        let testContent = """
-        .card {
-          scale: 1.50;
-          transition: 300ms ease;
-          translate-y: 24.0px;
+        // Copy companion CSS to /tmp so tweak can find it
+        if let root = projectRoot() {
+            let src = "\(root)/test-cases/cases/tweak/basic.css"
+            let dst = "/tmp/tweak-test.css"
+            try? FileManager.default.removeItem(atPath: dst)
+            try? FileManager.default.copyItem(atPath: src, toPath: dst)
         }
-        """
-        let testFile = NSTemporaryDirectory() + "tweak-test.css"
-        try? testContent.write(toFile: testFile, atomically: true, encoding: .utf8)
-
-        let settings = DialogSettings.shared
-        let json = """
-        {"body":"Tweaking card animation values","parameters":[{"id":"card-scale","label":"Card Scale","file":"\(testFile)","line":2,"column":10,"expectedText":"1.50","current":1.5,"min":0.1,"max":5.0,"step":0.01,"unit":"x"},{"id":"duration","label":"Duration","file":"\(testFile)","line":3,"column":15,"expectedText":"300","current":300,"min":50,"max":2000,"step":10,"unit":"ms"},{"id":"offset-y","label":"Vertical Offset","file":"\(testFile)","line":4,"column":16,"expectedText":"24.0","current":24.0,"min":0,"max":100,"step":0.5,"unit":"px"}],"position":"\(settings.position.rawValue)"}
-        """
-        runDialogCli(command: "tweak", json: json)
+        guard let tc = loadTestCase(category: "tweak", name: "basic") else { return }
+        runDialogCli(command: "tweak", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testNotifyTool() {
-        showPaneNotification(
-            title: "Notification Test",
-            body: "This is a test notification from Consult User MCP.",
-            sound: true,
-            clientName: "Debug"
-        )
+        guard let tc = loadTestCase(category: "notify", name: "basic") else { return }
+        runDialogCli(command: "notify", json: tc.json, projectPath: tc.projectPath)
     }
 
     @objc private func testNotifyUpdate() {
@@ -400,8 +387,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testAll() {
         testConfirm()
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { self.testChooseSingle() }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { self.testChooseMulti() }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) { self.testChooseMultiDescriptions() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { self.testChooseWithDescriptions() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4.5) { self.testChooseMulti() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) { self.testTextInput() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 7.5) { self.testTextInputPassword() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 9.0) { self.testTextInputMarkdown() }

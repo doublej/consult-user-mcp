@@ -76,7 +76,7 @@ struct SwiftUIChooseDialog: View {
 
     private var choicesScrollView: some View {
         ScrollViewReader { proxy in
-            ScrollView {
+            AutoSizingScrollView {
                 VStack(spacing: 8) {
                     ForEach(Array(choices.enumerated()), id: \.offset) { index, choice in
                         FocusableChoiceCard(

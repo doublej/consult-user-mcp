@@ -33,7 +33,7 @@ Use `--dry-run` to validate preconditions without executing.
 
 3 MCP tools: `ask` (interactive), `notify` (fire-and-forget), and `tweak` (value adjustment pane). When adding features, fixing bugs, or writing tests — **ALL dialog types MUST be considered**.
 
-**Invariant:** The debug menu (`macos-app/Sources/AppDelegate.swift`) and visual test fixtures (`test-cases/cases/`) MUST cover every dialog type. When adding a new type, update both.
+**Invariant:** The debug menu loads test cases from `test-cases/cases/` JSON files — no hardcoded dialog JSON in AppDelegate. When adding a new dialog type, add JSON files to `test-cases/cases/` and wire them into the debug menu. The `test-runner.sh` command mapping must also include the new type.
 
 ### All dialog types (flattened)
 
@@ -97,7 +97,7 @@ Repo: `C:\Users\jurre\PycharmProjects\consult-user-mcp`. Commands run via `cmd.e
 The base prompt has an independent version number.
 
 - **Location:** `macos-app/Sources/Resources/base-prompt.md` (first line: `<!-- version: X.Y.Z -->`)
-- **Current:** v2.8.0
+- **Current:** v2.9.0
 - **Validate:** `bash scripts/validate-baseprompt-version.sh` (also runs in CI)
 - **Bump:** Major = breaking tool/workflow changes, Minor = new features/guidance, Patch = fixes/typos
 

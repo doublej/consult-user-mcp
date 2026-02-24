@@ -1,8 +1,8 @@
 {
-  "body": "Do you want to proceed with this operation?",
-  "title": "Confirmation",
-  "confirmLabel": "Yes",
-  "cancelLabel": "No",
+  "body": "This is a **test confirmation** dialog with *markdown* support.\n\nIt includes `inline code` and a [link](https://example.com).\n\nDo you want to proceed with the test?",
+  "title": "Confirmation Test",
+  "confirmLabel": "Yes, proceed",
+  "cancelLabel": "Cancel",
   "position": "center",
   "projectPath": "/Users/example/projects/consult-user-mcp"
 }

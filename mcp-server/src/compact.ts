@@ -42,6 +42,7 @@ export function compactResponse(type: AskType, raw: unknown): Record<string, unk
     const t = r as TweakResult;
     if (t.answers && Object.keys(t.answers).length > 0) out.answer = t.answers;
     if (t.action) out.action = t.action;
+    if (t.replayAnimations) out.replayAnimations = true;
   } else {
     // pick + text: same shape
     const answer = (r as ChoiceResult | TextInputResult).answer;

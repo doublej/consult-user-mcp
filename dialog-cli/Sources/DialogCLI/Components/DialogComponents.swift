@@ -1,6 +1,46 @@
 import SwiftUI
 import AppKit
 
+// MARK: - Auto-Sizing ScrollView
+
+/// A ScrollView that reports its content height so `NSHostingView.fittingSize`
+/// returns the correct value for window auto-sizing.
+///
+/// Plain `ScrollView` has flexible intrinsic size, causing `fittingSize` to return
+/// a compressed height. This wrapper measures the actual content height (unconstrained
+/// inside the scroll area) and sets `.frame(minHeight:)` so `fittingSize` includes
+/// the real content size. When the window is capped at maxHeight the scroll still works.
+struct AutoSizingScrollView<Content: View>: View {
+    @ViewBuilder let content: Content
+    @State private var contentHeight: CGFloat = 0
+
+    var body: some View {
+        ScrollView {
+            content
+                .background(
+                    GeometryReader { geo in
+                        Color.clear.preference(key: ContentHeightKey.self, value: geo.size.height)
+                    }
+                )
+        }
+        .frame(minHeight: contentHeight > 0 ? contentHeight : nil)
+        .onPreferenceChange(ContentHeightKey.self) { height in
+            guard abs(height - contentHeight) > 1 else { return }
+            contentHeight = height
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
+            }
+        }
+    }
+}
+
+private struct ContentHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
 // MARK: - Project Badge
 
 struct ProjectBadge: View {
@@ -32,17 +72,119 @@ struct ProjectBadge: View {
     }
 }
 
+// MARK: - Selectable Text (Simple)
+
+struct SelectableText: View {
+    let text: String
+    let font: NSFont
+    let color: NSColor
+    let alignment: NSTextAlignment
+
+    init(
+        _ text: String,
+        fontSize: CGFloat = 13,
+        weight: NSFont.Weight = .regular,
+        color: Color = Theme.Colors.textPrimary,
+        alignment: NSTextAlignment = .left
+    ) {
+        self.text = text
+        self.font = NSFont.systemFont(ofSize: fontSize, weight: weight)
+        self.color = NSColor(color)
+        self.alignment = alignment
+    }
+
+    private var attributedString: NSAttributedString {
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = alignment
+        return NSAttributedString(string: text, attributes: [
+            .font: font,
+            .foregroundColor: color,
+            .paragraphStyle: paragraphStyle,
+        ])
+    }
+
+    var body: some View {
+        SelectableTextView(attributedString, alignment: alignment)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+// MARK: - Selectable Text View
+
+/// NSScrollView subclass that reports its text content height as intrinsic content size,
+/// so SwiftUI allocates the correct amount of space during layout.
+class IntrinsicTextScrollView: NSScrollView {
+    override var intrinsicContentSize: NSSize {
+        guard let textView = documentView as? NSTextView,
+              let container = textView.textContainer,
+              let layoutManager = textView.layoutManager else {
+            return NSSize(width: NSView.noIntrinsicMetric, height: 0)
+        }
+        layoutManager.ensureLayout(for: container)
+        let height = layoutManager.usedRect(for: container).height
+        return NSSize(width: NSView.noIntrinsicMetric, height: height)
+    }
+}
+
+struct SelectableTextView: NSViewRepresentable {
+    let attributedString: NSAttributedString
+    let alignment: NSTextAlignment
+
+    init(_ attributedString: NSAttributedString, alignment: NSTextAlignment = .center) {
+        self.attributedString = attributedString
+        self.alignment = alignment
+    }
+
+    func makeNSView(context: Context) -> IntrinsicTextScrollView {
+        let textView = NSTextView()
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.drawsBackground = false
+        textView.textContainerInset = .zero
+        textView.textContainer?.lineFragmentPadding = 0
+        textView.isVerticallyResizable = true
+        textView.isHorizontallyResizable = false
+        textView.textContainer?.widthTracksTextView = true
+        textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textView.setContentHuggingPriority(.required, for: .vertical)
+
+        let scrollView = IntrinsicTextScrollView()
+        scrollView.documentView = textView
+        scrollView.hasVerticalScroller = false
+        scrollView.hasHorizontalScroller = false
+        scrollView.drawsBackground = false
+        scrollView.autohidesScrollers = true
+
+        return scrollView
+    }
+
+    func updateNSView(_ scrollView: IntrinsicTextScrollView, context: Context) {
+        guard let textView = scrollView.documentView as? NSTextView else { return }
+        textView.textStorage?.setAttributedString(attributedString)
+        textView.alignment = alignment
+        textView.sizeToFit()
+        scrollView.invalidateIntrinsicContentSize()
+    }
+}
+
 // MARK: - Markdown Text
 
 struct MarkdownText: View {
     let text: String
-    let font: Font
-    let color: Color
+    let fontSize: CGFloat
+    let color: NSColor
+    let alignment: NSTextAlignment
 
-    init(_ text: String, font: Font = .system(size: 13), color: Color = Theme.Colors.textSecondary) {
+    init(
+        _ text: String,
+        fontSize: CGFloat = 13,
+        color: Color = Theme.Colors.textSecondary,
+        alignment: NSTextAlignment = .center
+    ) {
         self.text = text
-        self.font = font
-        self.color = color
+        self.fontSize = fontSize
+        self.color = NSColor(color)
+        self.alignment = alignment
     }
 
     // Static regex constants — compiled once, reused across all calls
@@ -52,80 +194,89 @@ struct MarkdownText: View {
     private static let codeRegex = try! NSRegularExpression(pattern: "`([^`]+)`")
 
     var body: some View {
-        Text(parseMarkdown(text))
-            .font(font)
-            .foregroundColor(color)
-            .multilineTextAlignment(.center)
+        SelectableTextView(parseMarkdownNS(text), alignment: alignment)
             .fixedSize(horizontal: false, vertical: true)
-            .tint(Theme.Colors.accentBlue)
     }
 
-    private func parseMarkdown(_ input: String) -> AttributedString {
-        var result = AttributedString(input)
-        let str = String(result.characters)
+    private func parseMarkdownNS(_ input: String) -> NSAttributedString {
+        let baseFont = NSFont.systemFont(ofSize: fontSize)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = alignment
 
-        // Links: [text](url) - process first to avoid conflicts
+        let result = NSMutableAttributedString(string: input, attributes: [
+            .font: baseFont,
+            .foregroundColor: color,
+            .paragraphStyle: paragraphStyle,
+        ])
+
+        let str = input
+
+        // Links: [text](url)
         let linkMatches = Self.linkRegex.matches(in: str, range: NSRange(str.startIndex..., in: str))
         for match in linkMatches.reversed() {
-            guard let fullRange = Range(match.range, in: str),
+            guard Range(match.range, in: str) != nil,
                   let textRange = Range(match.range(at: 1), in: str),
                   let urlRange = Range(match.range(at: 2), in: str) else { continue }
             let linkText = String(str[textRange])
             let urlString = String(str[urlRange])
-            if let attrRange = result.range(of: String(str[fullRange])),
-               let url = URL(string: urlString) {
-                var replacement = AttributedString(linkText)
-                replacement.link = url
-                replacement.foregroundColor = Theme.Colors.accentBlue
-                result.replaceSubrange(attrRange, with: replacement)
+            if let url = URL(string: urlString) {
+                let linkAttr = NSMutableAttributedString(string: linkText, attributes: [
+                    .font: baseFont,
+                    .foregroundColor: NSColor(Theme.Colors.accentBlue),
+                    .link: url,
+                    .paragraphStyle: paragraphStyle,
+                ])
+                result.replaceCharacters(in: match.range, with: linkAttr)
             }
         }
 
         // Bold: **text**
-        result = applyInlinePattern(Self.boldRegex, to: result) { text in
-            var replacement = AttributedString(text)
-            replacement.font = font.bold()
-            return replacement
+        applyInlinePatternNS(Self.boldRegex, to: result) { range in
+            result.addAttribute(.font, value: NSFont.boldSystemFont(ofSize: fontSize), range: range)
         }
 
-        // Italic: *text* (single asterisks only)
-        result = applyInlinePattern(Self.italicRegex, to: result) { text in
-            var replacement = AttributedString(text)
-            replacement.font = font.italic()
-            return replacement
+        // Italic: *text*
+        applyInlinePatternNS(Self.italicRegex, to: result) { range in
+            if let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask) as NSFont? {
+                result.addAttribute(.font, value: italicFont, range: range)
+            }
         }
 
-        // Inline code: `code` - use monospace font
-        result = applyInlinePattern(Self.codeRegex, to: result) { text in
-            var replacement = AttributedString(text)
-            replacement.font = .system(size: 12, design: .monospaced)
-            replacement.backgroundColor = Theme.Colors.inputBackground
-            return replacement
+        // Inline code: `code`
+        applyInlinePatternNS(Self.codeRegex, to: result) { range in
+            let monoFont = NSFont.monospacedSystemFont(ofSize: fontSize - 1, weight: .regular)
+            result.addAttribute(.font, value: monoFont, range: range)
+            result.addAttribute(.backgroundColor, value: NSColor(Theme.Colors.inputBackground), range: range)
         }
 
         return result
     }
 
-    private func applyInlinePattern(
+    private func applyInlinePatternNS(
         _ regex: NSRegularExpression,
-        to attributed: AttributedString,
-        transform: (String) -> AttributedString
-    ) -> AttributedString {
-        var result = attributed
-        var currentStr = String(result.characters)
+        to attrString: NSMutableAttributedString,
+        apply: (NSRange) -> Void
+    ) {
+        var currentStr = attrString.string
         var matches = regex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
+
         while !matches.isEmpty {
             let match = matches[0]
-            guard let fullRange = Range(match.range, in: currentStr),
+            guard Range(match.range, in: currentStr) != nil,
                   let textRange = Range(match.range(at: 1), in: currentStr) else { break }
+
             let innerText = String(currentStr[textRange])
-            if let attrRange = result.range(of: String(currentStr[fullRange])) {
-                result.replaceSubrange(attrRange, with: transform(innerText))
-            }
-            currentStr = String(result.characters)
+            let replacement = NSMutableAttributedString(string: innerText, attributes: attrString.attributes(at: match.range.location, effectiveRange: nil))
+
+            attrString.replaceCharacters(in: match.range, with: replacement)
+
+            // Apply the styling to the replaced range
+            let newRange = NSRange(location: match.range.location, length: innerText.count)
+            apply(newRange)
+
+            currentStr = attrString.string
             matches = regex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
         }
-        return result
     }
 }
 

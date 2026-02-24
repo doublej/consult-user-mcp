@@ -40,11 +40,14 @@ struct QuestionSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(question.question)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(Theme.Colors.textPrimary)
-                .frame(maxWidth: 400, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
+            SelectableText(
+                question.question,
+                fontSize: 15,
+                weight: .semibold,
+                color: Theme.Colors.textPrimary,
+                alignment: .left
+            )
+            .frame(maxWidth: 400, alignment: .leading)
 
             if question.type == .text {
                 FocusableTextField(
@@ -130,7 +133,7 @@ struct SwiftUIWizardDialog: View {
 
                 // Question content
                 ScrollViewReader { proxy in
-                    ScrollView {
+                    AutoSizingScrollView {
                         QuestionSection(
                             question: currentQuestion,
                             answer: Binding(

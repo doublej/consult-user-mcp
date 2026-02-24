@@ -23,7 +23,7 @@ public static class MarkdownText
         return textBlock;
     }
 
-    private static void ParseInlines(string text, InlineCollection inlines)
+    internal static void ParseInlines(string text, InlineCollection inlines)
     {
         // Pattern matches: **bold**, *italic*, `code`, [text](url)
         var pattern = @"(\*\*(.+?)\*\*)|(\*(.+?)\*)|(`(.+?)`)|(\[(.+?)\]\((.+?)\))";
@@ -75,5 +75,35 @@ public static class MarkdownText
 
         if (lastIndex < text.Length)
             inlines.Add(new Run(text[lastIndex..]));
+    }
+}
+
+public static class SelectableMarkdownText
+{
+    public static RichTextBox Create(string text, double fontSize, Brush foreground)
+    {
+        var paragraph = new Paragraph();
+        MarkdownText.ParseInlines(text, paragraph.Inlines);
+
+        var richTextBox = new RichTextBox
+        {
+            Document = new FlowDocument(paragraph),
+            FontSize = fontSize,
+            Foreground = foreground,
+            Background = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            IsReadOnly = true,
+            IsDocumentEnabled = true,
+            IsTabStop = false,
+            Cursor = System.Windows.Input.Cursors.IBeam,
+        };
+
+        // Remove default margin/padding from FlowDocument
+        richTextBox.Document.PagePadding = new Thickness(0);
+        paragraph.LineHeight = 20;
+        paragraph.Margin = new Thickness(0);
+
+        return richTextBox;
     }
 }

@@ -1,17 +1,19 @@
 {
-  "body": "Select a database type:",
+  "body": "Select your preferred option from the list below:",
+  "title": "Single Select",
   "choices": [
-    "PostgreSQL",
-    "MySQL",
-    "SQLite"
+    "Option Alpha",
+    "Option Beta",
+    "Option Gamma",
+    "Option Delta"
+  ],
+  "descriptions": [
+    "First choice with description",
+    "Second choice - recommended",
+    "Third alternative option",
+    "Fourth fallback option"
   ],
   "allowMultiple": false,
   "position": "center",
-  "descriptions": [
-    "",
-    "",
-    ""
-  ],
-  "defaultSelection": "PostgreSQL",
   "projectPath": "/Users/example/projects/consult-user-mcp"
 }

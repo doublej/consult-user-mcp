@@ -87,6 +87,7 @@ get_command() {
         text-input) echo "textInput" ;;
         questions) echo "questions" ;;
         notify) echo "notify" ;;
+        tweak) echo "tweak" ;;
         *) echo "" ;;
     esac
 }
@@ -115,6 +116,12 @@ run_test_case() {
     # Optional pane activation for screenshoting expanded toolbar state
     local test_pane
     test_pane=$(echo "$json" | jq -r '.testPane // empty')
+
+    # Copy companion setup files (e.g. .css for tweak test cases)
+    local setup_file="${json_file%.json}.css"
+    if [ -f "$setup_file" ]; then
+        cp "$setup_file" /tmp/tweak-test.css
+    fi
 
     # Build environment
     local env_vars=()

@@ -1,6 +1,6 @@
 {
-  "body": "Enter the **API key** for `production` environment.\n\nSee [documentation](https://docs.example.com) for details.\n\n*This field is required.*",
-  "title": "API Configuration",
+  "body": "Provide a **commit message** for the changes.\n\nUse `conventional commits` format (e.g. `feat:`, `fix:`).\n\nSee [docs](https://conventionalcommits.org) for details.",
+  "title": "Commit Message",
   "defaultValue": "",
   "hidden": false,
   "position": "center",

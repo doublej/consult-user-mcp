@@ -1,19 +1,19 @@
 {
-  "body": "Select features to enable:",
+  "body": "Select one or more features to enable.\n\nUse **Space** to toggle, **Enter** to confirm.",
+  "title": "Multi Select",
   "choices": [
     "Authentication",
     "Database",
     "API Endpoints",
     "Logging"
   ],
+  "descriptions": [
+    "User login and session management",
+    "PostgreSQL with connection pooling",
+    "REST endpoints with OpenAPI docs",
+    "Structured logging with log levels"
+  ],
   "allowMultiple": true,
   "position": "center",
-  "descriptions": [
-    "",
-    "",
-    "",
-    ""
-  ],
-  "defaultSelection": "Authentication",
   "projectPath": "/Users/example/projects/consult-user-mcp"
 }

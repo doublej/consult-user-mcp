@@ -1,5 +1,6 @@
 {
   "body": "Choose a deployment target:",
+  "title": "Deployment",
   "choices": [
     "Development",
     "Staging",
@@ -11,7 +12,7 @@
     "Live production deployment"
   ],
   "allowMultiple": false,
-  "position": "center",
   "defaultSelection": "Development",
+  "position": "center",
   "projectPath": "/Users/example/projects/consult-user-mcp"
 }

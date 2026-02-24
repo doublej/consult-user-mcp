@@ -62,7 +62,7 @@ public static class DialogHeader
 
         if (!string.IsNullOrEmpty(body))
         {
-            var bodyBlock = MarkdownText.Create(body, DialogTheme.BodyFontSize, DialogTheme.SecondaryTextBrush);
+            var bodyBlock = SelectableMarkdownText.Create(body, DialogTheme.BodyFontSize, DialogTheme.SecondaryTextBrush);
             panel.Children.Add(bodyBlock);
         }
 

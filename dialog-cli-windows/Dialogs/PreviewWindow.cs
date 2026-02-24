@@ -61,14 +61,12 @@ public class PreviewWindow : Window
         if (badge != null)
             stack.Children.Add(badge);
 
-        stack.Children.Add(new TextBlock
-        {
-            Text = request.Body,
-            FontSize = DialogTheme.BodyFontSize,
-            Foreground = DialogTheme.TextBrush,
-            TextWrapping = TextWrapping.Wrap,
-            LineHeight = 20,
-        });
+        var bodyText = SelectableTextBlock.Create(
+            request.Body,
+            DialogTheme.BodyFontSize,
+            DialogTheme.TextBrush
+        );
+        stack.Children.Add(bodyText);
 
         outer.Child = stack;
         Content = outer;

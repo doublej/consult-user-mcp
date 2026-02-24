@@ -1,4 +1,6 @@
 {
+  "body": "Configure your new project stack.",
+  "title": "Project Setup",
   "questions": [
     {
       "id": "language",
@@ -18,8 +20,7 @@
         }
       ],
       "type": "choice",
-      "multiSelect": false,
-      "placeholder": ""
+      "multiSelect": false
     },
     {
       "id": "framework",
@@ -39,8 +40,7 @@
         }
       ],
       "type": "choice",
-      "multiSelect": false,
-      "placeholder": ""
+      "multiSelect": false
     }
   ],
   "mode": "wizard",

@@ -1,4 +1,4 @@
-<!-- version: 2.8.0 -->
+<!-- version: 2.9.0 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
@@ -58,18 +58,31 @@ Opens a slider panel for real-time numeric value adjustment with live file write
 
 **Response:** `{"answer": {"<id>": <number>}, "action": "file" | "agent"}`
 
-**CSS animations:** HMR updates styles but doesn't replay completed animations. Wrap animated elements in a `{#key}` block that increments on HMR:
+**CSS animations:** The tweak pane has a "Replay animations" checkbox (enabled by default). When enabled, animations automatically replay after each value change.
 
-```svelte
-<script>
-  let hmrKey = 0;
-  if (import.meta.hot) {
-    import.meta.hot.data.count = (import.meta.hot.data.count ?? 0) + 1;
-    hmrKey = import.meta.hot.data.count;
-  }
-</script>
-{#key hmrKey}<div class="animated">...</div>{/key}
+**Auto-injection (required):** Before calling tweak, inject the replay client via claude-in-chrome:
+```javascript
+// mcp__claude-in-chrome__javascript_tool
+if (!window.__tweakReplayConnected) {
+  window.__tweakReplayConnected = true;
+  const ws = new WebSocket('ws://localhost:19876');
+  ws.onmessage = (e) => {
+    if (JSON.parse(e.data).type === 'replay') {
+      document.querySelectorAll('*').forEach(el => {
+        const s = getComputedStyle(el);
+        if (s.animationName !== 'none') {
+          el.style.animation = 'none';
+          void el.offsetHeight;
+          el.style.animation = '';
+        }
+      });
+    }
+  };
+  ws.onclose = () => { window.__tweakReplayConnected = false; };
+}
 ```
+
+This is idempotent — safe to call multiple times. The script auto-reconnects on page reload.
 
 **Trigger patterns** — User says something like:
 
@@ -149,7 +162,7 @@ Use `type: "form"` for 2+ questions. Only ask sequentially when answer #1 determ
 | pick | `{"answer": "PostgreSQL"}` or `{"answer": ["Auth", "UI"]}` |
 | text | `{"answer": "user input"}` |
 | form | `{"answer": {"lang": "TypeScript"}, "completedCount": 2}` |
-| tweak | `{"answer": {"font-size": 18}, "action": "file"}` |
+| tweak | `{"answer": {"font-size": 18}, "action": "file", "replayAnimations": true}` |
 
 ### Special responses (priority order — only one per response)
 

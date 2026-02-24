@@ -189,4 +189,5 @@ export interface TweakResult {
   feedbackText?: string;
   askDifferently?: string;
   instruction?: string;
+  replayAnimations?: boolean;  // Request browser to replay CSS animations
 }

@@ -1,4 +1,6 @@
 {
+  "body": "Choose your infrastructure preferences.",
+  "title": "Infrastructure",
   "questions": [
     {
       "id": "database",
@@ -18,13 +20,11 @@
         }
       ],
       "type": "choice",
-      "multiSelect": false,
-      "placeholder": ""
+      "multiSelect": false
     },
     {
       "id": "auth",
       "question": "Authentication method:",
-      "multiSelect": true,
       "options": [
         {
           "label": "OAuth 2.0",
@@ -40,7 +40,7 @@
         }
       ],
       "type": "choice",
-      "placeholder": ""
+      "multiSelect": true
     },
     {
       "id": "hosting",
@@ -60,8 +60,7 @@
         }
       ],
       "type": "choice",
-      "multiSelect": false,
-      "placeholder": ""
+      "multiSelect": false
     }
   ],
   "mode": "accordion",

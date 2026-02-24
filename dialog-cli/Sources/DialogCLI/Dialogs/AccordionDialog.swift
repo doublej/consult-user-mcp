@@ -180,7 +180,7 @@ struct SwiftUIAccordionDialog: View {
 
                 // Accordion sections
                 ScrollViewReader { proxy in
-                    ScrollView {
+                    AutoSizingScrollView {
                         VStack(spacing: 8) {
                             ForEach(questions, id: \.id) { question in
                                 AccordionSection(

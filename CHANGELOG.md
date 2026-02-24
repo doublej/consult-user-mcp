@@ -7,6 +7,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.16.1] (macOS) - 2026-02-24
+
+### Added
+- New 'Start with Mac' toggle in General settings to automatically launch at login
+- Settings window now appears in Cmd+Tab when open
+- Uninstall removes the login item registration when cleaning up
+
 ## [1.16.0] (macOS) - 2026-02-24
 
 ### Added

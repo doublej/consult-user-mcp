@@ -3,6 +3,17 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.16.1",
+      "platform": "macos",
+      "date": "2026-02-24",
+      "highlight": "Launch at login and Cmd+Tab support",
+      "changes": [
+        { "text": "New 'Start with Mac' toggle in General settings to automatically launch at login", "type": "added", "scope": "app", "featured": true },
+        { "text": "Settings window now appears in Cmd+Tab when open", "type": "added", "scope": "app", "featured": true },
+        { "text": "Uninstall removes the login item registration when cleaning up", "type": "added", "scope": "app" }
+      ]
+    },
+    {
       "version": "1.16.0",
       "platform": "macos",
       "date": "2026-02-24",

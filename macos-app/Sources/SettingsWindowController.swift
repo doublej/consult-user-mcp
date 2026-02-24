@@ -4,7 +4,7 @@ import AppKit
 final class SettingsWindowController {
     static let shared = SettingsWindowController()
 
-    private var window: NSWindow?
+    fileprivate var window: NSWindow?
     private let minSize = NSSize(width: 680, height: 600)
 
     private let frameKey = "SettingsWindowFrame"
@@ -15,6 +15,8 @@ final class SettingsWindowController {
         if let section = section {
             DialogSettings.shared.pendingSettingsSection = section
         }
+
+        NSApp.setActivationPolicy(.regular)
 
         if let window = window {
             window.makeKeyAndOrderFront(nil)
@@ -43,6 +45,7 @@ final class SettingsWindowController {
     func closeWindow() {
         window?.close()
         window = nil
+        NSApp.setActivationPolicy(.accessory)
     }
 
     private func restoreFrame(_ window: NSWindow) {
@@ -70,6 +73,8 @@ private final class WindowDelegate: NSObject, NSWindowDelegate {
 
     func windowWillClose(_ notification: Notification) {
         SettingsWindowController.shared.saveFrame()
+        SettingsWindowController.shared.window = nil
+        NSApp.setActivationPolicy(.accessory)
     }
 
     func windowDidResize(_ notification: Notification) {

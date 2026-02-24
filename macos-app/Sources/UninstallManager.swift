@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import ServiceManagement
 
 enum UninstallManager {
     private static let tagName = "consult-user-mcp-baseprompt"
@@ -31,6 +32,14 @@ enum UninstallManager {
             }
         }
 
+        if SMAppService.mainApp.status == .enabled {
+            items.append(RemovalItem(
+                icon: "power",
+                title: "Login item",
+                detail: "Removes automatic launch at login"
+            ))
+        }
+
         items.append(RemovalItem(
             icon: "app",
             title: "Application bundle",
@@ -60,6 +69,8 @@ enum UninstallManager {
                 removeBasePrompt(for: target)
             }
         }
+
+        try? SMAppService.mainApp.unregister()
 
         if !keepData {
             removeAppData()

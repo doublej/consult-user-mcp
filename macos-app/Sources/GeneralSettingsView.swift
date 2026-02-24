@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import ServiceManagement
 
 struct GeneralSettingsView: View {
     @ObservedObject private var settings = DialogSettings.shared
@@ -17,6 +18,7 @@ struct GeneralSettingsView: View {
                     SnoozeBannerView()
                 }
 
+                StartupSettingsSection()
                 PositionSettingsSection()
                 AppearanceSettingsSection()
                 NotificationSettingsSection()
@@ -71,6 +73,36 @@ struct SnoozeBannerView: View {
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color.orange.opacity(0.1))
         )
+    }
+}
+
+// MARK: - Startup Section
+
+private struct StartupSettingsSection: View {
+    @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
+
+    var body: some View {
+        SettingsSectionContainer(title: "Startup") {
+            SettingsToggleRow(
+                icon: "power",
+                title: "Start with Mac",
+                subtitle: "Automatically launch when you log in",
+                isOn: $launchAtLogin
+            )
+            .padding(.vertical, 4)
+        }
+        .onChange(of: launchAtLogin) { _, newValue in
+            do {
+                if newValue {
+                    try SMAppService.mainApp.register()
+                } else {
+                    try SMAppService.mainApp.unregister()
+                }
+            } catch {
+                // Revert toggle to actual state on failure
+                launchAtLogin = SMAppService.mainApp.status == .enabled
+            }
+        }
     }
 }
 

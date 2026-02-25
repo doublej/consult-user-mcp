@@ -314,12 +314,12 @@ struct DialogHeader: View {
                 .foregroundColor(Theme.Colors.textPrimary)
                 .multilineTextAlignment(.center)
                 .lineLimit(nil)
-                .frame(width: 372, alignment: .center)
+                .frame(maxWidth: 372, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
 
             if let text = bodyText {
                 MarkdownText(text)
-                    .frame(width: 372, alignment: .center)
+                    .frame(maxWidth: 372, alignment: .center)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 4)
             }

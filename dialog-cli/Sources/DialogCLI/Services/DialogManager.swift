@@ -42,8 +42,8 @@ class DialogManager {
         }
     }
 
-    func effectivePosition(_ requestedPosition: DialogPosition) -> DialogPosition {
-        return DialogPosition(rawValue: userSettings.position) ?? .center
+    func effectivePosition(_ requestedPosition: DialogPosition?) -> DialogPosition {
+        return requestedPosition ?? DialogPosition(rawValue: userSettings.position) ?? .center
     }
 
     func buildTitle() -> String {
@@ -85,7 +85,8 @@ class DialogManager {
         minWidth: CGFloat = 420,
         minHeight: CGFloat = 300,
         maxHeightRatio: CGFloat = 0.85,
-        initialHeight: CGFloat? = nil
+        initialHeight: CGFloat? = nil,
+        position: DialogPosition = .center
     ) -> (NSWindow, NSHostingView<Content>, DraggableView) {
         let hostingView = NSHostingView(rootView: content)
 
@@ -113,7 +114,8 @@ class DialogManager {
             bgView: bgView,
             minWidth: minWidth,
             minHeight: minHeight,
-            maxHeight: maxHeight
+            maxHeight: maxHeight,
+            position: position
         )
 
         return (window, hostingView, bgView)

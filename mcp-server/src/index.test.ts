@@ -68,7 +68,7 @@ describe("ask schema", () => {
     questions: z.array(questionSchema).min(1).max(10).optional(),
     mode: z.enum(["wizard", "accordion"]).default("wizard"),
     title: z.string().max(80).optional(),
-    position: z.enum(["left", "right", "center"]).default("left"),
+    position: z.enum(["left", "right", "center"]).optional(),
     project_path: z.string().optional(),
   });
 
@@ -78,7 +78,7 @@ describe("ask schema", () => {
     expect(r.body).toBe("Proceed?");
     expect(r.yes).toBe("Yes");
     expect(r.no).toBe("No");
-    expect(r.position).toBe("left");
+    expect(r.position).toBeUndefined();
   });
 
   test("confirm with custom labels", () => {

@@ -99,7 +99,7 @@ const askSchema = z.object({
   mode: z.enum(["wizard", "accordion"]).default("wizard"),
   // shared
   title: z.string().max(80).optional(),
-  position: z.enum(["left", "right", "center"]).default("left"),
+  position: z.enum(["left", "right", "center"]).optional(),
   project_path: z.string().optional(),
 });
 
@@ -111,7 +111,7 @@ server.registerTool("ask", {
 
   if (p.project_path) cachedProjectPath = p.project_path;
   const projectPath = p.project_path ?? cachedProjectPath ?? "";
-  const position = p.position as DialogPosition;
+  const position = p.position as DialogPosition | undefined;
 
   let raw: unknown;
   const body = unescLiterals(p.body);
@@ -213,7 +213,7 @@ const tweakSchema = z.object({
   body: z.string().min(1).max(1000),
   parameters: z.array(tweakParameterSchema).min(1).max(20),
   title: z.string().max(80).optional(),
-  position: z.enum(["left", "right", "center"]).default("left"),
+  position: z.enum(["left", "right", "center"]).optional(),
   project_path: z.string().optional(),
 });
 
@@ -225,7 +225,7 @@ server.registerTool("tweak", {
 
   if (p.project_path) cachedProjectPath = p.project_path;
   const projectPath = p.project_path ?? cachedProjectPath ?? "";
-  const position = p.position as DialogPosition;
+  const position = p.position as DialogPosition | undefined;
   const body = unescLiterals(p.body);
 
   // Resolve parameters: auto-derive ids, resolve CSS/search to direct locations

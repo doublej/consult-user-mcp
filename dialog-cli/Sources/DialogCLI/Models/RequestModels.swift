@@ -17,7 +17,7 @@ struct ConfirmRequest: Codable {
     let title: String
     let confirmLabel: String
     let cancelLabel: String
-    let position: DialogPosition
+    let position: DialogPosition?
 }
 
 struct ChooseRequest: Codable {
@@ -27,7 +27,7 @@ struct ChooseRequest: Codable {
     let descriptions: [String]?
     let allowMultiple: Bool
     let defaultSelection: String?
-    let position: DialogPosition
+    let position: DialogPosition?
 }
 
 struct TextInputRequest: Codable {
@@ -35,7 +35,7 @@ struct TextInputRequest: Codable {
     let title: String
     let defaultValue: String
     let hidden: Bool
-    let position: DialogPosition
+    let position: DialogPosition?
 }
 
 struct NotifyRequest: Codable {

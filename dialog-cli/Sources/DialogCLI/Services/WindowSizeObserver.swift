@@ -11,15 +11,17 @@ class WindowSizeObserver: NSObject {
     private let minWidth: CGFloat
     private let minHeight: CGFloat
     private let maxHeight: CGFloat
+    private let position: DialogPosition
     private var notificationObserver: NSObjectProtocol?
 
-    init(window: NSWindow, hostingView: NSView, bgView: NSView, minWidth: CGFloat, minHeight: CGFloat, maxHeight: CGFloat) {
+    init(window: NSWindow, hostingView: NSView, bgView: NSView, minWidth: CGFloat, minHeight: CGFloat, maxHeight: CGFloat, position: DialogPosition) {
         self.window = window
         self.hostingView = hostingView
         self.bgView = bgView
         self.minWidth = minWidth
         self.minHeight = minHeight
         self.maxHeight = maxHeight
+        self.position = position
         super.init()
 
         notificationObserver = NotificationCenter.default.addObserver(
@@ -47,7 +49,16 @@ class WindowSizeObserver: NSObject {
             if widthDelta < 1 && heightDelta < 1 { return }
 
             let newY = currentFrame.origin.y + currentFrame.height - newHeight
-            let newFrame = NSRect(x: currentFrame.origin.x, y: newY, width: newWidth, height: newHeight)
+            let newX: CGFloat
+            switch self.position {
+            case .left:
+                newX = currentFrame.origin.x
+            case .right:
+                newX = currentFrame.origin.x + currentFrame.width - newWidth
+            case .center:
+                newX = currentFrame.origin.x + (currentFrame.width - newWidth) / 2
+            }
+            let newFrame = NSRect(x: newX, y: newY, width: newWidth, height: newHeight)
             let newHostingFrame = NSRect(x: 8, y: 8, width: newWidth - 16, height: newHeight - 16)
             let newBgFrame = NSRect(x: 0, y: 0, width: newWidth, height: newHeight)
 

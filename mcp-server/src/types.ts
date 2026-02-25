@@ -61,7 +61,7 @@ export interface ConfirmOptions {
   title: string;
   confirmLabel: string;
   cancelLabel: string;
-  position: DialogPosition;
+  position?: DialogPosition;
   projectPath: string;
 }
 
@@ -73,7 +73,7 @@ export interface ChooseOptions {
   descriptions?: string[];
   allowMultiple: boolean;
   defaultSelection?: string;
-  position: DialogPosition;
+  position?: DialogPosition;
   projectPath: string;
 }
 
@@ -83,7 +83,7 @@ export interface TextInputOptions {
   title: string;
   defaultValue: string;
   hidden: boolean;
-  position: DialogPosition;
+  position?: DialogPosition;
   projectPath: string;
 }
 
@@ -126,7 +126,7 @@ export interface QuestionsOptions {
   title?: string;
   questions: Question[];
   mode: QuestionsMode;
-  position: DialogPosition;
+  position?: DialogPosition;
   projectPath: string;
 }
 

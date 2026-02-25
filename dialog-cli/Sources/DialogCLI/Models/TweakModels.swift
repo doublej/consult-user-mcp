@@ -35,7 +35,7 @@ extension TweakParameter {
 struct TweakRequest: Codable {
     let body: String
     let parameters: [TweakParameter]
-    let position: DialogPosition
+    let position: DialogPosition?
 }
 
 struct TweakResponse: Codable {

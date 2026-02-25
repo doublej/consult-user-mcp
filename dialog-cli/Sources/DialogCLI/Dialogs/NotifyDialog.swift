@@ -41,11 +41,12 @@ struct SwiftUINotifyPane: View {
                 Spacer(minLength: 0)
             }
 
-            Text(bodyText)
-                .font(.system(size: 13))
-                .foregroundColor(Theme.Colors.textSecondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
+            ScrollView {
+                Text(bodyText)
+                    .font(.system(size: 13))
+                    .foregroundColor(Theme.Colors.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
         .frame(width: 360, alignment: .leading)
         .padding(.horizontal, 20)

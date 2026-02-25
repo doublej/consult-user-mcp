@@ -114,9 +114,10 @@ extension DialogManager {
             }
         )
 
-        let (window, _, _) = createAutoSizedWindow(content: swiftUIDialog)
+        let position = effectivePosition(request.position)
+        let (window, _, _) = createAutoSizedWindow(content: swiftUIDialog, position: position)
 
-        positionWindow(window, position: effectivePosition(request.position))
+        positionWindow(window, position: position)
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         playShowSound()

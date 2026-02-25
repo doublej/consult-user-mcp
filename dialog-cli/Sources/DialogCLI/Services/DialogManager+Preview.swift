@@ -7,14 +7,15 @@ extension DialogManager {
 
         let pane = SwiftUIPreviewPane(bodyText: request.body)
 
+        let position = DialogPosition(rawValue: getSettings().position) ?? .right
+
         let (window, _, _) = createAutoSizedWindow(
             content: pane,
             minWidth: 360,
             minHeight: 120,
-            maxHeightRatio: 0.45
+            maxHeightRatio: 0.45,
+            position: position
         )
-
-        let position = DialogPosition(rawValue: getSettings().position) ?? .right
         positionWindow(window, position: position)
         window.level = .floating
         window.orderFrontRegardless()

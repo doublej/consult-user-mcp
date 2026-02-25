@@ -59,9 +59,10 @@ extension DialogManager {
             onAskDifferently: onAskDifferently
         )
 
-        let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460)
+        let position = effectivePosition(request.position)
+        let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460, position: position)
 
-        positionWindow(window, position: effectivePosition(request.position))
+        positionWindow(window, position: position)
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         playShowSound()

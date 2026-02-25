@@ -49,7 +49,7 @@ struct QuestionsRequest: Codable {
     let title: String?
     let questions: [QuestionItem]
     let mode: String  // "wizard" | "accordion"
-    let position: DialogPosition
+    let position: DialogPosition?
 }
 
 struct QuestionsResponse: Codable {

@@ -157,6 +157,7 @@ struct SwiftUIWizardDialog: View {
                         }
                     }
                 }
+                .clipped()
 
                 VStack(spacing: 0) {
                     DialogToolbar(

@@ -1,11 +1,22 @@
 export interface Slide {
-	template: 'confirmation' | 'multiple-choice' | 'wizard' | 'text-input' | 'snooze' | 'feedback';
+	template:
+		| 'confirmation'
+		| 'multiple-choice'
+		| 'wizard'
+		| 'wizard-text'
+		| 'wizard-multi'
+		| 'text-input'
+		| 'snooze'
+		| 'feedback';
 	toolName: string;
 	headline?: string;
+	caption?: string;
 	text?: string;
 	question?: string;
 	choices?: { label: string; selected?: boolean }[];
 	inputText?: string;
+	inputPlaceholder?: string;
+	inputHidden?: boolean;
 	step?: number;
 	totalSteps?: number;
 	selectedDuration?: string;
@@ -362,11 +373,78 @@ const setD: Record<string, Slide> = {
 	},
 };
 
-export const slides: Record<string, Slide> = { ...setA, ...setB, ...setC, ...setD };
+// Set E: "Mixed Wizard" — one wizard, mixed question types (v1.17 feature)
+const setE: Record<string, Slide> = {
+	'e-01': {
+		template: 'wizard',
+		toolName: 'ask type=form',
+		step: 1,
+		totalSteps: 6,
+		question: 'What programming language?',
+		choices: [
+			{ label: 'TypeScript', selected: true },
+			{ label: 'Python' },
+			{ label: 'Go' },
+		],
+	},
+	'e-02': {
+		template: 'wizard-text',
+		toolName: 'ask type=form',
+		step: 2,
+		totalSteps: 6,
+		question: 'What should we call the project?',
+		inputText: 'my-awesome-api',
+	},
+	'e-03': {
+		template: 'wizard-multi',
+		toolName: 'ask type=form',
+		step: 3,
+		totalSteps: 6,
+		question: 'Which features to include?',
+		choices: [
+			{ label: 'Authentication', selected: true },
+			{ label: 'API Routes', selected: true },
+			{ label: 'Database' },
+			{ label: 'Testing' },
+		],
+	},
+	'e-04': {
+		template: 'wizard',
+		toolName: 'ask type=form',
+		step: 4,
+		totalSteps: 6,
+		question: 'Select the deploy target:',
+		choices: [
+			{ label: 'Vercel' },
+			{ label: 'Fly.io', selected: true },
+			{ label: 'Self-hosted' },
+		],
+	},
+	'e-05': {
+		template: 'wizard-text',
+		toolName: 'ask type=form',
+		step: 5,
+		totalSteps: 6,
+		question: 'Enter your API key (optional):',
+		inputText: '••••••••••••••••',
+		inputHidden: true,
+	},
+	'e-06': {
+		template: 'wizard-text',
+		toolName: 'ask type=form',
+		step: 6,
+		totalSteps: 6,
+		question: 'Describe the project in one line:',
+		inputText: 'REST API for task management',
+	},
+};
+
+export const slides: Record<string, Slide> = { ...setA, ...setB, ...setC, ...setD, ...setE };
 export const slideIds = Object.keys(slides);
 export const sets = {
 	a: Object.keys(setA),
 	b: Object.keys(setB),
 	c: Object.keys(setC),
 	d: Object.keys(setD),
+	e: Object.keys(setE),
 };

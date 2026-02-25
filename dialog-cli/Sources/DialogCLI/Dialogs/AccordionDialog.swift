@@ -216,6 +216,7 @@ struct SwiftUIAccordionDialog: View {
                         }
                     }
                 }
+                .clipped()
 
                 VStack(spacing: 0) {
                     DialogToolbar(

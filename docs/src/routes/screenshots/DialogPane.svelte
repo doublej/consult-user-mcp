@@ -5,6 +5,9 @@
 	const isConfirmLike = $derived(
 		slide.template === 'confirmation' || slide.template === 'snooze' || slide.template === 'feedback'
 	);
+	const isWizardLike = $derived(
+		slide.template === 'wizard' || slide.template === 'wizard-text' || slide.template === 'wizard-multi'
+	);
 </script>
 
 <div class="scaled" style="zoom: {scale}">
@@ -46,7 +49,7 @@
 					<button class="btn primary">Done <span class="key-hint">&#x23CE;</span></button>
 				</div>
 
-			{:else if slide.template === 'wizard'}
+			{:else if isWizardLike}
 				<div class="progress-bar">
 					{#each Array(slide.totalSteps ?? 3) as _, i}
 						<div class="progress-segment" class:filled={i < (slide.step ?? 1)}></div>
@@ -54,14 +57,27 @@
 				</div>
 				<div class="step-label">{slide.step} of {slide.totalSteps}</div>
 				<div class="dialog-text question">{slide.question}</div>
-				<div class="choice-list">
-					{#each slide.choices ?? [] as choice}
-						<div class="choice-item" class:selected={choice.selected}>
-							<span class="radio" class:checked={choice.selected}></span>
-							<span class="choice-label">{choice.label}</span>
-						</div>
-					{/each}
-				</div>
+				{#if slide.template === 'wizard-text'}
+					<div class="text-input">
+						<span class="input-text">{slide.inputText}</span>
+						<span class="cursor"></span>
+					</div>
+				{:else}
+					<div class="choice-list">
+						{#each slide.choices ?? [] as choice}
+							<div class="choice-item" class:selected={choice.selected}>
+								{#if slide.template === 'wizard-multi'}
+									<span class="checkbox" class:checked={choice.selected}>
+										{#if choice.selected}&#x2713;{/if}
+									</span>
+								{:else}
+									<span class="radio" class:checked={choice.selected}></span>
+								{/if}
+								<span class="choice-label">{choice.label}</span>
+							</div>
+						{/each}
+					</div>
+				{/if}
 				<div class="button-row">
 					<button class="btn secondary">Back</button>
 					<button class="btn primary">Next <span class="key-hint">&#x23CE;</span></button>

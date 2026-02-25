@@ -1,4 +1,4 @@
-<!-- version: 2.9.0 -->
+<!-- version: 2.10.0 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
@@ -22,7 +22,7 @@ Three tools: `ask` (interactive dialogs), `notify` (fire-and-forget notification
 | `confirm` | Yes/no decision | `yes`, `no` (custom labels) |
 | `pick` | Select from list | `choices`, `multi`, `descriptions`, `default` |
 | `text` | Free-form input | `hidden`, `default` |
-| `form` | Multi-question | `questions`, `mode` (`"wizard"` \| `"accordion"`) |
+| `form` | Multi-question | `questions`, `mode` (`"wizard"` \| `"accordion"`). Questions support `type: "choice"` (default) or `"text"` |
 
 All types share: `body` (required), `title`, `position` (`"left"` \| `"center"` \| `"right"`), `project_path`.
 
@@ -137,10 +137,11 @@ This is idempotent — safe to call multiple times. The script auto-reconnects o
 // Password input
 {"type": "text", "body": "Enter API key:", "hidden": true}
 
-// Batch questions as form
+// Batch questions as form (choice + text mixed)
 {"type": "form", "body": "Project setup", "questions": [
   {"id": "lang", "question": "Language?", "options": ["TypeScript", "Python"]},
-  {"id": "test", "question": "Test framework?", "options": ["Jest", "Vitest"]}
+  {"id": "name", "question": "Project name?", "type": "text", "placeholder": "my-project"},
+  {"id": "key", "question": "API key?", "type": "text", "hidden": true}
 ]}
 
 // Tweak (text search format)

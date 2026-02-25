@@ -7,6 +7,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.17.0] (macOS) - 2026-02-25
+
+### Added
+- Form dialogs now support mixed question types — combine choice selectors and text inputs in a single wizard or accordion
+- Text questions in forms support placeholder text and hidden/password input mode
+- Debug menu now includes Wizard Mixed and Accordion Mixed test cases
+
+### Changed
+- Base prompt updated to v2.10.0 with mixed question type documentation and examples
+
+### Fixed
+- Dialog window now resizes correctly when switching between question types of different heights
+
 ## [1.16.1] (macOS) - 2026-02-24
 
 ### Added

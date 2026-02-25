@@ -110,8 +110,11 @@ export interface PreviewResult {
 export interface Question {
   id: string;
   question: string;
+  type: "choice" | "text";
   options: { label: string; description?: string }[];
   multiSelect: boolean;
+  placeholder?: string;
+  hidden?: boolean;
 }
 
 // Mode for multi-question display

@@ -84,7 +84,8 @@ class DialogManager {
         content: Content,
         minWidth: CGFloat = 420,
         minHeight: CGFloat = 300,
-        maxHeightRatio: CGFloat = 0.85
+        maxHeightRatio: CGFloat = 0.85,
+        initialHeight: CGFloat? = nil
     ) -> (NSWindow, NSHostingView<Content>, DraggableView) {
         let hostingView = NSHostingView(rootView: content)
 
@@ -94,7 +95,12 @@ class DialogManager {
         hostingView.layout()
         let fittingSize = hostingView.fittingSize
         let width = max(minWidth, fittingSize.width) + 16
-        let height = min(max(fittingSize.height + 16, minHeight), maxHeight)
+        let height: CGFloat
+        if let initial = initialHeight {
+            height = min(max(initial, minHeight), maxHeight)
+        } else {
+            height = min(max(fittingSize.height + 16, minHeight), maxHeight)
+        }
 
         let (window, bgView) = createWindow(width: width, height: height)
 

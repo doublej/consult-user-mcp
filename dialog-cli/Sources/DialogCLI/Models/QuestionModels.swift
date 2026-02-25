@@ -17,6 +17,7 @@ struct QuestionItem: Codable {
     let options: [QuestionOption]
     let multiSelect: Bool
     let placeholder: String?
+    let hidden: Bool
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -26,6 +27,7 @@ struct QuestionItem: Codable {
         options = try container.decodeIfPresent([QuestionOption].self, forKey: .options) ?? []
         multiSelect = try container.decodeIfPresent(Bool.self, forKey: .multiSelect) ?? false
         placeholder = try container.decodeIfPresent(String.self, forKey: .placeholder)
+        hidden = try container.decodeIfPresent(Bool.self, forKey: .hidden) ?? false
     }
 }
 

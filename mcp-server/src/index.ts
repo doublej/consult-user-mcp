@@ -65,9 +65,20 @@ let cachedProjectPath: string | undefined;
 const questionSchema = z.object({
   id: z.string().min(1).max(50),
   question: z.string().min(1).max(500),
-  options: z.array(z.string().min(1).max(100)).min(2).max(10),
+  type: z.enum(["choice", "text"]).default("choice"),
+  options: z.array(z.string().min(1).max(100)).min(2).max(10).optional(),
   descriptions: z.array(z.string().max(200)).optional(),
   multi: z.boolean().default(false),
+  placeholder: z.string().max(200).optional(),
+  hidden: z.boolean().default(false),
+}).superRefine((data, ctx) => {
+  if (data.type === "choice" && (!data.options || data.options.length < 2)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "options required (min 2) for choice questions",
+      path: ["options"],
+    });
+  }
 });
 
 const askSchema = z.object({
@@ -134,13 +145,18 @@ server.registerTool("ask", {
 
     case "form": {
       if (!p.questions?.length) throw new Error("questions required for type=form");
-      for (const q of p.questions) validateNoAllOfAbove(q.options);
+      for (const q of p.questions) {
+        if (q.type === "choice" && q.options) validateNoAllOfAbove(q.options);
+      }
       raw = await tracked(provider.questions({
         body, title: p.title,
         questions: p.questions.map(q => ({
           id: q.id, question: unescLiterals(q.question),
-          options: q.options.map((label, i) => ({ label, description: q.descriptions?.[i] })),
+          type: q.type,
+          options: (q.options ?? []).map((label, i) => ({ label, description: q.descriptions?.[i] })),
           multiSelect: q.multi,
+          placeholder: q.placeholder,
+          hidden: q.hidden,
         })),
         mode: p.mode as QuestionsMode,
         position, projectPath,

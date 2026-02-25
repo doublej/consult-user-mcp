@@ -121,20 +121,25 @@ extension DialogManager {
             ))
         }
 
-        // Compute initial height from content to avoid fittingSize + ScrollView issues
+        // Container-driven sizing: compute height from question structure, bypass fittingSize
         let chromeHeight: CGFloat = 340  // header + progress + toolbar + buttons + padding
         let maxStepHeight = request.questions.map { question -> CGFloat in
             let questionTextHeight: CGFloat = 30
+            let padding: CGFloat = 20  // top + bottom
+            if question.type == .text {
+                let textFieldHeight: CGFloat = 48
+                let spacing: CGFloat = 12
+                return questionTextHeight + spacing + textFieldHeight + padding
+            }
             let hasDescriptions = question.options.contains { $0.description != nil }
             let optionHeight: CGFloat = hasDescriptions ? 68 : 48
             let optionsHeight = CGFloat(question.options.count) * optionHeight
                 + CGFloat(max(0, question.options.count - 1)) * 8
-            let padding: CGFloat = 20  // top + bottom
             return questionTextHeight + optionsHeight + padding
         }.max() ?? 200
         let estimatedHeight = chromeHeight + maxStepHeight
 
-        let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460, minHeight: estimatedHeight)
+        let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460, initialHeight: estimatedHeight)
 
         positionWindow(window, position: effectivePosition(request.position))
         window.makeKeyAndOrderFront(nil)

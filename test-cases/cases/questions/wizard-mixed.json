@@ -1,0 +1,64 @@
+{
+  "body": "Set up your new project with mixed question types.",
+  "title": "Project Setup",
+  "questions": [
+    {
+      "id": "language",
+      "question": "What programming language?",
+      "type": "choice",
+      "options": [
+        {
+          "label": "TypeScript",
+          "description": "Strongly typed JavaScript"
+        },
+        {
+          "label": "Python",
+          "description": "Dynamic scripting language"
+        },
+        {
+          "label": "Go",
+          "description": "Fast compiled language"
+        }
+      ],
+      "multiSelect": false
+    },
+    {
+      "id": "project-name",
+      "question": "What should we call the project?",
+      "type": "text",
+      "placeholder": "my-awesome-project",
+      "multiSelect": false
+    },
+    {
+      "id": "api-key",
+      "question": "Enter your API key (optional):",
+      "type": "text",
+      "placeholder": "sk-...",
+      "hidden": true,
+      "multiSelect": false
+    },
+    {
+      "id": "features",
+      "question": "Which features to include?",
+      "type": "choice",
+      "options": [
+        {
+          "label": "Authentication"
+        },
+        {
+          "label": "API Routes"
+        },
+        {
+          "label": "Database"
+        },
+        {
+          "label": "Testing"
+        }
+      ],
+      "multiSelect": true
+    }
+  ],
+  "mode": "wizard",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

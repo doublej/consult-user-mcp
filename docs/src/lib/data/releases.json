@@ -3,6 +3,19 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.17.0",
+      "platform": "macos",
+      "date": "2026-02-25",
+      "highlight": "Mixed question types in wizard and accordion forms",
+      "changes": [
+        { "text": "Form dialogs now support mixed question types — combine choice selectors and text inputs in a single wizard or accordion", "type": "added", "scope": "server", "featured": true, "starred": true },
+        { "text": "Text questions in forms support placeholder text and hidden/password input mode", "type": "added", "scope": "server", "featured": true },
+        { "text": "Dialog window now resizes correctly when switching between question types of different heights", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Debug menu now includes Wizard Mixed and Accordion Mixed test cases", "type": "added", "scope": "app" },
+        { "text": "Base prompt updated to v2.10.0 with mixed question type documentation and examples", "type": "changed", "scope": "prompt" }
+      ]
+    },
+    {
       "version": "1.16.1",
       "platform": "macos",
       "date": "2026-02-24",

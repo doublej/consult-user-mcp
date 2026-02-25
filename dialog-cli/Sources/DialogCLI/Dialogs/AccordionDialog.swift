@@ -82,6 +82,7 @@ struct AccordionSection: View {
                     if question.type == .text {
                         FocusableTextField(
                             placeholder: question.placeholder ?? "Enter your answer...",
+                            isSecure: question.hidden,
                             text: $textValue
                         )
                         .frame(minHeight: 48)
@@ -256,6 +257,7 @@ struct SwiftUIAccordionDialog: View {
             focusedOptionIndex = 0
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 FocusManager.shared.focusFirst()
+                NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
             }
         }
     }

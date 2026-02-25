@@ -149,7 +149,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let questionsItem = NSMenuItem(title: "Test Questions", action: nil, keyEquivalent: "")
         let questionsSubmenu = NSMenu()
         addDebugMenuItem(questionsSubmenu, title: "Wizard", action: #selector(testQuestionsWizard))
+        addDebugMenuItem(questionsSubmenu, title: "Wizard Mixed", action: #selector(testQuestionsWizardMixed))
         addDebugMenuItem(questionsSubmenu, title: "Accordion", action: #selector(testQuestionsAccordion))
+        addDebugMenuItem(questionsSubmenu, title: "Accordion Mixed", action: #selector(testQuestionsAccordionMixed))
         questionsItem.submenu = questionsSubmenu
         debugMenu.addItem(questionsItem)
 
@@ -355,8 +357,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         runDialogCli(command: "questions", json: tc.json, projectPath: tc.projectPath)
     }
 
+    @objc private func testQuestionsWizardMixed() {
+        guard let tc = loadTestCase(category: "questions", name: "wizard-mixed") else { return }
+        runDialogCli(command: "questions", json: tc.json, projectPath: tc.projectPath)
+    }
+
     @objc private func testQuestionsAccordion() {
         guard let tc = loadTestCase(category: "questions", name: "accordion-basic") else { return }
+        runDialogCli(command: "questions", json: tc.json, projectPath: tc.projectPath)
+    }
+
+    @objc private func testQuestionsAccordionMixed() {
+        guard let tc = loadTestCase(category: "questions", name: "accordion-mixed") else { return }
         runDialogCli(command: "questions", json: tc.json, projectPath: tc.projectPath)
     }
 

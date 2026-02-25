@@ -39,9 +39,20 @@ describe("ask schema", () => {
   const questionSchema = z.object({
     id: z.string().min(1).max(50),
     question: z.string().min(1).max(500),
-    options: z.array(z.string().min(1).max(100)).min(2).max(10),
+    type: z.enum(["choice", "text"]).default("choice"),
+    options: z.array(z.string().min(1).max(100)).min(2).max(10).optional(),
     descriptions: z.array(z.string().max(200)).optional(),
     multi: z.boolean().default(false),
+    placeholder: z.string().max(200).optional(),
+    hidden: z.boolean().default(false),
+  }).superRefine((data, ctx) => {
+    if (data.type === "choice" && (!data.options || data.options.length < 2)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "options required (min 2) for choice questions",
+        path: ["options"],
+      });
+    }
   });
 
   const askSchema = z.object({
@@ -105,6 +116,54 @@ describe("ask schema", () => {
     });
     expect(r.questions).toHaveLength(1);
     expect(r.questions![0].multi).toBe(false);
+  });
+
+  test("form with text-type question (no options)", () => {
+    const r = askSchema.parse({
+      type: "form", body: "Setup",
+      questions: [{ id: "name", question: "Project name?", type: "text" }],
+    });
+    expect(r.questions![0].type).toBe("text");
+    expect(r.questions![0].options).toBeUndefined();
+  });
+
+  test("form with mixed choice and text questions", () => {
+    const r = askSchema.parse({
+      type: "form", body: "Setup",
+      questions: [
+        { id: "lang", question: "Language?", options: ["TS", "Py"] },
+        { id: "name", question: "Project name?", type: "text", placeholder: "my-project" },
+        { id: "db", question: "Database?", type: "choice", options: ["Postgres", "SQLite"] },
+      ],
+    });
+    expect(r.questions).toHaveLength(3);
+    expect(r.questions![0].type).toBe("choice");
+    expect(r.questions![1].type).toBe("text");
+    expect(r.questions![1].placeholder).toBe("my-project");
+    expect(r.questions![2].type).toBe("choice");
+  });
+
+  test("form text question with hidden flag", () => {
+    const r = askSchema.parse({
+      type: "form", body: "Credentials",
+      questions: [{ id: "key", question: "API key?", type: "text", hidden: true }],
+    });
+    expect(r.questions![0].hidden).toBe(true);
+  });
+
+  test("backward compat: no type field defaults to choice", () => {
+    const r = askSchema.parse({
+      type: "form", body: "Setup",
+      questions: [{ id: "lang", question: "Language?", options: ["TS", "Py"] }],
+    });
+    expect(r.questions![0].type).toBe("choice");
+  });
+
+  test("rejects choice question without options", () => {
+    expect(() => askSchema.parse({
+      type: "form", body: "Setup",
+      questions: [{ id: "lang", question: "Language?", type: "choice" }],
+    })).toThrow();
   });
 
   test("rejects empty body", () => {

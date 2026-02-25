@@ -1,0 +1,53 @@
+{
+  "body": "Configure deployment settings with mixed inputs.",
+  "title": "Deployment Config",
+  "questions": [
+    {
+      "id": "environment",
+      "question": "Target environment?",
+      "type": "choice",
+      "options": [
+        {
+          "label": "Production",
+          "description": "Live environment"
+        },
+        {
+          "label": "Staging",
+          "description": "Pre-production testing"
+        },
+        {
+          "label": "Development",
+          "description": "Local development"
+        }
+      ],
+      "multiSelect": false
+    },
+    {
+      "id": "domain",
+      "question": "Custom domain name?",
+      "type": "text",
+      "placeholder": "app.example.com",
+      "multiSelect": false
+    },
+    {
+      "id": "region",
+      "question": "Deploy region?",
+      "type": "choice",
+      "options": [
+        {
+          "label": "US East"
+        },
+        {
+          "label": "EU West"
+        },
+        {
+          "label": "Asia Pacific"
+        }
+      ],
+      "multiSelect": false
+    }
+  ],
+  "mode": "accordion",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

@@ -49,7 +49,7 @@ Use `--dry-run` to validate preconditions without executing.
 | 8 | **Notification** | — (`notify`) | `notify` | `body`, `title`, `sound` | fire-and-forget |
 | 9 | **Value tweak** | — (`tweak`) | `tweak` | `body`, `parameters[]` | `answer: Record<id, number>` |
 
-`questions[]` items: `id`, `question`, `options[]`, `descriptions[]?`, `multi`.
+`questions[]` items: `id`, `question`, `type?` (`"choice"` default, `"text"`), `options[]` (required for choice), `descriptions[]?`, `multi`, `placeholder?`, `hidden?`.
 
 `parameters[]` items: `id`, `label`, `file`, `line`, `column`, `expectedText`, `current`, `min`, `max`, `step?`, `unit?`.
 

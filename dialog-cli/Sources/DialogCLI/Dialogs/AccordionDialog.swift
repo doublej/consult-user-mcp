@@ -69,6 +69,11 @@ struct AccordionSection: View {
             .buttonStyle(.plain)
             .focusEffectDisabled()
             .onHover { hovering in
+                if hovering {
+                    NSCursor.pointingHand.push()
+                } else {
+                    NSCursor.pop()
+                }
                 if reduceMotion {
                     isHovered = hovering
                 } else {

@@ -12,6 +12,14 @@ class BorderlessWindow: NSWindow {
         self.autorecalculatesKeyViewLoop = true
     }
 
+    override func sendEvent(_ event: NSEvent) {
+        if event.type == .leftMouseDown && !isKeyWindow {
+            makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
+        super.sendEvent(event)
+    }
+
     override func keyDown(with event: NSEvent) {
         // Block action keys during cooldown
         if CooldownManager.shared.shouldBlockKey(event.keyCode) {

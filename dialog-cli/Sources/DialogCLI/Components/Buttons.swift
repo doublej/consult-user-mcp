@@ -176,6 +176,11 @@ class FocusableButtonView: NSView {
         setupTracking()
     }
 
+    override func resetCursorRects() {
+        discardCursorRects()
+        addCursorRect(bounds, cursor: .pointingHand)
+    }
+
     override func mouseEntered(with event: NSEvent) {
         guard !isDisabled else { return }
         isHovered = true

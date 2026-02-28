@@ -61,7 +61,7 @@ class FocusableChoiceCardView: NSView {
     private lazy var subtitleField: NSTextField = {
         let field = NSTextField()
         field.isEditable = false
-        field.isSelectable = true
+        field.isSelectable = false
         field.isBordered = false
         field.drawsBackground = false
         field.backgroundColor = .clear
@@ -204,6 +204,11 @@ class FocusableChoiceCardView: NSView {
                 subtitleField.frame = NSRect(x: contentX, y: subY, width: contentWidth, height: subSize.height)
             }
         }
+    }
+
+    override func resetCursorRects() {
+        discardCursorRects()
+        addCursorRect(bounds, cursor: .pointingHand)
     }
 
     override func mouseEntered(with event: NSEvent) {

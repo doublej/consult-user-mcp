@@ -51,8 +51,29 @@ echo "  Installing node dependencies..."
 cd "$APP_PATH/Contents/Resources/mcp-server"
 bun install --production
 
-# 8. Copy resources (icon, update script, logos)
-cp "$ROOT/macos-app/Sources/Resources/AppIcon.icns" "$APP_PATH/Contents/Resources/"
+# 8. Generate AppIcon.icns from appiconset PNGs if missing
+ICNS_PATH="$ROOT/macos-app/Sources/Resources/AppIcon.icns"
+if [ ! -f "$ICNS_PATH" ]; then
+    echo "  Generating AppIcon.icns..."
+    ICONSET_DIR=$(mktemp -d)/AppIcon.iconset
+    mkdir -p "$ICONSET_DIR"
+    APPICONSET="$ROOT/macos-app/Sources/Resources/Assets.xcassets/AppIcon.appiconset"
+    cp "$APPICONSET/icon_16x16.png" "$ICONSET_DIR/icon_16x16.png"
+    cp "$APPICONSET/icon_32x32.png" "$ICONSET_DIR/icon_16x16@2x.png"
+    cp "$APPICONSET/icon_32x32.png" "$ICONSET_DIR/icon_32x32.png"
+    cp "$APPICONSET/icon_64x64.png" "$ICONSET_DIR/icon_32x32@2x.png"
+    cp "$APPICONSET/icon_128x128.png" "$ICONSET_DIR/icon_128x128.png"
+    cp "$APPICONSET/icon_256x256.png" "$ICONSET_DIR/icon_128x128@2x.png"
+    cp "$APPICONSET/icon_256x256.png" "$ICONSET_DIR/icon_256x256.png"
+    cp "$APPICONSET/icon_512x512.png" "$ICONSET_DIR/icon_256x256@2x.png"
+    cp "$APPICONSET/icon_512x512.png" "$ICONSET_DIR/icon_512x512.png"
+    cp "$APPICONSET/icon_1024x1024.png" "$ICONSET_DIR/icon_512x512@2x.png"
+    iconutil -c icns -o "$ICNS_PATH" "$ICONSET_DIR"
+    rm -rf "$(dirname "$ICONSET_DIR")"
+fi
+
+# Copy resources (icon, update script, logos)
+cp "$ICNS_PATH" "$APP_PATH/Contents/Resources/"
 cp "$ROOT/macos-app/Sources/Resources/update.sh" "$APP_PATH/Contents/Resources/"
 cp "$ROOT/macos-app/Sources/Resources/claude-logo.png" "$APP_PATH/Contents/Resources/"
 cp "$ROOT/macos-app/Sources/Resources/openai-logo.png" "$APP_PATH/Contents/Resources/"

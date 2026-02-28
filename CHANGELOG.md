@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.18.2] (macOS) - 2026-03-01
+
+### Added
+- Choose and form dialogs now include an "Other" option so users can type a custom answer not in the predefined list
+
+### Changed
+- Base prompt updated to v2.11.0 with "Other" option documentation
+
+### Fixed
+- Clicking an unfocused dialog now both activates the window and registers the action in a single click
+- Clickable elements (choice cards, buttons, accordion headers) now show a pointer cursor on hover
+
 ## [1.18.1] (macOS) - 2026-03-01
 
 ### Fixed

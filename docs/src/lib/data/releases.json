@@ -3,6 +3,18 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.18.2",
+      "platform": "macos",
+      "date": "2026-03-01",
+      "highlight": "\"Other\" option and click-through focus",
+      "changes": [
+        { "text": "Choose and form dialogs now include an \"Other\" option so users can type a custom answer not in the predefined list", "type": "added", "scope": "cli", "featured": true, "starred": true },
+        { "text": "Clicking an unfocused dialog now both activates the window and registers the action in a single click", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Clickable elements (choice cards, buttons, accordion headers) now show a pointer cursor on hover", "type": "fixed", "scope": "cli" },
+        { "text": "Base prompt updated to v2.11.0 with \"Other\" option documentation", "type": "changed", "scope": "prompt" }
+      ]
+    },
+    {
       "version": "1.18.1",
       "platform": "macos",
       "date": "2026-03-01",

@@ -5,6 +5,7 @@ class DialogManager {
     static let shared = DialogManager()
     private var clientName = "MCP"
     private var projectPath: String?
+    var testPane: String?
     private var userSettings = UserSettings.load()
     var sizeObserver: WindowSizeObserver?
     var currentCommand: String?

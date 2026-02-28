@@ -501,6 +501,14 @@ struct DialogContainer<Content: View>: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 FocusManager.shared.focusFirst()
             }
+            if let pane = DialogManager.shared.testPane {
+                let tool: DialogToolbar.ToolbarTool? = pane == "snooze" ? .snooze : pane == "feedback" ? .feedback : nil
+                if let tool {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        toggleTool(tool)
+                    }
+                }
+            }
         }
         .onDisappear {
             keyboardMonitor = nil

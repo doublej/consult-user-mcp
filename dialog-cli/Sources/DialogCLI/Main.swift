@@ -122,6 +122,11 @@ static func run() {
         ThemeManager.shared.setTheme(named: themeName)
     }
 
+    // Set test pane from environment variable (for automated testing)
+    if let testPane = ProcessInfo.processInfo.environment["DIALOG_TEST_PANE"] {
+        manager.testPane = testPane
+    }
+
     guard let jsonData = jsonInput.data(using: .utf8) else {
         fputs("Invalid JSON input\n", stderr)
         exit(1)

@@ -50,7 +50,7 @@ struct AccordionSection: View {
                     Text(question.question)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(Theme.Colors.textPrimary)
-                        .lineLimit(1)
+                        .lineLimit(nil)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")

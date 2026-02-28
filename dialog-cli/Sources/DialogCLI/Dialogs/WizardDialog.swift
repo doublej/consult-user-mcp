@@ -47,7 +47,7 @@ struct QuestionSection: View {
                 color: Theme.Colors.textPrimary,
                 alignment: .left
             )
-            .frame(maxWidth: 400, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             if question.type == .text {
                 FocusableTextField(

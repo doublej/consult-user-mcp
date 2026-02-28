@@ -95,8 +95,11 @@ class FocusableChoiceCardView: NSView {
 
         if let sub = subtitle, !sub.isEmpty {
             let subAttrs: [NSAttributedString.Key: Any] = [.font: Self.subtitleFont]
+            // NSTextField has internal line fragment padding (~5pt per side)
+            // that reduces effective text width vs raw boundingRect
+            let effectiveWidth = contentWidth - 10
             cachedSubtitleSize = (sub as NSString).boundingRect(
-                with: NSSize(width: contentWidth, height: .greatestFiniteMagnitude),
+                with: NSSize(width: effectiveWidth, height: .greatestFiniteMagnitude),
                 options: [.usesLineFragmentOrigin],
                 attributes: subAttrs
             ).size

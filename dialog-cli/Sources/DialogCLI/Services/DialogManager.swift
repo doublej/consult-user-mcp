@@ -95,14 +95,22 @@ class DialogManager {
         let screenHeight = NSScreen.main?.visibleFrame.height ?? 800
         let maxHeight = screenHeight * maxHeightRatio
 
+        // Two-pass layout: first pass determines width, second pass gets
+        // correct height after text views know their wrapping width.
         hostingView.layout()
         let fittingSize = hostingView.fittingSize
         let width = max(minWidth, fittingSize.width) + 16
+
+        // Set width so NSTextView containers wrap correctly, then re-layout
+        hostingView.frame = NSRect(x: 0, y: 0, width: width - 16, height: 10000)
+        hostingView.layout()
+        let constrainedSize = hostingView.fittingSize
+
         let height: CGFloat
         if let initial = initialHeight {
             height = min(max(initial, minHeight), maxHeight)
         } else {
-            height = min(max(fittingSize.height + 16, minHeight), maxHeight)
+            height = min(max(constrainedSize.height + 16, minHeight), maxHeight)
         }
 
         let (window, bgView) = createWindow(width: width, height: height)

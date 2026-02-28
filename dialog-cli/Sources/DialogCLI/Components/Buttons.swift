@@ -292,14 +292,23 @@ class FocusableButtonView: NSView {
 
     private func drawText(in rect: NSRect) {
         let font = NSFont.systemFont(ofSize: 15, weight: isPrimary ? .semibold : .medium)
-        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: textColor]
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        paragraphStyle.lineBreakMode = .byTruncatingTail
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: textColor,
+            .paragraphStyle: paragraphStyle,
+        ]
         var displayText = title
         if showReturnHint && isPrimary && !isDisabled { displayText += " ⏎" }
+        let inset: CGFloat = 12
+        let maxWidth = rect.width - inset * 2
         let size = (displayText as NSString).size(withAttributes: attrs)
         let textRect = NSRect(
-            x: (bounds.width - size.width) / 2,
+            x: rect.minX + inset,
             y: (bounds.height - size.height) / 2,
-            width: size.width,
+            width: maxWidth,
             height: size.height
         )
         (displayText as NSString).draw(in: textRect, withAttributes: attrs)

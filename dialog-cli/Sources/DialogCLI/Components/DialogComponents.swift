@@ -23,7 +23,8 @@ struct AutoSizingScrollView<Content: View>: View {
                     }
                 )
         }
-        .frame(minHeight: contentHeight > 0 ? contentHeight : nil)
+        .frame(idealHeight: contentHeight > 0 ? contentHeight : nil)
+        .layoutPriority(-1)
         .onPreferenceChange(ContentHeightKey.self) { height in
             guard abs(height - contentHeight) > 1 else { return }
             contentHeight = height
@@ -145,7 +146,13 @@ struct SelectableText: View {
 
 /// NSScrollView subclass that reports its text content height as intrinsic content size,
 /// so SwiftUI allocates the correct amount of space during layout.
+///
+/// On first layout SwiftUI queries `intrinsicContentSize` before the view has a
+/// width, so text reports single-line height. `setFrameSize` detects when the
+/// width becomes known and re-invalidates so the window can resize to fit.
 class IntrinsicTextScrollView: NSScrollView {
+    private var lastKnownWidth: CGFloat = 0
+
     override var intrinsicContentSize: NSSize {
         guard let textView = documentView as? NSTextView,
               let container = textView.textContainer,
@@ -155,6 +162,18 @@ class IntrinsicTextScrollView: NSScrollView {
         layoutManager.ensureLayout(for: container)
         let height = layoutManager.usedRect(for: container).height
         return NSSize(width: NSView.noIntrinsicMetric, height: height)
+    }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        let widthChanged = abs(newSize.width - lastKnownWidth) > 1
+        super.setFrameSize(newSize)
+        if widthChanged && newSize.width > 0 {
+            lastKnownWidth = newSize.width
+            DispatchQueue.main.async { [weak self] in
+                self?.invalidateIntrinsicContentSize()
+                NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
+            }
+        }
     }
 }
 
@@ -356,6 +375,7 @@ struct DialogHeader: View {
                     .padding(.top, 4)
             }
         }
+        .padding(.horizontal, 20)
     }
 }
 

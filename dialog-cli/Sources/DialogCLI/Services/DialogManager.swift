@@ -7,6 +7,8 @@ class DialogManager {
     private var projectPath: String?
     private var userSettings = UserSettings.load()
     var sizeObserver: WindowSizeObserver?
+    var currentCommand: String?
+    var currentCallJSON: String?
 
     func setClientName(_ name: String) {
         clientName = name
@@ -119,6 +121,16 @@ class DialogManager {
         )
 
         return (window, hostingView, bgView)
+    }
+
+    func captureWindowScreenshot() -> Data? {
+        let window = NSApp.modalWindow
+            ?? NSApp.windows.first(where: { $0 is BorderlessWindow && $0.isVisible })
+        guard let contentView = window?.contentView,
+              let rep = contentView.bitmapImageRepForCachingDisplay(in: contentView.bounds)
+        else { return nil }
+        contentView.cacheDisplay(in: contentView.bounds, to: rep)
+        return rep.representation(using: .png, properties: [:])
     }
 
     func positionWindow(_ window: NSWindow, position: DialogPosition) {

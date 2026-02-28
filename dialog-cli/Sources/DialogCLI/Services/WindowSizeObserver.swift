@@ -2,6 +2,7 @@ import AppKit
 
 extension Notification.Name {
     static let dialogContentSizeChanged = Notification.Name("dialogContentSizeChanged")
+    static let dismissReportOverlay = Notification.Name("dismissReportOverlay")
 }
 
 class WindowSizeObserver: NSObject {

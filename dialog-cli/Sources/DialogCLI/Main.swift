@@ -127,6 +127,9 @@ static func run() {
         exit(1)
     }
 
+    manager.currentCommand = command
+    manager.currentCallJSON = jsonInput
+
     var outputData: Data?
 
     switch command {

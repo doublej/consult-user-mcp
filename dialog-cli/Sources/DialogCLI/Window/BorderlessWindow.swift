@@ -19,7 +19,11 @@ class BorderlessWindow: NSWindow {
         }
 
         if event.keyCode == KeyCode.escape {
-            NSApp.stopModal(withCode: .cancel)
+            if ReportIssueOverlayManager.shared.isShowing {
+                NotificationCenter.default.post(name: .dismissReportOverlay, object: nil)
+            } else {
+                NSApp.stopModal(withCode: .cancel)
+            }
         } else {
             super.keyDown(with: event)
         }
@@ -30,6 +34,10 @@ class BorderlessWindow: NSWindow {
         if CooldownManager.shared.isCoolingDown {
             return
         }
-        NSApp.stopModal(withCode: .cancel)
+        if ReportIssueOverlayManager.shared.isShowing {
+            NotificationCenter.default.post(name: .dismissReportOverlay, object: nil)
+        } else {
+            NSApp.stopModal(withCode: .cancel)
+        }
     }
 }

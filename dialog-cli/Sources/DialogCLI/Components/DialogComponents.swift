@@ -41,6 +41,38 @@ private struct ContentHeightKey: PreferenceKey {
     }
 }
 
+// MARK: - Report Feedback Button (top-left corner)
+
+struct ReportFeedbackButton: View {
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                Image(systemName: "ladybug")
+                    .font(.system(size: 9, weight: .medium))
+                Text("Feedback")
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .foregroundColor(isHovered ? Theme.Colors.accentRed : Theme.Colors.textMuted)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(
+                Capsule()
+                    .fill(isHovered ? Theme.Colors.accentRed.opacity(0.12) : Color.clear)
+                    .overlay(
+                        Capsule()
+                            .strokeBorder(isHovered ? Theme.Colors.accentRed.opacity(0.3) : Theme.Colors.border.opacity(0.4), lineWidth: 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .help("Report a bug or give feedback")
+    }
+}
+
 // MARK: - Project Badge
 
 struct ProjectBadge: View {
@@ -385,6 +417,8 @@ struct DialogContainer<Content: View>: View {
 
     @State private var keyboardMonitor: KeyboardNavigationMonitor?
     @State private var expandedTool: DialogToolbar.ToolbarTool?
+    @State private var showReportOverlay = false
+    @State private var reportScreenshot: Data?
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
 
@@ -412,19 +446,35 @@ struct DialogContainer<Content: View>: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if let name = projectName, let path = projectPath {
-                HStack {
-                    Spacer(minLength: 0)
+            HStack {
+                ReportFeedbackButton(action: captureAndShowOverlay)
+                Spacer(minLength: 0)
+                if let name = projectName, let path = projectPath {
                     ProjectBadge(projectName: name, projectPath: path)
                 }
-                .padding(.leading, 12)
-                .padding(.top, 12)
-                .padding(.trailing, 12)
             }
+            .padding(.horizontal, 12)
+            .padding(.top, 12)
 
             contentBuilder($expandedTool)
         }
-        .background(Color.clear)
+        .overlay {
+            if showReportOverlay {
+                ReportIssueView(
+                    screenshotData: reportScreenshot,
+                    onSubmit: { description, copyToClipboard in
+                        dismissOverlay()
+                        GitHubReporter.openIssue(description: description,
+                                                 screenshotData: reportScreenshot,
+                                                 copyToClipboard: copyToClipboard)
+                    },
+                    onCancel: { dismissOverlay() }
+                )
+                .transition(reduceMotion ? .identity : .opacity)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: showReportOverlay)
         .onAppear {
             FocusManager.shared.reset()
             setupKeyboardNavigation()
@@ -435,6 +485,23 @@ struct DialogContainer<Content: View>: View {
         .onDisappear {
             keyboardMonitor = nil
             FocusManager.shared.reset()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .dismissReportOverlay)) { _ in
+            dismissOverlay()
+        }
+    }
+
+    private func captureAndShowOverlay() {
+        reportScreenshot = DialogManager.shared.captureWindowScreenshot()
+        showReportOverlay = true
+        ReportIssueOverlayManager.shared.isShowing = true
+    }
+
+    private func dismissOverlay() {
+        showReportOverlay = false
+        ReportIssueOverlayManager.shared.isShowing = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            FocusManager.shared.focusFirst()
         }
     }
 
@@ -453,6 +520,14 @@ struct DialogContainer<Content: View>: View {
             // Universal cooldown check — blocks rapid keypresses for all keys
             if CooldownManager.shared.shouldBlockKey(keyCode) {
                 return true
+            }
+            if keyCode == KeyCode.escape && showReportOverlay {
+                dismissOverlay()
+                return true
+            }
+            // When report overlay is open, pass all other keys to its first responder
+            if showReportOverlay {
+                return false
             }
             if keyCode == KeyCode.escape && expandedTool != nil {
                 toggleTool(expandedTool!)

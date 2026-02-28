@@ -10,7 +10,7 @@ struct SwiftUITextInputDialog: View {
     let onSubmit: (String) -> Void
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String) -> Void
+    let onFeedback: (String, String) -> Void
     let onAskDifferently: (String) -> Void
 
     @State private var inputText: String
@@ -23,7 +23,7 @@ struct SwiftUITextInputDialog: View {
         onSubmit: @escaping (String) -> Void,
         onCancel: @escaping () -> Void,
         onSnooze: @escaping (Int) -> Void,
-        onFeedback: @escaping (String) -> Void,
+        onFeedback: @escaping (String, String) -> Void,
         onAskDifferently: @escaping (String) -> Void
     ) {
         self.title = title
@@ -76,7 +76,7 @@ struct SwiftUITextInputDialog: View {
                     expandedTool: expandedTool,
                     currentDialogType: isHidden ? "text-hidden" : "text",
                     onSnooze: onSnooze,
-                    onFeedback: onFeedback,
+                    onFeedback: { feedback in onFeedback(feedback, inputText) },
                     onAskDifferently: onAskDifferently
                 )
 

@@ -25,15 +25,15 @@ export function compactResponse(type: AskType, raw: unknown): Record<string, unk
   // Ask differently takes priority over feedback/normal/cancelled
   if (r.askDifferently) return { askDifferently: r.askDifferently };
 
-  // Feedback takes priority over normal/cancelled
-  if (r.feedbackText) return { feedbackText: r.feedbackText };
+  // Feedback — accumulate (don't early-return) so partial answers are included
+  if (r.feedbackText) out.feedbackText = r.feedbackText;
 
-  // Cancelled/dismissed
-  if (r.cancelled || r.dismissed) out.cancelled = true;
+  // Cancelled/dismissed (skip when feedback — user gave input, not a cancel)
+  if (!r.feedbackText && (r.cancelled || r.dismissed)) out.cancelled = true;
 
   // Type-specific answer extraction
   if (type === "confirm") {
-    if (!out.cancelled) out.answer = (r as ConfirmResult).confirmed;
+    if (!out.cancelled && !out.feedbackText) out.answer = (r as ConfirmResult).confirmed;
   } else if (type === "form") {
     const f = r as QuestionsResult;
     if (f.answers && Object.keys(f.answers).length > 0) out.answer = f.answers;

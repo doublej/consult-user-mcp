@@ -228,13 +228,50 @@ describe("compactResponse", () => {
     expect(r).toEqual({ snoozed: true, remainingSeconds: 300 });
   });
 
-  test("confirm: feedback", () => {
+  test("confirm: feedback (no partial answer)", () => {
     const r = compactResponse("confirm", {
       dialogType: "confirm", confirmed: false, cancelled: false,
       dismissed: false, answer: null, comment: null,
       feedbackText: "Need more context",
     });
     expect(r).toEqual({ feedbackText: "Need more context" });
+  });
+
+  test("pick: feedback with selection", () => {
+    const r = compactResponse("pick", {
+      dialogType: "choose", answer: "PostgreSQL", cancelled: false,
+      dismissed: false, description: null, comment: null,
+      feedbackText: "Why these options?",
+    });
+    expect(r).toEqual({ feedbackText: "Why these options?", answer: "PostgreSQL" });
+  });
+
+  test("text: feedback with input", () => {
+    const r = compactResponse("text", {
+      dialogType: "textInput", answer: "partial input", cancelled: false,
+      dismissed: false, comment: null,
+      feedbackText: "What format?",
+    });
+    expect(r).toEqual({ feedbackText: "What format?", answer: "partial input" });
+  });
+
+  test("form: feedback with partial answers", () => {
+    const r = compactResponse("form", {
+      dialogType: "questions", answers: { lang: "TypeScript" },
+      cancelled: false, dismissed: false, completedCount: 1,
+      feedbackText: "Need more options",
+    });
+    expect(r).toEqual({ feedbackText: "Need more options", answer: { lang: "TypeScript" }, completedCount: 1 });
+  });
+
+  test("tweak: feedback with values", () => {
+    const r = compactResponse("tweak", {
+      dialogType: "tweak", answers: { padding: 16 },
+      cancelled: false, dismissed: false,
+      action: "file", replayAnimations: false,
+      feedbackText: "Range too narrow",
+    });
+    expect(r).toEqual({ feedbackText: "Range too narrow", answer: { padding: 16 }, action: "file" });
   });
 
   test("pick: single selection", () => {

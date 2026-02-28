@@ -31,8 +31,8 @@ extension DialogManager {
                 result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: false, dismissed: false, comment: nil, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, askDifferently: nil, instruction: self.snoozeInstruction(minutes: minutes))
                 NSApp.stopModal()
             },
-            onFeedback: { feedback in
-                result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: false, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
+            onFeedback: { feedback, currentText in
+                result = TextInputResponse(dialogType: "textInput", answer: currentText.isEmpty ? nil : currentText, cancelled: false, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
                 NSApp.stopModal()
             },
             onAskDifferently: { type in

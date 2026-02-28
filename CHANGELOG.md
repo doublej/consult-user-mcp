@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.18.0] (macOS) - 2026-02-28
+
+### Added
+- Every dialog now has a Feedback button that opens a two-step issue reporter with optional screenshot
+
+### Fixed
+- Feedback responses now include any partial input so the agent has full context
+- Dialog text now adapts to window width instead of being capped at a fixed pixel size
+- Dialog windows now anchor to their position edge when resizing
+- Notify and preview dialogs now scroll long text instead of clipping it
+- Build script now generates the app icon automatically on fresh clones
+
 ## [1.17.0] (macOS) - 2026-02-25
 
 ### Added

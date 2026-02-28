@@ -3,6 +3,20 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.18.0",
+      "platform": "macos",
+      "date": "2026-02-28",
+      "highlight": "In-dialog feedback and GitHub issue reporting",
+      "changes": [
+        { "text": "Every dialog now has a Feedback button that opens a two-step issue reporter with optional screenshot", "type": "added", "scope": "cli", "featured": true, "starred": true },
+        { "text": "Feedback responses now include any partial input so the agent has full context", "type": "fixed", "scope": "server", "featured": true },
+        { "text": "Dialog text now adapts to window width instead of being capped at a fixed pixel size", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Dialog windows now anchor to their position edge when resizing", "type": "fixed", "scope": "cli" },
+        { "text": "Notify and preview dialogs now scroll long text instead of clipping it", "type": "fixed", "scope": "cli" },
+        { "text": "Build script now generates the app icon automatically on fresh clones", "type": "fixed", "scope": "app" }
+      ]
+    },
+    {
       "version": "1.17.0",
       "platform": "macos",
       "date": "2026-02-25",

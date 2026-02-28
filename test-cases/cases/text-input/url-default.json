@@ -1,0 +1,8 @@
+{
+  "body": "Enter the webhook endpoint URL for deployment notifications:",
+  "title": "Webhook URL",
+  "defaultValue": "https://example.com/webhooks/deploy-notify",
+  "hidden": false,
+  "position": "center",
+  "projectPath": "/Users/example/projects/deploy-bot"
+}

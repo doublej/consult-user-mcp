@@ -1,0 +1,12 @@
+{
+  "body": "Multiple authentication strategies are available for this API. The current setup uses session cookies but the mobile team has requested token-based auth. Consider that the API serves both the web dashboard (same-origin) and the mobile app (cross-origin). Which approach should we implement?",
+  "title": "Authentication Strategy",
+  "choices": [
+    "JWT tokens only",
+    "Session cookies + JWT hybrid",
+    "OAuth 2.0 with refresh tokens"
+  ],
+  "allowMultiple": false,
+  "position": "center",
+  "projectPath": "/Users/example/projects/api-gateway"
+}

@@ -1,0 +1,17 @@
+{
+  "body": "The tsconfig.json has both `moduleResolution: \"bundler\"` and `module: \"commonjs\"` which conflict. Which resolution strategy should we use?",
+  "title": "Config Conflict",
+  "choices": [
+    "Bundler (recommended)",
+    "Node16",
+    "Classic"
+  ],
+  "descriptions": [
+    "Modern bundler resolution for Vite/esbuild/webpack projects",
+    "Node.js native ESM resolution with package.json exports",
+    "Legacy TypeScript resolution — not recommended for new projects"
+  ],
+  "allowMultiple": false,
+  "position": "center",
+  "projectPath": "/Users/example/projects/web-app"
+}

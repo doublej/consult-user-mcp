@@ -1,0 +1,25 @@
+{
+  "body": "Quick setup:",
+  "title": "Init",
+  "questions": [
+    {
+      "id": "runtime",
+      "question": "Runtime?",
+      "options": [
+        { "label": "Node" },
+        { "label": "Bun" },
+        { "label": "Deno" }
+      ],
+      "type": "choice",
+      "multiSelect": false
+    },
+    {
+      "id": "name",
+      "question": "Project name?",
+      "type": "text",
+      "placeholder": "my-project"
+    }
+  ],
+  "mode": "wizard",
+  "position": "center"
+}

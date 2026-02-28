@@ -1,0 +1,12 @@
+{
+  "body": "3 merge conflicts found in `src/components/Dialog.tsx`. The incoming branch (feature/dark-mode) and the current branch (main) both modified the same sections. How should we resolve?",
+  "title": "Merge Conflicts",
+  "choices": [
+    "Keep ours",
+    "Keep theirs",
+    "Manual merge"
+  ],
+  "allowMultiple": false,
+  "position": "center",
+  "projectPath": "/Users/example/projects/ui-kit"
+}

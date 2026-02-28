@@ -1,0 +1,7 @@
+{
+  "body": "Pick:",
+  "title": "Choose",
+  "choices": ["A", "B", "C"],
+  "allowMultiple": false,
+  "position": "center"
+}

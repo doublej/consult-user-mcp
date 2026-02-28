@@ -1,0 +1,8 @@
+{
+  "body": "The `ANTHROPIC_API_KEY` environment variable is not set. Enter your API key to continue (starts with `sk-ant-`):",
+  "title": "API Key Required",
+  "defaultValue": "",
+  "hidden": true,
+  "position": "center",
+  "projectPath": "/Users/example/projects/ai-agent"
+}

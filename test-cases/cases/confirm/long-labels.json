@@ -1,0 +1,8 @@
+{
+  "body": "Unused dependencies detected: `@types/lodash`, `chalk`, `ora`, `execa`. Remove them?",
+  "title": "Cleanup",
+  "confirmLabel": "Remove all unused dependencies",
+  "cancelLabel": "Keep everything as-is",
+  "position": "center",
+  "projectPath": "/Users/example/projects/cli-tool"
+}

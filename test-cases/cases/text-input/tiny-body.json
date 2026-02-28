@@ -1,0 +1,8 @@
+{
+  "body": "Branch name:",
+  "title": "New Branch",
+  "defaultValue": "",
+  "hidden": false,
+  "position": "center",
+  "projectPath": "/Users/example/projects/my-app"
+}

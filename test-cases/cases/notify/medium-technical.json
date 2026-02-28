@@ -1,0 +1,6 @@
+{
+  "body": "Deployment to production completed successfully (3 services updated, 0 rollbacks). Average response time: 142ms.",
+  "title": "Deploy Complete",
+  "sound": true,
+  "projectPath": "/Users/example/projects/platform"
+}

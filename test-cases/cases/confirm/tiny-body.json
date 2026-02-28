@@ -1,0 +1,8 @@
+{
+  "body": "Continue?",
+  "title": "Confirm",
+  "confirmLabel": "Yes",
+  "cancelLabel": "No",
+  "position": "center",
+  "projectPath": "/Users/example/projects/my-app"
+}

@@ -1,0 +1,8 @@
+{
+  "body": "Pre-commit hook fails on pre-existing issues (file length: panes.ts exceeds 150 lines). Skip hooks and commit anyway?",
+  "title": "Confirmation",
+  "confirmLabel": "Skip hooks",
+  "cancelLabel": "Fix first",
+  "position": "center",
+  "projectPath": "/Users/example/projects/the-ultimate-music-quiz"
+}

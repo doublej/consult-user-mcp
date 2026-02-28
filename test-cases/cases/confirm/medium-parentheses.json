@@ -1,0 +1,8 @@
+{
+  "body": "Found 3 breaking changes in the API schema (GET /users/{id}, POST /auth/login, DELETE /sessions). Deploy anyway?",
+  "title": "Breaking Changes Detected",
+  "confirmLabel": "Deploy",
+  "cancelLabel": "Abort",
+  "position": "center",
+  "projectPath": "/Users/example/projects/backend-api"
+}

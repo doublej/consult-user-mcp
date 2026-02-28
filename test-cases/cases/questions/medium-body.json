@@ -1,0 +1,38 @@
+{
+  "body": "Configure the error monitoring integration. These settings determine how uncaught exceptions and rejected promises are reported to the dashboard.",
+  "title": "Error Monitoring Setup",
+  "questions": [
+    {
+      "id": "provider",
+      "question": "Which error tracking provider?",
+      "options": [
+        { "label": "Sentry", "description": "Full-featured with session replay" },
+        { "label": "Bugsnag", "description": "Lightweight, good mobile support" },
+        { "label": "Datadog", "description": "Best if already using Datadog APM" }
+      ],
+      "type": "choice",
+      "multiSelect": false
+    },
+    {
+      "id": "dsn",
+      "question": "Enter your DSN or API key:",
+      "type": "text",
+      "placeholder": "https://abc123@sentry.io/456",
+      "hidden": false
+    },
+    {
+      "id": "environments",
+      "question": "Which environments should report errors?",
+      "options": [
+        { "label": "Production only" },
+        { "label": "Production + Staging" },
+        { "label": "All environments" }
+      ],
+      "type": "choice",
+      "multiSelect": false
+    }
+  ],
+  "mode": "accordion",
+  "position": "center",
+  "projectPath": "/Users/example/projects/web-dashboard"
+}

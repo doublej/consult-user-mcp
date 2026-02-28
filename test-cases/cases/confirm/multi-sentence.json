@@ -1,0 +1,8 @@
+{
+  "body": "The database migration will add 3 new columns to the `users` table and drop the `legacy_auth` table. This operation cannot be reversed. Estimated downtime: 2-5 minutes.",
+  "title": "Run Migration",
+  "confirmLabel": "Migrate",
+  "cancelLabel": "Cancel",
+  "position": "center",
+  "projectPath": "/Users/example/projects/saas-platform"
+}

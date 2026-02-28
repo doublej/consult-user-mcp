@@ -1,0 +1,8 @@
+{
+  "body": "CI pipeline failed: https://github.com/anthropics/consult-user-mcp/actions/runs/12345678901/job/98765432109 — retry the failed job?",
+  "title": "CI Failure",
+  "confirmLabel": "Retry",
+  "cancelLabel": "Skip",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

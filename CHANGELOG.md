@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [1.18.2] (macOS) - 2026-03-01
+## [1.19.0] (macOS) - 2026-03-01
 
 ### Added
 - Choose and form dialogs now include an "Other" option so users can type a custom answer not in the predefined list

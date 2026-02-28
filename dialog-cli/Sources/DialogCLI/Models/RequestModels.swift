@@ -26,8 +26,21 @@ struct ChooseRequest: Codable {
     let choices: [String]
     let descriptions: [String]?
     let allowMultiple: Bool
+    let allowOther: Bool
     let defaultSelection: String?
     let position: DialogPosition?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        body = try container.decode(String.self, forKey: .body)
+        title = try container.decodeIfPresent(String.self, forKey: .title)
+        choices = try container.decode([String].self, forKey: .choices)
+        descriptions = try container.decodeIfPresent([String].self, forKey: .descriptions)
+        allowMultiple = try container.decodeIfPresent(Bool.self, forKey: .allowMultiple) ?? false
+        allowOther = try container.decodeIfPresent(Bool.self, forKey: .allowOther) ?? true
+        defaultSelection = try container.decodeIfPresent(String.self, forKey: .defaultSelection)
+        position = try container.decodeIfPresent(DialogPosition.self, forKey: .position)
+    }
 }
 
 struct TextInputRequest: Codable {

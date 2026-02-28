@@ -1,0 +1,13 @@
+{
+  "body": "Choose a deployment environment:",
+  "title": "Environment",
+  "choices": [
+    "Production",
+    "Staging",
+    "Development"
+  ],
+  "allowMultiple": false,
+  "allowOther": false,
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

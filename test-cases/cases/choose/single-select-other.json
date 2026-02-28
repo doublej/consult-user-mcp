@@ -1,0 +1,18 @@
+{
+  "body": "Which database should we use?",
+  "title": "Database Selection",
+  "choices": [
+    "PostgreSQL",
+    "MySQL",
+    "SQLite"
+  ],
+  "descriptions": [
+    "Best for complex queries",
+    "Widely supported",
+    "Zero config"
+  ],
+  "allowMultiple": false,
+  "allowOther": true,
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

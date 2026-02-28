@@ -32,6 +32,8 @@ struct QuestionSection: View {
     @Binding var answer: QuestionAnswer
     @Binding var textValue: String
     @Binding var focusedIndex: Int
+    @Binding var otherSelected: Bool
+    @Binding var otherText: String
 
     private var selectedIndices: Set<Int> {
         if case .choices(let set) = answer { return set }
@@ -73,15 +75,36 @@ struct QuestionSection: View {
                         .frame(minHeight: 48)
                         .id(index)
                     }
+                    if question.allowOther {
+                        OtherChoiceCard(
+                            isSelected: otherSelected,
+                            isMultiSelect: question.multiSelect,
+                            text: $otherText,
+                            onTap: { toggleOther() }
+                        )
+                        .id(question.options.count)
+                    }
                 }
             }
         }
     }
 
     private func toggleSelection(at index: Int) {
+        if !question.multiSelect {
+            otherSelected = false
+        }
         var current = selectedIndices
         current.toggle(index, multiSelect: question.multiSelect)
         answer = .choices(current)
+    }
+
+    private func toggleOther() {
+        if question.multiSelect {
+            otherSelected.toggle()
+        } else {
+            answer = .choices([])
+            otherSelected = true
+        }
     }
 }
 
@@ -91,21 +114,30 @@ struct SwiftUIWizardDialog: View {
     let title: String
     let bodyText: String?
     let questions: [QuestionItem]
-    let onComplete: ([String: QuestionAnswer]) -> Void
+    let onComplete: ([String: QuestionAnswer], [String: Bool], [String: String]) -> Void
     let onCancel: () -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String, [String: QuestionAnswer]) -> Void
+    let onFeedback: (String, [String: QuestionAnswer], [String: Bool], [String: String]) -> Void
     let onAskDifferently: (String) -> Void
 
     @State private var currentIndex = 0
     @State private var answers: [String: QuestionAnswer] = [:]
     @State private var focusedOptionIndex: Int = 0
     @State private var textInputs: [String: String] = [:]
+    @State private var otherSelections: [String: Bool] = [:]
+    @State private var otherTexts: [String: String] = [:]
 
     private var currentQuestion: QuestionItem { questions[currentIndex] }
     private var currentAnswer: QuestionAnswer { answers[currentQuestion.id] ?? (currentQuestion.type == .text ? .text("") : .choices([])) }
     private var isFirst: Bool { currentIndex == 0 }
     private var isLast: Bool { currentIndex == questions.count - 1 }
+
+    private var currentHasValidAnswer: Bool {
+        if !currentAnswer.isEmpty { return true }
+        let hasOther = otherSelections[currentQuestion.id] == true
+        let other = otherTexts[currentQuestion.id] ?? ""
+        return hasOther && !other.isEmpty
+    }
 
     var body: some View {
         DialogContainer(
@@ -145,7 +177,15 @@ struct SwiftUIWizardDialog: View {
                                 get: { textInputs[currentQuestion.id] ?? "" },
                                 set: { textInputs[currentQuestion.id] = $0 }
                             ),
-                            focusedIndex: $focusedOptionIndex
+                            focusedIndex: $focusedOptionIndex,
+                            otherSelected: Binding(
+                                get: { otherSelections[currentQuestion.id] ?? false },
+                                set: { otherSelections[currentQuestion.id] = $0 }
+                            ),
+                            otherText: Binding(
+                                get: { otherTexts[currentQuestion.id] ?? "" },
+                                set: { otherTexts[currentQuestion.id] = $0 }
+                            )
                         )
                         .padding(.horizontal, 20)
                         .padding(.top, 6)
@@ -164,7 +204,7 @@ struct SwiftUIWizardDialog: View {
                         expandedTool: expandedTool,
                         currentDialogType: "form-wizard",
                         onSnooze: onSnooze,
-                        onFeedback: { feedback in onFeedback(feedback, answers) },
+                        onFeedback: { feedback in onFeedback(feedback, answers, otherSelections, otherTexts) },
                         onAskDifferently: onAskDifferently
                     )
 
@@ -185,12 +225,12 @@ struct SwiftUIWizardDialog: View {
                             }
 
                             if isLast {
-                                FocusableButton(title: "Done", isPrimary: true, isDisabled: currentAnswer.isEmpty, showReturnHint: true, action: {
-                                    onComplete(answers)
+                                FocusableButton(title: "Done", isPrimary: true, isDisabled: !currentHasValidAnswer, showReturnHint: true, action: {
+                                    onComplete(answers, otherSelections, otherTexts)
                                 })
                                 .frame(height: 48)
                             } else {
-                                FocusableButton(title: "Next", isPrimary: true, isDisabled: currentAnswer.isEmpty, showReturnHint: true, action: goNext)
+                                FocusableButton(title: "Next", isPrimary: true, isDisabled: !currentHasValidAnswer, showReturnHint: true, action: goNext)
                                     .frame(height: 48)
                             }
                         }
@@ -216,12 +256,12 @@ struct SwiftUIWizardDialog: View {
             onCancel()
             return true
         case KeyCode.returnKey:
-            if !currentAnswer.isEmpty {
-                if isLast { onComplete(answers) } else { goNext() }
+            if currentHasValidAnswer {
+                if isLast { onComplete(answers, otherSelections, otherTexts) } else { goNext() }
             }
             return true
         case KeyCode.rightArrow:
-            if !isLast && !currentAnswer.isEmpty { goNext() }
+            if !isLast && currentHasValidAnswer { goNext() }
             return true
         case KeyCode.leftArrow:
             if !isFirst { goBack() }

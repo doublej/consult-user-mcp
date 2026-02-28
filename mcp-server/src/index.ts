@@ -69,6 +69,7 @@ const questionSchema = z.object({
   options: z.array(z.string().min(1).max(100)).min(2).max(10).optional(),
   descriptions: z.array(z.string().max(200)).optional(),
   multi: z.boolean().default(false),
+  other: z.boolean().default(true),
   placeholder: z.string().max(200).optional(),
   hidden: z.boolean().default(false),
 }).superRefine((data, ctx) => {
@@ -90,6 +91,7 @@ const askSchema = z.object({
   // pick
   choices: z.array(z.string().min(1).max(100)).min(2).max(20).optional(),
   multi: z.boolean().default(false),
+  other: z.boolean().default(true),
   descriptions: z.array(z.string().max(200)).optional(),
   default: z.string().optional(),
   // text
@@ -130,7 +132,7 @@ server.registerTool("ask", {
       validateNoAllOfAbove(p.choices);
       raw = await tracked(provider.choose({
         body, title: p.title, choices: p.choices, descriptions: p.descriptions,
-        allowMultiple: p.multi, defaultSelection: p.default,
+        allowMultiple: p.multi, allowOther: p.other, defaultSelection: p.default,
         position, projectPath,
       }), extra);
       break;
@@ -155,6 +157,7 @@ server.registerTool("ask", {
           type: q.type,
           options: (q.options ?? []).map((label, i) => ({ label, description: q.descriptions?.[i] })),
           multiSelect: q.multi,
+          allowOther: q.type === "choice" ? q.other : undefined,
           placeholder: q.placeholder,
           hidden: q.hidden,
         })),

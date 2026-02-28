@@ -1,0 +1,57 @@
+{
+  "body": "Configure your new project.",
+  "title": "Project Setup",
+  "questions": [
+    {
+      "id": "language",
+      "question": "What programming language?",
+      "options": [
+        {
+          "label": "TypeScript",
+          "description": "Strongly typed JavaScript"
+        },
+        {
+          "label": "Python",
+          "description": "Dynamic scripting language"
+        },
+        {
+          "label": "Go",
+          "description": "Fast compiled language"
+        }
+      ],
+      "type": "choice",
+      "multiSelect": false,
+      "allowOther": true
+    },
+    {
+      "id": "features",
+      "question": "Which features do you need?",
+      "options": [
+        {
+          "label": "Auth",
+          "description": "Authentication and authorization"
+        },
+        {
+          "label": "Database",
+          "description": "Data persistence layer"
+        },
+        {
+          "label": "CI/CD",
+          "description": "Continuous integration pipeline"
+        }
+      ],
+      "type": "choice",
+      "multiSelect": true,
+      "allowOther": true
+    },
+    {
+      "id": "name",
+      "question": "Project name?",
+      "type": "text",
+      "placeholder": "my-project"
+    }
+  ],
+  "mode": "wizard",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

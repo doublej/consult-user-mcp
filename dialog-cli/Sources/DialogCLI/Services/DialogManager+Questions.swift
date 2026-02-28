@@ -41,32 +41,44 @@ extension DialogManager {
 
         var result: QuestionsResponse?
 
-        func buildResponse(answers: [String: QuestionAnswer], cancelled: Bool, dismissed: Bool) -> QuestionsResponse {
+        func buildResponse(answers: [String: QuestionAnswer], otherSelections: [String: Bool], otherTexts: [String: String], cancelled: Bool, dismissed: Bool) -> QuestionsResponse {
             var responseAnswers: [String: StringOrStrings] = [:]
             var completedCount = 0
 
             for question in request.questions {
+                let hasOther = otherSelections[question.id] == true
+                let otherText = otherTexts[question.id] ?? ""
+                let hasValidOther = hasOther && !otherText.isEmpty
+
                 if let answer = answers[question.id], !answer.isEmpty {
                     completedCount += 1
                     switch answer {
                     case .choices(let indices):
-                        let labels = indices.sorted().map { question.options[$0].label }
+                        var labels = indices.sorted().map { question.options[$0].label }
+                        if hasValidOther {
+                            labels.append(otherText)
+                        }
                         if question.multiSelect {
                             responseAnswers[question.id] = .multiple(labels)
+                        } else if hasValidOther {
+                            responseAnswers[question.id] = .single(otherText)
                         } else if let first = labels.first {
                             responseAnswers[question.id] = .single(first)
                         }
                     case .text(let str):
                         responseAnswers[question.id] = .single(str)
                     }
+                } else if hasValidOther {
+                    completedCount += 1
+                    responseAnswers[question.id] = .single(otherText)
                 }
             }
 
             return makeQuestionsResponse(answers: responseAnswers, cancelled: cancelled, dismissed: dismissed, completedCount: completedCount)
         }
 
-        let onComplete: ([String: QuestionAnswer]) -> Void = { answers in
-            result = buildResponse(answers: answers, cancelled: false, dismissed: false)
+        let onComplete: ([String: QuestionAnswer], [String: Bool], [String: String]) -> Void = { answers, otherSelections, otherTexts in
+            result = buildResponse(answers: answers, otherSelections: otherSelections, otherTexts: otherTexts, cancelled: false, dismissed: false)
             NSApp.stopModal()
         }
 
@@ -81,8 +93,8 @@ extension DialogManager {
             NSApp.stopModal()
         }
 
-        let onFeedback: (String, [String: QuestionAnswer]) -> Void = { feedback, currentAnswers in
-            let response = buildResponse(answers: currentAnswers, cancelled: false, dismissed: false)
+        let onFeedback: (String, [String: QuestionAnswer], [String: Bool], [String: String]) -> Void = { feedback, currentAnswers, otherSelections, otherTexts in
+            let response = buildResponse(answers: currentAnswers, otherSelections: otherSelections, otherTexts: otherTexts, cancelled: false, dismissed: false)
             result = self.makeQuestionsResponse(answers: response.answers, completedCount: response.completedCount, feedbackText: feedback)
             NSApp.stopModal()
         }

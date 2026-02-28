@@ -1,0 +1,20 @@
+{
+  "body": "Select one or more features to enable:",
+  "title": "Feature Selection",
+  "choices": [
+    "Authentication",
+    "Database",
+    "API Endpoints",
+    "Logging"
+  ],
+  "descriptions": [
+    "User login and session management",
+    "PostgreSQL with connection pooling",
+    "REST endpoints with OpenAPI docs",
+    "Structured logging with log levels"
+  ],
+  "allowMultiple": true,
+  "allowOther": true,
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

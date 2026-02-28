@@ -21,7 +21,8 @@ public record ChooseRequest(
     string[]? Descriptions,
     bool AllowMultiple,
     string? DefaultSelection,
-    DialogPosition Position
+    DialogPosition Position,
+    bool AllowOther = true
 );
 
 public record TextInputRequest(

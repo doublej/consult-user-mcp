@@ -59,14 +59,21 @@ extension DialogManager {
             choices: request.choices,
             descriptions: normalizedDescriptions,
             allowMultiple: request.allowMultiple,
+            allowOther: request.allowOther,
             defaultSelection: request.defaultSelection,
-            onComplete: { selectedIndices in
-                if selectedIndices.isEmpty {
+            onComplete: { selectedIndices, otherText in
+                if selectedIndices.isEmpty && otherText == nil {
                     result = self.makeChoiceResponse(cancelled: true)
                 } else if request.allowMultiple {
-                    let selected = selectedIndices.sorted().map { request.choices[$0] }
-                    let descs = selectedIndices.sorted().map { request.descriptions?[safe: $0] }
+                    var selected = selectedIndices.sorted().map { request.choices[$0] }
+                    var descs: [String?] = selectedIndices.sorted().map { request.descriptions?[safe: $0] }
+                    if let other = otherText, !other.isEmpty {
+                        selected.append(other)
+                        descs.append(nil)
+                    }
                     result = self.makeChoiceResponse(answer: .multiple(selected), descriptions: descs)
+                } else if let other = otherText, !other.isEmpty {
+                    result = self.makeChoiceResponse(answer: .single(other))
                 } else if let idx = selectedIndices.first {
                     result = self.makeChoiceResponse(answer: .single(request.choices[idx]), description: request.descriptions?[safe: idx])
                 }
@@ -81,21 +88,28 @@ extension DialogManager {
                 result = self.makeChoiceResponse(snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, instruction: self.snoozeInstruction(minutes: minutes))
                 NSApp.stopModal()
             },
-            onFeedback: { feedback, selectedIndices in
-                // Build answer from current selections
+            onFeedback: { feedback, selectedIndices, otherText in
                 let answer: StringOrStrings?
                 let desc: String?
                 let descs: [String?]?
-                if selectedIndices.isEmpty {
+                if selectedIndices.isEmpty && otherText == nil {
                     answer = nil
                     desc = nil
                     descs = nil
                 } else if request.allowMultiple {
-                    let selected = selectedIndices.sorted().map { request.choices[$0] }
-                    let selectedDescs = selectedIndices.sorted().map { request.descriptions?[safe: $0] }
+                    var selected = selectedIndices.sorted().map { request.choices[$0] }
+                    var selectedDescs: [String?] = selectedIndices.sorted().map { request.descriptions?[safe: $0] }
+                    if let other = otherText, !other.isEmpty {
+                        selected.append(other)
+                        selectedDescs.append(nil)
+                    }
                     answer = .multiple(selected)
                     desc = nil
                     descs = selectedDescs
+                } else if let other = otherText, !other.isEmpty {
+                    answer = .single(other)
+                    desc = nil
+                    descs = nil
                 } else if let idx = selectedIndices.first {
                     answer = .single(request.choices[idx])
                     desc = request.descriptions?[safe: idx]

@@ -15,10 +15,14 @@ public class WizardDialog : DialogBase
     private readonly QuestionsRequest _request;
     private readonly Dictionary<string, HashSet<int>> _choiceAnswers = new();
     private readonly Dictionary<string, string> _textAnswers = new();
+    private readonly Dictionary<string, bool> _otherSelections = new();
+    private readonly Dictionary<string, string> _otherTexts = new();
     private int _currentIndex;
     private int _focusedOptionIndex;
     private readonly List<Border> _optionCards = new();
     private TextBox? _textInput;
+    private Border? _otherCard;
+    private TextBox? _otherQuestionTextBox;
     private readonly StackPanel _contentPanel = new();
     private readonly TextBlock _progressText = new();
     private readonly StackPanel _progressBar = new();
@@ -70,6 +74,8 @@ public class WizardDialog : DialogBase
         _focusedOptionIndex = 0;
         _optionCards.Clear();
         _textInput = null;
+        _otherCard = null;
+        _otherQuestionTextBox = null;
 
         // Update progress bar
         _progressBar.Children.Clear();
@@ -227,6 +233,12 @@ public class WizardDialog : DialogBase
             _contentPanel.Children.Add(card);
         }
 
+        if (q.AllowOther)
+        {
+            _otherCard = CreateOtherOptionCard(q);
+            _contentPanel.Children.Add(_otherCard);
+        }
+
         // Hint text
         _contentPanel.Children.Add(new TextBlock
         {
@@ -237,7 +249,9 @@ public class WizardDialog : DialogBase
             Margin = new Thickness(0, 8, 0, 4),
         });
 
-        return selected.Count > 0;
+        var hasOtherAnswer = _otherSelections.GetValueOrDefault(q.Id, false)
+            && !string.IsNullOrEmpty(_otherTexts.GetValueOrDefault(q.Id, ""));
+        return selected.Count > 0 || hasOtherAnswer;
     }
 
     private void SaveTextAnswer(string questionId)
@@ -302,6 +316,28 @@ public class WizardDialog : DialogBase
                 _optionCards[i].Background = DialogTheme.CardBrush;
             }
         }
+
+        if (_otherCard != null)
+        {
+            var isOtherSel = _otherSelections.GetValueOrDefault(q.Id, false);
+            var isOtherFocused = _focusedOptionIndex == q.Options.Length;
+
+            if (isOtherSel)
+            {
+                _otherCard.BorderBrush = DialogTheme.AccentBrush;
+                _otherCard.Background = new SolidColorBrush(Color.FromArgb(30, 59, 130, 246));
+            }
+            else if (isOtherFocused)
+            {
+                _otherCard.BorderBrush = DialogTheme.FocusRingBrush;
+                _otherCard.Background = DialogTheme.CardBrush;
+            }
+            else
+            {
+                _otherCard.BorderBrush = DialogTheme.TransparentBrush;
+                _otherCard.Background = DialogTheme.CardBrush;
+            }
+        }
     }
 
     private void ToggleOption(string questionId, int index, bool multiSelect)
@@ -318,7 +354,109 @@ public class WizardDialog : DialogBase
         {
             set.Clear();
             set.Add(index);
+            _otherSelections[questionId] = false;
         }
+    }
+
+    private Border CreateOtherOptionCard(QuestionItem q)
+    {
+        var stack = new StackPanel { Margin = new Thickness(12, 8, 12, 8) };
+        stack.Children.Add(new TextBlock
+        {
+            Text = "Other",
+            FontSize = DialogTheme.BodyFontSize,
+            Foreground = DialogTheme.TextBrush,
+            FontWeight = FontWeights.SemiBold,
+        });
+
+        _otherQuestionTextBox = new TextBox
+        {
+            Text = _otherTexts.GetValueOrDefault(q.Id, ""),
+            FontSize = DialogTheme.BodyFontSize,
+            Foreground = DialogTheme.TextBrush,
+            Background = DialogTheme.CardBrush,
+            BorderBrush = DialogTheme.BorderBrush,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(8, 6, 8, 6),
+            CaretBrush = DialogTheme.TextBrush,
+            Margin = new Thickness(0, 6, 0, 0),
+        };
+
+        var placeholder = new TextBlock
+        {
+            Text = "Type your answer...",
+            Foreground = DialogTheme.SecondaryTextBrush,
+            FontSize = DialogTheme.BodyFontSize,
+            IsHitTestVisible = false,
+            Margin = new Thickness(10, 7, 0, 0),
+        };
+
+        var grid = new Grid();
+        grid.Children.Add(_otherQuestionTextBox);
+        grid.Children.Add(placeholder);
+
+        _otherQuestionTextBox.TextChanged += (_, _) =>
+        {
+            _otherTexts[q.Id] = _otherQuestionTextBox.Text;
+            placeholder.Visibility = string.IsNullOrEmpty(_otherQuestionTextBox.Text)
+                ? Visibility.Visible : Visibility.Collapsed;
+        };
+
+        _otherQuestionTextBox.GotFocus += (_, _) =>
+        {
+            if (!_otherSelections.GetValueOrDefault(q.Id, false))
+                ToggleOtherOption(q);
+        };
+
+        // Set initial placeholder visibility
+        placeholder.Visibility = string.IsNullOrEmpty(_otherQuestionTextBox.Text)
+            ? Visibility.Visible : Visibility.Collapsed;
+
+        stack.Children.Add(grid);
+
+        var card = new Border
+        {
+            Child = stack,
+            Background = DialogTheme.CardBrush,
+            CornerRadius = new CornerRadius(DialogTheme.CardCornerRadius),
+            BorderThickness = new Thickness(2),
+            BorderBrush = DialogTheme.TransparentBrush,
+            Margin = new Thickness(0, 0, 0, 6),
+            Cursor = Cursors.Hand,
+        };
+
+        card.MouseLeftButtonDown += (_, _) => ToggleOtherOption(q);
+        card.MouseEnter += (_, _) =>
+        {
+            if (!_otherSelections.GetValueOrDefault(q.Id, false))
+                card.Background = DialogTheme.CardHoverBrush;
+        };
+        card.MouseLeave += (_, _) =>
+        {
+            if (!_otherSelections.GetValueOrDefault(q.Id, false))
+                card.Background = DialogTheme.CardBrush;
+        };
+
+        return card;
+    }
+
+    private void ToggleOtherOption(QuestionItem q)
+    {
+        var currentlySelected = _otherSelections.GetValueOrDefault(q.Id, false);
+        if (q.MultiSelect)
+        {
+            _otherSelections[q.Id] = !currentlySelected;
+        }
+        else
+        {
+            if (_choiceAnswers.ContainsKey(q.Id))
+                _choiceAnswers[q.Id].Clear();
+            _otherSelections[q.Id] = true;
+        }
+        _focusedOptionIndex = q.Options.Length;
+        UpdateOptionVisuals();
+        if (_otherSelections[q.Id] && _otherQuestionTextBox != null)
+            _otherQuestionTextBox.Focus();
     }
 
     protected override void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
@@ -342,7 +480,18 @@ public class WizardDialog : DialogBase
             return;
         }
 
-        var hasAnswer = _choiceAnswers.ContainsKey(q.Id) && _choiceAnswers[q.Id].Count > 0;
+        // When the Other text box is focused, let most keys pass through
+        if (_otherQuestionTextBox != null && _otherQuestionTextBox.IsFocused
+            && e.Key != Key.Enter && e.Key != Key.Up && e.Key != Key.Down && e.Key != Key.Escape)
+        {
+            base.OnWindowPreviewKeyDown(sender, e);
+            return;
+        }
+
+        var hasChoiceAnswer = _choiceAnswers.ContainsKey(q.Id) && _choiceAnswers[q.Id].Count > 0;
+        var hasOtherAnswer = _otherSelections.GetValueOrDefault(q.Id, false)
+            && !string.IsNullOrEmpty(_otherTexts.GetValueOrDefault(q.Id, ""));
+        var hasAnswer = hasChoiceAnswer || hasOtherAnswer;
 
         switch (e.Key)
         {
@@ -357,15 +506,21 @@ public class WizardDialog : DialogBase
                 e.Handled = true;
                 return;
             case Key.Down:
-                _focusedOptionIndex = Math.Min(q.Options.Length - 1, _focusedOptionIndex + 1);
+                var maxIdx = q.AllowOther ? q.Options.Length : q.Options.Length - 1;
+                _focusedOptionIndex = Math.Min(maxIdx, _focusedOptionIndex + 1);
                 UpdateOptionVisuals();
                 e.Handled = true;
                 return;
             case Key.Space:
-                ToggleOption(q.Id, _focusedOptionIndex, q.MultiSelect);
-                UpdateOptionVisuals();
-                if (!q.MultiSelect)
-                    AutoAdvance();
+                if (_focusedOptionIndex == q.Options.Length && q.AllowOther)
+                    ToggleOtherOption(q);
+                else
+                {
+                    ToggleOption(q.Id, _focusedOptionIndex, q.MultiSelect);
+                    UpdateOptionVisuals();
+                    if (!q.MultiSelect)
+                        AutoAdvance();
+                }
                 e.Handled = true;
                 return;
             case Key.Left when _currentIndex > 0:
@@ -420,13 +575,35 @@ public class WizardDialog : DialogBase
                     response.Answers[q.Id] = new StringOrStrings(text);
                 }
             }
-            else if (_choiceAnswers.TryGetValue(q.Id, out var indices) && indices.Count > 0)
+            else
             {
-                completed++;
-                var labels = indices.OrderBy(i => i).Select(i => q.Options[i].Label).ToArray();
-                response.Answers[q.Id] = q.MultiSelect
-                    ? new StringOrStrings(labels)
-                    : new StringOrStrings(labels[0]);
+                var hasChoices = _choiceAnswers.TryGetValue(q.Id, out var indices) && indices.Count > 0;
+                var hasOther = _otherSelections.GetValueOrDefault(q.Id, false)
+                    && !string.IsNullOrEmpty(_otherTexts.GetValueOrDefault(q.Id, ""));
+
+                if (hasChoices || hasOther)
+                {
+                    completed++;
+                    var labels = hasChoices
+                        ? indices!.OrderBy(i => i).Select(i => q.Options[i].Label).ToList()
+                        : new List<string>();
+
+                    if (hasOther)
+                        labels.Add(_otherTexts[q.Id]);
+
+                    if (q.MultiSelect)
+                    {
+                        response.Answers[q.Id] = new StringOrStrings(labels.ToArray());
+                    }
+                    else if (hasOther && _otherSelections[q.Id])
+                    {
+                        response.Answers[q.Id] = new StringOrStrings(_otherTexts[q.Id]);
+                    }
+                    else
+                    {
+                        response.Answers[q.Id] = new StringOrStrings(labels[0]);
+                    }
+                }
             }
         }
 

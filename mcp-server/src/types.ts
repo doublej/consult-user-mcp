@@ -72,6 +72,7 @@ export interface ChooseOptions {
   choices: string[];
   descriptions?: string[];
   allowMultiple: boolean;
+  allowOther: boolean;
   defaultSelection?: string;
   position?: DialogPosition;
   projectPath: string;
@@ -113,6 +114,7 @@ export interface Question {
   type: "choice" | "text";
   options: { label: string; description?: string }[];
   multiSelect: boolean;
+  allowOther?: boolean;
   placeholder?: string;
   hidden?: boolean;
 }

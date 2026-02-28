@@ -16,6 +16,7 @@ struct QuestionItem: Codable {
     let type: QuestionType
     let options: [QuestionOption]
     let multiSelect: Bool
+    let allowOther: Bool
     let placeholder: String?
     let hidden: Bool
 
@@ -26,6 +27,7 @@ struct QuestionItem: Codable {
         type = try container.decodeIfPresent(QuestionType.self, forKey: .type) ?? .choice
         options = try container.decodeIfPresent([QuestionOption].self, forKey: .options) ?? []
         multiSelect = try container.decodeIfPresent(Bool.self, forKey: .multiSelect) ?? false
+        allowOther = try container.decodeIfPresent(Bool.self, forKey: .allowOther) ?? true
         placeholder = try container.decodeIfPresent(String.self, forKey: .placeholder)
         hidden = try container.decodeIfPresent(Bool.self, forKey: .hidden) ?? false
     }

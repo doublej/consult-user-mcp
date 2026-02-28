@@ -17,7 +17,8 @@ public record QuestionItem(
     QuestionType Type = QuestionType.Choice,
     QuestionOption[]? Options = null,
     bool MultiSelect = false,
-    string? Placeholder = null
+    string? Placeholder = null,
+    bool AllowOther = true
 )
 {
     // Ensure Options is never null for choice-type questions

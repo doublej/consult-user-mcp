@@ -1,4 +1,4 @@
-<!-- version: 2.10.0 -->
+<!-- version: 2.11.0 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
@@ -20,11 +20,13 @@ Three tools: `ask` (interactive dialogs), `notify` (fire-and-forget notification
 | Type | Purpose | Key params |
 |------|---------|-----------|
 | `confirm` | Yes/no decision | `yes`, `no` (custom labels) |
-| `pick` | Select from list | `choices`, `multi`, `descriptions`, `default` |
+| `pick` | Select from list | `choices`, `multi`, `descriptions`, `default`, `other` (default `true`) |
 | `text` | Free-form input | `hidden`, `default` |
-| `form` | Multi-question | `questions`, `mode` (`"wizard"` \| `"accordion"`). Questions support `type: "choice"` (default) or `"text"` |
+| `form` | Multi-question | `questions`, `mode` (`"wizard"` \| `"accordion"`). Questions support `type: "choice"` (default, `other` default `true`) or `"text"` |
 
 All types share: `body` (required), `title`, `position` (`"left"` \| `"center"` \| `"right"`), `project_path`.
+
+**"Other" option:** Pick dialogs and form choice questions include an "Other" option by default (`other: true`), allowing users to type a custom answer not in the predefined list. The custom text is returned as the `answer` value (never the literal "Other"). Set `other: false` for closed-ended questions where custom input doesn't make sense.
 
 ### notify — Notification
 
@@ -133,6 +135,9 @@ This is idempotent — safe to call multiple times. The script auto-reconnects o
 
 // Multi-select
 {"type": "pick", "body": "Select features:", "choices": ["Auth", "API", "UI"], "multi": true}
+
+// Closed-ended pick (no "Other" option)
+{"type": "pick", "body": "Deploy to which environment?", "choices": ["Production", "Staging", "Dev"], "other": false}
 
 // Password input
 {"type": "text", "body": "Enter API key:", "hidden": true}

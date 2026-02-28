@@ -3,6 +3,18 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.18.1",
+      "platform": "macos",
+      "date": "2026-03-01",
+      "highlight": "Text rendering fixes",
+      "changes": [
+        { "text": "Buttons with long labels now truncate cleanly instead of overflowing", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Choice card subtitles now wrap at the correct width", "type": "fixed", "scope": "cli" },
+        { "text": "Dialog body text now sizes correctly after text wrapping, preventing cut-off content", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Dialog header text no longer extends past the window edges", "type": "fixed", "scope": "cli" }
+      ]
+    },
+    {
       "version": "1.18.0",
       "platform": "macos",
       "date": "2026-02-28",

@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.18.1] (macOS) - 2026-03-01
+
+### Fixed
+- Buttons with long labels now truncate cleanly instead of overflowing
+- Choice card subtitles now wrap at the correct width
+- Dialog body text now sizes correctly after text wrapping, preventing cut-off content
+- Dialog header text no longer extends past the window edges
+
 ## [1.18.0] (macOS) - 2026-02-28
 
 ### Added

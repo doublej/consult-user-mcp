@@ -163,8 +163,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let sketchSubmenu = NSMenu()
         addDebugMenuItem(sketchSubmenu, title: "Propose (with blocks)", action: #selector(testSketchProposeBasic))
         addDebugMenuItem(sketchSubmenu, title: "Propose (empty)", action: #selector(testSketchProposeEmpty))
-        addDebugMenuItem(sketchSubmenu, title: "Describe Layout", action: #selector(testSketchDescribe))
-        addDebugMenuItem(sketchSubmenu, title: "Get Templates", action: #selector(testSketchTemplates))
         sketchItem.submenu = sketchSubmenu
         debugMenu.addItem(sketchItem)
 
@@ -440,16 +438,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func testSketchProposeEmpty() {
         guard let tc = loadSketchTestCase(name: "propose-empty") else { return }
-        runSketchCli(command: tc.command, json: tc.json)
-    }
-
-    @objc private func testSketchDescribe() {
-        guard let tc = loadSketchTestCase(name: "describe-basic") else { return }
-        runSketchCli(command: tc.command, json: tc.json)
-    }
-
-    @objc private func testSketchTemplates() {
-        guard let tc = loadSketchTestCase(name: "templates") else { return }
         runSketchCli(command: tc.command, json: tc.json)
     }
 

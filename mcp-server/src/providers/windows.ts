@@ -21,9 +21,6 @@ import type {
   TweakResult,
   ProposeLayoutOptions,
   ProposeLayoutResult,
-  DescribeLayoutOptions,
-  DescribeLayoutResult,
-  GetLayoutTemplatesResult,
 } from "../types.js";
 
 const execFileAsync = promisify(execFile);
@@ -147,11 +144,4 @@ export class WindowsDialogProvider implements DialogProvider {
     throw new Error("Sketch layout editor is not yet supported on Windows");
   }
 
-  async describeLayout(_opts: DescribeLayoutOptions): Promise<DescribeLayoutResult> {
-    throw new Error("Sketch layout tools are not yet supported on Windows");
-  }
-
-  async getLayoutTemplates(): Promise<GetLayoutTemplatesResult> {
-    throw new Error("Sketch layout tools are not yet supported on Windows");
-  }
 }

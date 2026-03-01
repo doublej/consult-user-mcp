@@ -15,9 +15,6 @@ import type {
   TweakResult,
   ProposeLayoutOptions,
   ProposeLayoutResult,
-  DescribeLayoutOptions,
-  DescribeLayoutResult,
-  GetLayoutTemplatesResult,
 } from "../types.js";
 
 /**
@@ -78,14 +75,4 @@ export interface DialogProvider {
    * Blocks until the user accepts or cancels.
    */
   proposeLayout(opts: ProposeLayoutOptions, signal?: AbortSignal): Promise<ProposeLayoutResult>;
-
-  /**
-   * Convert a layout to text and ASCII art (non-interactive).
-   */
-  describeLayout(opts: DescribeLayoutOptions): Promise<DescribeLayoutResult>;
-
-  /**
-   * Return the list of built-in layout templates.
-   */
-  getLayoutTemplates(): Promise<GetLayoutTemplatesResult>;
 }

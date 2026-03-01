@@ -204,32 +204,6 @@ export interface ProposeLayoutResult {
   changes: string[] | null;
 }
 
-export interface DescribeLayoutOptions {
-  columns: number;
-  rows: number;
-  blocks?: SketchBlock[];
-  structure?: SketchLayoutNode;
-  detail?: "brief" | "full";
-}
-
-export interface DescribeLayoutResult {
-  summary: string;
-  ascii: string;
-}
-
-export interface SketchDensityTemplate {
-  name: string;
-  width: number;
-  height: number;
-  density: string;
-  description: string;
-  maxBlocks: number;
-}
-
-export interface GetLayoutTemplatesResult {
-  templates: SketchDensityTemplate[];
-}
-
 // Tweak parameter definition
 export interface TweakParameter {
   id: string;

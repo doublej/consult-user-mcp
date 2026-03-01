@@ -415,38 +415,6 @@ server.registerTool("propose_layout", {
   }
 });
 
-server.registerTool("describe_layout", {
-  description: "Convert a layout to human-readable text and ASCII art without opening UI. Accepts either explicit grid blocks or a semantic structure tree.",
-  inputSchema: z.object({
-    columns: z.number().int().min(3).max(20).describe("Grid columns"),
-    rows: z.number().int().min(3).max(20).describe("Grid rows"),
-    blocks: z.array(blockSchema).optional().describe("Blocks with grid coordinates (alternative to structure)"),
-    structure: layoutNodeSchema.optional().describe("Semantic layout tree (alternative to blocks)"),
-    detail: z.enum(["brief", "full"]).default("full").describe("Level of detail"),
-    project_path: z.string().optional(),
-  }).refine(d => d.blocks?.length || d.structure, {
-    message: "Provide either blocks or structure",
-  }),
-}, async (p) => {
-  if (p.project_path) cachedProjectPath = p.project_path;
-  const r = await provider.describeLayout({
-    columns: p.columns,
-    rows: p.rows,
-    blocks: p.blocks,
-    structure: p.structure as SketchLayoutNode,
-    detail: p.detail,
-  });
-  return { content: [{ type: "text", text: JSON.stringify(r) }] };
-});
-
-server.registerTool("get_layout_templates", {
-  description: "Returns predefined grid templates so you can pick the appropriate density for a layout before calling propose_layout.",
-  inputSchema: z.object({}),
-}, async () => {
-  const r = await provider.getLayoutTemplates();
-  return { content: [{ type: "text", text: JSON.stringify(r) }] };
-});
-
 async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);

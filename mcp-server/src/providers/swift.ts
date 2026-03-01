@@ -21,9 +21,6 @@ import type {
   TweakResult,
   ProposeLayoutOptions,
   ProposeLayoutResult,
-  DescribeLayoutOptions,
-  DescribeLayoutResult,
-  GetLayoutTemplatesResult,
 } from "../types.js";
 
 const execFileAsync = promisify(execFile);
@@ -213,11 +210,4 @@ export class SwiftDialogProvider implements DialogProvider {
     return this.execSketchCli<ProposeLayoutResult>("propose", opts, signal);
   }
 
-  async describeLayout(opts: DescribeLayoutOptions): Promise<DescribeLayoutResult> {
-    return this.execSketchCli<DescribeLayoutResult>("describe", opts);
-  }
-
-  async getLayoutTemplates(): Promise<GetLayoutTemplatesResult> {
-    return this.execSketchCli<GetLayoutTemplatesResult>("templates");
-  }
 }

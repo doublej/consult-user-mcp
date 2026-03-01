@@ -58,3 +58,7 @@ CLAUDE.md
 # Confidential / local-only
 local/
 .repomap.tags.cache.v1/
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db

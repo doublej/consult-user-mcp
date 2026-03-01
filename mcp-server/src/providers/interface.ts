@@ -13,6 +13,11 @@ import type {
   QuestionsResult,
   TweakOptions,
   TweakResult,
+  ProposeLayoutOptions,
+  ProposeLayoutResult,
+  DescribeLayoutOptions,
+  DescribeLayoutResult,
+  GetLayoutTemplatesResult,
 } from "../types.js";
 
 /**
@@ -67,4 +72,20 @@ export interface DialogProvider {
    * Display a tweak pane for real-time numeric value adjustment.
    */
   tweak(opts: TweakOptions): Promise<TweakResult>;
+
+  /**
+   * Open the interactive grid layout editor.
+   * Blocks until the user accepts or cancels.
+   */
+  proposeLayout(opts: ProposeLayoutOptions, signal?: AbortSignal): Promise<ProposeLayoutResult>;
+
+  /**
+   * Convert a layout to text and ASCII art (non-interactive).
+   */
+  describeLayout(opts: DescribeLayoutOptions): Promise<DescribeLayoutResult>;
+
+  /**
+   * Return the list of built-in layout templates.
+   */
+  getLayoutTemplates(): Promise<GetLayoutTemplatesResult>;
 }

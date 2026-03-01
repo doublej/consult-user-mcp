@@ -1,0 +1,13 @@
+{
+  "_sketchCommand": "propose",
+  "width": 12,
+  "height": 8,
+  "title": "Dashboard Layout",
+  "description": "Sketch a simple dashboard layout",
+  "blocks": [
+    { "label": "Header", "x": 0, "y": 0, "w": 12, "h": 1 },
+    { "label": "Sidebar", "x": 0, "y": 1, "w": 3, "h": 6 },
+    { "label": "Main", "x": 3, "y": 1, "w": 9, "h": 6 },
+    { "label": "Footer", "x": 0, "y": 7, "w": 12, "h": 1 }
+  ]
+}

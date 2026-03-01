@@ -9,6 +9,9 @@ APP_PATH="/Applications/Consult User MCP.app"
 echo "Building dialog-cli..."
 cd "$ROOT/dialog-cli" && swift build
 
+echo "Building sketch-cli..."
+cd "$ROOT/sketch-cli" && swift build
+
 echo "Building mcp-server..."
 cd "$ROOT/mcp-server" && bun run build:ts
 
@@ -20,6 +23,8 @@ if [ -d "$APP_PATH" ]; then
     echo "Installing to $APP_PATH..."
     cp "$ROOT/macos-app/.build/debug/ConsultUserMCP" "$APP_PATH/Contents/MacOS/ConsultUserMCP"
     cp "$ROOT/dialog-cli/.build/debug/DialogCLI" "$APP_PATH/Contents/Resources/dialog-cli/dialog-cli"
+    mkdir -p "$APP_PATH/Contents/Resources/sketch-cli"
+    cp "$ROOT/sketch-cli/.build/debug/SketchCLI" "$APP_PATH/Contents/Resources/sketch-cli/sketch-cli"
     cp -r "$ROOT/mcp-server/dist/"* "$APP_PATH/Contents/Resources/mcp-server/dist/"
     echo "Done. Restart the app to pick up changes."
 else

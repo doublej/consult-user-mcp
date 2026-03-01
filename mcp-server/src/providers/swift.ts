@@ -19,6 +19,11 @@ import type {
   QuestionsResult,
   TweakOptions,
   TweakResult,
+  ProposeLayoutOptions,
+  ProposeLayoutResult,
+  DescribeLayoutOptions,
+  DescribeLayoutResult,
+  GetLayoutTemplatesResult,
 } from "../types.js";
 
 const execFileAsync = promisify(execFile);
@@ -58,6 +63,37 @@ function getCliPath(): string {
 }
 
 let cliPath: string | null = null;
+
+function findSketchCli(): string | null {
+  // App bundle: Resources/mcp-server/dist/providers -> Resources/sketch-cli/sketch-cli
+  const appBundlePath = join(__dirname, "..", "..", "..", "sketch-cli", "sketch-cli");
+  if (existsSync(appBundlePath)) return appBundlePath;
+
+  // Dev: mcp-server/dist/providers -> sketch-cli/.build/{debug,release}/SketchCLI
+  const devDebugPath = join(__dirname, "..", "..", "..", "sketch-cli", ".build", "debug", "SketchCLI");
+  if (existsSync(devDebugPath)) return devDebugPath;
+
+  const devReleasePath = join(__dirname, "..", "..", "..", "sketch-cli", ".build", "release", "SketchCLI");
+  if (existsSync(devReleasePath)) return devReleasePath;
+
+  return null;
+}
+
+function getSketchCliPath(): string {
+  const path = findSketchCli();
+  if (!path) {
+    const appBundlePath = join(__dirname, "..", "..", "..", "sketch-cli", "sketch-cli");
+    const devPath = join(__dirname, "..", "..", "..", "sketch-cli", ".build", "release", "SketchCLI");
+    throw new Error(
+      `Sketch CLI not found.\n\n` +
+      `Searched:\n  - ${appBundlePath}\n  - ${devPath}\n\n` +
+      `Build it: cd sketch-cli && swift build -c release`
+    );
+  }
+  return path;
+}
+
+let sketchCliPath: string | null = null;
 
 /**
  * Swift-based native dialog provider for macOS.
@@ -155,5 +191,51 @@ export class SwiftDialogProvider implements DialogProvider {
     // Fire and forget - don't wait for completion
     if (!cliPath) cliPath = getCliPath();
     execFileAsync(cliPath, ["pulse"]).catch(() => {});
+  }
+
+  private async execSketchCli<T>(command: string, args?: object, signal?: AbortSignal): Promise<T> {
+    if (!sketchCliPath) sketchCliPath = getSketchCliPath();
+    const cliArgs = args ? [command, JSON.stringify(args)] : [command];
+    let stdout: string;
+    let stderr = "";
+    try {
+      const result = await execFileAsync(sketchCliPath, cliArgs, signal ? { signal } : {});
+      stdout = result.stdout;
+      stderr = result.stderr;
+    } catch (err: unknown) {
+      const e = err as { code?: string | number; signal?: string; stderr?: string; message?: string; name?: string };
+      if (e.name === "AbortError" || e.code === "ABORT_ERR") {
+        throw new Error(`Sketch CLI '${command}' was cancelled`);
+      }
+      if (e.code === "ENOENT") {
+        throw new Error(`Sketch CLI not found at: ${sketchCliPath}`);
+      }
+      if (typeof e.code === "number") {
+        const errOut = e.stderr?.trim();
+        throw new Error(`Sketch CLI '${command}' exited with code ${e.code}${errOut ? `: ${errOut}` : ""}`);
+      }
+      if (e.signal) {
+        throw new Error(`Sketch CLI '${command}' killed by signal ${e.signal}`);
+      }
+      throw new Error(`Sketch CLI '${command}' failed: ${e.message ?? String(err)}`);
+    }
+    try {
+      return JSON.parse(stdout.trim()) as T;
+    } catch {
+      const hint = stderr.trim() ? `\nStderr: ${stderr.trim().slice(0, 200)}` : "";
+      throw new Error(`Sketch CLI '${command}' returned invalid JSON: ${stdout.slice(0, 200)}${hint}`);
+    }
+  }
+
+  async proposeLayout(opts: ProposeLayoutOptions, signal?: AbortSignal): Promise<ProposeLayoutResult> {
+    return this.execSketchCli<ProposeLayoutResult>("propose", opts, signal);
+  }
+
+  async describeLayout(opts: DescribeLayoutOptions): Promise<DescribeLayoutResult> {
+    return this.execSketchCli<DescribeLayoutResult>("describe", opts);
+  }
+
+  async getLayoutTemplates(): Promise<GetLayoutTemplatesResult> {
+    return this.execSketchCli<GetLayoutTemplatesResult>("templates");
   }
 }

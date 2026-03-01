@@ -159,6 +159,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         addDebugMenuItem(debugMenu, title: "Test Notification", action: #selector(testNotifyTool), key: "4")
         addDebugMenuItem(debugMenu, title: "Test Update Notification", action: #selector(testNotifyUpdate), key: "5")
 
+        let sketchItem = NSMenuItem(title: "Test Sketch", action: nil, keyEquivalent: "")
+        let sketchSubmenu = NSMenu()
+        addDebugMenuItem(sketchSubmenu, title: "Propose (with blocks)", action: #selector(testSketchProposeBasic))
+        addDebugMenuItem(sketchSubmenu, title: "Propose (empty)", action: #selector(testSketchProposeEmpty))
+        addDebugMenuItem(sketchSubmenu, title: "Describe Layout", action: #selector(testSketchDescribe))
+        addDebugMenuItem(sketchSubmenu, title: "Get Templates", action: #selector(testSketchTemplates))
+        sketchItem.submenu = sketchSubmenu
+        debugMenu.addItem(sketchItem)
+
         debugMenu.addItem(NSMenuItem.separator())
 
         addDebugMenuItem(debugMenu, title: "Run All Tests", action: #selector(testAll), key: "a")
@@ -275,6 +284,64 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    private func sketchCliPath() -> String {
+        let fm = FileManager.default
+
+        // 1. Check Resources folder (bundled app)
+        if let resourcePath = Bundle.main.resourcePath {
+            let bundledPath = (resourcePath as NSString).appendingPathComponent("sketch-cli/sketch-cli")
+            if fm.fileExists(atPath: bundledPath) { return bundledPath }
+        }
+
+        // 2. Check dev build path (swift build)
+        if let execPath = Bundle.main.executablePath {
+            var devPath = (execPath as NSString).deletingLastPathComponent
+            if devPath.contains("/.build/") {
+                while !devPath.hasSuffix("/macos-app") && devPath.count > 1 {
+                    devPath = (devPath as NSString).deletingLastPathComponent
+                }
+                let cliPath = (devPath as NSString)
+                    .deletingLastPathComponent
+                    .appending("/sketch-cli/.build/debug/SketchCLI")
+                if fm.fileExists(atPath: cliPath) { return cliPath }
+            }
+        }
+
+        return "/usr/local/bin/sketch-cli"
+    }
+
+    private func runSketchCli(command: String, json: String) {
+        let cliPath = sketchCliPath()
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: cliPath)
+            process.arguments = [command, json]
+            process.environment = ProcessInfo.processInfo.environment
+
+            do {
+                try process.run()
+                process.waitUntilExit()
+            } catch {
+                // Error ignored - debug menu tests only
+            }
+        }
+    }
+
+    /// Load a sketch test case: strips the `_sketchCommand` key from JSON before returning.
+    private func loadSketchTestCase(name: String) -> (command: String, json: String)? {
+        guard let root = projectRoot() else { return nil }
+        let filePath = "\(root)/test-cases/cases/sketch/\(name).json"
+        guard let data = FileManager.default.contents(atPath: filePath),
+              var dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let command = dict["_sketchCommand"] as? String else { return nil }
+        dict.removeValue(forKey: "_sketchCommand")
+        guard JSONSerialization.isValidJSONObject(dict),
+              let stripped = try? JSONSerialization.data(withJSONObject: dict),
+              let json = String(data: stripped, encoding: .utf8) else { return nil }
+        return (command: command, json: json)
+    }
+
     private func showPaneNotification(title: String, body: String, sound: Bool = true, clientName: String = "Consult User MCP") {
         let payload: [String: Any] = [
             "body": body,
@@ -387,6 +454,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testNotifyTool() {
         guard let tc = loadTestCase(category: "notify", name: "basic") else { return }
         runDialogCli(command: "notify", json: tc.json, projectPath: tc.projectPath)
+    }
+
+    @objc private func testSketchProposeBasic() {
+        guard let tc = loadSketchTestCase(name: "propose-basic") else { return }
+        runSketchCli(command: tc.command, json: tc.json)
+    }
+
+    @objc private func testSketchProposeEmpty() {
+        guard let tc = loadSketchTestCase(name: "propose-empty") else { return }
+        runSketchCli(command: tc.command, json: tc.json)
+    }
+
+    @objc private func testSketchDescribe() {
+        guard let tc = loadSketchTestCase(name: "describe-basic") else { return }
+        runSketchCli(command: tc.command, json: tc.json)
+    }
+
+    @objc private func testSketchTemplates() {
+        guard let tc = loadSketchTestCase(name: "templates") else { return }
+        runSketchCli(command: tc.command, json: tc.json)
     }
 
     @objc private func testNotifyUpdate() {

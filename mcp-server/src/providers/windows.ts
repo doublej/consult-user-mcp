@@ -19,6 +19,11 @@ import type {
   QuestionsResult,
   TweakOptions,
   TweakResult,
+  ProposeLayoutOptions,
+  ProposeLayoutResult,
+  DescribeLayoutOptions,
+  DescribeLayoutResult,
+  GetLayoutTemplatesResult,
 } from "../types.js";
 
 const execFileAsync = promisify(execFile);
@@ -136,5 +141,17 @@ export class WindowsDialogProvider implements DialogProvider {
 
   async pulse(): Promise<void> {
     // No-op on Windows (no tray app to keep alive)
+  }
+
+  async proposeLayout(_opts: ProposeLayoutOptions, _signal?: AbortSignal): Promise<ProposeLayoutResult> {
+    throw new Error("Sketch layout editor is not yet supported on Windows");
+  }
+
+  async describeLayout(_opts: DescribeLayoutOptions): Promise<DescribeLayoutResult> {
+    throw new Error("Sketch layout tools are not yet supported on Windows");
+  }
+
+  async getLayoutTemplates(): Promise<GetLayoutTemplatesResult> {
+    throw new Error("Sketch layout tools are not yet supported on Windows");
   }
 }

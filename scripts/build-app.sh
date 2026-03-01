@@ -12,15 +12,14 @@ CLI_VERSION=$(cat "$ROOT/dialog-cli/VERSION" | tr -d '[:space:]')
 
 echo "Building ${APP_NAME} v${APP_VERSION}..."
 
-# 1. Build dialog-cli
-echo "  Building dialog-cli..."
-cd "$ROOT/dialog-cli"
-swift build -c release
-
-# 1b. Build sketch-cli
-echo "  Building sketch-cli..."
-cd "$ROOT/sketch-cli"
-swift build -c release
+# 1. Build dialog-cli and sketch-cli in parallel
+echo "  Building dialog-cli and sketch-cli in parallel..."
+(cd "$ROOT/dialog-cli" && swift build -c release) &
+PID_DIALOG=$!
+(cd "$ROOT/sketch-cli" && swift build -c release) &
+PID_SKETCH=$!
+wait $PID_DIALOG
+wait $PID_SKETCH
 
 # 2. Build mcp-server
 echo "  Building mcp-server..."

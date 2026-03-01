@@ -1,8 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { resolve } from "path";
+import { resolve, join } from "path";
 import { writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
 import { tmpdir } from "os";
 import { z } from "zod";
 import { resolveCSS } from "./css-resolver.js";
@@ -10,7 +9,7 @@ import { resolveTextSearch } from "./text-search-resolver.js";
 import { SwiftDialogProvider } from "./providers/swift.js";
 import { WindowsDialogProvider } from "./providers/windows.js";
 import type { DialogProvider } from "./providers/interface.js";
-import type { DialogPosition, QuestionsMode, TweakParameter, SketchBlock } from "./types.js";
+import type { DialogPosition, QuestionsMode, TweakParameter, SketchBlock, SketchLayoutNode } from "./types.js";
 import { compactResponse } from "./compact.js";
 import { humanize } from "./humanize.js";
 import { readSettings } from "./settings.js";
@@ -384,7 +383,7 @@ server.registerTool("propose_layout", {
       title: p.title,
       description: p.description,
       blocks: p.blocks,
-      structure: p.structure as never,
+      structure: p.structure as SketchLayoutNode,
     }, controller.signal), extra);
 
     const lines: string[] = [`Status: ${r.status}`];
@@ -434,7 +433,7 @@ server.registerTool("describe_layout", {
     columns: p.columns,
     rows: p.rows,
     blocks: p.blocks,
-    structure: p.structure as never,
+    structure: p.structure as SketchLayoutNode,
     detail: p.detail,
   });
   return { content: [{ type: "text", text: JSON.stringify(r) }] };

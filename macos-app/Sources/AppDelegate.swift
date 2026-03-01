@@ -216,12 +216,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Dialog CLI (preserved logic)
 
-    private func dialogCliPath() -> String {
+    private func cliPath(subdir: String, binaryName: String) -> String {
         let fm = FileManager.default
 
         // 1. Check Resources folder (bundled app)
         if let resourcePath = Bundle.main.resourcePath {
-            let bundledPath = (resourcePath as NSString).appendingPathComponent("dialog-cli/dialog-cli")
+            let bundledPath = (resourcePath as NSString).appendingPathComponent("\(subdir)/\(subdir)")
             if fm.fileExists(atPath: bundledPath) { return bundledPath }
         }
 
@@ -232,16 +232,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 while !devPath.hasSuffix("/macos-app") && devPath.count > 1 {
                     devPath = (devPath as NSString).deletingLastPathComponent
                 }
-                let cliPath = (devPath as NSString)
+                let p = (devPath as NSString)
                     .deletingLastPathComponent
-                    .appending("/dialog-cli/.build/debug/DialogCLI")
-                if fm.fileExists(atPath: cliPath) { return cliPath }
+                    .appending("/\(subdir)/.build/debug/\(binaryName)")
+                if fm.fileExists(atPath: p) { return p }
             }
         }
 
-        // 3. Fallback
-        return "/usr/local/bin/dialog-cli"
+        return "/usr/local/bin/\(subdir)"
     }
+
+    private func dialogCliPath() -> String { cliPath(subdir: "dialog-cli", binaryName: "DialogCLI") }
 
     private func runDialogCli(
         command: String,
@@ -284,31 +285,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func sketchCliPath() -> String {
-        let fm = FileManager.default
-
-        // 1. Check Resources folder (bundled app)
-        if let resourcePath = Bundle.main.resourcePath {
-            let bundledPath = (resourcePath as NSString).appendingPathComponent("sketch-cli/sketch-cli")
-            if fm.fileExists(atPath: bundledPath) { return bundledPath }
-        }
-
-        // 2. Check dev build path (swift build)
-        if let execPath = Bundle.main.executablePath {
-            var devPath = (execPath as NSString).deletingLastPathComponent
-            if devPath.contains("/.build/") {
-                while !devPath.hasSuffix("/macos-app") && devPath.count > 1 {
-                    devPath = (devPath as NSString).deletingLastPathComponent
-                }
-                let cliPath = (devPath as NSString)
-                    .deletingLastPathComponent
-                    .appending("/sketch-cli/.build/debug/SketchCLI")
-                if fm.fileExists(atPath: cliPath) { return cliPath }
-            }
-        }
-
-        return "/usr/local/bin/sketch-cli"
-    }
+    private func sketchCliPath() -> String { cliPath(subdir: "sketch-cli", binaryName: "SketchCLI") }
 
     private func runSketchCli(command: String, json: String) {
         let cliPath = sketchCliPath()

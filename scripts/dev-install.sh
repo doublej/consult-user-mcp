@@ -5,12 +5,14 @@ cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
 APP_PATH="/Applications/Consult User MCP.app"
 
-# Build all components
-echo "Building dialog-cli..."
-cd "$ROOT/dialog-cli" && swift build
-
-echo "Building sketch-cli..."
-cd "$ROOT/sketch-cli" && swift build
+# Build all components (dialog-cli and sketch-cli in parallel)
+echo "Building dialog-cli and sketch-cli in parallel..."
+(cd "$ROOT/dialog-cli" && swift build) &
+PID_DIALOG=$!
+(cd "$ROOT/sketch-cli" && swift build) &
+PID_SKETCH=$!
+wait $PID_DIALOG
+wait $PID_SKETCH
 
 echo "Building mcp-server..."
 cd "$ROOT/mcp-server" && bun run build:ts

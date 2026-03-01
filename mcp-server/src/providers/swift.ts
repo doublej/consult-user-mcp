@@ -31,23 +31,20 @@ const execFileAsync = promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-function findDialogCli(): string | null {
-  // App bundle: Resources/mcp-server/dist/providers -> Resources/dialog-cli/dialog-cli
-  const appBundlePath = join(__dirname, "..", "..", "..", "dialog-cli", "dialog-cli");
-  if (existsSync(appBundlePath)) return appBundlePath;
-
-  // Dev: mcp-server/dist/providers -> dialog-cli/.build/{debug,release}/DialogCLI
-  const devDebugPath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "debug", "DialogCLI");
-  if (existsSync(devDebugPath)) return devDebugPath;
-
-  const devReleasePath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "release", "DialogCLI");
-  if (existsSync(devReleasePath)) return devReleasePath;
-
-  return null;
+// App bundle: Resources/mcp-server/dist/providers -> Resources/<subdir>/<subdir>
+// Dev: mcp-server/dist/providers -> <subdir>/.build/{debug,release}/<binaryName>
+function findCli(subdir: string, binaryName: string): string | null {
+  const base = join(__dirname, "..", "..", "..", subdir);
+  const candidates = [
+    join(base, subdir),
+    join(base, ".build", "debug", binaryName),
+    join(base, ".build", "release", binaryName),
+  ];
+  return candidates.find(c => existsSync(c)) ?? null;
 }
 
 function getCliPath(): string {
-  const path = findDialogCli();
+  const path = findCli("dialog-cli", "DialogCLI");
   if (!path) {
     const appBundlePath = join(__dirname, "..", "..", "..", "dialog-cli", "dialog-cli");
     const devPath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "release", "DialogCLI");
@@ -64,23 +61,8 @@ function getCliPath(): string {
 
 let cliPath: string | null = null;
 
-function findSketchCli(): string | null {
-  // App bundle: Resources/mcp-server/dist/providers -> Resources/sketch-cli/sketch-cli
-  const appBundlePath = join(__dirname, "..", "..", "..", "sketch-cli", "sketch-cli");
-  if (existsSync(appBundlePath)) return appBundlePath;
-
-  // Dev: mcp-server/dist/providers -> sketch-cli/.build/{debug,release}/SketchCLI
-  const devDebugPath = join(__dirname, "..", "..", "..", "sketch-cli", ".build", "debug", "SketchCLI");
-  if (existsSync(devDebugPath)) return devDebugPath;
-
-  const devReleasePath = join(__dirname, "..", "..", "..", "sketch-cli", ".build", "release", "SketchCLI");
-  if (existsSync(devReleasePath)) return devReleasePath;
-
-  return null;
-}
-
 function getSketchCliPath(): string {
-  const path = findSketchCli();
+  const path = findCli("sketch-cli", "SketchCLI");
   if (!path) {
     const appBundlePath = join(__dirname, "..", "..", "..", "sketch-cli", "sketch-cli");
     const devPath = join(__dirname, "..", "..", "..", "sketch-cli", ".build", "release", "SketchCLI");

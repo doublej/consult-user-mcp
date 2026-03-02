@@ -515,11 +515,12 @@
   /* Hero row - two column layout */
   .hero-row {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    isolation: isolate;
     display: grid;
-    grid-template-columns: 1fr 440px;
-    gap: 16px;
-    padding-bottom: 60px;
+    grid-template-columns: minmax(0, 1.12fr) minmax(360px, 0.88fr);
+    gap: 24px;
+    padding-bottom: 56px;
     align-items: center;
     max-width: 100%;
     background: linear-gradient(165deg, #0a0a0f, #131320, #0f0f1a);
@@ -532,12 +533,20 @@
   .hero {
     padding: 0;
     min-width: 0;
+    max-width: 620px;
+    position: relative;
+    z-index: 2;
   }
 
   /* Hero visual sidebar */
   .hero-visual-sidebar {
     min-width: 0;
     overflow: visible;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    z-index: 2;
   }
 
   /* Hero label */
@@ -846,6 +855,10 @@
   .section {
     padding: 64px 56px;
     border-top: 1px solid #dfe3ee;
+  }
+
+  #install {
+    border-top: none;
   }
 
   h2 {

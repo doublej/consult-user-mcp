@@ -1,15 +1,14 @@
 import SwiftUI
 
 struct DeviceFrameView<Content: View>: View {
-    let frame: String
+    let frame: DeviceFrame
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         switch frame {
-        case "browser": browserFrame
-        case "phone": phoneFrame
-        case "tablet": tabletFrame
-        default: content()
+        case .browser: browserFrame
+        case .phone: phoneFrame
+        case .tablet: tabletFrame
         }
     }
 

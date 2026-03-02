@@ -37,13 +37,13 @@ enum ContentInference {
         return 0
     }
 
-    static func inferImportance(explicit: String?, role: String?) -> String {
-        if let explicit { return explicit }
-        switch role {
-        case "canvas": return "primary"
-        case "header", "sidebar": return "secondary"
-        case "toolbar", "panel", "footer": return "tertiary"
-        default: return "secondary"
+    static func inferImportance(explicit: String?, role: String?) -> ImportanceLevel {
+        if let explicit, let level = ImportanceLevel(rawValue: explicit) { return level }
+        guard let role, let blockRole = BlockRole(rawValue: role) else { return .secondary }
+        switch blockRole {
+        case .canvas: return .primary
+        case .header, .sidebar: return .secondary
+        case .toolbar, .panel, .footer: return .tertiary
         }
     }
 }

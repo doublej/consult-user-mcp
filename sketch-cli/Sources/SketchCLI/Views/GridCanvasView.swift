@@ -236,20 +236,17 @@ struct GridCanvasView: View {
     }
 
     private func roleTint(_ role: String?) -> Color? {
-        switch role {
-        case "header", "footer": return Color(red: 0.6, green: 0.55, blue: 0.5).opacity(0.05)
-        case "sidebar", "toolbar": return Color(red: 0.5, green: 0.55, blue: 0.65).opacity(0.05)
-        case "canvas", "panel": return Color.gray.opacity(0.03)
-        default: return nil
-        }
+        guard let role, let blockRole = BlockRole(rawValue: role) else { return nil }
+        let t = RoleZoneTint.from(blockRole)
+        return Color(red: t.r / 255, green: t.g / 255, blue: t.b / 255).opacity(t.a)
     }
 
     private func moveBlock(id: String, colDelta: Int, rowDelta: Int, nesting: [String: String]) {
         guard let block = layout.blocks.first(where: { $0.id == id }) else { return }
+        let childIds = Set(nesting.filter { $0.value == id }.map(\.key))
 
         // Stash: unclamped target exceeds grid bottom
         if block.y + rowDelta >= layout.rows {
-            let childIds = Set(nesting.filter { $0.value == id }.map(\.key))
             let removed = layout.blocks.filter { $0.id == id || childIds.contains($0.id) }
             stashedBlocks.append(contentsOf: removed)
             layout.blocks.removeAll { $0.id == id || childIds.contains($0.id) }
@@ -263,10 +260,9 @@ struct GridCanvasView: View {
         }
 
         // Move children by the same delta
-        let childIds = nesting.filter { $0.value == id }.map(\.key)
         for childId in childIds {
-            guard let child = layout.blocks.first(where: { $0.id == childId }),
-                  let idx = layout.blocks.firstIndex(where: { $0.id == childId }) else { continue }
+            guard let idx = layout.blocks.firstIndex(where: { $0.id == childId }) else { continue }
+            let child = layout.blocks[idx]
             layout.blocks[idx].x = max(0, min(layout.columns - child.w, child.x + colDelta))
             layout.blocks[idx].y = max(0, min(layout.rows - child.h, child.y + rowDelta))
         }

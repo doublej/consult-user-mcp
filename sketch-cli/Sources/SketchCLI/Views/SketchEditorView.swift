@@ -97,7 +97,7 @@ struct SketchEditorView: View {
                             .fill(Color.white)
                     )
 
-                    if let deviceFrame = state.layout.frame {
+                    if let frameStr = state.layout.frame, let deviceFrame = DeviceFrame(rawValue: frameStr) {
                         DeviceFrameView(frame: deviceFrame) { canvas }
                     } else {
                         canvas

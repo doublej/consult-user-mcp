@@ -43,27 +43,21 @@ struct BlockView: View {
         return isResizing ? max(cellHeight, base + resizeDelta.height) : base
     }
 
-    private var resolvedImportance: String {
-        ContentInference.inferImportance(explicit: block.importance, role: block.role)
+    private var importanceStyle: ImportanceStyle {
+        ImportanceStyle.from(ContentInference.inferImportance(explicit: block.importance, role: block.role))
     }
 
     private var importanceFill: Double {
         if isDragging { return 0.5 }
         if isNested { return 0.35 }
-        switch resolvedImportance {
-        case "primary": return 0.35
-        case "tertiary": return 0.12
-        default: return 0.25
-        }
+        return importanceStyle.fillOpacity
     }
 
     private var importanceBorder: (width: CGFloat, dash: [CGFloat]) {
         if isDragging || effectiveHover { return (2.5, isNested ? [4, 3] : []) }
-        switch resolvedImportance {
-        case "primary": return (2.5, isNested ? [4, 3] : [])
-        case "tertiary": return (0.5, [4, 3])
-        default: return (1, isNested ? [4, 3] : [])
-        }
+        let style = importanceStyle
+        let dash: [CGFloat] = (style.dashed || isNested) ? [4, 3] : []
+        return (CGFloat(style.strokeWidth), dash)
     }
 
     var body: some View {
@@ -280,11 +274,11 @@ private struct ElevationShadow: ViewModifier {
     let level: Int
 
     func body(content: Content) -> some View {
-        switch level {
-        case 1: content.shadow(color: .black.opacity(0.1), radius: 2, y: 1)
-        case 2: content.shadow(color: .black.opacity(0.15), radius: 6, y: 3)
-        case 3: content.shadow(color: .black.opacity(0.2), radius: 12, y: 6)
-        default: content
+        let style = ElevationStyle.from(level)
+        if style.radius > 0 {
+            content.shadow(color: .black.opacity(style.opacity), radius: style.radius, y: style.yOffset)
+        } else {
+            content
         }
     }
 }

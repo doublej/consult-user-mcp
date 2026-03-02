@@ -19,9 +19,7 @@ enum SvgRenderer {
         var svg = """
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 \(totalW) \(totalH)" width="\(totalW)" height="\(totalH)">
         <defs>
-        <filter id="elev1"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.1"/></filter>
-        <filter id="elev2"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-opacity="0.15"/></filter>
-        <filter id="elev3"><feDropShadow dx="0" dy="6" stdDeviation="12" flood-opacity="0.2"/></filter>
+        \(elevationFilterDefs())
         </defs>
         <rect width="\(totalW)" height="\(totalH)" fill="\(background)"/>
         """
@@ -62,9 +60,11 @@ enum SvgRenderer {
     }
 
     private static func frameChrome(_ frame: String?) -> FrameChrome {
-        guard let frame else { return FrameChrome(padL: 0, padR: 0, padT: 0, padB: 0, svg: "") }
-        switch frame {
-        case "browser":
+        guard let frame, let deviceFrame = DeviceFrame(rawValue: frame) else {
+            return FrameChrome(padL: 0, padR: 0, padT: 0, padB: 0, svg: "")
+        }
+        switch deviceFrame {
+        case .browser:
             let barH = 32
             let svg = """
             \n<rect x="0" y="0" width="\(width)" height="\(barH)" rx="8" fill="#1e1e1e"/>
@@ -75,7 +75,7 @@ enum SvgRenderer {
             <text x="\(width / 2)" y="20" fill="rgba(255,255,255,0.35)" font-family="system-ui" font-size="10" text-anchor="middle">https://</text>
             """
             return FrameChrome(padL: 0, padR: 0, padT: barH, padB: 0, svg: svg)
-        case "phone":
+        case .phone:
             let pad = 12, topBar = 20
             let totalPadT = pad + topBar
             let svg = """
@@ -83,14 +83,12 @@ enum SvgRenderer {
             <text x="\(pad + 12)" y="\(pad + 14)" fill="rgba(255,255,255,0.5)" font-family="system-ui" font-size="10" font-weight="600">9:41</text>
             """
             return FrameChrome(padL: pad, padR: pad, padT: totalPadT, padB: pad, svg: svg)
-        case "tablet":
+        case .tablet:
             let pad = 16
             let svg = """
             \n<rect x="0" y="0" width="\(width + pad * 2)" height="\(height + pad * 2)" rx="14" fill="#0d0d0d" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
             """
             return FrameChrome(padL: pad, padR: pad, padT: pad, padB: pad, svg: svg)
-        default:
-            return FrameChrome(padL: 0, padR: 0, padT: 0, padB: 0, svg: "")
         }
     }
 
@@ -113,23 +111,15 @@ enum SvgRenderer {
     private static func roleZones(_ blocks: [GridBlock], cellW: Double, cellH: Double) -> String {
         var svg = ""
         for block in blocks {
-            guard let fill = roleZoneFill(block.role) else { continue }
+            guard let roleStr = block.role, let role = BlockRole(rawValue: roleStr) else { continue }
+            let tint = RoleZoneTint.from(role)
             let rx = format(Double(block.x) * cellW)
             let ry = format(Double(block.y) * cellH)
             let rw = format(Double(block.w) * cellW)
             let rh = format(Double(block.h) * cellH)
-            svg += "\n<rect x=\"\(rx)\" y=\"\(ry)\" width=\"\(rw)\" height=\"\(rh)\" fill=\"\(fill)\"/>"
+            svg += "\n<rect x=\"\(rx)\" y=\"\(ry)\" width=\"\(rw)\" height=\"\(rh)\" fill=\"\(tint.rgba)\"/>"
         }
         return svg
-    }
-
-    private static func roleZoneFill(_ role: String?) -> String? {
-        switch role {
-        case "header", "footer": return "rgba(160,140,120,0.05)"
-        case "sidebar", "toolbar": return "rgba(120,140,170,0.05)"
-        case "canvas", "panel": return "rgba(128,128,128,0.03)"
-        default: return nil
-        }
     }
 
     private static func gridLines(columns: Int, rows: Int, cellW: Double, cellH: Double) -> String {
@@ -151,18 +141,16 @@ enum SvgRenderer {
         let by = Double(block.y) * cellH + 1
         let bw = Double(block.w) * cellW - 2
         let bh = Double(block.h) * cellH - 2
-        let imp = ContentInference.inferImportance(explicit: block.importance, role: block.role)
-        let fillAlpha: Double = imp == "primary" ? 0.35 : imp == "tertiary" ? 0.12 : 0.25
-        let strokeW: Double = imp == "primary" ? 2.5 : imp == "tertiary" ? 0.5 : 1.5
-        let dashAttr = imp == "tertiary" ? " stroke-dasharray=\"4 3\"" : ""
+        let impStyle = ImportanceStyle.from(ContentInference.inferImportance(explicit: block.importance, role: block.role))
+        let dashAttr = impStyle.dashed ? " stroke-dasharray=\"4 3\"" : ""
         let elev = ContentInference.inferElevation(explicit: block.elevation, label: block.label)
         let filterAttr = elev > 0 ? " filter=\"url(#elev\(elev))\"" : ""
-        let fill = hexToRGBA(hex, alpha: fillAlpha)
+        let fill = hexToRGBA(hex, alpha: impStyle.fillOpacity)
         let wireframeFill = hexToRGBA(hex, alpha: 0.3)
 
         var svg = """
 
-        <rect x="\(format(bx))" y="\(format(by))" width="\(format(bw))" height="\(format(bh))" rx="4" fill="\(fill)" stroke="\(hex)" stroke-width="\(format(strokeW))"\(dashAttr)\(filterAttr)/>
+        <rect x="\(format(bx))" y="\(format(by))" width="\(format(bw))" height="\(format(bh))" rx="4" fill="\(fill)" stroke="\(hex)" stroke-width="\(format(impStyle.strokeWidth))"\(dashAttr)\(filterAttr)/>
         <text x="\(format(bx + 7))" y="\(format(by + 17))" fill="white" font-family="system-ui, sans-serif" font-size="12">\(escapeXML(block.label))</text>
         """
 
@@ -178,6 +166,13 @@ enum SvgRenderer {
         }
 
         return svg
+    }
+
+    private static func elevationFilterDefs() -> String {
+        (1...3).map { level in
+            let s = ElevationStyle.from(level)
+            return "<filter id=\"elev\(level)\"><feDropShadow dx=\"0\" dy=\"\(format(s.yOffset))\" stdDeviation=\"\(format(s.radius))\" flood-opacity=\"\(s.opacity)\"/></filter>"
+        }.joined(separator: "\n")
     }
 
     private static func hexToRGBA(_ hex: String, alpha: Double) -> String {
@@ -197,7 +192,7 @@ enum SvgRenderer {
             .replacingOccurrences(of: ">", with: "&gt;")
     }
 
-    private static func format(_ value: Double) -> String {
+    static func format(_ value: Double) -> String {
         String(format: "%.1f", value)
     }
 }

@@ -181,7 +181,10 @@ struct SwiftUITweakDialog: View {
     }
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
-        let isEditingText = NSApp.keyWindow?.firstResponder is NSTextView
+        let isEditingText: Bool = {
+            guard let responder = NSApp.keyWindow?.firstResponder else { return false }
+            return responder is NSTextView || (responder as? NSTextField)?.isEditable == true
+        }()
 
         switch keyCode {
         case KeyCode.escape:

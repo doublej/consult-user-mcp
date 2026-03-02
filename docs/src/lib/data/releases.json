@@ -3,6 +3,18 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.0.1",
+      "platform": "macos",
+      "date": "2026-03-03",
+      "highlight": "Keyboard hotkeys no longer fire while typing",
+      "changes": [
+        { "text": "Keyboard hotkeys (S, F, A) no longer trigger while typing in the Other text field", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Arrow keys and Tab now work normally inside text fields instead of moving dialog focus", "type": "fixed", "scope": "cli" },
+        { "text": "Clicking the Other card now auto-focuses the text field for immediate typing", "type": "fixed", "scope": "cli" },
+        { "text": "Left/right arrow keys in wizard forms no longer navigate steps while editing text", "type": "fixed", "scope": "cli" }
+      ]
+    },
+    {
       "version": "2.0.0",
       "platform": "macos",
       "date": "2026-03-02",

@@ -562,7 +562,12 @@ struct DialogContainer<Content: View>: View {
                 return true
             }
             // Skip character hotkeys when a text field is being edited
-            let isEditingText = NSApp.keyWindow?.firstResponder is NSTextView
+            let isEditingText: Bool = {
+                guard let responder = NSApp.keyWindow?.firstResponder else { return false }
+                if responder is NSTextView { return true }
+                if let tf = responder as? NSTextField, tf.isEditable { return true }
+                return false
+            }()
             if !isEditingText && keyCode == KeyCode.s && expandedTool != .snooze {
                 toggleTool(.snooze)
                 return true
@@ -586,23 +591,25 @@ struct DialogContainer<Content: View>: View {
                 return true
             }
 
-            // Default navigation via FocusManager
-            switch keyCode {
-            case KeyCode.tab:
-                if modifiers.contains(.shift) {
-                    FocusManager.shared.focusPrevious()
-                } else {
-                    FocusManager.shared.focusNext()
+            // Default navigation via FocusManager (skip when editing text)
+            if !isEditingText {
+                switch keyCode {
+                case KeyCode.tab:
+                    if modifiers.contains(.shift) {
+                        FocusManager.shared.focusPrevious()
+                    } else {
+                        FocusManager.shared.focusNext()
+                    }
+                    return true
+                case KeyCode.downArrow:
+                    FocusManager.shared.focusNextContent()
+                    return true
+                case KeyCode.upArrow:
+                    FocusManager.shared.focusPreviousContent()
+                    return true
+                default:
+                    break
                 }
-                return true
-            case KeyCode.downArrow:
-                FocusManager.shared.focusNextContent()
-                return true
-            case KeyCode.upArrow:
-                FocusManager.shared.focusPreviousContent()
-                return true
-            default:
-                break
             }
 
             return false

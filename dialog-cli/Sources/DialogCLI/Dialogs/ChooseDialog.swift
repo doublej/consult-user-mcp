@@ -9,6 +9,8 @@ struct OtherChoiceCard: View {
     @Binding var text: String
     let onTap: () -> Void
 
+    @State private var shouldFocusField = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
@@ -20,7 +22,8 @@ struct OtherChoiceCard: View {
             }
             FocusableTextField(
                 placeholder: "Type your answer...",
-                text: $text
+                text: $text,
+                focusTrigger: $shouldFocusField
             )
             .frame(minHeight: 36)
         }
@@ -35,7 +38,10 @@ struct OtherChoiceCard: View {
                 .stroke(isSelected ? Theme.Colors.accentBlue : Theme.Colors.border, lineWidth: isSelected ? 2 : 1)
         )
         .contentShape(Rectangle())
-        .onTapGesture { onTap() }
+        .onTapGesture {
+            onTap()
+            shouldFocusField = true
+        }
         .onHover { hovering in
             if hovering {
                 NSCursor.pointingHand.push()

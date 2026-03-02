@@ -251,6 +251,10 @@ struct SwiftUIWizardDialog: View {
     }
 
     private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
+        let isEditingText: Bool = {
+            guard let responder = NSApp.keyWindow?.firstResponder else { return false }
+            return responder is NSTextView || (responder as? NSTextField)?.isEditable == true
+        }()
         switch keyCode {
         case KeyCode.escape:
             onCancel()
@@ -260,10 +264,10 @@ struct SwiftUIWizardDialog: View {
                 if isLast { onComplete(answers, otherSelections, otherTexts) } else { goNext() }
             }
             return true
-        case KeyCode.rightArrow:
+        case KeyCode.rightArrow where !isEditingText:
             if !isLast && currentHasValidAnswer { goNext() }
             return true
-        case KeyCode.leftArrow:
+        case KeyCode.leftArrow where !isEditingText:
             if !isFirst { goBack() }
             return true
         default:

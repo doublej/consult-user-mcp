@@ -334,12 +334,14 @@ struct FocusableTextField: NSViewRepresentable {
     let isSecure: Bool
     @Binding var text: String
     let onSubmit: (() -> Void)?
+    @Binding var focusTrigger: Bool
 
-    init(placeholder: String = "", isSecure: Bool = false, text: Binding<String>, onSubmit: (() -> Void)? = nil) {
+    init(placeholder: String = "", isSecure: Bool = false, text: Binding<String>, onSubmit: (() -> Void)? = nil, focusTrigger: Binding<Bool> = .constant(false)) {
         self.placeholder = placeholder
         self.isSecure = isSecure
         self._text = text
         self.onSubmit = onSubmit
+        self._focusTrigger = focusTrigger
     }
 
     func makeNSView(context: Context) -> FocusableTextFieldView {
@@ -366,6 +368,12 @@ struct FocusableTextField: NSViewRepresentable {
             }
         }
         nsView.onSubmit = onSubmit
+        if focusTrigger {
+            DispatchQueue.main.async {
+                self.focusTrigger = false
+                nsView.focusTextField()
+            }
+        }
     }
 }
 
@@ -477,15 +485,18 @@ class FocusableTextFieldView: NSView, NSTextFieldDelegate {
     }
 
     override func becomeFirstResponder() -> Bool {
-        window?.makeFirstResponder(textField)
-        styleFieldEditor()
-        needsDisplay = true
+        focusTextField()
         return true
     }
 
     override func mouseDown(with event: NSEvent) {
+        focusTextField()
+    }
+
+    func focusTextField() {
         window?.makeFirstResponder(textField)
         styleFieldEditor()
+        needsDisplay = true
     }
 
     override var intrinsicContentSize: NSSize {

@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.1] (macOS) - 2026-03-03
+
+### Fixed
+- Keyboard hotkeys (S, F, A) no longer trigger while typing in the Other text field
+- Arrow keys and Tab now work normally inside text fields instead of moving dialog focus
+- Clicking the Other card now auto-focuses the text field for immediate typing
+- Left/right arrow keys in wizard forms no longer navigate steps while editing text
+
 ## [2.0.0] (macOS) - 2026-03-02
 
 ### Added

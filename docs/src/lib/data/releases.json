@@ -3,6 +3,17 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.0.0",
+      "platform": "macos",
+      "date": "2026-03-02",
+      "highlight": "Report button everywhere",
+      "changes": [
+        { "text": "Report button renamed from \"Feedback\" to \"Report\" for clarity", "type": "changed", "scope": "cli", "featured": true },
+        { "text": "Notification and preview panes now include a report button for quick bug reporting", "type": "added", "scope": "cli", "featured": true },
+        { "text": "Layout sketch editor now includes a report button in the title bar", "type": "added", "scope": "cli" }
+      ]
+    },
+    {
       "version": "1.20.0",
       "platform": "macos",
       "date": "2026-03-02",

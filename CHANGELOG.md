@@ -7,6 +7,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.0] (macOS) - 2026-03-02
+
+### Added
+- Notification and preview panes now include a report button for quick bug reporting
+- Layout sketch editor now includes a report button in the title bar
+
+### Changed
+- Report button renamed from "Feedback" to "Report" for clarity
+
 ## [1.20.0] (macOS) - 2026-03-02
 
 ### Added

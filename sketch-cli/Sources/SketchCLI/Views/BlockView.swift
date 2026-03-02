@@ -116,17 +116,6 @@ struct BlockView: View {
                 Spacer()
             }
 
-            if effectiveHover && !isEditing && !isDragging {
-                Text(block.label)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white)
-                    .fixedSize()
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.black.opacity(0.75))
-                    .cornerRadius(6)
-            }
-
             if interactive {
                 VStack {
                     Spacer()
@@ -173,6 +162,19 @@ struct BlockView: View {
             }
         }
         .frame(width: currentW - (isNested ? 6 : 2), height: currentH - (isNested ? 6 : 2))
+        .overlay {
+            if effectiveHover && !isEditing && !isDragging {
+                Text(block.label)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.white)
+                    .fixedSize()
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.black.opacity(0.75))
+                    .cornerRadius(6)
+                    .allowsHitTesting(false)
+            }
+        }
         .modifier(ElevationShadow(level: ContentInference.inferElevation(explicit: block.elevation, label: block.label)))
         .offset(isDragging ? dragOffset : .zero)
         .contentShape(Rectangle())

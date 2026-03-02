@@ -57,6 +57,7 @@ struct SketchEditorView: View {
     @State private var stashedBlocks: [GridBlock] = []
     @State private var isDraggingBlock = false
     @State private var isOverStashZone = false
+    @State private var isOverSidebarStash = false
 
     var body: some View {
         let nestingMap = DescriptionRenderer.detectNesting(state.layout.blocks)
@@ -85,9 +86,10 @@ struct SketchEditorView: View {
                             addBlockRow = row
                             showAddSheet = true
                         },
-                        onDragHintChanged: { dragging, overStash in
+                        onDragHintChanged: { dragging, overBottom, overSidebar in
                             isDraggingBlock = dragging
-                            isOverStashZone = overStash
+                            isOverStashZone = overBottom
+                            isOverSidebarStash = overSidebar
                         },
                         nestingMap: nestingMap
                     )
@@ -203,6 +205,11 @@ struct SketchEditorView: View {
             }
             .buttonStyle(.plain)
 
+            // Drop zone (visible while dragging)
+            if isDraggingBlock {
+                sidebarStashDropZone(highlighted: isOverSidebarStash)
+            }
+
             // Stash tray
             if !stashedBlocks.isEmpty {
                 stashTray
@@ -280,6 +287,27 @@ struct SketchEditorView: View {
     }
 
     // MARK: - Drop hint
+
+    private func sidebarStashDropZone(highlighted: Bool) -> some View {
+        Label("Drop here", systemImage: "tray.and.arrow.down")
+            .font(.system(size: 11, weight: .medium))
+            .foregroundColor(highlighted ? .white : Color(Theme.textSecondary))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(highlighted ? Color.orange.opacity(0.6) : Color(Theme.cardBackground).opacity(0.4))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(
+                        highlighted ? Color.orange : Color(Theme.border),
+                        style: StrokeStyle(lineWidth: 1.5, dash: [5, 3])
+                    )
+            )
+            .allowsHitTesting(false)
+            .animation(.easeInOut(duration: 0.15), value: highlighted)
+    }
 
     private func dropToStashHint(highlighted: Bool) -> some View {
         Label("Drop to stash", systemImage: "tray.and.arrow.down")

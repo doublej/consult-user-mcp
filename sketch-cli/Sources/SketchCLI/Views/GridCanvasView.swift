@@ -56,7 +56,7 @@ struct GridCanvasView: View {
     var interactive: Bool = true
     var blockNumbers: [String: String] = [:]
     var onAddBlock: ((Int, Int) -> Void)?
-    var onDragHintChanged: ((Bool, Bool) -> Void)?
+    var onDragHintChanged: ((Bool, Bool, Bool) -> Void)?
 
     @StateObject private var cycleState = OptionCycleState()
     @State private var activeDragBlockId: String?
@@ -96,11 +96,13 @@ struct GridCanvasView: View {
                             activeDragBlockId = offset != nil ? block.id : nil
                             activeDragOffset = offset ?? .zero
                             if let offset = offset {
+                                let colDelta = Int(round(offset.width / cellW))
                                 let rowDelta = Int(round(offset.height / cellH))
-                                let isOver = block.y + rowDelta >= layout.rows
-                                onDragHintChanged?(true, isOver)
+                                let isOverBottom = block.y + rowDelta >= layout.rows
+                                let isOverSidebar = block.x + colDelta < 0
+                                onDragHintChanged?(true, isOverBottom, isOverSidebar)
                             } else {
-                                onDragHintChanged?(false, false)
+                                onDragHintChanged?(false, false, false)
                             }
                         },
                         onDragEnd: { colDelta, rowDelta in
@@ -245,8 +247,8 @@ struct GridCanvasView: View {
         guard let block = layout.blocks.first(where: { $0.id == id }) else { return }
         let childIds = Set(nesting.filter { $0.value == id }.map(\.key))
 
-        // Stash: unclamped target exceeds grid bottom
-        if block.y + rowDelta >= layout.rows {
+        // Stash: unclamped target exceeds grid bottom or left edge
+        if block.y + rowDelta >= layout.rows || block.x + colDelta < 0 {
             let removed = layout.blocks.filter { $0.id == id || childIds.contains($0.id) }
             stashedBlocks.append(contentsOf: removed)
             layout.blocks.removeAll { $0.id == id || childIds.contains($0.id) }

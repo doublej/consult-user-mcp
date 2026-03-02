@@ -159,6 +159,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         addDebugMenuItem(debugMenu, title: "Test Notification", action: #selector(testNotifyTool), key: "4")
         addDebugMenuItem(debugMenu, title: "Test Update Notification", action: #selector(testNotifyUpdate), key: "5")
 
+        let sketchItem = NSMenuItem(title: "Test Sketch", action: nil, keyEquivalent: "")
+        let sketchSubmenu = NSMenu()
+        addDebugMenuItem(sketchSubmenu, title: "Propose (with blocks)", action: #selector(testSketchProposeBasic))
+        addDebugMenuItem(sketchSubmenu, title: "Propose (empty)", action: #selector(testSketchProposeEmpty))
+        sketchItem.submenu = sketchSubmenu
+        debugMenu.addItem(sketchItem)
+
         debugMenu.addItem(NSMenuItem.separator())
 
         addDebugMenuItem(debugMenu, title: "Run All Tests", action: #selector(testAll), key: "a")
@@ -207,12 +214,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Dialog CLI (preserved logic)
 
-    private func dialogCliPath() -> String {
+    private func cliPath(subdir: String, binaryName: String) -> String {
         let fm = FileManager.default
 
         // 1. Check Resources folder (bundled app)
         if let resourcePath = Bundle.main.resourcePath {
-            let bundledPath = (resourcePath as NSString).appendingPathComponent("dialog-cli/dialog-cli")
+            let bundledPath = (resourcePath as NSString).appendingPathComponent("\(subdir)/\(subdir)")
             if fm.fileExists(atPath: bundledPath) { return bundledPath }
         }
 
@@ -223,16 +230,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 while !devPath.hasSuffix("/macos-app") && devPath.count > 1 {
                     devPath = (devPath as NSString).deletingLastPathComponent
                 }
-                let cliPath = (devPath as NSString)
+                let p = (devPath as NSString)
                     .deletingLastPathComponent
-                    .appending("/dialog-cli/.build/debug/DialogCLI")
-                if fm.fileExists(atPath: cliPath) { return cliPath }
+                    .appending("/\(subdir)/.build/debug/\(binaryName)")
+                if fm.fileExists(atPath: p) { return p }
             }
         }
 
-        // 3. Fallback
-        return "/usr/local/bin/dialog-cli"
+        return "/usr/local/bin/\(subdir)"
     }
+
+    private func dialogCliPath() -> String { cliPath(subdir: "dialog-cli", binaryName: "DialogCLI") }
 
     private func runDialogCli(
         command: String,
@@ -273,6 +281,40 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 // Error ignored - debug menu tests only
             }
         }
+    }
+
+    private func sketchCliPath() -> String { cliPath(subdir: "sketch-cli", binaryName: "SketchCLI") }
+
+    private func runSketchCli(command: String, json: String) {
+        let cliPath = sketchCliPath()
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            let process = Process()
+            process.executableURL = URL(fileURLWithPath: cliPath)
+            process.arguments = [command, json]
+            process.environment = ProcessInfo.processInfo.environment
+
+            do {
+                try process.run()
+                process.waitUntilExit()
+            } catch {
+                // Error ignored - debug menu tests only
+            }
+        }
+    }
+
+    /// Load a sketch test case: strips the `_sketchCommand` key from JSON before returning.
+    private func loadSketchTestCase(name: String) -> (command: String, json: String)? {
+        guard let root = projectRoot() else { return nil }
+        let filePath = "\(root)/test-cases/cases/sketch/\(name).json"
+        guard let data = FileManager.default.contents(atPath: filePath),
+              var dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let command = dict["_sketchCommand"] as? String else { return nil }
+        dict.removeValue(forKey: "_sketchCommand")
+        guard JSONSerialization.isValidJSONObject(dict),
+              let stripped = try? JSONSerialization.data(withJSONObject: dict),
+              let json = String(data: stripped, encoding: .utf8) else { return nil }
+        return (command: command, json: json)
     }
 
     private func showPaneNotification(title: String, body: String, sound: Bool = true, clientName: String = "Consult User MCP") {
@@ -387,6 +429,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func testNotifyTool() {
         guard let tc = loadTestCase(category: "notify", name: "basic") else { return }
         runDialogCli(command: "notify", json: tc.json, projectPath: tc.projectPath)
+    }
+
+    @objc private func testSketchProposeBasic() {
+        guard let tc = loadSketchTestCase(name: "propose-basic") else { return }
+        runSketchCli(command: tc.command, json: tc.json)
+    }
+
+    @objc private func testSketchProposeEmpty() {
+        guard let tc = loadSketchTestCase(name: "propose-empty") else { return }
+        runSketchCli(command: tc.command, json: tc.json)
     }
 
     @objc private func testNotifyUpdate() {

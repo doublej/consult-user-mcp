@@ -15,6 +15,8 @@ dist/
 dialog-cli/dialog-cli
 dialog-cli/dialog-cli-test
 dialog-cli/.build/
+sketch-cli/.build/
+sketch-cli/test-report/
 
 # macOS app build artifacts
 macos-app/.build/
@@ -56,3 +58,7 @@ CLAUDE.md
 # Confidential / local-only
 local/
 .repomap.tags.cache.v1/
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db

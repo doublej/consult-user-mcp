@@ -19,6 +19,8 @@ import type {
   QuestionsResult,
   TweakOptions,
   TweakResult,
+  ProposeLayoutOptions,
+  ProposeLayoutResult,
 } from "../types.js";
 
 const execFileAsync = promisify(execFile);
@@ -26,23 +28,20 @@ const execFileAsync = promisify(execFile);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-function findDialogCli(): string | null {
-  // App bundle: Resources/mcp-server/dist/providers -> Resources/dialog-cli/dialog-cli
-  const appBundlePath = join(__dirname, "..", "..", "..", "dialog-cli", "dialog-cli");
-  if (existsSync(appBundlePath)) return appBundlePath;
-
-  // Dev: mcp-server/dist/providers -> dialog-cli/.build/{debug,release}/DialogCLI
-  const devDebugPath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "debug", "DialogCLI");
-  if (existsSync(devDebugPath)) return devDebugPath;
-
-  const devReleasePath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "release", "DialogCLI");
-  if (existsSync(devReleasePath)) return devReleasePath;
-
-  return null;
+// App bundle: Resources/mcp-server/dist/providers -> Resources/<subdir>/<subdir>
+// Dev: mcp-server/dist/providers -> <subdir>/.build/{debug,release}/<binaryName>
+function findCli(subdir: string, binaryName: string): string | null {
+  const base = join(__dirname, "..", "..", "..", subdir);
+  const candidates = [
+    join(base, subdir),
+    join(base, ".build", "debug", binaryName),
+    join(base, ".build", "release", binaryName),
+  ];
+  return candidates.find(c => existsSync(c)) ?? null;
 }
 
 function getCliPath(): string {
-  const path = findDialogCli();
+  const path = findCli("dialog-cli", "DialogCLI");
   if (!path) {
     const appBundlePath = join(__dirname, "..", "..", "..", "dialog-cli", "dialog-cli");
     const devPath = join(__dirname, "..", "..", "..", "dialog-cli", ".build", "release", "DialogCLI");
@@ -58,6 +57,22 @@ function getCliPath(): string {
 }
 
 let cliPath: string | null = null;
+
+function getSketchCliPath(): string {
+  const path = findCli("sketch-cli", "SketchCLI");
+  if (!path) {
+    const appBundlePath = join(__dirname, "..", "..", "..", "sketch-cli", "sketch-cli");
+    const devPath = join(__dirname, "..", "..", "..", "sketch-cli", ".build", "release", "SketchCLI");
+    throw new Error(
+      `Sketch CLI not found.\n\n` +
+      `Searched:\n  - ${appBundlePath}\n  - ${devPath}\n\n` +
+      `Build it: cd sketch-cli && swift build -c release`
+    );
+  }
+  return path;
+}
+
+let sketchCliPath: string | null = null;
 
 /**
  * Swift-based native dialog provider for macOS.
@@ -156,4 +171,43 @@ export class SwiftDialogProvider implements DialogProvider {
     if (!cliPath) cliPath = getCliPath();
     execFileAsync(cliPath, ["pulse"]).catch(() => {});
   }
+
+  private async execSketchCli<T>(command: string, args?: object, signal?: AbortSignal): Promise<T> {
+    if (!sketchCliPath) sketchCliPath = getSketchCliPath();
+    const cliArgs = args ? [command, JSON.stringify(args)] : [command];
+    let stdout: string;
+    let stderr = "";
+    try {
+      const result = await execFileAsync(sketchCliPath, cliArgs, signal ? { signal } : {});
+      stdout = result.stdout;
+      stderr = result.stderr;
+    } catch (err: unknown) {
+      const e = err as { code?: string | number; signal?: string; stderr?: string; message?: string; name?: string };
+      if (e.name === "AbortError" || e.code === "ABORT_ERR") {
+        throw new Error(`Sketch CLI '${command}' was cancelled`);
+      }
+      if (e.code === "ENOENT") {
+        throw new Error(`Sketch CLI not found at: ${sketchCliPath}`);
+      }
+      if (typeof e.code === "number") {
+        const errOut = e.stderr?.trim();
+        throw new Error(`Sketch CLI '${command}' exited with code ${e.code}${errOut ? `: ${errOut}` : ""}`);
+      }
+      if (e.signal) {
+        throw new Error(`Sketch CLI '${command}' killed by signal ${e.signal}`);
+      }
+      throw new Error(`Sketch CLI '${command}' failed: ${e.message ?? String(err)}`);
+    }
+    try {
+      return JSON.parse(stdout.trim()) as T;
+    } catch {
+      const hint = stderr.trim() ? `\nStderr: ${stderr.trim().slice(0, 200)}` : "";
+      throw new Error(`Sketch CLI '${command}' returned invalid JSON: ${stdout.slice(0, 200)}${hint}`);
+    }
+  }
+
+  async proposeLayout(opts: ProposeLayoutOptions, signal?: AbortSignal): Promise<ProposeLayoutResult> {
+    return this.execSketchCli<ProposeLayoutResult>("propose", opts, signal);
+  }
+
 }

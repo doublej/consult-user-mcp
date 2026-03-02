@@ -13,6 +13,8 @@ import type {
   QuestionsResult,
   TweakOptions,
   TweakResult,
+  ProposeLayoutOptions,
+  ProposeLayoutResult,
 } from "../types.js";
 
 /**
@@ -67,4 +69,10 @@ export interface DialogProvider {
    * Display a tweak pane for real-time numeric value adjustment.
    */
   tweak(opts: TweakOptions): Promise<TweakResult>;
+
+  /**
+   * Open the interactive grid layout editor.
+   * Blocks until the user accepts or cancels.
+   */
+  proposeLayout(opts: ProposeLayoutOptions, signal?: AbortSignal): Promise<ProposeLayoutResult>;
 }

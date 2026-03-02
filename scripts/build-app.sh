@@ -12,10 +12,14 @@ CLI_VERSION=$(cat "$ROOT/dialog-cli/VERSION" | tr -d '[:space:]')
 
 echo "Building ${APP_NAME} v${APP_VERSION}..."
 
-# 1. Build dialog-cli
-echo "  Building dialog-cli..."
-cd "$ROOT/dialog-cli"
-swift build -c release
+# 1. Build dialog-cli and sketch-cli in parallel
+echo "  Building dialog-cli and sketch-cli in parallel..."
+(cd "$ROOT/dialog-cli" && swift build -c release) &
+PID_DIALOG=$!
+(cd "$ROOT/sketch-cli" && swift build -c release) &
+PID_SKETCH=$!
+wait $PID_DIALOG
+wait $PID_SKETCH
 
 # 2. Build mcp-server
 echo "  Building mcp-server..."
@@ -32,6 +36,7 @@ echo "  Creating app bundle..."
 rm -rf "$APP_PATH"
 mkdir -p "$APP_PATH/Contents/MacOS"
 mkdir -p "$APP_PATH/Contents/Resources/dialog-cli"
+mkdir -p "$APP_PATH/Contents/Resources/sketch-cli"
 mkdir -p "$APP_PATH/Contents/Resources/mcp-server/dist"
 
 # 5. Copy executable
@@ -40,6 +45,9 @@ cp "$ROOT/macos-app/.build/release/ConsultUserMCP" "$APP_PATH/Contents/MacOS/"
 # 6. Copy dialog-cli binary and VERSION
 cp "$ROOT/dialog-cli/.build/release/DialogCLI" "$APP_PATH/Contents/Resources/dialog-cli/dialog-cli"
 cp "$ROOT/dialog-cli/VERSION" "$APP_PATH/Contents/Resources/dialog-cli/VERSION"
+
+# 6b. Copy sketch-cli binary
+cp "$ROOT/sketch-cli/.build/release/SketchCLI" "$APP_PATH/Contents/Resources/sketch-cli/sketch-cli"
 
 # 7. Copy mcp-server dist and dependencies
 cp -r "$ROOT/mcp-server/dist/"* "$APP_PATH/Contents/Resources/mcp-server/dist/"

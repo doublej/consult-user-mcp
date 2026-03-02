@@ -1,13 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { resolve } from "path";
+import { resolve, join } from "path";
+import { writeFileSync, mkdirSync } from "fs";
+import { tmpdir } from "os";
 import { z } from "zod";
 import { resolveCSS } from "./css-resolver.js";
 import { resolveTextSearch } from "./text-search-resolver.js";
 import { SwiftDialogProvider } from "./providers/swift.js";
 import { WindowsDialogProvider } from "./providers/windows.js";
 import type { DialogProvider } from "./providers/interface.js";
-import type { DialogPosition, QuestionsMode, TweakParameter } from "./types.js";
+import type { DialogPosition, QuestionsMode, TweakParameter, SketchBlock, SketchLayoutNode } from "./types.js";
 import { compactResponse } from "./compact.js";
 import { humanize } from "./humanize.js";
 import { readSettings } from "./settings.js";
@@ -302,6 +304,134 @@ server.registerTool("notify", {
   const projectPath = p.project_path ?? cachedProjectPath;
   const r = await provider.notify({ body: unescLiterals(p.body), title: p.title, sound: p.sound, projectPath });
   return { content: [{ type: "text", text: JSON.stringify({ success: r.success }) }] };
+});
+
+function isHeadless(): boolean {
+  const env = process.env;
+  return !!(env.SSH_CONNECTION || env.SSH_TTY || env.CI);
+}
+
+function formatSketchBlock(b: SketchBlock): string {
+  return `  - "${b.label}" at (${b.x},${b.y}) size ${b.w}×${b.h}`;
+}
+
+const blockSchema = z.object({
+  label: z.string().min(1).max(50),
+  x: z.number().int().min(0),
+  y: z.number().int().min(0),
+  w: z.number().int().min(1),
+  h: z.number().int().min(1),
+  color: z.string().max(20).optional(),
+  content: z.enum(["text", "image", "video", "avatar", "button", "input", "list", "chart", "map", "nav", "form"]).optional()
+    .describe("Wireframe content type. Auto-inferred from label if omitted."),
+  role: z.enum(["header", "sidebar", "canvas", "footer", "toolbar", "panel"]).optional()
+    .describe("Semantic role. Adds faint background tint to the block zone."),
+  flowDirection: z.enum(["row", "column"]).optional()
+    .describe("Flow direction arrow shown next to block number."),
+  importance: z.enum(["primary", "secondary", "tertiary"]).optional()
+    .describe("Visual importance hierarchy. Auto-inferred from role if omitted."),
+  elevation: z.number().int().min(0).max(3).optional()
+    .describe("Shadow elevation level (0-3). Auto-inferred from label if omitted."),
+});
+
+const dimensionValue = z.union([
+  z.number().int().min(1),
+  z.enum(["hug", "fill"]),
+]);
+
+const layoutNodeSchema: z.ZodType = z.lazy(() =>
+  z.object({
+    id: z.string().min(1).max(50),
+    role: z.enum(["header", "sidebar", "canvas", "footer", "toolbar", "panel"]).optional(),
+    label: z.string().max(50).optional(),
+    children: z.array(layoutNodeSchema).optional(),
+    constraints: z.object({
+      width: dimensionValue.optional(),
+      height: dimensionValue.optional(),
+    }).optional(),
+    layout: z.object({
+      direction: z.enum(["row", "column"]).optional(),
+      gap: z.number().int().min(0).max(10).optional(),
+    }).optional(),
+    priority: z.number().int().min(0).optional(),
+    color: z.string().max(20).optional(),
+  })
+);
+
+let proposeLayoutActive = false;
+
+server.registerTool("propose_layout", {
+  description: "Open interactive grid layout editor. Accepts either explicit grid blocks or a semantic structure tree (direction/constraints-based). User can drag/resize/add/remove blocks. Returns structured layout data + ASCII + SVG. 10 min timeout. macOS only.",
+  inputSchema: z.object({
+    width: z.number().int().min(3).max(20).default(12).describe("Grid columns (3-20)"),
+    height: z.number().int().min(3).max(20).default(8).describe("Grid rows (3-20)"),
+    template: z.enum(["compact", "standard", "spacious", "detailed", "mobile"]).optional()
+      .describe("Preset template (overrides width/height)"),
+    title: z.string().max(80).default("Layout Sketch").describe("Dialog title"),
+    description: z.string().max(200).optional().describe("Description shown in dialog"),
+    blocks: z.array(blockSchema).default([]).describe("Initial blocks with grid coordinates (alternative to structure)"),
+    structure: layoutNodeSchema.optional().describe("Semantic layout tree with direction/constraints (alternative to blocks)"),
+    frame: z.enum(["browser", "phone", "tablet"]).optional()
+      .describe("Device frame chrome wrapping the canvas. Mobile template auto-sets 'phone'."),
+    annotations: z.array(z.object({
+      x: z.number().int().min(0),
+      y: z.number().int().min(0),
+      text: z.string().min(1).max(100),
+    })).optional().describe("Numbered callout markers at grid coordinates with legend text."),
+    project_path: z.string().optional(),
+  }),
+}, async (p, extra) => {
+  if (isHeadless()) {
+    throw new Error("Interactive layout editor requires a desktop environment (unavailable over SSH/CI)");
+  }
+  if (proposeLayoutActive) {
+    throw new Error("An interactive layout session is already running. Complete or cancel it first.");
+  }
+  if (p.project_path) cachedProjectPath = p.project_path;
+
+  proposeLayoutActive = true;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), DIALOG_TIMEOUT_MS);
+  try {
+    const r = await withHeartbeat(provider.proposeLayout({
+      width: p.width,
+      height: p.height,
+      template: p.template,
+      title: p.title,
+      description: p.description,
+      blocks: p.blocks,
+      structure: p.structure as SketchLayoutNode,
+      frame: p.frame,
+      annotations: p.annotations,
+    }, controller.signal), extra);
+
+    const lines: string[] = [`Status: ${r.status}`];
+    if (r.summary) lines.push("", r.summary);
+    if (r.changes?.length) {
+      lines.push("", "Changes:");
+      for (const c of r.changes) lines.push(`  - ${c}`);
+    }
+    if (r.layout?.blocks?.length) {
+      lines.push("", `Grid: ${r.layout.columns}×${r.layout.rows}`, "Blocks:");
+      for (const b of r.layout.blocks) lines.push(formatSketchBlock(b));
+    }
+    if (r.ascii) lines.push("", "ASCII:", r.ascii);
+
+    const content: { type: "text"; text: string }[] = [{ type: "text", text: lines.join("\n") }];
+
+    if (r.image) {
+      const dir = join(tmpdir(), "consult-user-sketch");
+      mkdirSync(dir, { recursive: true });
+      const svgPath = join(dir, `layout-${Date.now()}.svg`);
+      writeFileSync(svgPath, r.image);
+      content.push({ type: "text", text: `\nImage: ${svgPath}` });
+    }
+
+    return { content };
+  } finally {
+    clearTimeout(timeout);
+    proposeLayoutActive = false;
+  }
 });
 
 async function main(): Promise<void> {

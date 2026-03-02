@@ -1,0 +1,49 @@
+import Foundation
+
+enum ContentInference {
+    private static let mapping: [(keywords: [String], content: String)] = [
+        (["image", "photo", "hero", "banner", "thumbnail", "logo"], "image"),
+        (["video", "player"], "video"),
+        (["avatar", "profile pic"], "avatar"),
+        (["button", "cta", "action"], "button"),
+        (["input", "search", "field"], "input"),
+        (["list", "feed", "items"], "list"),
+        (["chart", "graph", "stats", "analytics"], "chart"),
+        (["map", "location"], "map"),
+        (["nav", "menu", "tabs", "breadcrumb"], "nav"),
+        (["form", "signup", "login", "register", "contact"], "form"),
+    ]
+
+    static func infer(from label: String) -> String? {
+        let lower = label.lowercased()
+        for (keywords, content) in mapping {
+            if keywords.contains(where: { lower.contains($0) }) {
+                return content
+            }
+        }
+        return nil
+    }
+
+    static func resolve(explicit: String?, label: String) -> String? {
+        explicit ?? infer(from: label)
+    }
+
+    static func inferElevation(explicit: Int?, label: String) -> Int {
+        if let explicit { return min(3, max(0, explicit)) }
+        let lower = label.lowercased()
+        if ["modal", "dialog", "overlay"].contains(where: { lower.contains($0) }) { return 3 }
+        if ["popover", "floating"].contains(where: { lower.contains($0) }) { return 2 }
+        if lower.contains("card") { return 1 }
+        return 0
+    }
+
+    static func inferImportance(explicit: String?, role: String?) -> ImportanceLevel {
+        if let explicit, let level = ImportanceLevel(rawValue: explicit) { return level }
+        guard let role, let blockRole = BlockRole(rawValue: role) else { return .secondary }
+        switch blockRole {
+        case .canvas: return .primary
+        case .header, .sidebar: return .secondary
+        case .toolbar, .panel, .footer: return .tertiary
+        }
+    }
+}

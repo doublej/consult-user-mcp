@@ -147,6 +147,78 @@ export interface QuestionsResult {
   instruction?: string;
 }
 
+// --- Sketch types ---
+
+export interface SketchBlock {
+  label: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  color?: string;
+  content?: string;
+  role?: string;
+  flowDirection?: string;
+  importance?: string;
+  elevation?: number;
+}
+
+export interface SketchAnnotation {
+  x: number;
+  y: number;
+  text: string;
+}
+
+export interface SketchGridLayout {
+  columns: number;
+  rows: number;
+  blocks: SketchBlock[];
+  frame?: string;
+  annotations?: SketchAnnotation[];
+}
+
+export interface SketchNodeConstraints {
+  width?: number | "hug" | "fill";
+  height?: number | "hug" | "fill";
+}
+
+export interface SketchNodeLayout {
+  direction?: "row" | "column";
+  gap?: number;
+}
+
+export interface SketchLayoutNode {
+  id: string;
+  role?: "header" | "sidebar" | "canvas" | "footer" | "toolbar" | "panel";
+  label?: string;
+  children?: SketchLayoutNode[];
+  constraints?: SketchNodeConstraints;
+  layout?: SketchNodeLayout;
+  priority?: number;
+  color?: string;
+}
+
+export interface ProposeLayoutOptions {
+  width?: number;
+  height?: number;
+  template?: string;
+  title?: string;
+  description?: string;
+  blocks?: SketchBlock[];
+  structure?: SketchLayoutNode;
+  frame?: string;
+  annotations?: SketchAnnotation[];
+}
+
+export interface ProposeLayoutResult {
+  status: "accepted" | "modified" | "cancelled";
+  layout: SketchGridLayout | null;
+  ascii: string | null;
+  image: string | null;
+  summary: string | null;
+  changes: string[] | null;
+}
+
 // Tweak parameter definition
 export interface TweakParameter {
   id: string;

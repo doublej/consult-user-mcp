@@ -1,15 +1,21 @@
-<!-- version: 2.11.0 -->
+<!-- version: 2.12.0 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
-**NEVER use the built-in `AskUserQuestion` tool.** It is DISABLED. Use only consult-user-mcp tools.
+**ALWAYS use consult-user-mcp tools (`ask`, `notify`, `tweak`) for all user interaction.** The built-in `AskUserQuestion` tool is disabled.
 
-**BATCH questions when you have 2+ questions.** Use `ask` with `type: "form"` to ask multiple questions at once.
+Batch 2+ questions using `ask` with `type: "form"` instead of asking one at a time.
 
-**CONTINUE smoothly after getting answers.** Don't check back in or ask "should I proceed?" — just use the answers and keep working.
-
-**ALWAYS pass `project_path`** on your first `ask`, `notify`, or `tweak` call. It's cached for the session — subsequent calls can omit it.
+Pass `project_path` on your first `ask`, `notify`, or `tweak` call. It's cached for the session — subsequent calls can omit it.
 </critical_rules>
+
+<anti_patterns>
+Common mistakes — do this instead:
+- Asking "should I proceed?" after getting an answer → just use the answer and keep working
+- Asking questions one at a time when you have multiple → use `type: "form"` to batch them
+- Guessing numeric values repeatedly when the user rejects them → offer `tweak` instead
+- Using `other: false` on open-ended questions → only set it for closed-ended lists (environments, predefined options)
+</anti_patterns>
 
 ## Tools
 
@@ -26,7 +32,7 @@ Three tools: `ask` (interactive dialogs), `notify` (fire-and-forget notification
 
 All types share: `body` (required), `title`, `position` (`"left"` \| `"center"` \| `"right"`), `project_path`.
 
-**"Other" option:** Pick dialogs and form choice questions include an "Other" option by default (`other: true`), allowing users to type a custom answer not in the predefined list. The custom text is returned as the `answer` value (never the literal "Other"). Set `other: false` for closed-ended questions where custom input doesn't make sense.
+"Other" option: Pick dialogs and form choice questions include an "Other" option by default (`other: true`), allowing users to type a custom answer. The custom text is returned as the `answer` value (never the literal "Other"). Set `other: false` only for closed-ended questions.
 
 ### notify — Notification
 
@@ -36,17 +42,21 @@ Params: `body` (required), `title`, `sound`, `project_path`.
 
 Opens a slider panel for real-time numeric value adjustment with live file writes.
 
-**Offer tweak when:**
+Offer tweak when:
 1. User adjusts visual/layout values — subjective choices benefit from interactive tuning
 2. User rejects your numeric guess — offer tweak instead of guessing again
 3. Multiple related values need coordinated tuning
 
-**Workflow:** Confirm first, then open if accepted:
-1. `ask` → `{"type": "confirm", "body": "Adjust font-size and line-height interactively?", "yes": "Open tweak", "no": "Just pick values"}`
+### Workflow
+
+Confirm first, then open if accepted:
+1. `ask` → `{"type": "confirm", "body": "Adjust values interactively?", "yes": "Open tweak", "no": "Just pick values"}`
 2. If confirmed → call `tweak` with parameters
 3. `action: "file"` → values already written to disk. `action: "agent"` → files reverted, apply returned values yourself.
 
-**Parameter formats** (one per slider):
+### Parameter formats
+
+One per slider:
 
 | Format | When to use | Required fields |
 |--------|-------------|----------------|
@@ -58,11 +68,11 @@ Opens a slider panel for real-time numeric value adjustment with live file write
 - Optional: `step`, `unit`, `index` (for multi-value CSS like `margin: 10px 20px`), `fn` (for CSS functions like `rotateY`).
 - CSS reference auto-resolves `line`, `column`, `expectedText`, `current`, `unit`.
 
-**Response:** `{"answer": {"<id>": <number>}, "action": "file" | "agent"}`
+Response: `{"answer": {"<id>": <number>}, "action": "file" | "agent"}`
 
-**CSS animations:** The tweak pane has a "Replay animations" checkbox (enabled by default). When enabled, animations automatically replay after each value change.
+### CSS animation replay
 
-**Auto-injection (required):** Before calling tweak, inject the replay client via claude-in-chrome:
+Before calling tweak on a page with CSS animations, inject the replay client via claude-in-chrome:
 ```javascript
 // mcp__claude-in-chrome__javascript_tool
 if (!window.__tweakReplayConnected) {
@@ -84,9 +94,7 @@ if (!window.__tweakReplayConnected) {
 }
 ```
 
-This is idempotent — safe to call multiple times. The script auto-reconnects on page reload.
-
-**Trigger patterns** — User says something like:
+### Trigger patterns
 
 | User prompt | Why tweak? |
 |-------------|-----------|
@@ -95,70 +103,6 @@ This is idempotent — safe to call multiple times. The script auto-reconnects o
 | "Hmm, that's too small" | Rejected your guess |
 | "Balance the margins and padding together" | Multiple related values |
 | "Let me adjust this interactively" | Explicit request |
-
-**Full workflow example:**
-
-```jsonc
-// 1. User: "The card padding doesn't feel balanced"
-// 2. Agent confirms before opening tweak pane:
-// ask tool:
-{"type": "confirm", "body": "Adjust padding values interactively?", "yes": "Open tweak", "no": "I'll pick values"}
-
-// 3. User confirms → Agent calls tweak:
-// tweak tool:
-{"body": "Card padding", "parameters": [
-  {"label": "Top/Bottom", "file": "Card.module.css", "selector": ".card", "property": "padding-block", "min": 4, "max": 48},
-  {"label": "Left/Right", "file": "Card.module.css", "selector": ".card", "property": "padding-inline", "min": 8, "max": 64}
-]}
-
-// 4. Response: {"answer": {"top-bottom": 24, "left-right": 32}, "action": "file"}
-// 5. action: "file" → values already saved. Agent continues with next task.
-```
-
-**Rejected guess → offer tweak:**
-
-```jsonc
-// Agent set border-radius, user says: "That doesn't look right"
-// DON'T guess again — offer tweak:
-// ask tool:
-{"type": "confirm", "body": "Want to adjust the border radius interactively?", "yes": "Open tweak", "no": "Try another value"}
-```
-
-## Examples
-
-```jsonc
-// Confirm with custom labels
-{"type": "confirm", "body": "Deploy to production?", "yes": "Deploy", "no": "Cancel", "project_path": "/path/to/project"}
-
-// Pick with descriptions
-{"type": "pick", "body": "Which database?", "choices": ["PostgreSQL", "MySQL", "SQLite"], "descriptions": ["Best for complex queries", "Widely supported", "Zero config"]}
-
-// Multi-select
-{"type": "pick", "body": "Select features:", "choices": ["Auth", "API", "UI"], "multi": true}
-
-// Closed-ended pick (no "Other" option)
-{"type": "pick", "body": "Deploy to which environment?", "choices": ["Production", "Staging", "Dev"], "other": false}
-
-// Password input
-{"type": "text", "body": "Enter API key:", "hidden": true}
-
-// Batch questions as form (choice + text mixed)
-{"type": "form", "body": "Project setup", "questions": [
-  {"id": "lang", "question": "Language?", "options": ["TypeScript", "Python"]},
-  {"id": "name", "question": "Project name?", "type": "text", "placeholder": "my-project"},
-  {"id": "key", "question": "API key?", "type": "text", "hidden": true}
-]}
-
-// Tweak (text search format)
-// tweak tool: {"body": "Adjust card layout", "parameters": [
-//   {"label": "Padding", "file": "style.css", "search": "padding: {v}px", "min": 0, "max": 60},
-//   {"label": "Border Radius", "file": "style.css", "search": "border-radius: {v}px", "min": 0, "max": 24}
-// ]}
-```
-
-## Batching
-
-Use `type: "form"` for 2+ questions. Only ask sequentially when answer #1 determines whether to ask #2, or questions are separated by significant work.
 
 ## Responses
 

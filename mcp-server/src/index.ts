@@ -322,6 +322,12 @@ const blockSchema = z.object({
   w: z.number().int().min(1),
   h: z.number().int().min(1),
   color: z.string().max(20).optional(),
+  content: z.enum(["text", "image", "video", "avatar", "button", "input", "list", "chart", "map", "nav", "form"]).optional()
+    .describe("Wireframe content type. Auto-inferred from label if omitted."),
+  role: z.enum(["header", "sidebar", "canvas", "footer", "toolbar", "panel"]).optional()
+    .describe("Semantic role. Adds faint background tint to the block zone."),
+  flowDirection: z.enum(["row", "column"]).optional()
+    .describe("Flow direction arrow shown next to block number."),
 });
 
 const dimensionValue = z.union([

@@ -22,7 +22,9 @@ enum LayoutCompiler {
                 label: node.displayLabel,
                 x: bounds.x, y: bounds.y,
                 w: bounds.w, h: bounds.h,
-                color: node.color
+                color: node.color,
+                role: node.role,
+                flowDirection: node.layout?.direction
             ))
         }
 

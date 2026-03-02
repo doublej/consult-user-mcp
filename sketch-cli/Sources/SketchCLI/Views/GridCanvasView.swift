@@ -52,11 +52,16 @@ final class OptionCycleState: ObservableObject {
 
 struct GridCanvasView: View {
     @Binding var layout: GridLayout
+    @Binding var stashedBlocks: [GridBlock]
     var interactive: Bool = true
     var blockNumbers: [String: String] = [:]
     var onAddBlock: ((Int, Int) -> Void)?
+    var onDragHintChanged: ((Bool, Bool) -> Void)?
 
     @StateObject private var cycleState = OptionCycleState()
+    @State private var activeDragBlockId: String?
+    @State private var activeDragOffset: CGSize = .zero
+    var isDragging: Bool { activeDragBlockId != nil }
     var nestingMap: [String: String]? = nil
 
     var body: some View {
@@ -67,11 +72,13 @@ struct GridCanvasView: View {
 
             ZStack(alignment: .topLeading) {
                 gridBackground(cellW: cellW, cellH: cellH, size: geo.size)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 ForEach(sortedBlocks(resolvedNesting)) { block in
                     let blockBinding = binding(for: block)
                     let isNested = resolvedNesting[block.id] != nil
+                    let isChildOfDragged = activeDragBlockId.map { resolvedNesting[block.id] == $0 } ?? false
+                    let childOffset = isChildOfDragged ? activeDragOffset : .zero
+
                     BlockView(
                         block: blockBinding,
                         cellWidth: cellW,
@@ -84,13 +91,29 @@ struct GridCanvasView: View {
                         displayNumber: blockNumbers[block.id] ?? "",
                         onDelete: { deleteBlock(id: block.id) },
                         onRename: { newLabel in renameBlock(id: block.id, label: newLabel) },
-                        onDuplicate: { duplicateBlock(id: block.id) }
+                        onDuplicate: { duplicateBlock(id: block.id) },
+                        onDragUpdate: { offset in
+                            activeDragBlockId = offset != nil ? block.id : nil
+                            activeDragOffset = offset ?? .zero
+                            if let offset = offset {
+                                let rowDelta = Int(round(offset.height / cellH))
+                                let isOver = block.y + rowDelta >= layout.rows
+                                onDragHintChanged?(true, isOver)
+                            } else {
+                                onDragHintChanged?(false, false)
+                            }
+                        },
+                        onDragEnd: { colDelta, rowDelta in
+                            moveBlock(id: block.id, colDelta: colDelta, rowDelta: rowDelta,
+                                      nesting: resolvedNesting)
+                        }
                     )
                     .offset(
-                        x: CGFloat(block.x) * cellW + (isNested ? 3 : 1),
-                        y: CGFloat(block.y) * cellH + (isNested ? 3 : 1)
+                        x: CGFloat(block.x) * cellW + (isNested ? 3 : 1) + childOffset.width,
+                        y: CGFloat(block.y) * cellH + (isNested ? 3 : 1) + childOffset.height
                     )
                 }
+
             }
             .coordinateSpace(name: "canvas")
             .onContinuousHover { phase in
@@ -101,6 +124,10 @@ struct GridCanvasView: View {
                 case .ended:
                     cycleState.clearHover()
                 }
+            }
+            .onChange(of: layout.blocks) {
+                let activeIds = Set(layout.blocks.map(\.id))
+                stashedBlocks.removeAll { activeIds.contains($0.id) }
             }
             .onAppear { if interactive { cycleState.startMonitoring() } }
             .onDisappear { cycleState.stopMonitoring() }
@@ -116,7 +143,10 @@ struct GridCanvasView: View {
 
     private func gridBackground(cellW: CGFloat, cellH: CGFloat, size: CGSize) -> some View {
         Canvas { context, canvasSize in
-            let lineColor = Color(Theme.gridLines)
+            // White fill
+            context.fill(Path(CGRect(origin: .zero, size: canvasSize)), with: .color(.white))
+            // Light blue grid lines
+            let lineColor = Color(red: 0.78, green: 0.88, blue: 0.98)
             for col in 0 ... layout.columns {
                 let x = CGFloat(col) * cellW
                 var path = Path()
@@ -130,6 +160,17 @@ struct GridCanvasView: View {
                 path.move(to: CGPoint(x: 0, y: y))
                 path.addLine(to: CGPoint(x: canvasSize.width, y: y))
                 context.stroke(path, with: .color(lineColor), lineWidth: 0.5)
+            }
+            // Role zone tints
+            for block in layout.blocks {
+                guard let tint = roleTint(block.role) else { continue }
+                let rect = CGRect(
+                    x: CGFloat(block.x) * cellW,
+                    y: CGFloat(block.y) * cellH,
+                    width: CGFloat(block.w) * cellW,
+                    height: CGFloat(block.h) * cellH
+                )
+                context.fill(Path(rect), with: .color(tint))
             }
         }
         .contentShape(Rectangle())
@@ -183,4 +224,42 @@ struct GridCanvasView: View {
 
         layout.blocks.append(duplicate)
     }
+
+    private func roleTint(_ role: String?) -> Color? {
+        switch role {
+        case "header", "footer": return Color(red: 0.6, green: 0.55, blue: 0.5).opacity(0.05)
+        case "sidebar", "toolbar": return Color(red: 0.5, green: 0.55, blue: 0.65).opacity(0.05)
+        case "canvas", "panel": return Color.gray.opacity(0.03)
+        default: return nil
+        }
+    }
+
+    private func moveBlock(id: String, colDelta: Int, rowDelta: Int, nesting: [String: String]) {
+        guard let block = layout.blocks.first(where: { $0.id == id }) else { return }
+
+        // Stash: unclamped target exceeds grid bottom
+        if block.y + rowDelta >= layout.rows {
+            let childIds = Set(nesting.filter { $0.value == id }.map(\.key))
+            let removed = layout.blocks.filter { $0.id == id || childIds.contains($0.id) }
+            stashedBlocks.append(contentsOf: removed)
+            layout.blocks.removeAll { $0.id == id || childIds.contains($0.id) }
+            return
+        }
+
+        // Move the block
+        if let idx = layout.blocks.firstIndex(where: { $0.id == id }) {
+            layout.blocks[idx].x = max(0, min(layout.columns - block.w, block.x + colDelta))
+            layout.blocks[idx].y = max(0, min(layout.rows - block.h, block.y + rowDelta))
+        }
+
+        // Move children by the same delta
+        let childIds = nesting.filter { $0.value == id }.map(\.key)
+        for childId in childIds {
+            guard let child = layout.blocks.first(where: { $0.id == childId }),
+                  let idx = layout.blocks.firstIndex(where: { $0.id == childId }) else { continue }
+            layout.blocks[idx].x = max(0, min(layout.columns - child.w, child.x + colDelta))
+            layout.blocks[idx].y = max(0, min(layout.rows - child.h, child.y + rowDelta))
+        }
+    }
+
 }

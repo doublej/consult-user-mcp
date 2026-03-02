@@ -13,6 +13,8 @@ struct BlockView: View {
     var onDelete: (() -> Void)?
     var onRename: ((String) -> Void)?
     var onDuplicate: (() -> Void)?
+    var onDragUpdate: ((CGSize?) -> Void)?
+    var onDragEnd: ((Int, Int) -> Void)?
 
     @State private var isDragging = false
     @State private var dragOffset: CGSize = .zero
@@ -51,6 +53,11 @@ struct BlockView: View {
                     dash: isNested ? [4, 3] : []
                 ))
 
+            // Wireframe content
+            if let ct = ContentInference.resolve(explicit: block.content, label: block.label) {
+                WireframeView(contentType: ct, color: blockColor)
+            }
+
             // Number badge at top-left
             VStack(spacing: 0) {
                 HStack {
@@ -81,6 +88,11 @@ struct BlockView: View {
                             .background(blockColor.opacity(0.85))
                             .cornerRadius(4)
                             .padding(3)
+                        if let dir = block.flowDirection {
+                            Text(dir == "row" ? "\u{2192}" : "\u{2193}")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(blockColor.opacity(0.7))
+                        }
                     }
                     Spacer()
                 }
@@ -174,17 +186,17 @@ struct BlockView: View {
     }
 
     private var resizeHandle: some View {
-        ZStack {
-            // Background circle for better visibility
-            Circle()
-                .fill(blockColor.opacity(0.2))
-                .frame(width: 24, height: 24)
-
-            Image(systemName: "arrow.down.right")
-                .font(.system(size: 11, weight: .bold))
-                .foregroundColor(blockColor.opacity(isResizing ? 1.0 : 0.7))
+        Canvas { context, size in
+            let color = blockColor.opacity(isResizing ? 1.0 : 0.5)
+            for i in 0..<3 {
+                let offset = CGFloat(i) * 3.5
+                var path = Path()
+                path.move(to: CGPoint(x: size.width - 3 - offset, y: size.height - 1))
+                path.addLine(to: CGPoint(x: size.width - 1, y: size.height - 3 - offset))
+                context.stroke(path, with: .color(color), lineWidth: 1.5)
+            }
         }
-        .frame(width: 24, height: 24)
+        .frame(width: 14, height: 14)
         .contentShape(Rectangle())
         .gesture(resizeGesture)
     }
@@ -194,8 +206,8 @@ struct BlockView: View {
             .onChanged { value in
                 isDragging = true
                 dragOffset = value.translation
+                onDragUpdate?(value.translation)
 
-                // Show coordinate preview
                 let colDelta = Int(round(value.translation.width / cellWidth))
                 let rowDelta = Int(round(value.translation.height / cellHeight))
                 let newX = max(0, min(gridColumns - block.w, block.x + colDelta))
@@ -205,12 +217,12 @@ struct BlockView: View {
             .onEnded { value in
                 isDragging = false
                 dragCoordinates = nil
+                dragOffset = .zero
+                onDragUpdate?(nil)
 
                 let colDelta = Int(round(value.translation.width / cellWidth))
                 let rowDelta = Int(round(value.translation.height / cellHeight))
-                block.x = max(0, min(gridColumns - block.w, block.x + colDelta))
-                block.y = max(0, min(gridRows - block.h, block.y + rowDelta))
-                dragOffset = .zero
+                onDragEnd?(colDelta, rowDelta)
             }
     }
 

@@ -4,7 +4,7 @@
   import { dev } from "$app/environment";
   import SiteNav from "$lib/components/SiteNav.svelte";
   import PerspectiveDialog from "$lib/components/PerspectiveDialog.svelte";
-  import FieldCanvas from "$lib/components/FieldCanvas.svelte";
+  import { browser } from "$app/environment";
 
   let copied = $state(false);
   let selectedPlatform = $state<"macos" | "windows">("macos");
@@ -163,7 +163,11 @@
   </div>
 
   <section class="hero-row">
-    <FieldCanvas />
+    {#if browser}
+      {#await import("$lib/components/FieldCanvas.svelte") then { default: FieldCanvas }}
+        <FieldCanvas />
+      {/await}
+    {/if}
     <div class="hero">
       <p class="hero-label animate-in">Human Consultation Interface</p>
       <h1 class="animate-in" style="animation-delay: 100ms;">

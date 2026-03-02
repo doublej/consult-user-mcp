@@ -114,6 +114,12 @@ struct GridCanvasView: View {
                     )
                 }
 
+                AlignmentGuidesView(
+                    blocks: layout.blocks,
+                    activeBlockId: activeDragBlockId ?? cycleState.promotedBlockId,
+                    cellW: cellW, cellH: cellH,
+                    gridColumns: layout.columns, gridRows: layout.rows
+                )
             }
             .coordinateSpace(name: "canvas")
             .onContinuousHover { phase in

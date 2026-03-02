@@ -11,6 +11,7 @@ struct BlockInput: Codable {
     let role: String?
     let flowDirection: String?
     let importance: String?
+    let elevation: Int?
 }
 
 struct ProposeLayoutRequest: Codable {
@@ -51,7 +52,8 @@ struct ProposeLayoutRequest: Codable {
                 content: input.content,
                 role: input.role,
                 flowDirection: input.flowDirection,
-                importance: input.importance
+                importance: input.importance,
+                elevation: input.elevation
             )
         }
 
@@ -71,7 +73,7 @@ struct DescribeRequest: Codable {
             return LayoutCompiler.compile(structure, columns: columns, rows: rows)
         }
         return (blocks ?? []).map {
-            GridBlock(label: $0.label, x: $0.x, y: $0.y, w: $0.w, h: $0.h, color: $0.color, content: $0.content, role: $0.role, flowDirection: $0.flowDirection, importance: $0.importance)
+            GridBlock(label: $0.label, x: $0.x, y: $0.y, w: $0.w, h: $0.h, color: $0.color, content: $0.content, role: $0.role, flowDirection: $0.flowDirection, importance: $0.importance, elevation: $0.elevation)
         }
     }
 }

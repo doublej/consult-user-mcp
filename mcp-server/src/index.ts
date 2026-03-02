@@ -330,6 +330,8 @@ const blockSchema = z.object({
     .describe("Flow direction arrow shown next to block number."),
   importance: z.enum(["primary", "secondary", "tertiary"]).optional()
     .describe("Visual importance hierarchy. Auto-inferred from role if omitted."),
+  elevation: z.number().int().min(0).max(3).optional()
+    .describe("Shadow elevation level (0-3). Auto-inferred from label if omitted."),
 });
 
 const dimensionValue = z.union([

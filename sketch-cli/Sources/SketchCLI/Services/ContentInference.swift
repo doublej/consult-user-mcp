@@ -28,6 +28,15 @@ enum ContentInference {
         explicit ?? infer(from: label)
     }
 
+    static func inferElevation(explicit: Int?, label: String) -> Int {
+        if let explicit { return min(3, max(0, explicit)) }
+        let lower = label.lowercased()
+        if ["modal", "dialog", "overlay"].contains(where: { lower.contains($0) }) { return 3 }
+        if ["popover", "floating"].contains(where: { lower.contains($0) }) { return 2 }
+        if lower.contains("card") { return 1 }
+        return 0
+    }
+
     static func inferImportance(explicit: String?, role: String?) -> String {
         if let explicit { return explicit }
         switch role {

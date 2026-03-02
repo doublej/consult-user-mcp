@@ -179,6 +179,7 @@ struct BlockView: View {
             }
         }
         .frame(width: currentW - (isNested ? 6 : 2), height: currentH - (isNested ? 6 : 2))
+        .modifier(ElevationShadow(level: ContentInference.inferElevation(explicit: block.elevation, label: block.label)))
         .offset(isDragging ? dragOffset : .zero)
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
@@ -272,5 +273,18 @@ struct BlockView: View {
                 block.h = max(1, min(gridRows - block.y, block.h + rowDelta))
                 resizeDelta = .zero
             }
+    }
+}
+
+private struct ElevationShadow: ViewModifier {
+    let level: Int
+
+    func body(content: Content) -> some View {
+        switch level {
+        case 1: content.shadow(color: .black.opacity(0.1), radius: 2, y: 1)
+        case 2: content.shadow(color: .black.opacity(0.15), radius: 6, y: 3)
+        case 3: content.shadow(color: .black.opacity(0.2), radius: 12, y: 6)
+        default: content
+        }
     }
 }

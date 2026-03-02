@@ -160,6 +160,7 @@ export interface SketchBlock {
   role?: string;
   flowDirection?: string;
   importance?: string;
+  elevation?: number;
 }
 
 export interface SketchGridLayout {

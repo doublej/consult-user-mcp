@@ -15,6 +15,11 @@ enum SvgRenderer {
 
         var svg = """
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 \(width) \(height)" width="\(width)" height="\(height)">
+        <defs>
+        <filter id="elev1"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.1"/></filter>
+        <filter id="elev2"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-opacity="0.15"/></filter>
+        <filter id="elev3"><feDropShadow dx="0" dy="6" stdDeviation="12" flood-opacity="0.2"/></filter>
+        </defs>
         <rect width="\(width)" height="\(height)" fill="\(background)"/>
         """
 
@@ -74,12 +79,14 @@ enum SvgRenderer {
         let fillAlpha: Double = imp == "primary" ? 0.35 : imp == "tertiary" ? 0.12 : 0.25
         let strokeW: Double = imp == "primary" ? 2.5 : imp == "tertiary" ? 0.5 : 1.5
         let dashAttr = imp == "tertiary" ? " stroke-dasharray=\"4 3\"" : ""
+        let elev = ContentInference.inferElevation(explicit: block.elevation, label: block.label)
+        let filterAttr = elev > 0 ? " filter=\"url(#elev\(elev))\"" : ""
         let fill = hexToRGBA(hex, alpha: fillAlpha)
         let wireframeFill = hexToRGBA(hex, alpha: 0.3)
 
         var svg = """
 
-        <rect x="\(format(bx))" y="\(format(by))" width="\(format(bw))" height="\(format(bh))" rx="4" fill="\(fill)" stroke="\(hex)" stroke-width="\(format(strokeW))"\(dashAttr)/>
+        <rect x="\(format(bx))" y="\(format(by))" width="\(format(bw))" height="\(format(bh))" rx="4" fill="\(fill)" stroke="\(hex)" stroke-width="\(format(strokeW))"\(dashAttr)\(filterAttr)/>
         <text x="\(format(bx + 7))" y="\(format(by + 17))" fill="white" font-family="system-ui, sans-serif" font-size="12">\(escapeXML(block.label))</text>
         """
 

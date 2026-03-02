@@ -30,11 +30,18 @@ struct GridBlock: Codable, Identifiable, Equatable {
     }
 }
 
+struct Annotation: Codable, Equatable {
+    let x: Int
+    let y: Int
+    let text: String
+}
+
 struct GridLayout: Codable, Equatable {
     var columns: Int
     var rows: Int
     var blocks: [GridBlock]
     var frame: String?
+    var annotations: [Annotation]?
 }
 
 struct DensityTemplate: Codable {

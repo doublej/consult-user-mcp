@@ -373,6 +373,11 @@ server.registerTool("propose_layout", {
     structure: layoutNodeSchema.optional().describe("Semantic layout tree with direction/constraints (alternative to blocks)"),
     frame: z.enum(["browser", "phone", "tablet"]).optional()
       .describe("Device frame chrome wrapping the canvas. Mobile template auto-sets 'phone'."),
+    annotations: z.array(z.object({
+      x: z.number().int().min(0),
+      y: z.number().int().min(0),
+      text: z.string().min(1).max(100),
+    })).optional().describe("Numbered callout markers at grid coordinates with legend text."),
     project_path: z.string().optional(),
   }),
 }, async (p, extra) => {
@@ -397,6 +402,7 @@ server.registerTool("propose_layout", {
       blocks: p.blocks,
       structure: p.structure as SketchLayoutNode,
       frame: p.frame,
+      annotations: p.annotations,
     }, controller.signal), extra);
 
     const lines: string[] = [`Status: ${r.status}`];

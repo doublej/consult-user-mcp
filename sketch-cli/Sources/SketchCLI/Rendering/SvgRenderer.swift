@@ -35,7 +35,23 @@ enum SvgRenderer {
             svg += blockRect(block, cellW: cellW, cellH: cellH)
         }
 
+        if let annotations = layout.annotations {
+            svg += annotationSvg(annotations, cellW: cellW, cellH: cellH)
+        }
+
         svg += "\n</g>"
+
+        // Legend below grid
+        if let annotations = layout.annotations, !annotations.isEmpty {
+            let legendY = totalH + 8
+            for (i, ann) in annotations.enumerated() {
+                let ly = legendY + i * 18
+                svg += "\n<circle cx=\"\(chrome.padL + 8)\" cy=\"\(ly + 6)\" r=\"7\" fill=\"#f59e0b\"/>"
+                svg += "\n<text x=\"\(chrome.padL + 8)\" y=\"\(ly + 10)\" fill=\"white\" font-family=\"system-ui\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">\(i + 1)</text>"
+                svg += "\n<text x=\"\(chrome.padL + 22)\" y=\"\(ly + 10)\" fill=\"rgba(255,255,255,0.7)\" font-family=\"system-ui\" font-size=\"11\">\(escapeXML(ann.text))</text>"
+            }
+        }
+
         svg += "\n</svg>"
         return svg
     }
@@ -76,6 +92,22 @@ enum SvgRenderer {
         default:
             return FrameChrome(padL: 0, padR: 0, padT: 0, padB: 0, svg: "")
         }
+    }
+
+    private static func annotationSvg(_ annotations: [Annotation], cellW: Double, cellH: Double) -> String {
+        var svg = ""
+        for (i, ann) in annotations.enumerated() {
+            let cx = Double(ann.x) * cellW + cellW / 2
+            let cy = Double(ann.y) * cellH + cellH / 2
+            let mx = Double(ann.x) * cellW - 10
+            let my = Double(ann.y) * cellH - 10
+            // Leader line
+            svg += "\n<line x1=\"\(format(mx + 10))\" y1=\"\(format(my + 10))\" x2=\"\(format(cx))\" y2=\"\(format(cy))\" stroke=\"#f59e0b\" opacity=\"0.4\" stroke-width=\"1\"/>"
+            // Circle marker
+            svg += "\n<circle cx=\"\(format(mx + 10))\" cy=\"\(format(my + 10))\" r=\"10\" fill=\"#f59e0b\"/>"
+            svg += "\n<text x=\"\(format(mx + 10))\" y=\"\(format(my + 14))\" fill=\"white\" font-family=\"system-ui\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">\(i + 1)</text>"
+        }
+        return svg
     }
 
     private static func roleZones(_ blocks: [GridBlock], cellW: Double, cellH: Double) -> String {

@@ -106,6 +106,10 @@ struct SketchEditorView: View {
                     if isDraggingBlock {
                         dropToStashHint(highlighted: isOverStashZone)
                     }
+
+                    if let annotations = state.layout.annotations, !annotations.isEmpty {
+                        annotationLegend(annotations)
+                    }
                 }
             }
             .padding(.horizontal, 20)
@@ -289,6 +293,32 @@ struct SketchEditorView: View {
             )
             .allowsHitTesting(false)
             .animation(.easeInOut(duration: 0.15), value: highlighted)
+    }
+
+    // MARK: - Annotation legend
+
+    private func annotationLegend(_ annotations: [Annotation]) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            ForEach(Array(annotations.enumerated()), id: \.offset) { index, annotation in
+                HStack(spacing: 6) {
+                    ZStack {
+                        Circle().fill(Color.orange).frame(width: 16, height: 16)
+                        Text("\(index + 1)")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    Text(annotation.text)
+                        .font(.system(size: 11))
+                        .foregroundColor(Color(Theme.textSecondary))
+                        .lineLimit(1)
+                }
+            }
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color(Theme.cardBackground))
+        )
     }
 
     // MARK: - Footer

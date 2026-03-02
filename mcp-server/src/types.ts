@@ -163,11 +163,18 @@ export interface SketchBlock {
   elevation?: number;
 }
 
+export interface SketchAnnotation {
+  x: number;
+  y: number;
+  text: string;
+}
+
 export interface SketchGridLayout {
   columns: number;
   rows: number;
   blocks: SketchBlock[];
   frame?: string;
+  annotations?: SketchAnnotation[];
 }
 
 export interface SketchNodeConstraints {
@@ -200,6 +207,7 @@ export interface ProposeLayoutOptions {
   blocks?: SketchBlock[];
   structure?: SketchLayoutNode;
   frame?: string;
+  annotations?: SketchAnnotation[];
 }
 
 export interface ProposeLayoutResult {

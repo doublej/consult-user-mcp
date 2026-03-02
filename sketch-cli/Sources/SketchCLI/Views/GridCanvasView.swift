@@ -120,6 +120,10 @@ struct GridCanvasView: View {
                     cellW: cellW, cellH: cellH,
                     gridColumns: layout.columns, gridRows: layout.rows
                 )
+
+                if let annotations = layout.annotations, !annotations.isEmpty {
+                    AnnotationOverlayView(annotations: annotations, cellW: cellW, cellH: cellH)
+                }
             }
             .coordinateSpace(name: "canvas")
             .onContinuousHover { phase in

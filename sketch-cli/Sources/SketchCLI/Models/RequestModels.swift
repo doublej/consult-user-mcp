@@ -24,6 +24,7 @@ struct ProposeLayoutRequest: Codable {
     let structure: LayoutNode?
     let theme: String?
     let frame: String?
+    let annotations: [Annotation]?
 
     func resolvedLayout() -> GridLayout {
         var cols = width ?? 12
@@ -41,7 +42,7 @@ struct ProposeLayoutRequest: Codable {
 
         if let structure {
             let gridBlocks = LayoutCompiler.compile(structure, columns: cols, rows: rows)
-            return GridLayout(columns: cols, rows: rows, blocks: gridBlocks, frame: resolvedFrame)
+            return GridLayout(columns: cols, rows: rows, blocks: gridBlocks, frame: resolvedFrame, annotations: annotations)
         }
 
         let inputBlocks = blocks ?? []
@@ -59,7 +60,7 @@ struct ProposeLayoutRequest: Codable {
             )
         }
 
-        return GridLayout(columns: cols, rows: rows, blocks: gridBlocks, frame: resolvedFrame)
+        return GridLayout(columns: cols, rows: rows, blocks: gridBlocks, frame: resolvedFrame, annotations: annotations)
     }
 }
 

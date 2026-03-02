@@ -23,6 +23,8 @@ test-cases/
     text-input/         # Text input dialogs
     questions/          # Multi-question wizard/accordion
     notify/             # Notification panes
+    tweak/              # Value adjustment pane
+    sketch/             # Layout editor (propose_layout)
 ```
 
 ## Options
@@ -62,6 +64,8 @@ Create a JSON file in the appropriate `cases/` subdirectory matching the request
 | text-input/ | `textInput` | `{body, title, defaultValue, hidden, position, projectPath}` |
 | questions/ | `questions` | `{questions[{id, question, type, options, multiSelect, placeholder}], mode, position, projectPath}` |
 | notify/ | `notify` | `{body, title, sound}` |
+| tweak/ | `tweak` | `{body, parameters[{id, label, file, line, column, expectedText, current, min, max, step, unit}]}` |
+| sketch/ | `proposeLayout` | `{title, description, width, height, blocks[{label, x, y, w, h}]}` |
 
 Optional visual test key:
 

@@ -1,19 +1,21 @@
 # consult-user-mcp-server
 
-An MCP server for interacting with users through native macOS dialogs.
+An MCP server for interacting with users through native dialogs. Supports macOS and Windows.
 
 ## Tools
 
 | Tool | Description |
 |------|-------------|
 | `ask` | Interactive dialog — type: `confirm` (yes/no), `pick` (list picker), `text` (free-form input), `form` (multi-question wizard/accordion) |
-| `notify` | macOS notification banner (non-blocking) |
+| `notify` | Notification banner (non-blocking) |
+| `tweak` | Real-time numeric value adjustment with live file writes |
+| `propose_layout` | Interactive grid layout editor (macOS only) |
 
 All interactive dialogs support **snooze** (defer with 1-60 min delay) and **feedback** (user provides text instead of answering).
 
 ## Requirements
 
-- macOS (uses native Swift dialog CLI)
+- macOS (Swift dialog CLI + sketch CLI) or Windows (WPF dialog CLI)
 - Node.js 18+
 
 ## Installation

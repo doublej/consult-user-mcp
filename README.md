@@ -122,6 +122,7 @@ bun run build:bundle   # Builds and installs to /Applications
 consult-user-mcp/
 ├── mcp-server/          # MCP server (TypeScript, cross-platform)
 ├── dialog-cli/          # macOS: Swift CLI for dialogs
+├── sketch-cli/          # macOS: Swift CLI for layout editor
 ├── macos-app/           # macOS: SwiftUI menu bar app
 ├── dialog-cli-windows/  # Windows: WPF CLI for dialogs
 ├── windows-app/         # Windows: WPF system tray app

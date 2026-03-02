@@ -16,9 +16,12 @@ struct SwiftUINotifyPane: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let name = projectName, let path = projectPath {
-                HStack {
-                    Spacer(minLength: 0)
+            HStack {
+                ReportFeedbackButton(action: {
+                    GitHubReporter.openIssue(description: "", screenshotData: nil, copyToClipboard: false)
+                })
+                Spacer(minLength: 0)
+                if let name = projectName, let path = projectPath {
                     ProjectBadge(projectName: name, projectPath: path)
                 }
             }
@@ -50,7 +53,7 @@ struct SwiftUINotifyPane: View {
         }
         .frame(width: 360, alignment: .leading)
         .padding(.horizontal, 20)
-        .padding(.top, projectName == nil ? 16 : 12)
+        .padding(.top, 12)
         .padding(.bottom, 16)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("\(title). \(bodyText)"))

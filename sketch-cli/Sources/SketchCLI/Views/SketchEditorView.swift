@@ -145,6 +145,7 @@ struct SketchEditorView: View {
 
     private var titleBar: some View {
         HStack {
+            ReportButton()
             VStack(alignment: .leading, spacing: 4) {
                 Text(titleText)
                     .font(.system(size: 18, weight: .bold))

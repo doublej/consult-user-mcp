@@ -1,6 +1,8 @@
-<script lang="ts">
-	import { onMount } from 'svelte';
-	import '../styles/dialog.css';
+	<script lang="ts">
+		import { cubicIn, cubicOut } from 'svelte/easing';
+		import { onMount } from 'svelte';
+		import { fly } from 'svelte/transition';
+		import '../styles/dialog.css';
 
 	const animationKey = import.meta.hot
 		? (import.meta.hot.data.animKey = (import.meta.hot.data.animKey ?? 0) + 1)
@@ -34,15 +36,18 @@
 		{ label: 'Vue', description: 'Progressive framework', selected: false }
 	];
 
-	const layoutBlocks = [
+		const layoutBlocks = [
 		{ label: 'Header', x: 0, y: 0, w: 6, h: 1, color: '#3B82F6' },
 		{ label: 'Sidebar', x: 0, y: 1, w: 2, h: 3, color: '#8B5CF6' },
 		{ label: 'Canvas', x: 2, y: 1, w: 4, h: 2, color: '#10B981' },
 		{ label: 'Footer', x: 0, y: 4, w: 6, h: 1, color: '#EF4444' },
 		{ label: 'Toolbar', x: 2, y: 3, w: 4, h: 1, color: '#F59E0B' }
-	];
+		];
 
-	let paneIndex = $state(0);
+		const paneTransitionIn = { y: 12, duration: 360, easing: cubicOut };
+		const paneTransitionOut = { y: -8, duration: 260, easing: cubicIn };
+
+		let paneIndex = $state(0);
 
 	onMount(() => {
 		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -55,11 +60,11 @@
 
 <div class="perspective-container">
 	<div class="perspective-scene">
-		{#key animationKey}
-		<div class="dialog-wrapper">
-			{#key paneIndex}
-			<div class="dialog-window pane-transition">
-				<div class="dialog-body">
+			{#key animationKey}
+			<div class="dialog-wrapper">
+				{#key paneIndex}
+				<div class="dialog-window" in:fly={paneTransitionIn} out:fly={paneTransitionOut}>
+					<div class="dialog-body">
 					{#if panes[paneIndex].id === 'confirm'}
 						<div class="icon-circle">
 							<span class="icon">?</span>
@@ -200,36 +205,19 @@
 						<span class="hint"><kbd>S</kbd> snooze</span>
 					{/if}
 				</div>
-				{/if}
-			</div>
-			{/key}
-
-			<div class="pane-label">
-				{#key paneIndex}
-				<code class="tool-name">{panes[paneIndex].label}</code>
+					{/if}
+					</div>
 				{/key}
-			</div>
-
-			<div class="pane-dots">
-				{#each panes as _, i}
-					<button
-						class="dot"
-						class:active={paneIndex === i}
-						onclick={() => { paneIndex = i; }}
-						aria-label="Show {panes[i].label}"
-					></button>
-				{/each}
-			</div>
+				</div>
+			{/key}
 		</div>
-		{/key}
 	</div>
-</div>
 
 <style>
 	.perspective-container {
 		position: relative;
 		padding: 0px;
-		margin-right: -200px;
+		margin-right: -124px;
 		overflow: visible;
 	}
 
@@ -242,6 +230,8 @@
 
 	.dialog-wrapper {
 		position: relative;
+		display: flex;
+		justify-content: center;
 		transform-style: preserve-3d;
 		transform: rotateY(-10deg) rotateX(3deg) translateZ(0);
 		animation: floatIn 3.0s cubic-bezier(0.23, 1, 0.32, 1) forwards;
@@ -260,6 +250,10 @@
 
 	/* Override dialog-window for this context */
 	.dialog-wrapper :global(.dialog-window) {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
 		background: rgb(26, 26, 31);
 		max-width: 400px;
 		min-width: 340px;
@@ -273,34 +267,19 @@
 		backface-visibility: hidden;
 	}
 
-	/* Pane transition */
-	@keyframes paneIn {
-		from {
-			opacity: 0;
-			filter: blur(4px);
-			transform: translateY(6px);
+		/* Stable height so the wrapper doesn't collapse */
+		.dialog-wrapper :global(.dialog-body) {
+			min-height: 310px;
 		}
-		to {
-			opacity: 1;
-			filter: blur(0);
-			transform: translateY(0);
+
+		/* Invisible sizer keeps the wrapper's flow height stable */
+		.dialog-wrapper::after {
+			content: '';
+			display: block;
+			min-height: 380px;
+			width: 340px;
+			visibility: hidden;
 		}
-	}
-
-	.pane-transition {
-		animation: paneIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-	}
-
-	/* Consistent height across all panes */
-	.dialog-wrapper :global(.dialog-body) {
-		min-height: 310px;
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.pane-transition {
-			animation: none;
-		}
-	}
 
 	/* Icon styling */
 	.icon-circle {
@@ -445,52 +424,8 @@
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 	}
 
-	/* Pane label + dots below the dialog */
-	.pane-label {
-		text-align: center;
-		margin-top: 14px;
-	}
-
-	.tool-name {
-		display: inline-block;
-		font-family: 'DM Mono', 'SF Mono', Monaco, monospace;
-		font-size: 12px;
-		color: rgba(255, 255, 255, 0.5);
-		background: rgba(255, 255, 255, 0.08);
-		padding: 4px 10px;
-		border-radius: 6px;
-		animation: paneIn 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-	}
-
-	.pane-dots {
-		display: flex;
-		justify-content: center;
-		gap: 8px;
-		margin-top: 12px;
-	}
-
-	.dot {
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		border: none;
-		padding: 0;
-		background: rgba(255, 255, 255, 0.15);
-		cursor: pointer;
-		transition: background 0.2s, transform 0.2s;
-	}
-
-	.dot.active {
-		background: rgba(90, 140, 255, 0.8);
-		transform: scale(1.3);
-	}
-
-	.dot:hover:not(.active) {
-		background: rgba(255, 255, 255, 0.3);
-	}
-
-	/* Notify badge */
-	.notify-badge {
+		/* Notify badge */
+		.notify-badge {
 		font-size: 11px;
 		font-weight: 500;
 		color: #666;
@@ -527,5 +462,17 @@
 	/* Non-interactive buttons */
 	:global(.dialog-window) .btn {
 		cursor: default;
+	}
+
+	@media (max-width: 1200px) {
+		.perspective-container {
+			margin-right: -84px;
+		}
+	}
+
+	@media (max-width: 1000px) {
+		.perspective-container {
+			margin-right: 0;
+		}
 	}
 </style>

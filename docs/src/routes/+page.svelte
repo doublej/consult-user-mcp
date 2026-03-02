@@ -31,26 +31,26 @@
   const activeClient = $derived(clients[activeIndex]);
 
   const phrases = [
-    { subject: 'agent', accent: 'needs a human' },
-    { subject: 'human', accent: "doesn't feel like typing" },
-    { subject: 'agent', accent: 'needs to understand layouts' },
-    { subject: 'code', accent: 'needs a gut check' },
-    { subject: 'agent', accent: "can't pick alone" },
-    { subject: 'agent', accent: 'needs your taste' },
-    { subject: 'human', accent: 'wants to snooze it' },
-    { subject: 'agent', accent: 'wants your approval' },
-    { subject: 'deploy', accent: 'needs a green light' },
-    { subject: 'agent', accent: 'found three options' },
-    { subject: 'human', accent: 'is grabbing coffee' },
-    { subject: 'agent', accent: 'needs a tiebreaker' },
-    { subject: 'refactor', accent: 'needs a sanity check' },
-    { subject: 'agent', accent: "isn't sure about the name" },
-    { subject: 'pipeline', accent: 'hits a decision point' },
-    { subject: 'human', accent: 'prefers buttons over prompts' },
-    { subject: 'agent', accent: 'needs a password' },
-    { subject: 'agent', accent: 'goes "hmm" for too long' },
-    { subject: 'agent', accent: 'wants to mass-delete files' },
-    { subject: 'agent', accent: 'needs emotional support' },
+    { subject: "agent", accent: "needs a human" },
+    { subject: "human", accent: "doesn't feel like typing" },
+    { subject: "agent", accent: "needs to understand layouts" },
+    { subject: "code", accent: "needs a gut check" },
+    { subject: "agent", accent: "can't pick alone" },
+    { subject: "agent", accent: "needs your taste" },
+    { subject: "human", accent: "wants to snooze it" },
+    { subject: "agent", accent: "wants your approval" },
+    { subject: "deploy", accent: "needs a green light" },
+    { subject: "agent", accent: "found three options" },
+    { subject: "human", accent: "is grabbing coffee" },
+    { subject: "agent", accent: "needs a tiebreaker" },
+    { subject: "refactor", accent: "needs a sanity check" },
+    { subject: "agent", accent: "isn't sure about the name" },
+    { subject: "pipeline", accent: "hits a decision point" },
+    { subject: "human", accent: "prefers buttons over prompts" },
+    { subject: "agent", accent: "needs a password" },
+    { subject: "agent", accent: 'goes "hmm" for too long' },
+    { subject: "agent", accent: "wants to mass-delete files" },
+    { subject: "agent", accent: "needs emotional support" },
   ];
   let phraseIndex = $state(0);
 
@@ -73,14 +73,17 @@
 
   // Cycle through hero phrases (start after page animation settles)
   onMount(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let intervalId: ReturnType<typeof setInterval>;
     const timeoutId = setTimeout(() => {
       intervalId = setInterval(() => {
         phraseIndex = (phraseIndex + 1) % phrases.length;
       }, 4000);
     }, 3000);
-    return () => { clearTimeout(timeoutId); clearInterval(intervalId); };
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
   });
 
   // Tweak replay: connect to tray app WebSocket in dev mode
@@ -164,49 +167,24 @@
     <div class="hero">
       <p class="hero-label animate-in">Human Consultation Interface</p>
       <h1 class="animate-in" style="animation-delay: 100ms;">
-        When your {#key phraseIndex}<span class="hero-cycling"><span class="hero-cycle-word">{phrases[phraseIndex].subject}</span>
-        <span class="accent hero-cycle-accent">{phrases[phraseIndex].accent}</span></span>{/key}
+        When your {#key phraseIndex}<span class="hero-cycling"
+            ><span class="hero-cycle-word">{phrases[phraseIndex].subject}</span>
+            <span class="accent hero-cycle-accent"
+              >{phrases[phraseIndex].accent}</span
+            ></span
+          >{/key}
       </h1>
       <p class="lead animate-in" style="animation-delay: 200ms;">
         Your AI agent pops up a native dialog when it needs input — pick an
         option, type an answer, or snooze it for later. No window switching, no
         terminal babysitting.
       </p>
-      <div class="platform-badges animate-in" style="animation-delay: 300ms;">
-        <span class="platform-badge">
-          <svg
-            viewBox="0 0 384 512"
-            width="14"
-            height="14"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5c0 26.2 4.8 53.3 14.4 81.2 12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-62.1 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"
-            />
-          </svg>
-          macOS
-        </span>
-        <span class="platform-badge">
-          <svg
-            viewBox="0 0 448 512"
-            width="13"
-            height="13"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"
-            />
-          </svg>
-          Windows
-        </span>
-      </div>
       <div class="client-logos animate-in" style="animation-delay: 350ms;">
         <span class="client-logos-label"
-          >{activeClient.hasInstaller ? "Has autoinstaller for" : "Works with"} {#key activeIndex}<span class="active-name"
+          >Works with
+          {#key activeIndex}<span class="active-name"
               >{clients[activeIndex].name}</span
-            >{/key}</span
+            >{/key}{#if activeClient.hasInstaller}&nbsp;and autoconfigures{/if}</span
         >
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
@@ -249,6 +227,36 @@
     <aside class="hero-visual-sidebar">
       <PerspectiveDialog />
     </aside>
+    <div class="platform-badges animate-in" style="animation-delay: 450ms;">
+      <span class="platform-badge">
+        <svg
+          viewBox="0 0 384 512"
+          width="14"
+          height="14"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5c0 26.2 4.8 53.3 14.4 81.2 12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-62.1 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"
+          />
+        </svg>
+        macOS
+      </span>
+      <span class="platform-badge">
+        <svg
+          viewBox="0 0 448 512"
+          width="13"
+          height="13"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"
+          />
+        </svg>
+        Windows
+      </span>
+    </div>
   </section>
 
   <section
@@ -496,10 +504,8 @@
       BlinkMacSystemFont,
       system-ui,
       sans-serif;
-    background:
-      radial-gradient(circle at 20% -10%, #eef1fb 0%, transparent 45%),
-      radial-gradient(circle at 80% -30%, #eceff8 0%, transparent 40%),
-      #f7f8fc;
+    background: radial-gradient(circle at 20% -10%, #eef1fb 0%, transparent 45%),
+      radial-gradient(circle at 80% -30%, #eceff8 0%, transparent 40%), #f7f8fc;
     color: #2f3446;
     min-height: 100vh;
     line-height: 1.6;
@@ -556,14 +562,14 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #5a8cff;
-    margin: 0 0 16px;
+    margin: 0 0 26px;
   }
 
   h1 {
     font-size: 3rem;
     font-weight: 600;
     color: #f0f0f5;
-    margin: 0 0 20px;
+    margin: 42px 0 22px;
     letter-spacing: -0.035em;
     line-height: 1.1;
   }
@@ -586,15 +592,20 @@
     display: contents;
   }
 
-  .hero-cycle-word {
+  .hero-cycle-word,
+  .hero-cycle-accent {
     display: inline-block;
-    animation: phraseIn 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    padding-block: 0.15em;
+    margin-block: -0.15em;
+  }
+
+  .hero-cycle-word {
+    animation: phraseIn 0.40s cubic-bezier(0.23, 1, 0.32, 1);
   }
 
   .hero-cycle-accent {
-    display: inline-block;
     white-space: nowrap;
-    animation: phraseIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.08s backwards;
+    animation: phraseIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0.36s backwards;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -616,27 +627,33 @@
     font-size: 1.1rem;
     color: #9a9aa5;
     max-width: 520px;
-    margin: 0 0 40px;
+    margin: 0 0 64px;
   }
 
   /* Platform badges */
   .platform-badges {
     display: flex;
-    gap: 16px;
-    margin: 0 0 32px;
+    gap: 10px;
+    justify-content: flex-end;
+    position: absolute;
+    right: 40px;
+    bottom: 40px;
+    margin: 0;
+    opacity: 0.68;
+    z-index: 3;
   }
 
   .platform-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     font-weight: 500;
-    color: #b0b0b8;
-    padding: 5px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.58);
+    padding: 4px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 100px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.02);
   }
 
   /* Client logos strip */
@@ -654,7 +671,7 @@
   }
 
   .client-logos {
-    margin: 0 0 32px;
+    margin: 0 0 60px;
   }
 
   .client-logos-label {
@@ -693,7 +710,7 @@
     border-radius: 999px;
     background: #7aa0ff;
     box-shadow: 0 0 0 2px rgba(13, 13, 18, 0.95);
-    opacity: 0.95;
+    opacity: 0.5;
   }
 
   .logo-item img {
@@ -749,6 +766,10 @@
   /* Install block */
   .install-block {
     max-width: 100%;
+  }
+
+  .hero .install-block {
+    margin-top: 18px;
   }
 
   .install-block.standalone {
@@ -814,7 +835,7 @@
 
   .hero-row .copy-btn {
     background: #5a8cff;
-    border-radius: 8px;
+    border-radius: 4px;
     color: #fff;
   }
 
@@ -830,7 +851,8 @@
   }
 
   .hero-row .install-note {
-    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.3);
   }
 
   .install-note a {
@@ -840,7 +862,7 @@
   }
 
   .hero-row .install-note a {
-    color: #8a8aff;
+    color: rgba(148, 160, 230, 0.72);
   }
 
   .install-note a:hover {
@@ -848,7 +870,7 @@
   }
 
   .hero-row .install-note a:hover {
-    color: #a0a0ff;
+    color: rgba(176, 188, 255, 0.84);
   }
 
   /* Sections */
@@ -1020,6 +1042,15 @@
       order: -1;
     }
 
+    .platform-badges {
+      position: static;
+      right: auto;
+      bottom: auto;
+      width: 100%;
+      margin: 8px 0 0;
+      justify-content: flex-end;
+    }
+
     .section {
       padding: 60px 32px;
     }
@@ -1063,6 +1094,11 @@
 
     .copy-btn {
       align-self: flex-start;
+    }
+
+    .platform-badges {
+      margin-top: 18px;
+      opacity: 0.72;
     }
   }
 </style>

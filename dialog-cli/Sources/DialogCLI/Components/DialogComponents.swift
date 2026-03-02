@@ -53,7 +53,7 @@ struct ReportFeedbackButton: View {
             HStack(spacing: 4) {
                 Image(systemName: "ladybug")
                     .font(.system(size: 9, weight: .medium))
-                Text("Feedback")
+                Text("Report")
                     .font(.system(size: 10, weight: .medium))
             }
             .foregroundColor(isHovered ? Theme.Colors.accentRed : Theme.Colors.textMuted)
@@ -70,7 +70,7 @@ struct ReportFeedbackButton: View {
         }
         .buttonStyle(.plain)
         .onHover { isHovered = $0 }
-        .help("Report a bug or give feedback")
+        .help("Report a bug or suggestion")
     }
 }
 

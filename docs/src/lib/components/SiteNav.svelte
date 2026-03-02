@@ -5,46 +5,38 @@
 <header class="site-nav-header">
   <nav class="site-nav">
     <a href="{base}/" class="site-nav-logo">consult-user-mcp</a>
-    <div class="site-nav-groups">
-      <div class="site-nav-group">
-        <div class="site-nav-links">
-          <a href="{base}/" class="site-nav-link">Home</a>
-          <a href="{base}/#install" class="site-nav-link">Install</a>
-          <a href="{base}/demo" class="site-nav-link">Gallery</a>
-          <a href="{base}/comparison" class="site-nav-link">Comparison</a>
-          <a href="{base}/questions" class="site-nav-link">Questions</a>
-          <a href="{base}/changelog" class="site-nav-link">Changelog</a>
-          <a href="{base}/ecosystem" class="site-nav-link">Ecosystem</a>
-        </div>
-      </div>
-      <div class="site-nav-group">
-        <div class="site-nav-links">
-          <a
-            href="https://github.com/doublej/consult-user-mcp"
-            class="site-nav-link site-nav-link-external"
-            target="_blank"
-            rel="noopener"
-          >
-            <span>GitHub</span>
-            <span class="external-icon" aria-hidden="true">&#x2197;</span>
-          </a>
-        </div>
-      </div>
+    <div class="site-nav-links site-nav-links-primary">
+      <a href="{base}/" class="site-nav-link">Home</a>
+      <a href="{base}/#install" class="site-nav-link">Install</a>
+      <a href="{base}/demo" class="site-nav-link">Gallery</a>
+      <a href="{base}/comparison" class="site-nav-link">Comparison</a>
+      <a href="{base}/questions" class="site-nav-link">Questions</a>
+      <a href="{base}/changelog" class="site-nav-link">Changelog</a>
     </div>
+    <a
+      href="https://github.com/doublej/consult-user-mcp"
+      class="site-nav-link site-nav-link-external"
+      target="_blank"
+      rel="noopener"
+    >
+      <span>GitHub</span>
+      <span class="external-icon" aria-hidden="true">&#x2197;</span>
+    </a>
   </nav>
 </header>
 
 <style>
   .site-nav-header {
-    padding: 20px 56px 24px;
-    margin-bottom: 24px;
+    padding: 40px 56px 34px;
+    margin-bottom: 16px;
   }
 
   .site-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: max-content 1fr max-content;
+    align-items: center;
+    column-gap: 32px;
+    row-gap: 16px;
   }
 
   .site-nav-logo {
@@ -52,28 +44,20 @@
     color: #1a1a1a;
     font-weight: 600;
     font-size: 0.95rem;
-    padding-top: 2px;
+    line-height: 1;
     flex-shrink: 0;
-  }
-
-  .site-nav-groups {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .site-nav-group {
-    display: flex;
-    align-items: center;
-    gap: 0;
   }
 
   .site-nav-links {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 20px;
     flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .site-nav-links-primary {
+    justify-content: center;
   }
 
   .site-nav-link {
@@ -81,6 +65,8 @@
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
   }
 
   .site-nav-link:hover {
@@ -89,11 +75,11 @@
 
   .site-nav-link-external {
     display: inline-flex;
-    align-items: center;
+    align-items: baseline;
     gap: 5px;
     color: #4f5b7c;
     border-bottom: 1px dashed #b9c2d8;
-    padding-bottom: 1px;
+    justify-self: end;
   }
 
   .site-nav-link-external:hover {
@@ -110,27 +96,27 @@
 
   @media (max-width: 900px) {
     .site-nav-header {
-      padding: 20px 32px 24px;
+      padding: 24px 32px 30px;
     }
 
     .site-nav {
-      flex-direction: column;
-      align-items: flex-start;
+      grid-template-columns: 1fr;
+      justify-items: start;
     }
 
-    .site-nav-groups {
+    .site-nav-links-primary {
       justify-content: flex-start;
-      gap: 12px;
+      gap: 14px 18px;
     }
 
-    .site-nav-group {
-      align-items: center;
+    .site-nav-link-external {
+      justify-self: start;
     }
   }
 
   @media (max-width: 700px) {
     .site-nav-header {
-      padding: 20px 20px 22px;
+      padding: 22px 20px 26px;
     }
   }
 </style>

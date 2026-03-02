@@ -11,8 +11,9 @@ struct GridBlock: Codable, Identifiable, Equatable {
     var content: String?
     var role: String?
     var flowDirection: String?
+    var importance: String?
 
-    init(id: String = UUID().uuidString, label: String, x: Int, y: Int, w: Int, h: Int, color: String? = nil, content: String? = nil, role: String? = nil, flowDirection: String? = nil) {
+    init(id: String = UUID().uuidString, label: String, x: Int, y: Int, w: Int, h: Int, color: String? = nil, content: String? = nil, role: String? = nil, flowDirection: String? = nil, importance: String? = nil) {
         self.id = id
         self.label = label
         self.x = x
@@ -23,6 +24,7 @@ struct GridBlock: Codable, Identifiable, Equatable {
         self.content = content
         self.role = role
         self.flowDirection = flowDirection
+        self.importance = importance
     }
 }
 

@@ -328,6 +328,8 @@ const blockSchema = z.object({
     .describe("Semantic role. Adds faint background tint to the block zone."),
   flowDirection: z.enum(["row", "column"]).optional()
     .describe("Flow direction arrow shown next to block number."),
+  importance: z.enum(["primary", "secondary", "tertiary"]).optional()
+    .describe("Visual importance hierarchy. Auto-inferred from role if omitted."),
 });
 
 const dimensionValue = z.union([

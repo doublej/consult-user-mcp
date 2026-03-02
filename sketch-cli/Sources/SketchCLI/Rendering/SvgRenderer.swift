@@ -70,12 +70,16 @@ enum SvgRenderer {
         let by = Double(block.y) * cellH + 1
         let bw = Double(block.w) * cellW - 2
         let bh = Double(block.h) * cellH - 2
-        let fill = hexToRGBA(hex, alpha: 0.25)
+        let imp = ContentInference.inferImportance(explicit: block.importance, role: block.role)
+        let fillAlpha: Double = imp == "primary" ? 0.35 : imp == "tertiary" ? 0.12 : 0.25
+        let strokeW: Double = imp == "primary" ? 2.5 : imp == "tertiary" ? 0.5 : 1.5
+        let dashAttr = imp == "tertiary" ? " stroke-dasharray=\"4 3\"" : ""
+        let fill = hexToRGBA(hex, alpha: fillAlpha)
         let wireframeFill = hexToRGBA(hex, alpha: 0.3)
 
         var svg = """
 
-        <rect x="\(format(bx))" y="\(format(by))" width="\(format(bw))" height="\(format(bh))" rx="4" fill="\(fill)" stroke="\(hex)" stroke-width="1.5"/>
+        <rect x="\(format(bx))" y="\(format(by))" width="\(format(bw))" height="\(format(bh))" rx="4" fill="\(fill)" stroke="\(hex)" stroke-width="\(format(strokeW))"\(dashAttr)/>
         <text x="\(format(bx + 7))" y="\(format(by + 17))" fill="white" font-family="system-ui, sans-serif" font-size="12">\(escapeXML(block.label))</text>
         """
 

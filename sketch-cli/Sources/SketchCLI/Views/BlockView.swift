@@ -43,14 +43,37 @@ struct BlockView: View {
         return isResizing ? max(cellHeight, base + resizeDelta.height) : base
     }
 
+    private var resolvedImportance: String {
+        ContentInference.inferImportance(explicit: block.importance, role: block.role)
+    }
+
+    private var importanceFill: Double {
+        if isDragging { return 0.5 }
+        if isNested { return 0.35 }
+        switch resolvedImportance {
+        case "primary": return 0.35
+        case "tertiary": return 0.12
+        default: return 0.25
+        }
+    }
+
+    private var importanceBorder: (width: CGFloat, dash: [CGFloat]) {
+        if isDragging || effectiveHover { return (2.5, isNested ? [4, 3] : []) }
+        switch resolvedImportance {
+        case "primary": return (2.5, isNested ? [4, 3] : [])
+        case "tertiary": return (0.5, [4, 3])
+        default: return (1, isNested ? [4, 3] : [])
+        }
+    }
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 6)
-                .fill(blockColor.opacity(isDragging ? 0.5 : (isNested ? 0.35 : 0.25)))
+                .fill(blockColor.opacity(importanceFill))
             RoundedRectangle(cornerRadius: 6)
                 .strokeBorder(blockColor, style: StrokeStyle(
-                    lineWidth: (isDragging || effectiveHover) ? 2 : 1,
-                    dash: isNested ? [4, 3] : []
+                    lineWidth: importanceBorder.width,
+                    dash: importanceBorder.dash
                 ))
 
             // Wireframe content

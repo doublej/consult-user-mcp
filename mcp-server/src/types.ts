@@ -167,6 +167,7 @@ export interface SketchGridLayout {
   columns: number;
   rows: number;
   blocks: SketchBlock[];
+  frame?: string;
 }
 
 export interface SketchNodeConstraints {
@@ -198,6 +199,7 @@ export interface ProposeLayoutOptions {
   description?: string;
   blocks?: SketchBlock[];
   structure?: SketchLayoutNode;
+  frame?: string;
 }
 
 export interface ProposeLayoutResult {

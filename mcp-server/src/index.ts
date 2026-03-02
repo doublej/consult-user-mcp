@@ -371,6 +371,8 @@ server.registerTool("propose_layout", {
     description: z.string().max(200).optional().describe("Description shown in dialog"),
     blocks: z.array(blockSchema).default([]).describe("Initial blocks with grid coordinates (alternative to structure)"),
     structure: layoutNodeSchema.optional().describe("Semantic layout tree with direction/constraints (alternative to blocks)"),
+    frame: z.enum(["browser", "phone", "tablet"]).optional()
+      .describe("Device frame chrome wrapping the canvas. Mobile template auto-sets 'phone'."),
     project_path: z.string().optional(),
   }),
 }, async (p, extra) => {
@@ -394,6 +396,7 @@ server.registerTool("propose_layout", {
       description: p.description,
       blocks: p.blocks,
       structure: p.structure as SketchLayoutNode,
+      frame: p.frame,
     }, controller.signal), extra);
 
     const lines: string[] = [`Status: ${r.status}`];

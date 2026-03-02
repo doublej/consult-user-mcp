@@ -54,88 +54,67 @@ struct SketchEditorView: View {
     @State private var showAddSheet = false
     @State private var addBlockCol = 0
     @State private var addBlockRow = 0
+    @State private var stashedBlocks: [GridBlock] = []
+    @State private var isDraggingBlock = false
+    @State private var isOverStashZone = false
 
     var body: some View {
         let nestingMap = DescriptionRenderer.detectNesting(state.layout.blocks)
         let blockNumbers = assignNumbers(blocks: state.layout.blocks, nestingMap: nestingMap)
 
         VStack(spacing: 0) {
+            // Header
             titleBar
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
-                .padding(.bottom, 8)
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 12)
 
-            // Sidebar (Add Element) + Canvas + Legend
+            // Left sidebar + Canvas
             HStack(spacing: 12) {
-                addElementSidebar
+                sidebar
                     .frame(width: 120)
 
-                GridCanvasView(
-                    layout: $state.layout,
-                    interactive: true,
-                    blockNumbers: blockNumbers,
-                    onAddBlock: { col, row in
-                        addBlockCol = col
-                        addBlockRow = row
-                        showAddSheet = true
-                    },
-                    nestingMap: nestingMap
-                )
-            }
-            .padding(.horizontal, 16)
+                VStack(spacing: 8) {
+                    let canvas = GridCanvasView(
+                        layout: $state.layout,
+                        stashedBlocks: $stashedBlocks,
+                        interactive: true,
+                        blockNumbers: blockNumbers,
+                        onAddBlock: { col, row in
+                            addBlockCol = col
+                            addBlockRow = row
+                            showAddSheet = true
+                        },
+                        onDragHintChanged: { dragging, overStash in
+                            isDraggingBlock = dragging
+                            isOverStashZone = overStash
+                        },
+                        nestingMap: nestingMap
+                    )
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.white)
+                    )
 
-            // Bottom row: instructions left, undo/redo + buttons right
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Drag to move · Resize from corner · Double-click to rename · ⌥ Cycle layers")
-                        .font(.system(size: 11))
-                        .foregroundColor(Color(Theme.textMuted))
-                    Text("⌘Z Undo · ⌘⇧Z Redo · ⌘D Duplicate · ⌫ Delete")
-                        .font(.system(size: 10))
-                        .foregroundColor(Color(Theme.textMuted).opacity(0.7))
-                }
-                .lineLimit(1)
-
-                Spacer()
-
-                // Undo/Redo buttons
-                HStack(spacing: 8) {
-                    Button {
-                        state.undo()
-                    } label: {
-                        Image(systemName: "arrow.uturn.backward")
-                            .foregroundColor(state.canUndo ? Color(Theme.textSecondary) : Color(Theme.textMuted))
+                    if let deviceFrame = state.layout.frame {
+                        DeviceFrameView(frame: deviceFrame) { canvas }
+                    } else {
+                        canvas
                     }
-                    .buttonStyle(.plain)
-                    .disabled(!state.canUndo)
-                    .help("Undo (⌘Z)")
 
-                    Button {
-                        state.redo()
-                    } label: {
-                        Image(systemName: "arrow.uturn.forward")
-                            .foregroundColor(state.canRedo ? Color(Theme.textSecondary) : Color(Theme.textMuted))
+                    if isDraggingBlock {
+                        dropToStashHint(highlighted: isOverStashZone)
                     }
-                    .buttonStyle(.plain)
-                    .disabled(!state.canRedo)
-                    .help("Redo (⌘⇧Z)")
                 }
-
-                FocusableButton(title: "Cancel", isPrimary: false) {
-                    state.status = "cancelled"
-                    NSApp.stopModal()
-                }
-                .frame(width: 120, height: 48)
-
-                FocusableButton(title: "Accept", isPrimary: true) {
-                    state.status = state.layout == state.initialLayout ? "accepted" : "modified"
-                    NSApp.stopModal()
-                }
-                .frame(width: 140, height: 48)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 10)
-            .padding(.bottom, 16)
+            .padding(.horizontal, 20)
+
+            // Footer
+            footer
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 20)
         }
         .background(Color(Theme.windowBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -156,9 +135,11 @@ struct SketchEditorView: View {
         }
     }
 
+    // MARK: - Header
+
     private var titleBar: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(titleText)
                     .font(.system(size: 18, weight: .bold))
                     .foregroundColor(Color(Theme.textPrimary))
@@ -180,22 +161,33 @@ struct SketchEditorView: View {
         .background(WindowDragArea())
     }
 
-    private var addElementSidebar: some View {
-        VStack {
+    // MARK: - Sidebar (undo/redo, add, stash)
+
+    private var sidebar: some View {
+        VStack(spacing: 8) {
+            // Undo/Redo
+            HStack(spacing: 4) {
+                sidebarIconButton(icon: "arrow.uturn.backward", enabled: state.canUndo) { state.undo() }
+                    .help("Undo (⌘Z)")
+                sidebarIconButton(icon: "arrow.uturn.forward", enabled: state.canRedo) { state.redo() }
+                    .help("Redo (⌘⇧Z)")
+            }
+
+            // Add Element
             Button {
                 addBlockCol = firstEmptyCell.col
                 addBlockRow = firstEmptyCell.row
                 showAddSheet = true
             } label: {
-                VStack(spacing: 6) {
+                VStack(spacing: 4) {
                     Image(systemName: "plus")
-                        .font(.system(size: 20, weight: .medium))
-                    Text("Add Element")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 16, weight: .medium))
+                    Text("Add")
+                        .font(.system(size: 10, weight: .medium))
                 }
                 .foregroundColor(Color(Theme.textSecondary))
                 .frame(maxWidth: .infinity)
-                .frame(height: 72)
+                .frame(height: 52)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
                         .fill(Color(Theme.cardBackground))
@@ -207,9 +199,129 @@ struct SketchEditorView: View {
             }
             .buttonStyle(.plain)
 
+            // Stash tray
+            if !stashedBlocks.isEmpty {
+                stashTray
+            }
+
             Spacer()
         }
     }
+
+    private func sidebarIconButton(icon: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(enabled ? Color(Theme.textSecondary) : Color(Theme.textMuted))
+                .frame(maxWidth: .infinity)
+                .frame(height: 32)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(Theme.cardBackground))
+                )
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+    }
+
+    // MARK: - Stash tray
+
+    private var stashTray: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Stash")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(Color(Theme.textMuted))
+                .textCase(.uppercase)
+
+            ForEach(stashedBlocks) { block in
+                stashChip(block: block)
+            }
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(Theme.cardBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .strokeBorder(Color(Theme.border).opacity(0.5), lineWidth: 1)
+        )
+    }
+
+    private func stashChip(block: GridBlock) -> some View {
+        let color = ColorPalette.swiftUIColor(from: block.color ?? "#3B82F6")
+        return HStack(spacing: 4) {
+            Circle()
+                .fill(color)
+                .frame(width: 8, height: 8)
+            Text(block.label)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(Color(Theme.textPrimary))
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 4)
+        .background(
+            RoundedRectangle(cornerRadius: 5)
+                .fill(Color(Theme.cardHover).opacity(0.6))
+        )
+        .onTapGesture { restoreBlock(id: block.id) }
+    }
+
+    private func restoreBlock(id: String) {
+        guard let idx = stashedBlocks.firstIndex(where: { $0.id == id }) else { return }
+        let block = stashedBlocks.remove(at: idx)
+        state.layout.blocks.append(block)
+    }
+
+    // MARK: - Drop hint
+
+    private func dropToStashHint(highlighted: Bool) -> some View {
+        Label("Drop to stash", systemImage: "tray.and.arrow.down")
+            .font(.system(size: 12, weight: .medium))
+            .foregroundColor(highlighted ? .white : Color(Theme.textSecondary))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(highlighted ? Color.orange.opacity(0.6) : Color(Theme.cardBackground).opacity(0.7))
+            )
+            .allowsHitTesting(false)
+            .animation(.easeInOut(duration: 0.15), value: highlighted)
+    }
+
+    // MARK: - Footer
+
+    private var footer: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Drag to move · Resize from corner · Double-click to rename")
+                    .font(.system(size: 10))
+                    .foregroundColor(Color(Theme.textMuted))
+                Text("⌘Z Undo · ⌘⇧Z Redo · ⌘D Duplicate · ⌫ Delete")
+                    .font(.system(size: 10))
+                    .foregroundColor(Color(Theme.textMuted).opacity(0.7))
+            }
+            .lineLimit(1)
+
+            Spacer()
+
+            FocusableButton(title: "Cancel", isPrimary: false) {
+                state.status = "cancelled"
+                NSApp.stopModal()
+            }
+            .frame(width: 110, height: 44)
+
+            FocusableButton(title: "Accept", isPrimary: true) {
+                state.status = state.layout == state.initialLayout ? "accepted" : "modified"
+                NSApp.stopModal()
+            }
+            .frame(width: 130, height: 44)
+        }
+    }
+
+    // MARK: - Helpers
 
     private var firstEmptyCell: (col: Int, row: Int) {
         for row in 0..<state.layout.rows {

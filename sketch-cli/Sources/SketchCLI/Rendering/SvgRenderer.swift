@@ -10,19 +10,24 @@ enum SvgRenderer {
         var colored = layout
         colored.blocks = ColorPalette.assignColors(to: colored.blocks)
 
+        let chrome = frameChrome(layout.frame)
+        let totalW = width + chrome.padL + chrome.padR
+        let totalH = height + chrome.padT + chrome.padB
         let cellW = Double(width) / Double(layout.columns)
         let cellH = Double(height) / Double(layout.rows)
 
         var svg = """
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 \(width) \(height)" width="\(width)" height="\(height)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 \(totalW) \(totalH)" width="\(totalW)" height="\(totalH)">
         <defs>
         <filter id="elev1"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.1"/></filter>
         <filter id="elev2"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-opacity="0.15"/></filter>
         <filter id="elev3"><feDropShadow dx="0" dy="6" stdDeviation="12" flood-opacity="0.2"/></filter>
         </defs>
-        <rect width="\(width)" height="\(height)" fill="\(background)"/>
+        <rect width="\(totalW)" height="\(totalH)" fill="\(background)"/>
         """
 
+        svg += chrome.svg
+        svg += "\n<g transform=\"translate(\(chrome.padL),\(chrome.padT))\">"
         svg += gridLines(columns: layout.columns, rows: layout.rows, cellW: cellW, cellH: cellH)
         svg += roleZones(colored.blocks, cellW: cellW, cellH: cellH)
 
@@ -30,8 +35,47 @@ enum SvgRenderer {
             svg += blockRect(block, cellW: cellW, cellH: cellH)
         }
 
+        svg += "\n</g>"
         svg += "\n</svg>"
         return svg
+    }
+
+    private struct FrameChrome {
+        let padL: Int; let padR: Int; let padT: Int; let padB: Int
+        let svg: String
+    }
+
+    private static func frameChrome(_ frame: String?) -> FrameChrome {
+        guard let frame else { return FrameChrome(padL: 0, padR: 0, padT: 0, padB: 0, svg: "") }
+        switch frame {
+        case "browser":
+            let barH = 32
+            let svg = """
+            \n<rect x="0" y="0" width="\(width)" height="\(barH)" rx="8" fill="#1e1e1e"/>
+            <circle cx="14" cy="16" r="5" fill="#ff5f57" opacity="0.7"/>
+            <circle cx="30" cy="16" r="5" fill="#febc2e" opacity="0.7"/>
+            <circle cx="46" cy="16" r="5" fill="#28c840" opacity="0.7"/>
+            <rect x="80" y="8" width="\(width - 160)" height="16" rx="4" fill="#151515"/>
+            <text x="\(width / 2)" y="20" fill="rgba(255,255,255,0.35)" font-family="system-ui" font-size="10" text-anchor="middle">https://</text>
+            """
+            return FrameChrome(padL: 0, padR: 0, padT: barH, padB: 0, svg: svg)
+        case "phone":
+            let pad = 12, topBar = 20
+            let totalPadT = pad + topBar
+            let svg = """
+            \n<rect x="0" y="0" width="\(width + pad * 2)" height="\(height + totalPadT + pad)" rx="20" fill="#0d0d0d" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+            <text x="\(pad + 12)" y="\(pad + 14)" fill="rgba(255,255,255,0.5)" font-family="system-ui" font-size="10" font-weight="600">9:41</text>
+            """
+            return FrameChrome(padL: pad, padR: pad, padT: totalPadT, padB: pad, svg: svg)
+        case "tablet":
+            let pad = 16
+            let svg = """
+            \n<rect x="0" y="0" width="\(width + pad * 2)" height="\(height + pad * 2)" rx="14" fill="#0d0d0d" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+            """
+            return FrameChrome(padL: pad, padR: pad, padT: pad, padB: pad, svg: svg)
+        default:
+            return FrameChrome(padL: 0, padR: 0, padT: 0, padB: 0, svg: "")
+        }
     }
 
     private static func roleZones(_ blocks: [GridBlock], cellW: Double, cellH: Double) -> String {

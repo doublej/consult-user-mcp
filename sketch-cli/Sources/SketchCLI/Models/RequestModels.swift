@@ -23,10 +23,12 @@ struct ProposeLayoutRequest: Codable {
     let blocks: [BlockInput]?
     let structure: LayoutNode?
     let theme: String?
+    let frame: String?
 
     func resolvedLayout() -> GridLayout {
         var cols = width ?? 12
         var rows = height ?? 8
+        let resolvedFrame = frame ?? (template == "mobile" ? "phone" : nil)
 
         if let templateName = template,
            let tmpl = DensityTemplate.builtIn.first(where: { $0.name == templateName }) {
@@ -39,7 +41,7 @@ struct ProposeLayoutRequest: Codable {
 
         if let structure {
             let gridBlocks = LayoutCompiler.compile(structure, columns: cols, rows: rows)
-            return GridLayout(columns: cols, rows: rows, blocks: gridBlocks)
+            return GridLayout(columns: cols, rows: rows, blocks: gridBlocks, frame: resolvedFrame)
         }
 
         let inputBlocks = blocks ?? []
@@ -57,7 +59,7 @@ struct ProposeLayoutRequest: Codable {
             )
         }
 
-        return GridLayout(columns: cols, rows: rows, blocks: gridBlocks)
+        return GridLayout(columns: cols, rows: rows, blocks: gridBlocks, frame: resolvedFrame)
     }
 }
 

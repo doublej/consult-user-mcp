@@ -34,6 +34,7 @@ struct GridLayout: Codable, Equatable {
     var columns: Int
     var rows: Int
     var blocks: [GridBlock]
+    var frame: String?
 }
 
 struct DensityTemplate: Codable {

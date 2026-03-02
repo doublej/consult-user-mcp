@@ -16,15 +16,15 @@
 	];
 
 	const choiceItems = [
-		{ label: 'Dark mode', checked: true },
-		{ label: 'Notifications', checked: false },
-		{ label: 'Auto-save', checked: true }
+		{ label: 'Authentication', description: 'OAuth2 + JWT tokens', checked: true },
+		{ label: 'Database ORM', description: 'Prisma with migrations', checked: false },
+		{ label: 'Unit Testing', description: 'Jest + React Testing Library', checked: true }
 	];
 
 	const frameworkOptions = [
-		{ label: 'React', selected: false },
-		{ label: 'Svelte', selected: true },
-		{ label: 'Vue', selected: false }
+		{ label: 'React', description: 'Component-based UI library', selected: false },
+		{ label: 'Svelte', description: 'Compile-time framework', selected: true },
+		{ label: 'Vue', description: 'Progressive framework', selected: false }
 	];
 </script>
 
@@ -33,33 +33,32 @@
 		{#each dialogs as dialog, i}
 			<div class="preview-wrapper" style="--delay: {i * 0.1}s">
 				<div class="dialog-window">
-					<div class="window-header">
-						<div class="traffic-lights">
-							<span class="light red"></span>
-							<span class="light yellow"></span>
-							<span class="light green"></span>
-						</div>
-					</div>
-
 					<div class="dialog-body">
 						{#if dialog.content === 'confirm'}
 							<div class="icon-circle">
 								<span class="icon">?</span>
 							</div>
-							<div class="dialog-title">Confirmation</div>
-							<div class="dialog-text">Are you sure you want to proceed with this action?</div>
+							<div class="dialog-title">Deploy to Production</div>
+							<div class="dialog-text">You're about to deploy v2.4.1 to production servers.</div>
+							<div class="toolbar-inline">
+								<span class="toolbar-inline-btn"><span class="toolbar-icon">&#x23F1;</span><span class="toolbar-btn-label">Snooze</span></span>
+								<span class="toolbar-inline-btn"><span class="toolbar-icon">&#x25A1;</span><span class="toolbar-btn-label">Feedback</span></span>
+							</div>
 							<div class="button-row">
 								<button class="btn secondary">Cancel</button>
-								<button class="btn primary">Confirm <span class="key-hint">&#x23CE;</span></button>
+								<button class="btn primary">Deploy Now <span class="key-hint">&#x23CE;</span></button>
 							</div>
 
 						{:else if dialog.content === 'choices'}
-							<div class="dialog-text question">Which options do you want to enable?</div>
+							<div class="dialog-text question">Select features to include:</div>
 							<div class="choice-list">
 								{#each choiceItems as item}
 									<div class="choice-item" class:selected={item.checked}>
+										<div class="choice-content">
+											<span class="choice-label">{item.label}</span>
+											<span class="choice-description">{item.description}</span>
+										</div>
 										<span class="checkbox" class:checked={item.checked}>{item.checked ? '✓' : ''}</span>
-										<span class="choice-label">{item.label}</span>
 									</div>
 								{/each}
 							</div>
@@ -79,8 +78,11 @@
 							<div class="choice-list">
 								{#each frameworkOptions as option}
 									<div class="choice-item" class:selected={option.selected}>
+										<div class="choice-content">
+											<span class="choice-label">{option.label}</span>
+											<span class="choice-description">{option.description}</span>
+										</div>
 										<span class="radio" class:checked={option.selected}></span>
-										<span class="choice-label">{option.label}</span>
 									</div>
 								{/each}
 							</div>
@@ -106,7 +108,7 @@
 
 						{:else if dialog.content === 'tweak'}
 							<div class="icon-circle small">
-								<span class="icon slider-icon">≡</span>
+								<span class="icon slider-icon">&#x2261;</span>
 							</div>
 							<div class="dialog-title">Debug</div>
 							<div class="dialog-text">Tweaking card animation values</div>
@@ -149,7 +151,7 @@
 	.dialog-previews-container {
 		width: 100vw;
 		margin-left: calc(-50vw + 50%);
-		background: linear-gradient(180deg, #f0f0f0 0%, #fafafa 100%);
+		background: linear-gradient(180deg, #f0f3fb 0%, #f7f8fc 100%);
 		padding: 48px 24px;
 		margin-top: 32px;
 	}
@@ -209,10 +211,10 @@
 	}
 
 	.icon-circle {
-		width: 44px;
-		height: 44px;
+		width: 48px;
+		height: 48px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #5A8CFF 0%, #4070e0 100%);
+		background: #3a3d5c;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -220,20 +222,20 @@
 	}
 
 	.icon-circle.small {
-		width: 38px;
-		height: 38px;
+		width: 42px;
+		height: 42px;
 	}
 
 	.icon {
-		color: white;
+		color: #7B8FCC;
 		font-size: 22px;
-		font-weight: 600;
+		font-weight: 700;
 	}
 
 	.dialog-title {
 		color: white;
-		font-size: 15px;
-		font-weight: 600;
+		font-size: 16px;
+		font-weight: 700;
 		text-align: center;
 		letter-spacing: -0.01em;
 	}
@@ -362,9 +364,9 @@
 	.tool-name {
 		font-family: 'DM Mono', 'SF Mono', Monaco, monospace;
 		font-size: 12px;
-		color: #606060;
-		background: #e8e8e8;
+		color: #555f7a;
+		background: #e9edf8;
 		padding: 5px 12px;
-		border-radius: 6px;
+		border-radius: 999px;
 	}
 </style>

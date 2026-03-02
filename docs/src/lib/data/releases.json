@@ -3,6 +3,23 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "1.20.0",
+      "platform": "macos",
+      "date": "2026-03-02",
+      "highlight": "Interactive layout sketch editor",
+      "changes": [
+        { "text": "New `propose_layout` tool opens an interactive grid editor where users can drag, resize, and arrange UI blocks visually", "type": "added", "scope": "server", "featured": true, "starred": true },
+        { "text": "Layout blocks support semantic roles (header, sidebar, canvas, footer), importance hierarchy, and elevation shadows", "type": "added", "scope": "cli", "featured": true },
+        { "text": "Device frame chrome (browser, phone, tablet) wraps the sketch canvas for realistic previews", "type": "added", "scope": "cli", "featured": true },
+        { "text": "Annotation callouts with numbered markers and a legend can be added to layouts", "type": "added", "scope": "cli" },
+        { "text": "Alignment guide lines appear on hover and drag to help position blocks precisely", "type": "added", "scope": "cli" },
+        { "text": "Wireframe content shapes (text, image, button, input, list, chart, etc.) render inside blocks", "type": "added", "scope": "cli" },
+        { "text": "Layouts can be defined as a semantic structure tree with direction and constraints as an alternative to explicit grid coordinates", "type": "added", "scope": "server" },
+        { "text": "Layout results include structured data, ASCII art, and SVG output", "type": "added", "scope": "server" },
+        { "text": "Base prompt updated to v2.12.0 with positive framing and emphasis rebalancing", "type": "changed", "scope": "prompt" }
+      ]
+    },
+    {
       "version": "1.19.0",
       "platform": "macos",
       "date": "2026-03-01",

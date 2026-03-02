@@ -13,7 +13,7 @@ export interface Slide {
 	caption?: string;
 	text?: string;
 	question?: string;
-	choices?: { label: string; selected?: boolean }[];
+	choices?: { label: string; description?: string; selected?: boolean }[];
 	inputText?: string;
 	inputPlaceholder?: string;
 	inputHidden?: boolean;

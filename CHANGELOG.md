@@ -7,6 +7,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.20.0] (macOS) - 2026-03-02
+
+### Added
+- New `propose_layout` tool opens an interactive grid editor where users can drag, resize, and arrange UI blocks visually
+- Layout blocks support semantic roles (header, sidebar, canvas, footer), importance hierarchy, and elevation shadows
+- Device frame chrome (browser, phone, tablet) wraps the sketch canvas for realistic previews
+- Annotation callouts with numbered markers and a legend can be added to layouts
+- Alignment guide lines appear on hover and drag to help position blocks precisely
+- Wireframe content shapes (text, image, button, input, list, chart, etc.) render inside blocks
+- Layouts can be defined as a semantic structure tree with direction and constraints as an alternative to explicit grid coordinates
+- Layout results include structured data, ASCII art, and SVG output
+
+### Changed
+- Base prompt updated to v2.12.0 with positive framing and emphasis rebalancing
+
 ## [1.19.0] (macOS) - 2026-03-01
 
 ### Added

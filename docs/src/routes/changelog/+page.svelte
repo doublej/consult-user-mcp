@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { base } from '$app/paths';
 	import Changelist from '$lib/components/Changelist.svelte';
+	import SiteNav from '$lib/components/SiteNav.svelte';
 </script>
 
 <svelte:head>
@@ -11,16 +11,7 @@
 </svelte:head>
 
 <main>
-	<header>
-		<nav>
-			<a href="{base}/" class="nav-logo">consult-user-mcp</a>
-			<div class="nav-links">
-				<a href="{base}/" class="nav-link">Home</a>
-				<a href="{base}/#install" class="nav-link">Install</a>
-				<a href="https://github.com/doublej/consult-user-mcp" class="nav-link" target="_blank" rel="noopener">GitHub</a>
-			</div>
-		</nav>
-	</header>
+	<SiteNav />
 
 	<section class="changelog-section">
 		<h1>Changelog</h1>
@@ -56,49 +47,15 @@
 	}
 
 	main {
-		max-width: 800px;
+		max-width: 1200px;
 		margin: 0 auto;
-		padding: 0 24px;
-	}
-
-	header {
-		padding: 20px 0;
-		border-bottom: 1px solid #e0e0e0;
-		margin-bottom: 48px;
-	}
-
-	nav {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	.nav-logo {
-		text-decoration: none;
-		color: #1a1a1a;
-		font-weight: 600;
-		font-size: 0.95rem;
-	}
-
-	.nav-links {
-		display: flex;
-		align-items: center;
-		gap: 24px;
-	}
-
-	.nav-link {
-		color: #707070;
-		text-decoration: none;
-		font-size: 0.9rem;
-		font-weight: 500;
-	}
-
-	.nav-link:hover {
-		color: #1a1a1a;
+		padding: 0 24px 56px;
 	}
 
 	.changelog-section {
-		padding-bottom: 60px;
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 0 56px 60px;
 	}
 
 	h1 {
@@ -151,7 +108,7 @@
 	}
 
 	footer {
-		padding: 48px 0;
+		padding: 48px 56px 0;
 		border-top: 1px solid #e0e0e0;
 		text-align: center;
 		font-size: 0.85rem;
@@ -169,5 +126,29 @@
 
 	footer a:hover {
 		color: #1a1a1a;
+	}
+
+	@media (max-width: 1000px) {
+		.changelog-section {
+			padding: 0 32px 52px;
+		}
+
+		footer {
+			padding: 42px 32px 0;
+		}
+	}
+
+	@media (max-width: 700px) {
+		main {
+			padding: 0 16px 48px;
+		}
+
+		.changelog-section {
+			padding: 0 20px 44px;
+		}
+
+		footer {
+			padding: 36px 20px 0;
+		}
 	}
 </style>

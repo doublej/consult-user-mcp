@@ -12,14 +12,6 @@
 
 <div class="scaled" style="zoom: {scale}">
 	<div class="dialog-window">
-		<div class="window-header">
-			<div class="traffic-lights">
-				<span class="light red"></span>
-				<span class="light yellow"></span>
-				<span class="light green"></span>
-			</div>
-		</div>
-
 		<div class="dialog-body">
 			{#if isConfirmLike}
 				<div class="icon-circle">
@@ -27,6 +19,10 @@
 				</div>
 				<div class="dialog-title">Confirmation</div>
 				<div class="dialog-text">{slide.text}</div>
+				<div class="toolbar-inline">
+					<span class="toolbar-inline-btn"><span class="toolbar-icon">&#x23F1;</span><span class="toolbar-btn-label">Snooze</span></span>
+					<span class="toolbar-inline-btn"><span class="toolbar-icon">&#x25A1;</span><span class="toolbar-btn-label">Feedback</span></span>
+				</div>
 				<div class="button-row">
 					<button class="btn secondary">No</button>
 					<button class="btn primary">Yes <span class="key-hint">&#x23CE;</span></button>
@@ -37,10 +33,15 @@
 				<div class="choice-list">
 					{#each slide.choices ?? [] as choice}
 						<div class="choice-item" class:selected={choice.selected}>
+							<div class="choice-content">
+								<span class="choice-label">{choice.label}</span>
+								{#if choice.description}
+									<span class="choice-description">{choice.description}</span>
+								{/if}
+							</div>
 							<span class="checkbox" class:checked={choice.selected}>
 								{#if choice.selected}&#x2713;{/if}
 							</span>
-							<span class="choice-label">{choice.label}</span>
 						</div>
 					{/each}
 				</div>
@@ -66,6 +67,12 @@
 					<div class="choice-list">
 						{#each slide.choices ?? [] as choice}
 							<div class="choice-item" class:selected={choice.selected}>
+								<div class="choice-content">
+									<span class="choice-label">{choice.label}</span>
+									{#if choice.description}
+										<span class="choice-description">{choice.description}</span>
+									{/if}
+								</div>
 								{#if slide.template === 'wizard-multi'}
 									<span class="checkbox" class:checked={choice.selected}>
 										{#if choice.selected}&#x2713;{/if}
@@ -73,7 +80,6 @@
 								{:else}
 									<span class="radio" class:checked={choice.selected}></span>
 								{/if}
-								<span class="choice-label">{choice.label}</span>
 							</div>
 						{/each}
 					</div>
@@ -101,45 +107,41 @@
 		</div>
 
 		{#if slide.template === 'snooze'}
-			<div class="toolbar">
-				<div class="toolbar-expanded">
-					<div class="toolbar-label">Ask me again in:</div>
-					<div class="snooze-row">
-						{#each ['1m', '5m', '15m', '30m', '1h'] as duration}
-							<button class="snooze-pill" class:selected={duration === slide.selectedDuration}>{duration}</button>
-						{/each}
-					</div>
-				</div>
-				<div class="toolbar-buttons">
-					<button class="toolbar-btn active">
-						<span class="toolbar-icon">&#x21BA;</span>
-						<span class="toolbar-btn-label">Snooze</span>
-					</button>
-					<button class="toolbar-btn">
-						<span class="toolbar-icon">&#x270E;</span>
-						<span class="toolbar-btn-label">Feedback</span>
-					</button>
+			<div class="snooze-section">
+				<div class="section-label">Ask me again in:</div>
+				<div class="snooze-row">
+					{#each ['1m', '5m', '15m', '30m', '1h'] as duration}
+						<button class="snooze-pill" class:selected={duration === slide.selectedDuration}>{duration}</button>
+					{/each}
 				</div>
 			</div>
+			<div class="toolbar-section">
+				<span class="toolbar-inline-btn active">
+					<span class="toolbar-icon">&#x23F1;</span>
+					<span class="toolbar-btn-label">Snooze</span>
+				</span>
+				<span class="toolbar-inline-btn">
+					<span class="toolbar-icon">&#x25A1;</span>
+					<span class="toolbar-btn-label">Feedback</span>
+				</span>
+			</div>
 		{:else if slide.template === 'feedback'}
-			<div class="toolbar">
-				<div class="toolbar-expanded">
-					<div class="toolbar-label">Send feedback to agent:</div>
-					<div class="feedback-row">
-						<input class="feedback-field" type="text" value={slide.feedbackText} readonly />
-						<button class="send-btn">Send</button>
-					</div>
+			<div class="feedback-section">
+				<div class="section-label">Send feedback to agent:</div>
+				<div class="feedback-row">
+					<input class="feedback-field" type="text" value={slide.feedbackText} readonly />
+					<button class="send-btn">Send</button>
 				</div>
-				<div class="toolbar-buttons">
-					<button class="toolbar-btn">
-						<span class="toolbar-icon">&#x21BA;</span>
-						<span class="toolbar-btn-label">Snooze</span>
-					</button>
-					<button class="toolbar-btn active">
-						<span class="toolbar-icon">&#x270E;</span>
-						<span class="toolbar-btn-label">Feedback</span>
-					</button>
-				</div>
+			</div>
+			<div class="toolbar-section">
+				<span class="toolbar-inline-btn">
+					<span class="toolbar-icon">&#x23F1;</span>
+					<span class="toolbar-btn-label">Snooze</span>
+				</span>
+				<span class="toolbar-inline-btn active">
+					<span class="toolbar-icon">&#x25A1;</span>
+					<span class="toolbar-btn-label">Feedback</span>
+				</span>
 			</div>
 		{/if}
 
@@ -169,28 +171,28 @@
 	.dialog-window { max-width: 360px; }
 
 	.icon-circle {
-		width: 44px;
-		height: 44px;
+		width: 48px;
+		height: 48px;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #5A8CFF 0%, #4070e0 100%);
+		background: #3a3d5c;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin: 0 auto 6px;
 	}
 
-	.icon-circle.small { width: 38px; height: 38px; }
+	.icon-circle.small { width: 42px; height: 42px; }
 
 	.icon {
-		color: white;
+		color: #7B8FCC;
 		font-size: 22px;
-		font-weight: 600;
+		font-weight: 700;
 	}
 
 	.dialog-title {
 		color: white;
-		font-size: 15px;
-		font-weight: 600;
+		font-size: 16px;
+		font-weight: 700;
 		text-align: center;
 		letter-spacing: -0.01em;
 	}
@@ -246,27 +248,59 @@
 		border-radius: 6px;
 	}
 
-	.toolbar { background: #242428; }
-	.toolbar-expanded { padding: 12px 20px; }
+	/* Inline toolbar buttons */
+	.toolbar-inline-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		padding: 0;
+		background: transparent;
+		border: none;
+		cursor: default;
+		font-family: inherit;
+	}
 
-	.toolbar-label {
-		font-size: 12px;
+	.toolbar-inline-btn.active {
+		background: rgba(90, 140, 255, 0.15);
+		padding: 4px 12px;
+		border-radius: 8px;
+	}
+
+	.toolbar-inline-btn.active .toolbar-icon,
+	.toolbar-inline-btn.active .toolbar-btn-label { color: #5A8CFF; }
+
+	.toolbar-icon { font-size: 14px; color: #9a9a9f; }
+	.toolbar-btn-label { font-size: 13px; font-weight: 500; color: #9a9a9f; }
+
+	/* Snooze/feedback sections inside dialog */
+	.snooze-section, .feedback-section {
+		padding: 12px 20px;
+	}
+
+	.section-label {
+		font-size: 13px;
 		font-weight: 500;
-		color: #9a9a9f;
+		color: #e0e0e0;
 		margin-bottom: 8px;
+	}
+
+	.toolbar-section {
+		display: flex;
+		gap: 16px;
+		padding: 8px 20px 12px;
 	}
 
 	.snooze-row { display: flex; gap: 8px; }
 
 	.snooze-pill {
 		padding: 0;
-		width: 48px;
-		height: 36px;
-		background: #242428;
-		border: 1px solid #3a3a3f;
-		border-radius: 8px;
+		width: 52px;
+		height: 38px;
+		background: #2a2a30;
+		border: 1.5px solid #3a3a3f;
+		border-radius: 10px;
 		color: #e0e0e0;
-		font-size: 13px;
+		font-size: 14px;
 		font-weight: 600;
 		cursor: default;
 		font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
@@ -286,7 +320,7 @@
 	.feedback-field {
 		flex: 1;
 		background: #1a1a1f;
-		border: 1.5px solid #3a3a3f;
+		border: 1.5px solid #5A8CFF;
 		border-radius: 10px;
 		padding: 0 14px;
 		height: 40px;
@@ -299,38 +333,13 @@
 	.send-btn {
 		width: 70px;
 		height: 40px;
-		background: linear-gradient(135deg, #5A8CFF 0%, #4a7cf0 100%);
+		background: #5A8CFF;
 		border: none;
 		border-radius: 10px;
 		color: white;
-		font-size: 13px;
-		font-weight: 500;
+		font-size: 14px;
+		font-weight: 600;
 		cursor: default;
 		font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
 	}
-
-	.toolbar-buttons {
-		display: flex;
-		gap: 12px;
-		padding: 8px 20px;
-	}
-
-	.toolbar-btn {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		padding: 6px 12px;
-		background: transparent;
-		border: none;
-		border-radius: 8px;
-		cursor: default;
-		font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-	}
-
-	.toolbar-icon { font-size: 12px; color: #9a9a9f; }
-	.toolbar-btn-label { font-size: 12px; font-weight: 500; color: #9a9a9f; }
-
-	.toolbar-btn.active { background: rgba(90, 140, 255, 0.15); }
-	.toolbar-btn.active .toolbar-icon,
-	.toolbar-btn.active .toolbar-btn-label { color: #5A8CFF; }
 </style>

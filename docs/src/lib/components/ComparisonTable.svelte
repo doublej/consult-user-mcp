@@ -152,7 +152,7 @@
 	</div>
 
 	<p class="table-note">
-		Star counts as of February 2026. Active = committed to in last 3 months.
+		Star counts as of March 2026. Active = committed to in last 3 months.
 	</p>
 </div>
 

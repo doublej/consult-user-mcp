@@ -13,48 +13,35 @@
 	font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
 }
 
-.window-header {
-	padding: 14px 16px 10px;
-	display: flex;
-	align-items: center;
-}
-
-.traffic-lights {
-	display: flex;
-	gap: 7px;
-}
-
-.light {
-	width: 12px;
-	height: 12px;
-	border-radius: 50%;
-	opacity: 0.85;
-}
-
-.light.red { background: #ff5f57; }
-.light.yellow { background: #febc2e; }
-.light.green { background: #28c840; }
-
 .dialog-body {
-	padding: 6px 20px 20px;
+	padding: 20px 20px 16px;
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 	position: relative;
 }
 
-/* Progress bar */
+/* Progress bar - full width at top of dialog */
 .progress-bar {
 	display: flex;
-	gap: 5px;
+	gap: 4px;
+	margin: -20px -20px 0;
+	padding: 0;
 }
 
 .progress-segment {
 	flex: 1;
-	height: 5px;
+	height: 4px;
 	background: #3a3a3f;
-	border-radius: 3px;
 	transition: background 0.3s ease;
+}
+
+.progress-segment:first-child {
+	border-radius: 0;
+}
+
+.progress-segment:last-child {
+	border-radius: 0;
 }
 
 .progress-segment.filled {
@@ -65,7 +52,7 @@
 	color: #666666;
 	font-size: 12px;
 	text-align: center;
-	margin-top: -6px;
+	margin-top: 2px;
 }
 
 /* Choice list */
@@ -78,22 +65,32 @@
 .choice-item {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
 	gap: 10px;
-	padding: 10px 12px;
+	padding: 12px 14px;
 	background: #242428;
 	border-radius: 10px;
-	border: 1px solid transparent;
+	border: 1.5px solid #3a3a3f;
 	transition: all 0.15s ease;
 }
 
 .choice-item.selected {
-	background: #2a2a30;
+	background: rgba(90, 140, 255, 0.12);
 	border-color: #5A8CFF;
+	box-shadow: 0 0 0 1px rgba(90, 140, 255, 0.3);
+}
+
+.choice-content {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
 }
 
 .choice-label {
 	color: #BFBFBF;
-	font-size: 13px;
+	font-size: 14px;
+	font-weight: 600;
 	transition: color 0.2s ease;
 }
 
@@ -101,22 +98,32 @@
 	color: white;
 }
 
-/* Checkbox and radio */
+.choice-description {
+	color: #666;
+	font-size: 12px;
+	line-height: 1.3;
+}
+
+.choice-item.selected .choice-description {
+	color: #9a9a9f;
+}
+
+/* Checkbox and radio - on the right side */
 .checkbox, .radio {
-	width: 16px;
-	height: 16px;
-	border: 1.5px solid #595959;
+	width: 20px;
+	height: 20px;
+	border: 2px solid #595959;
 	background: transparent;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 10px;
+	font-size: 11px;
 	color: white;
 	flex-shrink: 0;
 }
 
 .checkbox {
-	border-radius: 4px;
+	border-radius: 5px;
 }
 
 .checkbox.checked {
@@ -145,20 +152,49 @@
 	border-radius: 50%;
 }
 
+/* Snooze/Feedback inline buttons */
+.toolbar-inline {
+	display: flex;
+	gap: 16px;
+	padding: 4px 0 0;
+}
+
+.toolbar-inline-btn {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 0;
+	background: transparent;
+	border: none;
+	cursor: default;
+	font-family: inherit;
+}
+
+.toolbar-inline-btn .toolbar-icon {
+	font-size: 14px;
+	color: #9a9a9f;
+}
+
+.toolbar-inline-btn .toolbar-btn-label {
+	font-size: 13px;
+	font-weight: 500;
+	color: #9a9a9f;
+}
+
 /* Buttons */
 .button-row {
 	display: flex;
 	gap: 10px;
-	margin-top: 8px;
+	margin-top: 4px;
 }
 
 .btn {
 	flex: 1;
-	padding: 10px 14px;
-	border-radius: 10px;
+	padding: 14px 16px;
+	border-radius: 12px;
 	border: none;
-	font-size: 13px;
-	font-weight: 500;
+	font-size: 15px;
+	font-weight: 600;
 	font-family: inherit;
 	display: flex;
 	align-items: center;
@@ -169,23 +205,23 @@
 .btn.secondary {
 	background: #2a2a30;
 	color: #BFBFBF;
-	border: 1px solid #3a3a3f;
+	border: 1.5px solid #3a3a3f;
 }
 
 .btn.primary {
-	background: linear-gradient(135deg, #5A8CFF 0%, #4a7cf0 100%);
+	background: #5A8CFF;
 	color: white;
 	transition: box-shadow 0.2s ease;
 }
 
 .btn.primary:not(:disabled) {
-	box-shadow: 0 0 16px rgba(90, 140, 255, 0.5);
+	box-shadow: 0 0 16px rgba(90, 140, 255, 0.4);
 	animation: btnPulse 2s ease-in-out infinite;
 }
 
 @keyframes btnPulse {
-	0%, 100% { box-shadow: 0 0 16px rgba(90, 140, 255, 0.5); }
-	50% { box-shadow: 0 0 24px rgba(90, 140, 255, 0.7); }
+	0%, 100% { box-shadow: 0 0 16px rgba(90, 140, 255, 0.4); }
+	50% { box-shadow: 0 0 24px rgba(90, 140, 255, 0.6); }
 }
 
 .btn:disabled {
@@ -194,11 +230,8 @@
 }
 
 .key-hint {
-	font-size: 10px;
-	opacity: 0.7;
-	background: rgba(255, 255, 255, 0.15);
-	padding: 2px 5px;
-	border-radius: 4px;
+	font-size: 14px;
+	opacity: 0.9;
 }
 
 /* Keyboard hints footer */

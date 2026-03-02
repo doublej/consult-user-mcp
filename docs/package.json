@@ -22,5 +22,8 @@
 		"svelte-check": "^4.3.4",
 		"typescript": "^5.9.3",
 		"vite": "^7.2.6"
+	},
+	"dependencies": {
+		"pixi.js": "^8.16.0"
 	}
 }

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import SiteNav from '$lib/components/SiteNav.svelte';
+
 	type CellState = 'yes' | 'no' | 'unknown';
 
 	type Client = {
@@ -67,17 +69,17 @@
 </script>
 
 <svelte:head>
-	<title>MCP Client Ecosystem</title>
+	<title>MCP Client Ecosystem - consult-user-mcp</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 	<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 </svelte:head>
 
 <main>
-	<header>
-		<h1>MCP Client Ecosystem</h1>
-		<p class="lead">Feature support across LLM coding clients.</p>
-	</header>
+	<SiteNav />
+
+	<h1>MCP Client Ecosystem</h1>
+	<p class="lead">MCP feature support across AI coding tools.</p>
 
 	<div class="table-scroll">
 		<table>
@@ -111,7 +113,12 @@
 		</table>
 	</div>
 
-	<p class="table-note">Data as of February 2026. Based on publicly available documentation.</p>
+	<p class="table-note">Data as of March 2026. Based on publicly available documentation.</p>
+
+	<footer>
+		<p>Built for <a href="https://claude.ai/claude-code" target="_blank" rel="noopener">Claude Code</a> and MCP-compatible agents</p>
+		<p><a href="https://github.com/doublej/consult-user-mcp" target="_blank" rel="noopener">GitHub</a></p>
+	</footer>
 </main>
 
 <style>
@@ -122,20 +129,17 @@
 	:global(body) {
 		margin: 0;
 		font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-		background: #fff;
-		color: #1a1a1a;
+		background: #fafafa;
+		color: #404040;
 		min-height: 100vh;
+		line-height: 1.6;
 		-webkit-font-smoothing: antialiased;
 	}
 
 	main {
 		max-width: 1200px;
 		margin: 0 auto;
-		padding: 48px 24px 80px;
-	}
-
-	header {
-		margin-bottom: 32px;
+		padding: 0 24px;
 	}
 
 	h1 {
@@ -148,7 +152,7 @@
 	.lead {
 		font-size: 1rem;
 		color: #707070;
-		margin: 0;
+		margin: 0 0 32px;
 	}
 
 	/* Table wrapper */
@@ -257,7 +261,7 @@
 
 	/* Hover */
 	tbody tr:not(.category-row):hover td {
-		background: #fafafa;
+		background: #f5f5f5;
 	}
 
 	tbody tr:last-child td {
@@ -271,9 +275,31 @@
 		text-align: right;
 	}
 
+	/* Footer */
+	footer {
+		padding: 48px 0;
+		border-top: 1px solid #e0e0e0;
+		text-align: center;
+		font-size: 0.85rem;
+	}
+
+	footer p {
+		margin: 6px 0;
+		color: #808080;
+	}
+
+	footer a {
+		color: #505050;
+		text-decoration: none;
+	}
+
+	footer a:hover {
+		color: #1a1a1a;
+	}
+
 	@media (max-width: 700px) {
 		main {
-			padding: 32px 16px 60px;
+			padding: 0 16px;
 		}
 
 		h1 {

@@ -5,6 +5,7 @@
 	type Question = {
 		question: string;
 		options: string[];
+		descriptions?: string[];
 		selectedIndex: number;
 	};
 
@@ -23,11 +24,11 @@
 			name: 'Build Error',
 			description: 'Fix type errors step by step',
 			questions: [
-				{ question: 'Found 3 type errors in auth.ts — how to proceed?', options: ['Fix all now', 'Fix critical only', 'Skip with @ts-ignore'], selectedIndex: 0 },
-				{ question: 'Missing return type on loginUser()', options: ['Infer from usage', 'Add Promise<User>', 'Add Promise<void>'], selectedIndex: 1 },
-				{ question: 'Unused import: lodash — remove it?', options: ['Yes, remove', 'Keep for now'], selectedIndex: 0 },
-				{ question: 'Run tests after fixes?', options: ['Full suite', 'Only affected', 'Skip tests'], selectedIndex: 1 },
-				{ question: '2 tests failing — block build?', options: ['Fix before build', 'Build anyway', 'Skip failing tests'], selectedIndex: 0 }
+				{ question: 'Found 3 type errors in auth.ts — how to proceed?', options: ['Fix all now', 'Fix critical only', 'Skip with @ts-ignore'], descriptions: ['Address every error', 'Only breaking errors', 'Suppress with comments'], selectedIndex: 0 },
+				{ question: 'Missing return type on loginUser()', options: ['Infer from usage', 'Add Promise<User>', 'Add Promise<void>'], descriptions: ['Let TS figure it out', 'Typed user response', 'No return value'], selectedIndex: 1 },
+				{ question: 'Unused import: lodash — remove it?', options: ['Yes, remove', 'Keep for now'], descriptions: ['Clean up imports', 'Might need later'], selectedIndex: 0 },
+				{ question: 'Run tests after fixes?', options: ['Full suite', 'Only affected', 'Skip tests'], descriptions: ['All test files', 'Changed files only', 'No testing'], selectedIndex: 1 },
+				{ question: '2 tests failing — block build?', options: ['Fix before build', 'Build anyway', 'Skip failing tests'], descriptions: ['Resolve first', 'Proceed regardless', 'Exclude from run'], selectedIndex: 0 }
 			]
 		},
 		{
@@ -55,9 +56,9 @@
 			name: 'Recipe',
 			description: 'Customize dietary preferences',
 			questions: [
-				{ question: "What's your dietary restriction?", options: ['Vegetarian', 'Vegan', 'Gluten-free', 'None'], selectedIndex: 0 },
-				{ question: 'Substitute for cream?', options: ['Coconut milk', 'Cashew cream', 'Silken tofu'], selectedIndex: 0 },
-				{ question: 'Spice level?', options: ['Mild', 'Medium', 'Hot'], selectedIndex: 1 },
+				{ question: "What's your dietary restriction?", options: ['Vegetarian', 'Vegan', 'Gluten-free', 'None'], descriptions: ['No meat', 'No animal products', 'No wheat/barley', 'No restrictions'], selectedIndex: 0 },
+				{ question: 'Substitute for cream?', options: ['Coconut milk', 'Cashew cream', 'Silken tofu'], descriptions: ['Rich and tropical', 'Nutty and smooth', 'Neutral and creamy'], selectedIndex: 0 },
+				{ question: 'Spice level?', options: ['Mild', 'Medium', 'Hot'], descriptions: ['Gentle flavour', 'Some kick', 'Full heat'], selectedIndex: 1 },
 				{ question: 'Portion size?', options: ['2 servings', '4 servings', '6 servings'], selectedIndex: 1 }
 			]
 		},
@@ -68,7 +69,7 @@
 			questions: [
 				{ question: 'Which devices affected?', options: ['All devices', 'Just one', 'Some devices'], selectedIndex: 2 },
 				{ question: 'When did issues start?', options: ['Today', 'This week', 'Gradual'], selectedIndex: 0 },
-				{ question: 'Router location?', options: ['Central', 'Corner/edge', 'Basement'], selectedIndex: 1 },
+				{ question: 'Router location?', options: ['Central', 'Corner/edge', 'Basement'], descriptions: ['Middle of space', 'Room corner', 'Below floor level'], selectedIndex: 1 },
 				{ question: 'Try rebooting router?', options: ['Done, still issues', 'Fixed it!', "Haven't tried"], selectedIndex: 0 }
 			]
 		},
@@ -77,8 +78,8 @@
 			name: 'Git Merge',
 			description: 'Resolve conflicts interactively',
 			questions: [
-				{ question: 'Conflict in auth.ts — keep?', options: ['Ours', 'Theirs', 'Manual'], selectedIndex: 0 },
-				{ question: 'Conflict in config.json — keep?', options: ['Ours', 'Theirs', 'Manual'], selectedIndex: 1 },
+				{ question: 'Conflict in auth.ts — keep?', options: ['Ours', 'Theirs', 'Manual'], descriptions: ['Keep local version', 'Keep remote version', 'Merge by hand'], selectedIndex: 0 },
+				{ question: 'Conflict in config.json — keep?', options: ['Ours', 'Theirs', 'Manual'], descriptions: ['Keep local version', 'Keep remote version', 'Merge by hand'], selectedIndex: 1 },
 				{ question: 'Run tests after merge?', options: ['Yes', 'Skip'], selectedIndex: 0 },
 				{ question: 'Commit message', options: ['Auto-generate', 'Custom'], selectedIndex: 0 }
 			]
@@ -88,10 +89,10 @@
 			name: 'Deploy',
 			description: 'Configure deployment options',
 			questions: [
-				{ question: 'Target environment', options: ['Production', 'Staging', 'Preview'], selectedIndex: 1 },
-				{ question: 'Run tests first?', options: ['Yes', 'No', 'Only if changed'], selectedIndex: 0 },
+				{ question: 'Target environment', options: ['Production', 'Staging', 'Preview'], descriptions: ['Live servers', 'Pre-production', 'Temporary URL'], selectedIndex: 1 },
+				{ question: 'Run tests first?', options: ['Yes', 'No', 'Only if changed'], descriptions: ['Full test suite', 'Skip testing', 'Smart detection'], selectedIndex: 0 },
 				{ question: 'Notify team', options: ['Slack', 'Email', 'Both', 'None'], selectedIndex: 0 },
-				{ question: 'Rollback strategy', options: ['Auto on failure', 'Manual', 'None'], selectedIndex: 0 }
+				{ question: 'Rollback strategy', options: ['Auto on failure', 'Manual', 'None'], descriptions: ['Automatic revert', 'Manual trigger', 'No rollback'], selectedIndex: 0 }
 			]
 		}
 	];
@@ -189,7 +190,7 @@
 
 <div class="demo-container">
 	<div class="demo-header">
-		<p class="demo-instruction">Click a scenario to see how Claude asks for your input</p>
+		<p class="demo-instruction">Click a scenario to step through a dialog flow</p>
 	</div>
 
 	<div class="topic-tabs">
@@ -208,14 +209,6 @@
 	<div class="demo-split">
 		<div class="demo-dialog">
 			<div class="dialog-window">
-				<div class="window-header">
-					<div class="traffic-lights">
-						<span class="light red"></span>
-						<span class="light yellow"></span>
-						<span class="light green"></span>
-					</div>
-				</div>
-
 				<div class="dialog-body">
 					<div class="progress-bar">
 						{#each Array(totalSteps) as _, i}
@@ -229,9 +222,15 @@
 					<div class="choice-list">
 						{#each currentQuestion.options as option, i}
 							{@const isSelected = i === currentQuestion.selectedIndex && (isActive || isComplete)}
+							{@const desc = currentQuestion.descriptions?.[i]}
 							<div class="choice-item" class:selected={isSelected}>
+								<div class="choice-content">
+									<span class="choice-label">{option}</span>
+									{#if desc}
+										<span class="choice-description">{desc}</span>
+									{/if}
+								</div>
 								<span class="radio" class:checked={isSelected}></span>
-								<span class="choice-label">{option}</span>
 							</div>
 						{/each}
 					</div>
@@ -439,7 +438,7 @@
 	}
 
 	.control-btn.primary {
-		background: linear-gradient(135deg, #5A8CFF 0%, #4a7cf0 100%);
+		background: #5A8CFF;
 		color: white;
 		box-shadow: 0 0 20px rgba(90, 140, 255, 0.5);
 		animation: pulseGlow 2s ease-in-out infinite;
@@ -454,16 +453,5 @@
 		transform: translateY(-1px);
 		box-shadow: 0 0 35px rgba(90, 140, 255, 0.9);
 		animation: none;
-	}
-
-	.control-btn.secondary {
-		background: #2a2a30;
-		color: #BFBFBF;
-		border: 1px solid #3a3a3f;
-	}
-
-	.control-btn.secondary:hover {
-		background: #3a3a40;
-		color: white;
 	}
 </style>

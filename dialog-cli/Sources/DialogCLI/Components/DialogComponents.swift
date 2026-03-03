@@ -164,13 +164,21 @@ class IntrinsicTextScrollView: NSScrollView {
         return NSSize(width: NSView.noIntrinsicMetric, height: height)
     }
 
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        guard window != nil else { return }
+        DispatchQueue.main.async { [weak self] in
+            self?.invalidateIntrinsicContentSize()
+        }
+    }
+
     override func setFrameSize(_ newSize: NSSize) {
         let widthChanged = abs(newSize.width - lastKnownWidth) > 1
         super.setFrameSize(newSize)
         if widthChanged && newSize.width > 0 {
             lastKnownWidth = newSize.width
-            DispatchQueue.main.async { [weak self] in
-                self?.invalidateIntrinsicContentSize()
+            invalidateIntrinsicContentSize()
+            DispatchQueue.main.async {
                 NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
             }
         }

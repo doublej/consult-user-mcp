@@ -250,11 +250,18 @@ struct UpdatesSettingsView: View {
     private var actionButton: some View {
         if isDownloading {
             EmptyView()
-        } else if settings.updateAvailable != nil {
-            Button("Update Now") {
-                performUpdate()
+        } else if let release = settings.updateAvailable {
+            HStack(spacing: 8) {
+                Button("What's New") {
+                    showChangelog(for: release)
+                }
+                .buttonStyle(.bordered)
+
+                Button("Update Now") {
+                    performUpdate()
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .buttonStyle(.borderedProminent)
         } else {
             Button("Check for Updates") {
                 checkForUpdates()
@@ -499,6 +506,15 @@ struct UpdatesSettingsView: View {
     }
 
     // MARK: - Actions
+
+    private func showChangelog(for release: UpdateManager.Release) {
+        ChangelogWindowController.shared.showWindow(
+            currentVersion: VersionInfo.app,
+            targetVersion: release.version,
+            release: release,
+            expandSections: true
+        )
+    }
 
     private func checkForUpdates() {
         settings.updateCheckInProgress = true

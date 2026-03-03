@@ -8,7 +8,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var contextMenu: NSMenu!
     private var snoozeObserver: AnyCancellable?
     private var updateObserver: AnyCancellable?
-    private var isPresentingUpdateDecision = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -98,8 +97,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             statusItem.menu = contextMenu
             statusItem.button?.performClick(nil)
             statusItem.menu = nil
-        } else if DialogSettings.shared.updateAvailable != nil {
-            showSettingsWindow(section: .updates)
+        } else if let release = DialogSettings.shared.updateAvailable {
+            showChangelogWindow(for: release)
         } else {
             showSettingsWindow()
         }
@@ -110,6 +109,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showSettingsWindow(section: SettingsSection? = nil) {
         SettingsWindowController.shared.showWindow(section: section)
         checkForUpdatesAutomatically()
+    }
+
+    // MARK: - Changelog Window
+
+    private func showChangelogWindow(
+        for release: UpdateManager.Release,
+        expandSections: Bool = false,
+        onDismiss: (() -> Void)? = nil
+    ) {
+        ChangelogWindowController.shared.showWindow(
+            currentVersion: UpdateManager.shared.currentVersion,
+            targetVersion: release.version,
+            release: release,
+            expandSections: expandSections,
+            onDismiss: onDismiss
+        )
     }
 
     // MARK: - Debug Menu
@@ -158,6 +173,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         addDebugMenuItem(debugMenu, title: "Test Tweak", action: #selector(testTweak), key: "6")
         addDebugMenuItem(debugMenu, title: "Test Notification", action: #selector(testNotifyTool), key: "4")
         addDebugMenuItem(debugMenu, title: "Test Update Notification", action: #selector(testNotifyUpdate), key: "5")
+        addDebugMenuItem(debugMenu, title: "Test Changelist", action: #selector(testChangelist), key: "7")
 
         let sketchItem = NSMenuItem(title: "Test Sketch", action: nil, keyEquivalent: "")
         let sketchSubmenu = NSMenu()
@@ -441,11 +457,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         runSketchCli(command: tc.command, json: tc.json)
     }
 
+    @objc private func testChangelist() {
+        let mockZipURL = AppURLs.latestRelease
+        let release = UpdateManager.Release(version: "9.9.9", zipURL: mockZipURL)
+        ChangelogWindowController.shared.showWindow(
+            currentVersion: "1.18.0",
+            targetVersion: "9.9.9",
+            release: release
+        )
+    }
+
     @objc private func testNotifyUpdate() {
-        guard let mockZipURL = URL(string: "https://github.com/doublej/consult-user-mcp/releases/latest") else { return }
+        let mockZipURL = AppURLs.latestRelease
         let release = UpdateManager.Release(version: "9.9.9-test", zipURL: mockZipURL)
         DialogSettings.shared.updateAvailable = release
-        presentUpdateDecisionDialog(for: release)
+        showChangelogWindow(for: release) {
+            DialogSettings.shared.remindAboutUpdateUsingPreference()
+        }
     }
 
     @objc private func testAll() {
@@ -461,6 +489,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 13.5) { self.testTweak() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 15.0) { self.testNotifyTool() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 16.0) { self.testNotifyUpdate() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 17.5) { self.testChangelist() }
     }
 
     // MARK: - Update
@@ -506,122 +535,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func presentUpdateDecisionDialog(for release: UpdateManager.Release) {
-        if isPresentingUpdateDecision {
-            return
-        }
-        isPresentingUpdateDecision = true
-
-        let reminderLabel = DialogSettings.shared.updateReminderInterval.label
-        let choices = [
-            "Yes, update now",
-            "Remind me again in \(reminderLabel)",
-            "I'll do it manually later"
-        ]
-        let body = "Consult User MCP v\(release.version) is available. You have v\(UpdateManager.shared.currentVersion).\n\nHow do you want to proceed?"
-
-        let payload: [String: Any] = [
-            "body": body,
-            "choices": choices,
-            "allowMultiple": false,
-            "position": DialogSettings.shared.position.rawValue
-        ]
-
-        guard let json = encodeJSON(payload) else {
-            isPresentingUpdateDecision = false
-            return
-        }
-
-        runDialogCli(command: "choose", json: json, clientName: "Consult User MCP") { [weak self] output in
-            guard let self = self else { return }
-            self.isPresentingUpdateDecision = false
-            self.handleUpdateDecision(output: output, release: release)
-        }
-    }
-
-    private func handleUpdateDecision(output: String, release: UpdateManager.Release) {
-        guard let data = output.data(using: .utf8),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            DialogSettings.shared.remindAboutUpdateUsingPreference()
-            return
-        }
-
-        if let snoozed = json["snoozed"] as? Bool, snoozed {
-            if let remaining = json["remainingSeconds"] as? Double {
-                DialogSettings.shared.remindAboutUpdate(after: remaining)
-            } else if let minutes = json["snoozeMinutes"] as? Double {
-                DialogSettings.shared.remindAboutUpdate(after: minutes * 60)
-            } else {
-                DialogSettings.shared.remindAboutUpdateUsingPreference()
-            }
-            return
-        }
-
-        if let cancelled = json["cancelled"] as? Bool, cancelled {
-            DialogSettings.shared.remindAboutUpdateUsingPreference()
-            return
-        }
-
-        let answerValue = json["answer"]
-        let answer: String?
-        if let single = answerValue as? String {
-            answer = single
-        } else if let multiple = answerValue as? [String], let first = multiple.first {
-            answer = first
-        } else {
-            answer = nil
-        }
-
-        switch answer {
-        case "Yes, update now":
-            DialogSettings.shared.clearUpdateReminderState()
-            downloadAndInstall(release)
-        case "Remind me again in \(DialogSettings.shared.updateReminderInterval.label)":
-            DialogSettings.shared.remindAboutUpdateUsingPreference()
-        case "Remind me again in 1 hour":
-            DialogSettings.shared.remindAboutUpdate(hours: 1) // Backward-compat with older choice labels
-        case "Remind me again in 24 hours":
-            DialogSettings.shared.remindAboutUpdate(hours: 24) // Backward-compat with older choice labels
-        case "I'll do it manually later":
-            DialogSettings.shared.ignoreUpdate(version: release.version)
-        default:
+        showChangelogWindow(for: release) {
             DialogSettings.shared.remindAboutUpdateUsingPreference()
         }
     }
 
     private func showUpToDateAlert() {
         showAlert(title: "Up to Date", message: "You're running the latest version (\(UpdateManager.shared.currentVersion)).")
-    }
-
-    private func downloadAndInstall(_ release: UpdateManager.Release) {
-        let alert = NSAlert()
-        alert.messageText = "Downloading Update..."
-        alert.informativeText = "Please wait while the update downloads."
-        alert.addButton(withTitle: "Cancel")
-        alert.alertStyle = .informational
-        alert.buttons.first?.isHidden = true
-
-        let window = alert.window
-        alert.beginSheetModal(for: NSApp.keyWindow ?? window) { _ in }
-
-        UpdateManager.shared.downloadUpdate(from: release.zipURL) { [weak self] result in
-            DispatchQueue.main.async {
-                NSApp.keyWindow?.endSheet(window)
-                self?.handleDownloadResult(result)
-            }
-        }
-    }
-
-    private func handleDownloadResult(_ result: Result<URL, Error>) {
-        switch result {
-        case .success(let zipPath):
-            do {
-                try UpdateManager.shared.installUpdate(zipPath: zipPath)
-            } catch {
-                showAlert(title: "Install Failed", message: error.localizedDescription)
-            }
-        case .failure(let error):
-            showAlert(title: "Download Failed", message: error.localizedDescription)
-        }
     }
 
     private func showAlert(title: String, message: String) {

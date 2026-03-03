@@ -5,8 +5,6 @@ import os.log
 final class UpdateManager {
     static let shared = UpdateManager()
 
-    private let repoOwner = "doublej"
-    private let repoName = "consult-user-mcp"
     private let tagPrefix = "macos/v"
     private let logger = Logger(subsystem: "com.consultuser.mcp", category: "UpdateManager")
 
@@ -63,13 +61,7 @@ final class UpdateManager {
         let current = currentVersion
         logger.info("Checking for updates. Current version: \(current)")
 
-        let endpoint = "https://api.github.com/repos/\(repoOwner)/\(repoName)/releases?per_page=20"
-        guard let url = URL(string: endpoint) else {
-            completion(.failure(UpdateError.noRelease))
-            return
-        }
-
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: AppURLs.releasesAPI)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
 
         URLSession.shared.dataTask(with: request) { [weak self] data, _, error in

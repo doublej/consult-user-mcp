@@ -11,6 +11,8 @@ final class SettingsWindowController {
 
     private init() {}
 
+    var isOpen: Bool { window != nil }
+
     func showWindow(section: SettingsSection? = nil) {
         if let section = section {
             DialogSettings.shared.pendingSettingsSection = section
@@ -74,7 +76,10 @@ private final class WindowDelegate: NSObject, NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         SettingsWindowController.shared.saveFrame()
         SettingsWindowController.shared.window = nil
-        NSApp.setActivationPolicy(.accessory)
+
+        if !ChangelogWindowController.shared.isOpen {
+            NSApp.setActivationPolicy(.accessory)
+        }
     }
 
     func windowDidResize(_ notification: Notification) {

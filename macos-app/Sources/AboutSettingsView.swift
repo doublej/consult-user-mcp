@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 
 struct AboutSettingsView: View {
-    private let issuesURL = URL(string: "https://github.com/doublej/consult-user-mcp/issues")!
+    private let issuesURL = AppURLs.githubIssues
 
     var body: some View {
         ScrollView {
@@ -73,6 +73,16 @@ struct AboutSettingsView: View {
                     }
 
                     Spacer(minLength: 0)
+
+                    Button("What's New") {
+                        ChangelogWindowController.shared.showWindow(
+                            currentVersion: "0.0.0",
+                            targetVersion: VersionInfo.app,
+                            expandSections: true
+                        )
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
                 .padding(16)
 

@@ -92,7 +92,7 @@ struct SwiftUITweakDialog: View {
                         hints: [
                             KeyboardHint(key: "↑↓", label: "navigate"),
                             KeyboardHint(key: "←→", label: "adjust"),
-                            KeyboardHint(key: "⏎", label: hasChanges ? "save to file" : "cancel"),
+                            KeyboardHint(key: "⏎", label: hasChanges ? "save" : "cancel"),
                             KeyboardHint(key: "Esc", label: "cancel"),
                         ] + KeyboardHint.toolbarHints,
                         buttons: hasChanges

@@ -420,6 +420,7 @@ struct DialogFooter: View {
                     .frame(height: 48)
                 }
             }
+            .frame(height: 48)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)

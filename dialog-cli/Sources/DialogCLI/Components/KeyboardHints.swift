@@ -38,6 +38,7 @@ struct KeyboardHintsView: View {
                     Text(hint.label)
                         .font(.system(size: 10, weight: .regular))
                         .foregroundColor(Theme.Colors.textMuted)
+                        .lineLimit(1)
                 }
             }
         }

@@ -11,7 +11,10 @@ enum AsciiRenderer {
         // Assign short labels (first letter or first unique chars)
         let abbreviations = buildAbbreviations(layout.blocks)
 
-        for block in layout.blocks {
+        // Sort largest blocks first so smaller blocks render on top
+        let sortedBlocks = layout.blocks.sorted { ($0.w * $0.h) > ($1.w * $1.h) }
+
+        for block in sortedBlocks {
             let abbr = abbreviations[block.id] ?? "?"
             for row in block.y ..< min(block.y + block.h, rows) {
                 for col in block.x ..< min(block.x + block.w, cols) {

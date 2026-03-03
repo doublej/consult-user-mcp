@@ -89,14 +89,15 @@ struct ChangelogView: View {
 
     private var releaseList: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 4) {
+            LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(releases) { release in
                     releaseSection(release)
                 }
 
                 changelogLink
             }
-            .padding(20)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
         }
     }
 
@@ -107,64 +108,79 @@ struct ChangelogView: View {
                 .font(.system(size: 12))
             Spacer()
         }
-        .padding(.top, 8)
+        .padding(.top, 12)
     }
 
     // MARK: - Release Section
 
     private func releaseSection(_ release: ChangelogRelease) -> some View {
-        DisclosureGroup(isExpanded: isExpandedBinding(for: release)) {
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(release.changes) { entry in
-                    changeRow(entry)
+        let isExpanded = expandedSections.contains(release.id)
+
+        return VStack(alignment: .leading, spacing: 0) {
+            sectionHeader(release, isExpanded: isExpanded)
+                .contentShape(Rectangle())
+                .onTapGesture { toggleSection(release.id) }
+
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 5) {
+                    ForEach(release.changes) { entry in
+                        changeRow(entry)
+                    }
                 }
+                .padding(.top, 6)
+                .padding(.bottom, 4)
             }
-            .padding(.top, 4)
-        } label: {
-            releaseSectionHeader(release)
         }
+        .padding(.vertical, 8)
     }
 
-    private func releaseSectionHeader(_ release: ChangelogRelease) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack {
-                Text("v\(release.version)")
-                    .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                Spacer()
-                Text(release.date)
-                    .font(.system(size: 12))
-                    .foregroundColor(.secondary)
-            }
+    private func sectionHeader(_ release: ChangelogRelease, isExpanded: Bool) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: "chevron.right")
+                .font(.system(size: 10, weight: .medium))
+                .foregroundColor(.secondary)
+                .rotationEffect(.degrees(isExpanded ? 90 : 0))
+
+            Text("v\(release.version)")
+                .font(.system(size: 13, weight: .semibold, design: .monospaced))
 
             if let highlight = release.highlight {
+                Text("\u{2014}")
+                    .foregroundStyle(.tertiary)
                 Text(highlight)
                     .font(.system(size: 12))
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
             }
+
+            Spacer(minLength: 8)
+
+            Text(release.date)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(.tertiary)
         }
     }
 
     private func changeRow(_ entry: ChangelogEntry) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
             TypeBadge(type: entry.type)
+                .frame(width: 56, alignment: .leading)
             Text(entry.text)
                 .font(.system(size: 12))
                 .foregroundColor(.primary.opacity(0.85))
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .padding(.leading, 16)
     }
 
-    private func isExpandedBinding(for release: ChangelogRelease) -> Binding<Bool> {
-        Binding(
-            get: { expandedSections.contains(release.id) },
-            set: { expanded in
-                if expanded {
-                    expandedSections.insert(release.id)
-                } else {
-                    expandedSections.remove(release.id)
-                }
+    private func toggleSection(_ id: String) {
+        withAnimation(.easeInOut(duration: 0.15)) {
+            if expandedSections.contains(id) {
+                expandedSections.remove(id)
+            } else {
+                expandedSections.insert(id)
             }
-        )
+        }
     }
 
     // MARK: - Footer

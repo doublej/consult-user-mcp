@@ -4,16 +4,30 @@ struct AnnotationOverlayView: View {
     let annotations: [Annotation]
     let cellW: CGFloat
     let cellH: CGFloat
+    var blocks: [GridBlock] = []
+    var activeDragBlockId: String? = nil
+    var activeDragOffset: CGSize = .zero
 
     private let markerSize: CGFloat = 20
+
+    private func ownerBlock(for annotation: Annotation) -> GridBlock? {
+        blocks.first { b in
+            annotation.x >= b.x && annotation.x < b.x + b.w &&
+            annotation.y >= b.y && annotation.y < b.y + b.h
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             ForEach(Array(annotations.enumerated()), id: \.offset) { index, annotation in
-                let cx = CGFloat(annotation.x) * cellW + cellW / 2
-                let cy = CGFloat(annotation.y) * cellH + cellH / 2
-                let markerX = CGFloat(annotation.x) * cellW - markerSize / 2
-                let markerY = CGFloat(annotation.y) * cellH - markerSize / 2
+                let owner = ownerBlock(for: annotation)
+                let isLinked = activeDragBlockId != nil && owner?.id == activeDragBlockId
+                let dragOff = isLinked ? activeDragOffset : CGSize.zero
+
+                let cx = CGFloat(annotation.x) * cellW + cellW / 2 + dragOff.width
+                let cy = CGFloat(annotation.y) * cellH + cellH / 2 + dragOff.height
+                let markerX = CGFloat(annotation.x) * cellW - markerSize / 2 + dragOff.width
+                let markerY = CGFloat(annotation.y) * cellH - markerSize / 2 + dragOff.height
 
                 // Leader line from marker to cell centre
                 Path { p in

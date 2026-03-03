@@ -124,9 +124,15 @@ struct GridCanvasView: View {
                 )
 
                 if let annotations = layout.annotations, !annotations.isEmpty {
-                    AnnotationOverlayView(annotations: annotations, cellW: cellW, cellH: cellH)
+                    AnnotationOverlayView(
+                        annotations: annotations, cellW: cellW, cellH: cellH,
+                        blocks: layout.blocks,
+                        activeDragBlockId: activeDragBlockId,
+                        activeDragOffset: activeDragOffset
+                    )
                 }
             }
+            .frame(width: cellW * CGFloat(layout.columns), height: cellH * CGFloat(layout.rows))
             .coordinateSpace(name: "canvas")
             .onContinuousHover { phase in
                 guard interactive else { return }
@@ -143,6 +149,7 @@ struct GridCanvasView: View {
             }
             .onAppear { if interactive { cycleState.startMonitoring() } }
             .onDisappear { cycleState.stopMonitoring() }
+            .frame(width: geo.size.width, height: geo.size.height)
         }
     }
 
@@ -256,9 +263,26 @@ struct GridCanvasView: View {
         }
 
         // Move the block
+        let newX = max(0, min(layout.columns - block.w, block.x + colDelta))
+        let newY = max(0, min(layout.rows - block.h, block.y + rowDelta))
+        let actualDx = newX - block.x
+        let actualDy = newY - block.y
+
+        // Move annotations within the block's bounds
+        if actualDx != 0 || actualDy != 0, var annotations = layout.annotations {
+            for i in annotations.indices {
+                let ann = annotations[i]
+                if ann.x >= block.x && ann.x < block.x + block.w &&
+                   ann.y >= block.y && ann.y < block.y + block.h {
+                    annotations[i] = Annotation(x: ann.x + actualDx, y: ann.y + actualDy, text: ann.text)
+                }
+            }
+            layout.annotations = annotations
+        }
+
         if let idx = layout.blocks.firstIndex(where: { $0.id == id }) {
-            layout.blocks[idx].x = max(0, min(layout.columns - block.w, block.x + colDelta))
-            layout.blocks[idx].y = max(0, min(layout.rows - block.h, block.y + rowDelta))
+            layout.blocks[idx].x = newX
+            layout.blocks[idx].y = newY
         }
 
         // Move children by the same delta

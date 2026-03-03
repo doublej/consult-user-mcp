@@ -47,10 +47,13 @@ extension DialogManager {
             NSApp.stopModal()
         }
 
+        let position = effectivePosition(request.position)
+
         let dialogContent = SwiftUITweakDialog(
             bodyText: request.body,
             parameters: request.parameters,
             fileRewriter: fileRewriter,
+            position: position,
             onSaveToFile: onSaveToFile,
             onTellAgent: onTellAgent,
             onCancel: onCancel,
@@ -58,8 +61,6 @@ extension DialogManager {
             onFeedback: onFeedback,
             onAskDifferently: onAskDifferently
         )
-
-        let position = effectivePosition(request.position)
         let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460, position: position)
 
         positionWindow(window, position: position)

@@ -8,6 +8,7 @@ struct SwiftUITweakDialog: View {
     let parameters: [TweakParameter]
     let fileRewriter: FileRewriter
     let detectedFramework: DetectedFramework?
+    let position: DialogPosition
     let onSaveToFile: ([String: Double], Bool) -> Void
     let onTellAgent: ([String: Double], Bool) -> Void
     let onCancel: () -> Void
@@ -20,11 +21,14 @@ struct SwiftUITweakDialog: View {
     @State private var debounceTimers: [String: DispatchWorkItem] = [:]
     @State private var focusedIndex: Int?
     @State private var replayAnimations: Bool = true
+    @State private var showConsole: Bool = false
+    @State private var latestEdit: EditEvent?
 
     init(
         bodyText: String,
         parameters: [TweakParameter],
         fileRewriter: FileRewriter,
+        position: DialogPosition,
         onSaveToFile: @escaping ([String: Double], Bool) -> Void,
         onTellAgent: @escaping ([String: Double], Bool) -> Void,
         onCancel: @escaping () -> Void,
@@ -36,6 +40,7 @@ struct SwiftUITweakDialog: View {
         self.parameters = parameters
         self.fileRewriter = fileRewriter
         self.detectedFramework = FrameworkDetector.detect(from: parameters)
+        self.position = position
         self.onSaveToFile = onSaveToFile
         self.onTellAgent = onTellAgent
         self.onCancel = onCancel
@@ -49,60 +54,115 @@ struct SwiftUITweakDialog: View {
     }
 
     var body: some View {
-        DialogContainer(
-            keyHandler: handleKeyPress,
-            currentDialogType: "tweak",
-            onAskDifferently: onAskDifferently
-        ) { expandedTool in
-            VStack(spacing: 0) {
-                DialogHeader(
-                    icon: "slider.horizontal.3",
-                    title: DialogManager.shared.buildTitle(),
-                    body: bodyText
-                )
-                .padding(.bottom, 8)
-
-                if let framework = detectedFramework {
-                    HStack(spacing: 12) {
-                        FrameworkBadge(framework: framework)
-                        Spacer()
-                        ReplayAnimationsToggle(isOn: $replayAnimations)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 8)
-                }
-
-                parameterList
-                    .clipped()
-
-                DialogToolbar(
-                    expandedTool: expandedTool,
-                    currentDialogType: "tweak",
-                    onSnooze: onSnooze,
-                    onFeedback: { feedback in onFeedback(feedback, values) },
-                    onAskDifferently: onAskDifferently
-                )
-
-                DialogFooter(
-                    hints: [
-                        KeyboardHint(key: "↑↓", label: "navigate"),
-                        KeyboardHint(key: "←→", label: "adjust"),
-                        KeyboardHint(key: "⏎", label: hasChanges ? "save to file" : "cancel"),
-                        KeyboardHint(key: "Esc", label: "cancel"),
-                    ] + KeyboardHint.toolbarHints,
-                    buttons: hasChanges
-                        ? [
-                            .init("Revert All", action: revertAll),
-                            .init("Tell Agent", action: tellAgent),
-                            .init("Save to File", isPrimary: true, showReturnHint: true, action: saveToFile),
-                        ]
-                        : [
-                            .init("Cancel", isPrimary: true, showReturnHint: true, action: { onCancel() }),
-                        ]
-                )
+        HStack(spacing: 0) {
+            if showConsole && position == .right {
+                consoleDivider
+                TweakConsoleView(editEvent: latestEdit)
             }
-            .accessibilityElement(children: .contain)
-            .accessibilityLabel(Text(bodyText))
+
+            DialogContainer(
+                keyHandler: handleKeyPress,
+                currentDialogType: "tweak",
+                onAskDifferently: onAskDifferently
+            ) { expandedTool in
+                VStack(spacing: 0) {
+                    DialogHeader(
+                        icon: "slider.horizontal.3",
+                        title: DialogManager.shared.buildTitle(),
+                        body: bodyText
+                    )
+                    .padding(.bottom, 8)
+
+                    tweakToolbarRow
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 8)
+
+                    parameterList
+                        .clipped()
+
+                    DialogToolbar(
+                        expandedTool: expandedTool,
+                        currentDialogType: "tweak",
+                        onSnooze: onSnooze,
+                        onFeedback: { feedback in onFeedback(feedback, values) },
+                        onAskDifferently: onAskDifferently
+                    )
+
+                    DialogFooter(
+                        hints: [
+                            KeyboardHint(key: "↑↓", label: "navigate"),
+                            KeyboardHint(key: "←→", label: "adjust"),
+                            KeyboardHint(key: "⏎", label: hasChanges ? "save to file" : "cancel"),
+                            KeyboardHint(key: "Esc", label: "cancel"),
+                        ] + KeyboardHint.toolbarHints,
+                        buttons: hasChanges
+                            ? [
+                                .init("Revert All", action: revertAll),
+                                .init("Tell Agent", action: tellAgent),
+                                .init("Save to File", isPrimary: true, showReturnHint: true, action: saveToFile),
+                            ]
+                            : [
+                                .init("Cancel", isPrimary: true, showReturnHint: true, action: { onCancel() }),
+                            ]
+                    )
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(Text(bodyText))
+            }
+
+            if showConsole && position != .right {
+                consoleDivider
+                TweakConsoleView(editEvent: latestEdit)
+            }
+        }
+    }
+
+    private var tweakToolbarRow: some View {
+        HStack(spacing: 12) {
+            if let framework = detectedFramework {
+                FrameworkBadge(framework: framework)
+            }
+            Spacer()
+            if detectedFramework != nil {
+                ReplayAnimationsToggle(isOn: $replayAnimations)
+            }
+            consoleToggleButton
+        }
+    }
+
+    private var consoleToggleButton: some View {
+        Button(action: toggleConsole) {
+            HStack(spacing: 5) {
+                Image(systemName: "chevron.left.forwardslash.chevron.right")
+                    .font(.system(size: 10, weight: .medium))
+                Text("Show edits")
+                    .font(.system(size: 11, weight: .medium))
+            }
+            .foregroundColor(showConsole ? Theme.Colors.accentBlue : Theme.Colors.textMuted)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(showConsole ? Theme.Colors.accentBlue.opacity(0.1) : Color.clear)
+            )
+        }
+        .buttonStyle(.plain)
+        .help("Toggle debug console")
+    }
+
+    private var consoleDivider: some View {
+        Rectangle()
+            .fill(Theme.Colors.border.opacity(0.5))
+            .frame(width: 1)
+    }
+
+    private func toggleConsole() {
+        withConditionalAnimation {
+            showConsole.toggle()
+        }
+        if !showConsole { latestEdit = nil }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
         }
     }
 
@@ -250,6 +310,7 @@ struct SwiftUITweakDialog: View {
                 disabledParams.insert(id)
             }
         }
+        latestEdit = nil
     }
 
     private func resetParam(_ id: String) {
@@ -269,12 +330,16 @@ struct SwiftUITweakDialog: View {
         let shouldReplay = replayAnimations
         let work = DispatchWorkItem { [fileRewriter] in
             let result = fileRewriter.applyChange(paramId: paramId, newValue: value)
-            if case .failure = result {
+            switch result {
+            case .success(let editEvent):
+                DispatchQueue.main.async {
+                    latestEdit = editEvent
+                }
+                if shouldReplay { Self.triggerBrowserReplay() }
+            case .failure:
                 DispatchQueue.main.async {
                     disabledParams.insert(paramId)
                 }
-            } else if shouldReplay {
-                Self.triggerBrowserReplay()
             }
         }
         debounceTimers[paramId] = work

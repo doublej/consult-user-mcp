@@ -20,9 +20,22 @@ enum RewriteError: Error {
     case outsideProjectRoot(path: String)
 }
 
+struct EditEvent {
+    let paramLabel: String
+    let fileName: String
+    let lineNumber: Int
+    let oldValue: String
+    let newValue: String
+    let lineContent: String
+    let editRange: Range<Int>
+    let contextBefore: [String]
+    let contextAfter: [String]
+}
+
 final class FileRewriter {
     struct TrackedParam {
         let id: String
+        let label: String
         let filePath: String
         var line: Int      // 1-indexed
         var column: Int    // 1-indexed
@@ -46,6 +59,7 @@ final class FileRewriter {
                 : projectPath.map { ($0 as NSString).appendingPathComponent(p.file) } ?? p.file
             map[p.id] = TrackedParam(
                 id: p.id,
+                label: p.label,
                 filePath: resolvedPath,
                 line: p.line,
                 column: p.column,
@@ -64,8 +78,10 @@ final class FileRewriter {
         }
     }
 
-    func applyChange(paramId: String, newValue: Double) -> Result<Void, RewriteError> {
-        guard var param = params[paramId] else { return .success(()) }
+    func applyChange(paramId: String, newValue: Double) -> Result<EditEvent, RewriteError> {
+        guard var param = params[paramId] else {
+            return .failure(.verificationFailed(paramId: paramId, expected: "", found: ""))
+        }
 
         // Security: reject writes outside project root
         if let root = projectPath {
@@ -108,6 +124,7 @@ final class FileRewriter {
 
         // Format new value
         let expectedLen = param.expectedText.count
+        let oldText = param.expectedText
         let newText = formatValue(newValue, matching: param.expectedText, step: param.step)
         let lengthDiff = newText.count - expectedLen
 
@@ -117,6 +134,10 @@ final class FileRewriter {
         let prefix = String(line[line.startIndex..<startIdx])
         let suffix = String(line[endIdx...])
         lines[lineIndex] = prefix + newText + suffix
+
+        // Build context lines
+        let ctxBefore = lines[max(0, lineIndex - 2)..<lineIndex].map { String($0) }
+        let ctxAfter = lines[(lineIndex + 1)..<min(lines.count, lineIndex + 3)].map { String($0) }
 
         // Adjust columns for sibling params on same file + line
         for (otherId, var other) in params where otherId != paramId {
@@ -140,7 +161,18 @@ final class FileRewriter {
         param.expectedText = newText
         params[paramId] = param
 
-        return .success(())
+        let editEvent = EditEvent(
+            paramLabel: param.label,
+            fileName: (param.filePath as NSString).lastPathComponent,
+            lineNumber: param.line,
+            oldValue: oldText,
+            newValue: newText,
+            lineContent: lines[lineIndex],
+            editRange: matchCol..<(matchCol + newText.count),
+            contextBefore: Array(ctxBefore),
+            contextAfter: Array(ctxAfter)
+        )
+        return .success(editEvent)
     }
 
     func formatValue(_ value: Double, matching expectedText: String, step: Double?) -> String {

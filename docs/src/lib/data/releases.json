@@ -3,6 +3,17 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.0.3",
+      "platform": "macos",
+      "date": "2026-03-03",
+      "highlight": "Wizard text and tweak footer stability fixes",
+      "changes": [
+        { "text": "Wizard form body text and question text now appear reliably on first render", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Tweak dialog footer no longer grows when switching between save and cancel states", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Smaller blocks in ASCII layout sketches now render on top of larger overlapping blocks", "type": "fixed", "scope": "cli" }
+      ]
+    },
+    {
       "version": "2.0.2",
       "platform": "macos",
       "date": "2026-03-03",

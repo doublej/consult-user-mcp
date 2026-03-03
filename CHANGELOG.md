@@ -7,6 +7,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.3] (macOS) - 2026-03-03
+
+### Fixed
+- Wizard form body text and question text now appear reliably on first render
+- Tweak dialog footer no longer grows when switching between save and cancel states
+- Smaller blocks in ASCII layout sketches now render on top of larger overlapping blocks
+
 ## [2.0.2] (macOS) - 2026-03-03
 
 ### Added

@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.2] (macOS) - 2026-03-03
+
+### Added
+- Annotations now move with their parent block when dragged in the layout editor
+
+### Fixed
+- Layout editor grid cells are now square, maintaining proper aspect ratio instead of stretching to fill
+- Drop-to-stash hint now floats as an overlay instead of pushing layout content around
+- Annotation legend now aligns to the left edge consistently
+
 ## [2.0.1] (macOS) - 2026-03-03
 
 ### Fixed

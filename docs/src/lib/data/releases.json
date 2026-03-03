@@ -3,6 +3,18 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.0.2",
+      "platform": "macos",
+      "date": "2026-03-03",
+      "highlight": "Layout editor drag and grid improvements",
+      "changes": [
+        { "text": "Annotations now move with their parent block when dragged in the layout editor", "type": "added", "scope": "cli", "featured": true },
+        { "text": "Layout editor grid cells are now square, maintaining proper aspect ratio instead of stretching to fill", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Drop-to-stash hint now floats as an overlay instead of pushing layout content around", "type": "fixed", "scope": "cli" },
+        { "text": "Annotation legend now aligns to the left edge consistently", "type": "fixed", "scope": "cli" }
+      ]
+    },
+    {
       "version": "2.0.1",
       "platform": "macos",
       "date": "2026-03-03",

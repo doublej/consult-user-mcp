@@ -99,18 +99,23 @@ struct SketchEditorView: View {
                             .fill(Color.white)
                     )
 
-                    if let frameStr = state.layout.frame, let deviceFrame = DeviceFrame(rawValue: frameStr) {
-                        DeviceFrameView(frame: deviceFrame) { canvas }
-                    } else {
-                        canvas
+                    Group {
+                        if let frameStr = state.layout.frame, let deviceFrame = DeviceFrame(rawValue: frameStr) {
+                            DeviceFrameView(frame: deviceFrame) { canvas }
+                        } else {
+                            canvas
+                        }
                     }
-
-                    if isDraggingBlock {
-                        dropToStashHint(highlighted: isOverStashZone)
+                    .overlay(alignment: .bottom) {
+                        if isDraggingBlock {
+                            dropToStashHint(highlighted: isOverStashZone)
+                                .padding(8)
+                        }
                     }
 
                     if let annotations = state.layout.annotations, !annotations.isEmpty {
                         annotationLegend(annotations)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
             }

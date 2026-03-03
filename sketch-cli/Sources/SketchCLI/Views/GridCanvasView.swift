@@ -66,8 +66,9 @@ struct GridCanvasView: View {
 
     var body: some View {
         GeometryReader { geo in
-            let cellW = geo.size.width / CGFloat(layout.columns)
-            let cellH = geo.size.height / CGFloat(layout.rows)
+            let cellSize = min(geo.size.width / CGFloat(layout.columns), geo.size.height / CGFloat(layout.rows))
+            let cellW = cellSize
+            let cellH = cellSize
             let resolvedNesting = nestingMap ?? DescriptionRenderer.detectNesting(layout.blocks)
 
             ZStack(alignment: .topLeading) {

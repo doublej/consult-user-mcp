@@ -4,10 +4,11 @@ h1 {
   line-height: 1.20;
 }
 
-span {
-  font-size: 14px;
-  height: 24px;
-  width: 120px;
+.card-container {
+  padding-top: 14px;
+  padding-bottom: 24px;
+  border-radius: 120px;
+  max-width: 480px;
 }
 
 .animation {

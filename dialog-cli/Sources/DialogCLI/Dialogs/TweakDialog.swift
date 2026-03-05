@@ -54,80 +54,73 @@ struct SwiftUITweakDialog: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            if showConsole && position == .right {
-                consoleDivider
-                TweakConsoleView(editEvent: latestEdit)
-            }
+        DialogContainer(
+            keyHandler: handleKeyPress,
+            currentDialogType: "tweak",
+            onAskDifferently: onAskDifferently
+        ) { expandedTool in
+            VStack(spacing: 0) {
+                DialogHeader(
+                    icon: "slider.horizontal.3",
+                    title: DialogManager.shared.buildTitle(),
+                    body: bodyText
+                )
+                .padding(.bottom, 8)
 
-            DialogContainer(
-                keyHandler: handleKeyPress,
-                currentDialogType: "tweak",
-                onAskDifferently: onAskDifferently
-            ) { expandedTool in
-                VStack(spacing: 0) {
-                    DialogHeader(
-                        icon: "slider.horizontal.3",
-                        title: DialogManager.shared.buildTitle(),
-                        body: bodyText
-                    )
+                tweakToolbarRow
+                    .padding(.horizontal, 20)
                     .padding(.bottom, 8)
 
-                    tweakToolbarRow
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 8)
+                parameterList
+                    .clipped()
 
-                    parameterList
-                        .clipped()
+                DialogToolbar(
+                    expandedTool: expandedTool,
+                    currentDialogType: "tweak",
+                    onSnooze: onSnooze,
+                    onFeedback: { feedback in onFeedback(feedback, values) },
+                    onAskDifferently: onAskDifferently
+                )
 
-                    DialogToolbar(
-                        expandedTool: expandedTool,
-                        currentDialogType: "tweak",
-                        onSnooze: onSnooze,
-                        onFeedback: { feedback in onFeedback(feedback, values) },
-                        onAskDifferently: onAskDifferently
-                    )
-
-                    DialogFooter(
-                        hints: [
-                            KeyboardHint(key: "↑↓", label: "navigate"),
-                            KeyboardHint(key: "←→", label: "adjust"),
-                            KeyboardHint(key: "⏎", label: hasChanges ? "save" : "cancel"),
-                            KeyboardHint(key: "Esc", label: "cancel"),
-                        ] + KeyboardHint.toolbarHints,
-                        buttons: hasChanges
-                            ? [
-                                .init("Revert All", action: revertAll),
-                                .init("Tell Agent", action: tellAgent),
-                                .init("Save to File", isPrimary: true, showReturnHint: true, action: saveToFile),
-                            ]
-                            : [
-                                .init("Cancel", isPrimary: true, showReturnHint: true, action: { onCancel() }),
-                            ]
-                    )
-                }
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel(Text(bodyText))
+                DialogFooter(
+                    hints: [
+                        KeyboardHint(key: "↑↓", label: "navigate"),
+                        KeyboardHint(key: "←→", label: "adjust"),
+                        KeyboardHint(key: "⏎", label: hasChanges ? "save" : "cancel"),
+                        KeyboardHint(key: "Esc", label: "cancel"),
+                    ] + KeyboardHint.toolbarHints,
+                    buttons: hasChanges
+                        ? [
+                            .init("Revert All", action: revertAll),
+                            .init("Tell Agent", action: tellAgent),
+                            .init("Save to File", isPrimary: true, showReturnHint: true, action: saveToFile),
+                        ]
+                        : [
+                            .init("Cancel", isPrimary: true, showReturnHint: true, action: { onCancel() }),
+                        ]
+                )
             }
-
-            if showConsole && position != .right {
-                consoleDivider
-                TweakConsoleView(editEvent: latestEdit)
-            }
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(Text(bodyText))
         }
+        .background(ConsolePanelBridge(
+            showConsole: showConsole,
+            position: position,
+            editEvent: latestEdit
+        ))
     }
 
     private var tweakToolbarRow: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             if let framework = detectedFramework {
                 FrameworkBadge(framework: framework)
             }
-            Spacer()
             if detectedFramework != nil {
                 ReplayAnimationsToggle(isOn: $replayAnimations)
             }
             consoleToggleButton
         }
+        .frame(maxWidth: .infinity)
     }
 
     private var consoleToggleButton: some View {
@@ -150,20 +143,9 @@ struct SwiftUITweakDialog: View {
         .help("Toggle debug console")
     }
 
-    private var consoleDivider: some View {
-        Rectangle()
-            .fill(Theme.Colors.border.opacity(0.5))
-            .frame(width: 1)
-    }
-
     private func toggleConsole() {
-        withConditionalAnimation {
-            showConsole.toggle()
-        }
+        showConsole.toggle()
         if !showConsole { latestEdit = nil }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
-        }
     }
 
     private var hasChanges: Bool {
@@ -374,196 +356,6 @@ struct SwiftUITweakDialog: View {
             debounceTimers[paramId] = nil
         }
     }
-}
-
-// MARK: - Parameter Card
-
-private struct TweakParameterCard: View {
-    let param: TweakParameter
-    @Binding var value: Double
-    let isDisabled: Bool
-    let isFocused: Bool
-    let isGrouped: Bool
-    let onReset: () -> Void
-
-    @State private var textValue: String = ""
-
-    private var steppedBinding: Binding<Double> {
-        Binding(
-            get: { value },
-            set: { newValue in
-                let step = param.effectiveStep
-                let snapped = (newValue / step).rounded() * step
-                value = min(max(snapped, param.min), param.max)
-            }
-        )
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            // Disabled warning
-            if isDisabled {
-                HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 10))
-                        .foregroundColor(Theme.Colors.accentRed)
-                    Text("File changed externally")
-                        .font(.system(size: 11))
-                        .foregroundColor(Theme.Colors.accentRed)
-                }
-            }
-
-            // Single row: label | slider+ticks | input | unit | reset
-            HStack(spacing: 8) {
-                Text(param.label)
-                    .font(.system(size: 12, weight: .regular))
-                    .foregroundColor(isDisabled ? Theme.Colors.textMuted : Theme.Colors.textSecondary)
-                    .lineLimit(1)
-                    .frame(width: 100, alignment: .leading)
-                    .help("\(param.file):\(param.line)")
-
-                // Slider with tick marks
-                VStack(spacing: 2) {
-                    Slider(value: steppedBinding, in: param.min...param.max)
-                        .disabled(isDisabled)
-                        .tint(Theme.Colors.accentBlue)
-
-                    SliderTickMarks(min: param.min, max: param.max, step: param.effectiveStep)
-                }
-
-                // Fixed-width value section for alignment
-                HStack(spacing: 4) {
-                    TextField("", text: $textValue)
-                        .font(.system(size: 12, weight: .medium, design: .monospaced))
-                        .foregroundColor(isDisabled ? Theme.Colors.textMuted : Theme.Colors.accentBlue)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 56)
-                        .textFieldStyle(.plain)
-                        .disabled(isDisabled)
-                        .onSubmit { commitTextValue() }
-
-                    Text(param.unit ?? "")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(Theme.Colors.textMuted)
-                        .frame(width: 24, alignment: .leading)
-
-                    Button(action: onReset) {
-                        Image(systemName: "arrow.counterclockwise")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(Theme.Colors.textMuted)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Reset to original value")
-                }
-                .frame(width: 110, alignment: .trailing)
-            }
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(RoundedRectangle(cornerRadius: 6).fill(Theme.Colors.cardBackground.opacity(0.5)))
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .strokeBorder(borderColor, lineWidth: isFocused ? 1.5 : 0.5)
-        )
-        .opacity(isDisabled ? 0.7 : 1.0)
-        .onAppear { textValue = formatDisplay(value) }
-        .onChange(of: value) { _, newValue in
-            textValue = formatDisplay(newValue)
-        }
-    }
-
-    private var borderColor: Color {
-        if isDisabled { return Theme.Colors.accentRed.opacity(0.5) }
-        if isFocused { return Theme.Colors.accentBlue }
-        return Theme.Colors.border.opacity(0.5)
-    }
-
-    private func commitTextValue() {
-        guard let parsed = Double(textValue) else {
-            textValue = formatDisplay(value)
-            return
-        }
-        let clamped = min(max(parsed, param.min), param.max)
-        value = clamped
-    }
-
-    private func formatDisplay(_ val: Double) -> String {
-        if !param.expectedText.contains(".") {
-            return String(Int(val.rounded()))
-        }
-        let parts = param.expectedText.split(separator: ".", maxSplits: 1)
-        let decimals = parts.count > 1 ? parts[1].count : 0
-        let stepDecimals = param.step.map { decimalPlaces(in: $0) } ?? 0
-        return String(format: "%.\(max(decimals, stepDecimals))f", val)
-    }
-
-    private func decimalPlaces(in value: Double) -> Int {
-        let str = String(value)
-        guard let dotIndex = str.firstIndex(of: ".") else { return 0 }
-        let afterDot = str[str.index(after: dotIndex)...]
-        let trimmed = afterDot.replacingOccurrences(of: "0+$", with: "", options: .regularExpression)
-        return trimmed.count
-    }
-}
-
-// MARK: - Slider Tick Marks
-
-private struct SliderTickMarks: View {
-    let min: Double
-    let max: Double
-    let step: Double
-
-    private let minPixelsPerTick: CGFloat = 10
-
-    var body: some View {
-        GeometryReader { geometry in
-            let width = geometry.size.width
-            let tickCount = tickCount(for: width)
-
-            if tickCount > 1 {
-                HStack(spacing: 0) {
-                    ForEach(0..<tickCount, id: \.self) { index in
-                        if index > 0 { Spacer(minLength: 0) }
-                        Rectangle()
-                            .fill(Theme.Colors.textMuted.opacity(0.4))
-                            .frame(width: 1, height: 4)
-                    }
-                }
-            }
-        }
-        .frame(height: 4)
-    }
-
-    private func tickCount(for width: CGFloat) -> Int {
-        let range = max - min
-        guard range > 0, step > 0 else { return 0 }
-
-        // Start with natural tick count based on step
-        var count = Int((range / step).rounded()) + 1
-
-        // Halve until we meet density constraint
-        while count > 1 {
-            let spacing = width / CGFloat(count - 1)
-            if spacing >= minPixelsPerTick { break }
-            count = (count + 1) / 2
-        }
-
-        return count
-    }
-}
-
-// MARK: - Non-Draggable Area
-
-private struct NonDraggableArea: NSViewRepresentable {
-    func makeNSView(context: Context) -> NonDraggableNSView {
-        NonDraggableNSView()
-    }
-
-    func updateNSView(_ nsView: NonDraggableNSView, context: Context) {}
-}
-
-private class NonDraggableNSView: NSView {
-    override var mouseDownCanMoveWindow: Bool { false }
 }
 
 // MARK: - Framework Badge

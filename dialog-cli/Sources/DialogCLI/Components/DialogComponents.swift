@@ -377,21 +377,12 @@ struct DialogHeader: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if let text = bodyText {
-                Group {
-                    if let markdown = try? AttributedString(markdown: text) {
-                        Text(markdown)
-                    } else {
-                        Text(text)
-                    }
-                }
-                .font(.system(size: 13))
-                .foregroundColor(Theme.Colors.textSecondary)
-                .multilineTextAlignment(.center)
-                .lineLimit(nil)
-                .textSelection(.enabled)
-                .tint(Theme.Colors.accentBlue)
-                .frame(idealWidth: 380, maxWidth: .infinity, alignment: .center)
-                .fixedSize(horizontal: false, vertical: true)
+                let hasBlockContent = text.contains("\n")
+                MarkdownText(
+                    text,
+                    alignment: hasBlockContent ? .left : .center
+                )
+                .frame(idealWidth: 380, maxWidth: .infinity, alignment: hasBlockContent ? .leading : .center)
                 .padding(.top, 4)
             }
         }

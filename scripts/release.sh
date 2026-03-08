@@ -89,6 +89,20 @@ if [[ "$MATCH" != "found" ]]; then
 fi
 echo "ok: releases.json has $PLATFORM entry for $VERSION"
 
+# 3b. Validate CHANGELOG.md is up-to-date with releases.json
+CHANGELOG_BACKUP=$(mktemp)
+cp CHANGELOG.md "$CHANGELOG_BACKUP"
+bun run scripts/generate-changelog.ts 2>/dev/null
+if ! diff -q CHANGELOG.md "$CHANGELOG_BACKUP" > /dev/null 2>&1; then
+  cp "$CHANGELOG_BACKUP" CHANGELOG.md
+  rm -f "$CHANGELOG_BACKUP"
+  echo "error: CHANGELOG.md is out of date — run 'bun run changelog' and commit" >&2
+  exit 1
+fi
+cp "$CHANGELOG_BACKUP" CHANGELOG.md
+rm -f "$CHANGELOG_BACKUP"
+echo "ok: CHANGELOG.md is up-to-date"
+
 # 4. Validate baseprompt version (macOS only)
 if [[ "$PLATFORM" == "macos" ]]; then
   bash scripts/validate-baseprompt-version.sh

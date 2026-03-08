@@ -8,12 +8,12 @@
       "date": "2026-03-08",
       "highlight": "Precision slider with vertical sensitivity and tweak panel improvements",
       "changes": [
-        { "text": "Custom scrub slider with vertical-distance sensitivity — drag up while sliding for fine-grained control", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Cogwheel settings button on each parameter card lets you reset values and expand slider min/max range", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Show Edits console now opens as a separate floating panel that doesn't resize or disturb the main dialog", "type": "changed", "scope": "cli", "featured": true },
-        { "text": "Wizard form body text and question text now render reliably on macOS Sequoia", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Parameter labels now wrap instead of truncating at 100px, with flexible width up to 120px", "type": "changed", "scope": "cli" },
-        { "text": "Framework badge, replay animations toggle, and show edits button are now grouped together", "type": "changed", "scope": "cli" }
+        { "text": "Custom scrub slider with vertical-distance sensitivity — drag up while sliding for fine-grained control", "type": "added", "scope": "cli", "pane": "tweak", "featured": true },
+        { "text": "Cogwheel settings button on each parameter card lets you reset values and expand slider min/max range", "type": "added", "scope": "cli", "pane": "tweak", "featured": true },
+        { "text": "Show Edits console now opens as a separate floating panel that doesn't resize or disturb the main dialog", "type": "changed", "scope": "cli", "pane": "tweak", "featured": true },
+        { "text": "Wizard form body text and question text now render reliably on macOS Sequoia", "type": "fixed", "scope": "cli", "pane": "wizard", "featured": true },
+        { "text": "Parameter labels now wrap instead of truncating at 100px, with flexible width up to 120px", "type": "changed", "scope": "cli", "pane": "tweak" },
+        { "text": "Framework badge, replay animations toggle, and show edits button are now grouped together", "type": "changed", "scope": "cli", "pane": "tweak" }
       ]
     },
     {
@@ -22,9 +22,9 @@
       "date": "2026-03-03",
       "highlight": "Wizard text and tweak footer stability fixes",
       "changes": [
-        { "text": "Wizard form body text and question text now appear reliably on first render", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Tweak dialog footer no longer grows when switching between save and cancel states", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Smaller blocks in ASCII layout sketches now render on top of larger overlapping blocks", "type": "fixed", "scope": "cli" }
+        { "text": "Wizard form body text and question text now appear reliably on first render", "type": "fixed", "scope": "cli", "pane": "wizard", "featured": true },
+        { "text": "Tweak dialog footer no longer grows when switching between save and cancel states", "type": "fixed", "scope": "cli", "pane": "tweak", "featured": true },
+        { "text": "Smaller blocks in ASCII layout sketches now render on top of larger overlapping blocks", "type": "fixed", "scope": "cli", "pane": "layout" }
       ]
     },
     {
@@ -33,10 +33,10 @@
       "date": "2026-03-03",
       "highlight": "Layout editor drag and grid improvements",
       "changes": [
-        { "text": "Annotations now move with their parent block when dragged in the layout editor", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Layout editor grid cells are now square, maintaining proper aspect ratio instead of stretching to fill", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Drop-to-stash hint now floats as an overlay instead of pushing layout content around", "type": "fixed", "scope": "cli" },
-        { "text": "Annotation legend now aligns to the left edge consistently", "type": "fixed", "scope": "cli" }
+        { "text": "Annotations now move with their parent block when dragged in the layout editor", "type": "added", "scope": "cli", "pane": "layout", "featured": true },
+        { "text": "Layout editor grid cells are now square, maintaining proper aspect ratio instead of stretching to fill", "type": "fixed", "scope": "cli", "pane": "layout", "featured": true },
+        { "text": "Drop-to-stash hint now floats as an overlay instead of pushing layout content around", "type": "fixed", "scope": "cli", "pane": "layout" },
+        { "text": "Annotation legend now aligns to the left edge consistently", "type": "fixed", "scope": "cli", "pane": "layout" }
       ]
     },
     {
@@ -45,10 +45,10 @@
       "date": "2026-03-03",
       "highlight": "Keyboard hotkeys no longer fire while typing",
       "changes": [
-        { "text": "Keyboard hotkeys (S, F, A) no longer trigger while typing in the Other text field", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Arrow keys and Tab now work normally inside text fields instead of moving dialog focus", "type": "fixed", "scope": "cli" },
-        { "text": "Clicking the Other card now auto-focuses the text field for immediate typing", "type": "fixed", "scope": "cli" },
-        { "text": "Left/right arrow keys in wizard forms no longer navigate steps while editing text", "type": "fixed", "scope": "cli" }
+        { "text": "Keyboard hotkeys (S, F, A) no longer trigger while typing in the Other text field", "type": "fixed", "scope": "cli", "pane": "general", "featured": true },
+        { "text": "Arrow keys and Tab now work normally inside text fields instead of moving dialog focus", "type": "fixed", "scope": "cli", "pane": "general" },
+        { "text": "Clicking the Other card now auto-focuses the text field for immediate typing", "type": "fixed", "scope": "cli", "pane": "pick" },
+        { "text": "Left/right arrow keys in wizard forms no longer navigate steps while editing text", "type": "fixed", "scope": "cli", "pane": "wizard" }
       ]
     },
     {
@@ -57,9 +57,9 @@
       "date": "2026-03-02",
       "highlight": "Report button everywhere",
       "changes": [
-        { "text": "Report button renamed from \"Feedback\" to \"Report\" for clarity", "type": "changed", "scope": "cli", "featured": true },
-        { "text": "Notification and preview panes now include a report button for quick bug reporting", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Layout sketch editor now includes a report button in the title bar", "type": "added", "scope": "cli" }
+        { "text": "Report button renamed from \"Feedback\" to \"Report\" for clarity", "type": "changed", "scope": "cli", "pane": "general", "featured": true },
+        { "text": "Notification and preview panes now include a report button for quick bug reporting", "type": "added", "scope": "cli", "pane": "notify", "featured": true },
+        { "text": "Layout sketch editor now includes a report button in the title bar", "type": "added", "scope": "cli", "pane": "layout" }
       ]
     },
     {
@@ -68,14 +68,14 @@
       "date": "2026-03-02",
       "highlight": "Interactive layout sketch editor",
       "changes": [
-        { "text": "New `propose_layout` tool opens an interactive grid editor where users can drag, resize, and arrange UI blocks visually", "type": "added", "scope": "server", "featured": true, "starred": true },
-        { "text": "Layout blocks support semantic roles (header, sidebar, canvas, footer), importance hierarchy, and elevation shadows", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Device frame chrome (browser, phone, tablet) wraps the sketch canvas for realistic previews", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Annotation callouts with numbered markers and a legend can be added to layouts", "type": "added", "scope": "cli" },
-        { "text": "Alignment guide lines appear on hover and drag to help position blocks precisely", "type": "added", "scope": "cli" },
-        { "text": "Wireframe content shapes (text, image, button, input, list, chart, etc.) render inside blocks", "type": "added", "scope": "cli" },
-        { "text": "Layouts can be defined as a semantic structure tree with direction and constraints as an alternative to explicit grid coordinates", "type": "added", "scope": "server" },
-        { "text": "Layout results include structured data, ASCII art, and SVG output", "type": "added", "scope": "server" },
+        { "text": "New `propose_layout` tool opens an interactive grid editor where users can drag, resize, and arrange UI blocks visually", "type": "added", "scope": "server", "pane": "layout", "featured": true, "starred": true },
+        { "text": "Layout blocks support semantic roles (header, sidebar, canvas, footer), importance hierarchy, and elevation shadows", "type": "added", "scope": "cli", "pane": "layout", "featured": true },
+        { "text": "Device frame chrome (browser, phone, tablet) wraps the sketch canvas for realistic previews", "type": "added", "scope": "cli", "pane": "layout", "featured": true },
+        { "text": "Annotation callouts with numbered markers and a legend can be added to layouts", "type": "added", "scope": "cli", "pane": "layout" },
+        { "text": "Alignment guide lines appear on hover and drag to help position blocks precisely", "type": "added", "scope": "cli", "pane": "layout" },
+        { "text": "Wireframe content shapes (text, image, button, input, list, chart, etc.) render inside blocks", "type": "added", "scope": "cli", "pane": "layout" },
+        { "text": "Layouts can be defined as a semantic structure tree with direction and constraints as an alternative to explicit grid coordinates", "type": "added", "scope": "server", "pane": "layout" },
+        { "text": "Layout results include structured data, ASCII art, and SVG output", "type": "added", "scope": "server", "pane": "layout" },
         { "text": "Base prompt updated to v2.12.0 with positive framing and emphasis rebalancing", "type": "changed", "scope": "prompt" }
       ]
     },
@@ -85,9 +85,9 @@
       "date": "2026-03-01",
       "highlight": "\"Other\" option and click-through focus",
       "changes": [
-        { "text": "Choose and form dialogs now include an \"Other\" option so users can type a custom answer not in the predefined list", "type": "added", "scope": "cli", "featured": true, "starred": true },
-        { "text": "Clicking an unfocused dialog now both activates the window and registers the action in a single click", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Clickable elements (choice cards, buttons, accordion headers) now show a pointer cursor on hover", "type": "fixed", "scope": "cli" },
+        { "text": "Choose and form dialogs now include an \"Other\" option so users can type a custom answer not in the predefined list", "type": "added", "scope": "cli", "pane": "pick", "featured": true, "starred": true },
+        { "text": "Clicking an unfocused dialog now both activates the window and registers the action in a single click", "type": "fixed", "scope": "cli", "pane": "general", "featured": true },
+        { "text": "Clickable elements (choice cards, buttons, accordion headers) now show a pointer cursor on hover", "type": "fixed", "scope": "cli", "pane": "general" },
         { "text": "Base prompt updated to v2.11.0 with \"Other\" option documentation", "type": "changed", "scope": "prompt" }
       ]
     },

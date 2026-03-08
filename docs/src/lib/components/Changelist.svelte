@@ -5,6 +5,7 @@
 		text: string;
 		type: 'added' | 'changed' | 'fixed' | 'removed';
 		scope?: 'app' | 'server' | 'docs' | 'cli';
+		pane?: 'general' | 'confirm' | 'pick' | 'text' | 'form' | 'wizard' | 'accordion' | 'tweak' | 'notify' | 'layout';
 		featured?: boolean;
 	};
 
@@ -30,6 +31,19 @@
 		server: 'Server',
 		docs: 'Docs',
 		cli: 'CLI'
+	};
+
+	const paneLabels: Record<string, string> = {
+		general: 'General',
+		confirm: 'Confirm',
+		pick: 'Pick',
+		text: 'Text',
+		form: 'Form',
+		wizard: 'Wizard',
+		accordion: 'Accordion',
+		tweak: 'Tweak',
+		notify: 'Notify',
+		layout: 'Layout'
 	};
 
 	// Old macOS releases used v{version} tags; new ones use {platform}/v{version}
@@ -67,6 +81,9 @@
 						<span class="type-badge">{typeLabels[change.type]}</span>
 						{#if change.scope}
 							<span class="scope-badge {change.scope}">{scopeLabels[change.scope]}</span>
+						{/if}
+						{#if change.pane}
+							<span class="pane-badge">{paneLabels[change.pane]}</span>
 						{/if}
 						<span class="change-text">{change.text}</span>
 					</li>
@@ -218,6 +235,18 @@
 	.scope-badge.cli {
 		border-color: #e1bee7;
 		color: #7b1fa2;
+	}
+
+	.pane-badge {
+		font-size: 0.65rem;
+		font-weight: 500;
+		padding: 2px 5px;
+		letter-spacing: 0.03em;
+		flex-shrink: 0;
+		margin-top: 2px;
+		border: 1px solid #e0d4b0;
+		color: #8a7a4a;
+		background: #fdf8ec;
 	}
 
 	.change-text {

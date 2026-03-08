@@ -21,6 +21,9 @@
 			<span class="scope-pill server">Server</span>
 			<span class="scope-pill docs">Docs</span>
 			<span class="scope-pill cli">CLI</span>
+			<span class="scope-pill pane">Tweak</span>
+			<span class="scope-pill pane">Wizard</span>
+			<span class="legend-label">etc.</span>
 		</div>
 		<Changelist />
 	</section>
@@ -53,8 +56,6 @@
 	}
 
 	.changelog-section {
-		max-width: 800px;
-		margin: 0 auto;
 		padding: 0 56px 60px;
 	}
 
@@ -105,6 +106,18 @@
 	.scope-pill.cli {
 		border-color: #e1bee7;
 		color: #7b1fa2;
+	}
+
+	.scope-pill.pane {
+		border-color: #e0d4b0;
+		color: #8a7a4a;
+		background: #fdf8ec;
+	}
+
+	.legend-label {
+		font-size: 0.75rem;
+		color: #909090;
+		align-self: center;
 	}
 
 	footer {

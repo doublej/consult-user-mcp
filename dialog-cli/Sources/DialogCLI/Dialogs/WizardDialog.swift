@@ -48,7 +48,7 @@ struct QuestionSection: View {
                 .multilineTextAlignment(.leading)
                 .lineLimit(nil)
                 .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(idealWidth: 380, maxWidth: .infinity, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
 
             if question.type == .text {

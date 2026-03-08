@@ -390,7 +390,7 @@ struct DialogHeader: View {
                 .lineLimit(nil)
                 .textSelection(.enabled)
                 .tint(Theme.Colors.accentBlue)
-                .frame(maxWidth: .infinity, alignment: .center)
+                .frame(idealWidth: 380, maxWidth: .infinity, alignment: .center)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 4)
             }

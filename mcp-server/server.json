@@ -1,0 +1,20 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.doublej/consult-user",
+  "description": "Native dialog system for MCP servers — confirm, pick, text input, forms, notifications, and value tweaking via native OS dialogs on macOS and Windows",
+  "repository": {
+    "url": "https://github.com/doublej/consult-user-mcp",
+    "source": "github"
+  },
+  "version": "2.0.3",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "consult-user-mcp-server",
+      "version": "2.0.3",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

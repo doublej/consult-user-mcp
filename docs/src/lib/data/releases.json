@@ -3,6 +3,15 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.1.1",
+      "platform": "macos",
+      "date": "2026-03-08",
+      "highlight": "Dialog text wrapping fix",
+      "changes": [
+        { "text": "Dialogs with long descriptions now wrap text correctly instead of expanding wider than the screen", "type": "fixed", "scope": "cli", "pane": "general", "featured": true }
+      ]
+    },
+    {
       "version": "2.1.0",
       "platform": "macos",
       "date": "2026-03-08",

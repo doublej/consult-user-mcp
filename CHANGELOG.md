@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.1.1] (macOS) - 2026-03-08
+
+### Fixed
+- Dialogs with long descriptions now wrap text correctly instead of expanding wider than the screen
+
 ## [2.1.0] (macOS) - 2026-03-08
 
 ### Added

@@ -42,14 +42,14 @@ struct QuestionSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SelectableText(
-                question.question,
-                fontSize: 15,
-                weight: .semibold,
-                color: Theme.Colors.textPrimary,
-                alignment: .left
-            )
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Text(question.question)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(Theme.Colors.textPrimary)
+                .multilineTextAlignment(.leading)
+                .lineLimit(nil)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
 
             if question.type == .text {
                 FocusableTextField(

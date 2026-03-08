@@ -377,10 +377,22 @@ struct DialogHeader: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if let text = bodyText {
-                MarkdownText(text)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, 4)
+                Group {
+                    if let markdown = try? AttributedString(markdown: text) {
+                        Text(markdown)
+                    } else {
+                        Text(text)
+                    }
+                }
+                .font(.system(size: 13))
+                .foregroundColor(Theme.Colors.textSecondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .textSelection(.enabled)
+                .tint(Theme.Colors.accentBlue)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 4)
             }
         }
         .padding(.horizontal, 20)

@@ -1,9 +1,40 @@
 {
   "name": "consult-user-mcp-server",
-  "version": "1.0.0",
-  "description": "MCP server for macOS native dialogs",
+  "version": "2.0.3",
+  "mcpName": "io.github.doublej/consult-user",
+  "description": "Native dialog system for MCP servers — confirm, pick, text input, forms, notifications, and value tweaking via native OS dialogs",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "consult-user-mcp-server": "dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "dialog",
+    "native",
+    "macos",
+    "windows",
+    "user-interaction",
+    "ai-tools"
+  ],
+  "author": "JJ",
+  "license": "MIT",
+  "homepage": "https://doublej.github.io/consult-user-mcp/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doublej/consult-user-mcp.git",
+    "directory": "mcp-server"
+  },
+  "bugs": {
+    "url": "https://github.com/doublej/consult-user-mcp/issues"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "!dist/**/*.test.*"
+  ],
   "scripts": {
     "build": "bun run build:swift && tsc",
     "build:swift": "cd ../dialog-cli && swift build -c release",

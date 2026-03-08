@@ -5,14 +5,15 @@
     {
       "version": "2.1.0",
       "platform": "macos",
-      "date": "2026-03-05",
+      "date": "2026-03-08",
       "highlight": "Precision slider with vertical sensitivity and tweak panel improvements",
       "changes": [
         { "text": "Custom scrub slider with vertical-distance sensitivity — drag up while sliding for fine-grained control", "type": "added", "scope": "cli", "featured": true },
         { "text": "Cogwheel settings button on each parameter card lets you reset values and expand slider min/max range", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Show Edits console now opens as a separate floating panel that doesn't resize or disturb the main dialog", "type": "improved", "scope": "cli", "featured": true },
-        { "text": "Parameter labels now wrap instead of truncating at 100px, with flexible width up to 120px", "type": "improved", "scope": "cli" },
-        { "text": "Framework badge, replay animations toggle, and show edits button are now grouped together", "type": "improved", "scope": "cli" }
+        { "text": "Show Edits console now opens as a separate floating panel that doesn't resize or disturb the main dialog", "type": "changed", "scope": "cli", "featured": true },
+        { "text": "Wizard form body text and question text now render reliably on macOS Sequoia", "type": "fixed", "scope": "cli", "featured": true },
+        { "text": "Parameter labels now wrap instead of truncating at 100px, with flexible width up to 120px", "type": "changed", "scope": "cli" },
+        { "text": "Framework badge, replay animations toggle, and show edits button are now grouped together", "type": "changed", "scope": "cli" }
       ]
     },
     {

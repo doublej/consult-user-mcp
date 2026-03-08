@@ -7,11 +7,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2.1.0] (macOS) - 2026-03-05
+## [2.1.0] (macOS) - 2026-03-08
 
 ### Added
 - Custom scrub slider with vertical-distance sensitivity — drag up while sliding for fine-grained control
 - Cogwheel settings button on each parameter card lets you reset values and expand slider min/max range
+
+### Changed
+- Show Edits console now opens as a separate floating panel that doesn't resize or disturb the main dialog
+- Parameter labels now wrap instead of truncating at 100px, with flexible width up to 120px
+- Framework badge, replay animations toggle, and show edits button are now grouped together
+
+### Fixed
+- Wizard form body text and question text now render reliably on macOS Sequoia
 
 ## [2.0.3] (macOS) - 2026-03-03
 

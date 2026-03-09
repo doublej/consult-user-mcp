@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.1.2] (macOS) - 2026-03-10
+
+### Fixed
+- Keyboard shortcuts (S, F, A) no longer fire while typing in text fields
+- Dialog body text now renders markdown formatting including newlines and bullet points
+
 ## [2.1.1] (macOS) - 2026-03-08
 
 ### Fixed

@@ -3,6 +3,16 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.1.2",
+      "platform": "macos",
+      "date": "2026-03-10",
+      "highlight": "Keyboard shortcuts and markdown text fixes",
+      "changes": [
+        { "text": "Keyboard shortcuts (S, F, A) no longer fire while typing in text fields", "type": "fixed", "scope": "cli", "pane": "general", "featured": true },
+        { "text": "Dialog body text now renders markdown formatting including newlines and bullet points", "type": "fixed", "scope": "cli", "pane": "general", "featured": true }
+      ]
+    },
+    {
       "version": "2.1.1",
       "platform": "macos",
       "date": "2026-03-08",

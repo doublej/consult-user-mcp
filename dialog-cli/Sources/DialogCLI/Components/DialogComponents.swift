@@ -580,15 +580,22 @@ struct DialogContainer<Content: View>: View {
                 if let tf = responder as? NSTextField, tf.isEditable { return true }
                 return false
             }()
-            if !isEditingText && keyCode == KeyCode.s && expandedTool != .snooze {
+            // Global: when editing text, only process navigation keys and Cmd shortcuts
+            if isEditingText {
+                let isNavigationKey = keyCode == KeyCode.escape || keyCode == KeyCode.returnKey || keyCode == KeyCode.tab
+                if !isNavigationKey && !modifiers.contains(.command) {
+                    return false
+                }
+            }
+            if keyCode == KeyCode.s && expandedTool != .snooze {
                 toggleTool(.snooze)
                 return true
             }
-            if !isEditingText && keyCode == KeyCode.f && expandedTool != .feedback {
+            if keyCode == KeyCode.f && expandedTool != .feedback {
                 toggleTool(.feedback)
                 return true
             }
-            if !isEditingText && keyCode == KeyCode.a && onAskDifferently != nil {
+            if keyCode == KeyCode.a && onAskDifferently != nil {
                 if let type = AskDifferentlyMenuHelper.show(currentDialogType: currentDialogType) {
                     onAskDifferently?(type)
                 }

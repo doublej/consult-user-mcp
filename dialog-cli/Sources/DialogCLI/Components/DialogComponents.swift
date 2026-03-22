@@ -226,6 +226,100 @@ struct SelectableTextView: NSViewRepresentable {
     }
 }
 
+// MARK: - Markdown Parser
+
+enum MarkdownParser {
+    static let linkRegex = try! NSRegularExpression(pattern: "\\[([^\\]]+)\\]\\(([^)]+)\\)")
+    static let boldRegex = try! NSRegularExpression(pattern: "\\*\\*([^*]+)\\*\\*")
+    static let italicRegex = try! NSRegularExpression(pattern: "(?<!\\*)\\*([^*]+)\\*(?!\\*)")
+    static let codeRegex = try! NSRegularExpression(pattern: "`([^`]+)`")
+
+    static func parse(
+        _ input: String,
+        fontSize: CGFloat = 13,
+        color: NSColor = NSColor(Theme.Colors.textSecondary),
+        alignment: NSTextAlignment = .center
+    ) -> NSAttributedString {
+        let baseFont = NSFont.systemFont(ofSize: fontSize)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = alignment
+
+        let result = NSMutableAttributedString(string: input, attributes: [
+            .font: baseFont,
+            .foregroundColor: color,
+            .paragraphStyle: paragraphStyle,
+        ])
+
+        let str = input
+
+        // Links: [text](url)
+        let linkMatches = linkRegex.matches(in: str, range: NSRange(str.startIndex..., in: str))
+        for match in linkMatches.reversed() {
+            guard Range(match.range, in: str) != nil,
+                  let textRange = Range(match.range(at: 1), in: str),
+                  let urlRange = Range(match.range(at: 2), in: str) else { continue }
+            let linkText = String(str[textRange])
+            let urlString = String(str[urlRange])
+            if let url = URL(string: urlString) {
+                let linkAttr = NSMutableAttributedString(string: linkText, attributes: [
+                    .font: baseFont,
+                    .foregroundColor: NSColor(Theme.Colors.accentBlue),
+                    .link: url,
+                    .paragraphStyle: paragraphStyle,
+                ])
+                result.replaceCharacters(in: match.range, with: linkAttr)
+            }
+        }
+
+        // Bold: **text**
+        applyInlinePattern(boldRegex, to: result) { range in
+            result.addAttribute(.font, value: NSFont.boldSystemFont(ofSize: fontSize), range: range)
+        }
+
+        // Italic: *text*
+        applyInlinePattern(italicRegex, to: result) { range in
+            if let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask) as NSFont? {
+                result.addAttribute(.font, value: italicFont, range: range)
+            }
+        }
+
+        // Inline code: `code`
+        applyInlinePattern(codeRegex, to: result) { range in
+            let monoFont = NSFont.monospacedSystemFont(ofSize: fontSize - 1, weight: .regular)
+            result.addAttribute(.font, value: monoFont, range: range)
+            result.addAttribute(.backgroundColor, value: NSColor(Theme.Colors.inputBackground), range: range)
+        }
+
+        return result
+    }
+
+    private static func applyInlinePattern(
+        _ regex: NSRegularExpression,
+        to attrString: NSMutableAttributedString,
+        apply: (NSRange) -> Void
+    ) {
+        var currentStr = attrString.string
+        var matches = regex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
+
+        while !matches.isEmpty {
+            let match = matches[0]
+            guard Range(match.range, in: currentStr) != nil,
+                  let textRange = Range(match.range(at: 1), in: currentStr) else { break }
+
+            let innerText = String(currentStr[textRange])
+            let replacement = NSMutableAttributedString(string: innerText, attributes: attrString.attributes(at: match.range.location, effectiveRange: nil))
+
+            attrString.replaceCharacters(in: match.range, with: replacement)
+
+            let newRange = NSRange(location: match.range.location, length: innerText.count)
+            apply(newRange)
+
+            currentStr = attrString.string
+            matches = regex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
+        }
+    }
+}
+
 // MARK: - Markdown Text
 
 struct MarkdownText: View {
@@ -246,96 +340,9 @@ struct MarkdownText: View {
         self.alignment = alignment
     }
 
-    // Static regex constants — compiled once, reused across all calls
-    private static let linkRegex = try! NSRegularExpression(pattern: "\\[([^\\]]+)\\]\\(([^)]+)\\)")
-    private static let boldRegex = try! NSRegularExpression(pattern: "\\*\\*([^*]+)\\*\\*")
-    private static let italicRegex = try! NSRegularExpression(pattern: "(?<!\\*)\\*([^*]+)\\*(?!\\*)")
-    private static let codeRegex = try! NSRegularExpression(pattern: "`([^`]+)`")
-
     var body: some View {
-        SelectableTextView(parseMarkdownNS(text), alignment: alignment)
+        SelectableTextView(MarkdownParser.parse(text, fontSize: fontSize, color: color, alignment: alignment), alignment: alignment)
             .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private func parseMarkdownNS(_ input: String) -> NSAttributedString {
-        let baseFont = NSFont.systemFont(ofSize: fontSize)
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = alignment
-
-        let result = NSMutableAttributedString(string: input, attributes: [
-            .font: baseFont,
-            .foregroundColor: color,
-            .paragraphStyle: paragraphStyle,
-        ])
-
-        let str = input
-
-        // Links: [text](url)
-        let linkMatches = Self.linkRegex.matches(in: str, range: NSRange(str.startIndex..., in: str))
-        for match in linkMatches.reversed() {
-            guard Range(match.range, in: str) != nil,
-                  let textRange = Range(match.range(at: 1), in: str),
-                  let urlRange = Range(match.range(at: 2), in: str) else { continue }
-            let linkText = String(str[textRange])
-            let urlString = String(str[urlRange])
-            if let url = URL(string: urlString) {
-                let linkAttr = NSMutableAttributedString(string: linkText, attributes: [
-                    .font: baseFont,
-                    .foregroundColor: NSColor(Theme.Colors.accentBlue),
-                    .link: url,
-                    .paragraphStyle: paragraphStyle,
-                ])
-                result.replaceCharacters(in: match.range, with: linkAttr)
-            }
-        }
-
-        // Bold: **text**
-        applyInlinePatternNS(Self.boldRegex, to: result) { range in
-            result.addAttribute(.font, value: NSFont.boldSystemFont(ofSize: fontSize), range: range)
-        }
-
-        // Italic: *text*
-        applyInlinePatternNS(Self.italicRegex, to: result) { range in
-            if let italicFont = NSFontManager.shared.convert(baseFont, toHaveTrait: .italicFontMask) as NSFont? {
-                result.addAttribute(.font, value: italicFont, range: range)
-            }
-        }
-
-        // Inline code: `code`
-        applyInlinePatternNS(Self.codeRegex, to: result) { range in
-            let monoFont = NSFont.monospacedSystemFont(ofSize: fontSize - 1, weight: .regular)
-            result.addAttribute(.font, value: monoFont, range: range)
-            result.addAttribute(.backgroundColor, value: NSColor(Theme.Colors.inputBackground), range: range)
-        }
-
-        return result
-    }
-
-    private func applyInlinePatternNS(
-        _ regex: NSRegularExpression,
-        to attrString: NSMutableAttributedString,
-        apply: (NSRange) -> Void
-    ) {
-        var currentStr = attrString.string
-        var matches = regex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
-
-        while !matches.isEmpty {
-            let match = matches[0]
-            guard Range(match.range, in: currentStr) != nil,
-                  let textRange = Range(match.range(at: 1), in: currentStr) else { break }
-
-            let innerText = String(currentStr[textRange])
-            let replacement = NSMutableAttributedString(string: innerText, attributes: attrString.attributes(at: match.range.location, effectiveRange: nil))
-
-            attrString.replaceCharacters(in: match.range, with: replacement)
-
-            // Apply the styling to the replaced range
-            let newRange = NSRange(location: match.range.location, length: innerText.count)
-            apply(newRange)
-
-            currentStr = attrString.string
-            matches = regex.matches(in: currentStr, range: NSRange(currentStr.startIndex..., in: currentStr))
-        }
     }
 }
 
@@ -378,12 +385,13 @@ struct DialogHeader: View {
 
             if let text = bodyText {
                 let hasBlockContent = text.contains("\n")
-                MarkdownText(
-                    text,
-                    alignment: hasBlockContent ? .left : .center
-                )
-                .frame(idealWidth: 380, maxWidth: .infinity, alignment: hasBlockContent ? .leading : .center)
-                .padding(.top, 4)
+                let alignment: NSTextAlignment = hasBlockContent ? .left : .center
+                Text(AttributedString(MarkdownParser.parse(text, alignment: alignment)))
+                    .textSelection(.enabled)
+                    .tint(Theme.Colors.accentBlue)
+                    .frame(idealWidth: 380, maxWidth: .infinity, alignment: hasBlockContent ? .leading : .center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 4)
             }
         }
         .padding(.horizontal, 20)

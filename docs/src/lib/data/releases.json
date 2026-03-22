@@ -3,6 +3,15 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.1.3",
+      "platform": "macos",
+      "date": "2026-03-22",
+      "highlight": "Dialog body text now visible on macOS Sequoia",
+      "changes": [
+        { "text": "Dialog body text now renders reliably on macOS Sequoia instead of collapsing to zero height", "type": "fixed", "scope": "cli", "pane": "general", "featured": true }
+      ]
+    },
+    {
       "version": "2.1.2",
       "platform": "macos",
       "date": "2026-03-10",

@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.1.3] (macOS) - 2026-03-22
+
+### Fixed
+- Dialog body text now renders reliably on macOS Sequoia instead of collapsing to zero height
+
 ## [2.1.2] (macOS) - 2026-03-10
 
 ### Fixed

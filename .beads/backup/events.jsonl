@@ -628,3 +628,51 @@
 {"actor":"beads-mgr","comment":"Intentional: Windows tray app uses jurrejan/ for its own releases, macOS uses doublej/.","created_at":"2026-02-08T18:30:30Z","event_type":"closed","id":628,"issue_id":"speak-zh4","new_value":null,"old_value":null}
 {"actor":"jurrejan","comment":null,"created_at":"2026-02-08T14:57:14Z","event_type":"created","id":629,"issue_id":"speak-3yq","new_value":"{\"id\":\"speak-3yq\",\"title\":\"[DEVIATION] Tray app snooze state architecture differs\",\"description\":\"macOS: snooze stored in main settings.json, snoozed requests in separate file. Windows: separate snooze-state.json plus dual-write to settings.json. Both work, different file layouts.\",\"status\":\"open\",\"priority\":3,\"issue_type\":\"task\",\"created_at\":\"2026-02-08T21:57:14.287683+07:00\",\"created_by\":\"jurrejan\",\"updated_at\":\"2026-02-08T21:57:14.287683+07:00\"}","old_value":null}
 {"actor":"beads-mgr","comment":"Acceptable divergence: both architectures work correctly. Windows dual-write approach is fine.","created_at":"2026-02-08T18:30:38Z","event_type":"closed","id":630,"issue_id":"speak-3yq","new_value":null,"old_value":null}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:25Z","event_type":"closed","id":631,"issue_id":"speak-lrm","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:25Z","event_type":"closed","id":632,"issue_id":"speak-y6y","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:25Z","event_type":"closed","id":633,"issue_id":"speak-rvb","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:25Z","event_type":"closed","id":634,"issue_id":"speak-4p4","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:25Z","event_type":"closed","id":635,"issue_id":"speak-rm1","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:25Z","event_type":"closed","id":636,"issue_id":"speak-elg","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:29Z","event_type":"closed","id":637,"issue_id":"speak-rul","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:29Z","event_type":"closed","id":638,"issue_id":"speak-hi9","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:29Z","event_type":"closed","id":639,"issue_id":"speak-9z5","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:29Z","event_type":"closed","id":640,"issue_id":"speak-jgy","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:29Z","event_type":"closed","id":641,"issue_id":"speak-i23","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:29Z","event_type":"closed","id":642,"issue_id":"speak-9kl","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:41:31Z","event_type":"closed","id":643,"issue_id":"speak-2d8","new_value":"Reset: closing all open work","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:47:33Z","event_type":"created","id":644,"issue_id":"speak-nd3","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:47:35Z","event_type":"created","id":645,"issue_id":"speak-baq","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:47:38Z","event_type":"created","id":646,"issue_id":"speak-dnm","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:47:40Z","event_type":"created","id":647,"issue_id":"speak-rom","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:47:43Z","event_type":"created","id":648,"issue_id":"speak-31yc","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:47:45Z","event_type":"created","id":649,"issue_id":"speak-dtno","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:47:54Z","event_type":"created","id":650,"issue_id":"speak-nd3.1","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:47:58Z","event_type":"created","id":651,"issue_id":"speak-nd3.2","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:01Z","event_type":"created","id":652,"issue_id":"speak-nd3.3","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:04Z","event_type":"created","id":653,"issue_id":"speak-nd3.4","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:07Z","event_type":"created","id":654,"issue_id":"speak-nd3.5","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:11Z","event_type":"created","id":655,"issue_id":"speak-nd3.6","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:13Z","event_type":"created","id":656,"issue_id":"speak-nd3.7","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:16Z","event_type":"created","id":657,"issue_id":"speak-nd3.8","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:18Z","event_type":"created","id":658,"issue_id":"speak-nd3.9","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:24Z","event_type":"created","id":659,"issue_id":"speak-baq.1","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:27Z","event_type":"created","id":660,"issue_id":"speak-baq.2","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:29Z","event_type":"created","id":661,"issue_id":"speak-baq.3","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:32Z","event_type":"created","id":662,"issue_id":"speak-baq.4","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:34Z","event_type":"created","id":663,"issue_id":"speak-baq.5","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:36Z","event_type":"created","id":664,"issue_id":"speak-baq.6","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:38Z","event_type":"created","id":665,"issue_id":"speak-baq.7","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:44Z","event_type":"created","id":666,"issue_id":"speak-dnm.1","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:47Z","event_type":"created","id":667,"issue_id":"speak-dnm.2","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:51Z","event_type":"created","id":668,"issue_id":"speak-dnm.3","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:53Z","event_type":"created","id":669,"issue_id":"speak-dnm.4","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:48:56Z","event_type":"created","id":670,"issue_id":"speak-dnm.5","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:49:03Z","event_type":"created","id":671,"issue_id":"speak-rom.1","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:49:05Z","event_type":"created","id":672,"issue_id":"speak-rom.2","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:49:08Z","event_type":"created","id":673,"issue_id":"speak-31yc.1","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:49:11Z","event_type":"created","id":674,"issue_id":"speak-31yc.2","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:49:14Z","event_type":"created","id":675,"issue_id":"speak-31yc.3","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:49:16Z","event_type":"created","id":676,"issue_id":"speak-dtno.1","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:49:18Z","event_type":"created","id":677,"issue_id":"speak-dtno.2","new_value":"","old_value":""}
+{"actor":"jurrejan","comment":null,"created_at":"2026-04-11T18:49:20Z","event_type":"created","id":678,"issue_id":"speak-dtno.3","new_value":"","old_value":""}

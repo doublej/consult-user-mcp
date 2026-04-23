@@ -94,6 +94,16 @@ private struct StartupSettingsSection: View {
         .onChange(of: launchAtLogin) { _, newValue in
             do {
                 if newValue {
+                    // Refuse to register from non-canonical paths. Login Items are keyed by
+                    // bundle path, so registering from dev/DerivedData/moved locations creates
+                    // duplicate entries that persist until the user manually removes them or
+                    // runs `sfltool resetbtm`.
+                    guard Bundle.main.bundlePath.hasPrefix("/Applications/") else {
+                        launchAtLogin = false
+                        return
+                    }
+                    // Unregister first so re-toggling from the same install stays idempotent.
+                    try? SMAppService.mainApp.unregister()
                     try SMAppService.mainApp.register()
                 } else {
                     try SMAppService.mainApp.unregister()

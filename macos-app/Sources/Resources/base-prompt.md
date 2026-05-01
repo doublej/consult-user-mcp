@@ -1,4 +1,4 @@
-<!-- version: 2.12.0 -->
+<!-- version: 2.12.1 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
@@ -60,9 +60,11 @@ One per slider:
 
 | Format | When to use | Required fields |
 |--------|-------------|----------------|
-| **Text search** | Any file type | `label`, `file`, `search` (pattern with `{v}`), `min`, `max` |
+| **Text search** | Any file type | `label`, `file`, `search` (pattern with single `{v}`), `current`, `min`, `max` |
 | **CSS reference** | Stylesheets (preferred) | `label`, `file`, `selector`, `property`, `min`, `max` |
 | **Direct** | Fallback / computed locations | `label`, `file`, `line`, `column`, `expectedText`, `current`, `min`, `max` |
+
+For text search: `current` must equal the actual numeric value at the file location. When two parameters share the same `search` pattern in the same file, `current` is what disambiguates them — pass `current: 8` for the line that reads `8px` and `current: 10` for the line that reads `10px`.
 
 - `label` is required for all formats; `id` auto-derives as kebab-case if omitted.
 - Optional: `step`, `unit`, `index` (for multi-value CSS like `margin: 10px 20px`), `fn` (for CSS functions like `rotateY`).

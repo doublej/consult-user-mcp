@@ -3,6 +3,19 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.2.0",
+      "platform": "macos",
+      "date": "2026-05-01",
+      "highlight": "Form reliability and tweak slider precision",
+      "changes": [
+        { "text": "Tweak sliders now disambiguate same-pattern matches in code, picking the right value when multiple identical literals exist", "type": "fixed", "scope": "cli", "pane": "tweak", "featured": true },
+        { "text": "Wizard and accordion forms reliably count answers when only the Other field is filled", "type": "fixed", "scope": "cli", "pane": "form", "featured": true },
+        { "text": "Login Items no longer accumulates duplicate entries when the app starts", "type": "fixed", "scope": "app", "pane": "general" },
+        { "text": "Accordion auto-advance, single-select clearing, and other-text behavior now stay consistent across all form types", "type": "changed", "scope": "cli", "pane": "form" },
+        { "text": "Updated baseprompt to v2.12.1 with clearer guidance for current selection and disambiguation", "type": "changed", "scope": "server", "pane": "general" }
+      ]
+    },
+    {
       "version": "2.1.3",
       "platform": "macos",
       "date": "2026-03-22",

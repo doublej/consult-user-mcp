@@ -7,6 +7,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.2.0] (macOS) - 2026-05-01
+
+### Changed
+- Accordion auto-advance, single-select clearing, and other-text behavior now stay consistent across all form types
+- Updated baseprompt to v2.12.1 with clearer guidance for current selection and disambiguation
+
+### Fixed
+- Tweak sliders now disambiguate same-pattern matches in code, picking the right value when multiple identical literals exist
+- Wizard and accordion forms reliably count answers when only the Other field is filled
+- Login Items no longer accumulates duplicate entries when the app starts
+
 ## [2.1.3] (macOS) - 2026-03-22
 
 ### Fixed

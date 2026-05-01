@@ -44,6 +44,10 @@ enum QuestionAnswer {
         case .text(let str): return str.isEmpty
         }
     }
+
+    static func empty(for question: QuestionItem) -> QuestionAnswer {
+        question.type == .text ? .text("") : .choices([])
+    }
 }
 
 struct QuestionsRequest: Codable {

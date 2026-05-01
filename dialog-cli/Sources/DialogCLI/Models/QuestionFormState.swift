@@ -8,7 +8,7 @@ final class QuestionFormState: ObservableObject {
     @Published var otherTexts: [String: String] = [:]
 
     func answer(for question: QuestionItem) -> QuestionAnswer {
-        answers[question.id] ?? (question.type == .text ? .text("") : .choices([]))
+        answers[question.id] ?? .empty(for: question)
     }
 
     func bindingForAnswer(_ question: QuestionItem) -> Binding<QuestionAnswer> {

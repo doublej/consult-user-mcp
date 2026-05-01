@@ -166,22 +166,11 @@ struct SwiftUIAccordionDialog: View {
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
     @State private var expandedId: String?
-    @State private var answers: [String: QuestionAnswer] = [:]
-    @State private var textInputs: [String: String] = [:]
     @State private var focusedOptionIndex: Int = 0
-    @State private var otherSelections: [String: Bool] = [:]
-    @State private var otherTexts: [String: String] = [:]
+    @StateObject private var formState = QuestionFormState()
 
     private var answeredCount: Int {
-        questions.filter { isAnswered($0.id) }.count
-    }
-
-    private func isAnswered(_ questionId: String) -> Bool {
-        QuestionAnswer.isAnswered(
-            answer: answers[questionId],
-            otherSelected: otherSelections[questionId] ?? false,
-            otherText: otherTexts[questionId] ?? ""
-        )
+        questions.filter { formState.isAnswered($0.id) }.count
     }
 
     private var expandedQuestion: QuestionItem? {
@@ -192,7 +181,7 @@ struct SwiftUIAccordionDialog: View {
         DialogContainer(
             bindings: DialogKeyBindings(
                 canSubmit: { answeredCount > 0 },
-                onSubmit: { onComplete(answers, otherSelections, otherTexts) },
+                onSubmit: { onComplete(formState.answers, formState.otherSelections, formState.otherTexts) },
                 onCancel: onCancel,
                 onTab: { modifiers in jumpSection(reverse: modifiers.contains(.shift)) }
             ),
@@ -225,27 +214,15 @@ struct SwiftUIAccordionDialog: View {
                                 AccordionSection(
                                     question: question,
                                     isExpanded: expandedId == question.id,
-                                    isAnswered: isAnswered(question.id),
-                                    answer: Binding(
-                                        get: { answers[question.id] ?? (question.type == .text ? .text("") : .choices([])) },
-                                        set: { answers[question.id] = $0 }
-                                    ),
-                                    textValue: Binding(
-                                        get: { textInputs[question.id] ?? "" },
-                                        set: { textInputs[question.id] = $0 }
-                                    ),
+                                    isAnswered: formState.isAnswered(question.id),
+                                    answer: formState.bindingForAnswer(question),
+                                    textValue: formState.bindingForText(question.id),
                                     focusedIndex: Binding(
                                         get: { expandedId == question.id ? focusedOptionIndex : -1 },
                                         set: { if expandedId == question.id { focusedOptionIndex = $0 } }
                                     ),
-                                    otherSelected: Binding(
-                                        get: { otherSelections[question.id] ?? false },
-                                        set: { otherSelections[question.id] = $0 }
-                                    ),
-                                    otherText: Binding(
-                                        get: { otherTexts[question.id] ?? "" },
-                                        set: { otherTexts[question.id] = $0 }
-                                    ),
+                                    otherSelected: formState.bindingForOtherSelected(question.id),
+                                    otherText: formState.bindingForOtherText(question.id),
                                     onToggle: { toggleExpanded(question.id) },
                                     onAutoAdvance: { advanceToNextSection(from: question.id) }
                                 )
@@ -269,7 +246,7 @@ struct SwiftUIAccordionDialog: View {
                         expandedTool: expandedTool,
                         currentDialogType: "form-accordion",
                         onSnooze: onSnooze,
-                        onFeedback: { feedback in onFeedback(feedback, answers, otherSelections, otherTexts) },
+                        onFeedback: { feedback in onFeedback(feedback, formState.answers, formState.otherSelections, formState.otherTexts) },
                         onAskDifferently: onAskDifferently
                     )
 
@@ -284,7 +261,7 @@ struct SwiftUIAccordionDialog: View {
                             FocusableButton(title: "Cancel", isPrimary: false, action: onCancel)
                                 .frame(height: 48)
                             FocusableButton(title: "Done", isPrimary: true, isDisabled: answeredCount == 0, showReturnHint: true, action: {
-                                onComplete(answers, otherSelections, otherTexts)
+                                onComplete(formState.answers, formState.otherSelections, formState.otherTexts)
                             })
                             .frame(height: 48)
                         }

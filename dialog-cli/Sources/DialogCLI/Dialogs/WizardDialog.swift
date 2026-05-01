@@ -124,23 +124,16 @@ struct SwiftUIWizardDialog: View {
     let onAskDifferently: (String) -> Void
 
     @State private var currentIndex = 0
-    @State private var answers: [String: QuestionAnswer] = [:]
     @State private var focusedOptionIndex: Int = 0
-    @State private var textInputs: [String: String] = [:]
-    @State private var otherSelections: [String: Bool] = [:]
-    @State private var otherTexts: [String: String] = [:]
+    @StateObject private var formState = QuestionFormState()
 
     private var currentQuestion: QuestionItem { questions[currentIndex] }
-    private var currentAnswer: QuestionAnswer { answers[currentQuestion.id] ?? (currentQuestion.type == .text ? .text("") : .choices([])) }
+    private var currentAnswer: QuestionAnswer { formState.answer(for: currentQuestion) }
     private var isFirst: Bool { currentIndex == 0 }
     private var isLast: Bool { currentIndex == questions.count - 1 }
 
     private var currentHasValidAnswer: Bool {
-        QuestionAnswer.isAnswered(
-            answer: currentAnswer,
-            otherSelected: otherSelections[currentQuestion.id] ?? false,
-            otherText: otherTexts[currentQuestion.id] ?? ""
-        )
+        formState.isAnswered(currentQuestion.id)
     }
 
     var body: some View {
@@ -149,7 +142,7 @@ struct SwiftUIWizardDialog: View {
                 canSubmit: { currentHasValidAnswer },
                 onSubmit: {
                     if isLast {
-                        onComplete(answers, otherSelections, otherTexts)
+                        onComplete(formState.answers, formState.otherSelections, formState.otherTexts)
                     } else {
                         goNext()
                     }
@@ -193,23 +186,11 @@ struct SwiftUIWizardDialog: View {
                     AutoSizingScrollView {
                         QuestionSection(
                             question: currentQuestion,
-                            answer: Binding(
-                                get: { currentAnswer },
-                                set: { answers[currentQuestion.id] = $0 }
-                            ),
-                            textValue: Binding(
-                                get: { textInputs[currentQuestion.id] ?? "" },
-                                set: { textInputs[currentQuestion.id] = $0 }
-                            ),
+                            answer: formState.bindingForAnswer(currentQuestion),
+                            textValue: formState.bindingForText(currentQuestion.id),
                             focusedIndex: $focusedOptionIndex,
-                            otherSelected: Binding(
-                                get: { otherSelections[currentQuestion.id] ?? false },
-                                set: { otherSelections[currentQuestion.id] = $0 }
-                            ),
-                            otherText: Binding(
-                                get: { otherTexts[currentQuestion.id] ?? "" },
-                                set: { otherTexts[currentQuestion.id] = $0 }
-                            )
+                            otherSelected: formState.bindingForOtherSelected(currentQuestion.id),
+                            otherText: formState.bindingForOtherText(currentQuestion.id)
                         )
                         .padding(.horizontal, 20)
                         .padding(.top, 6)
@@ -228,7 +209,7 @@ struct SwiftUIWizardDialog: View {
                         expandedTool: expandedTool,
                         currentDialogType: "form-wizard",
                         onSnooze: onSnooze,
-                        onFeedback: { feedback in onFeedback(feedback, answers, otherSelections, otherTexts) },
+                        onFeedback: { feedback in onFeedback(feedback, formState.answers, formState.otherSelections, formState.otherTexts) },
                         onAskDifferently: onAskDifferently
                     )
 
@@ -250,7 +231,7 @@ struct SwiftUIWizardDialog: View {
 
                             if isLast {
                                 FocusableButton(title: "Done", isPrimary: true, isDisabled: !currentHasValidAnswer, showReturnHint: true, action: {
-                                    onComplete(answers, otherSelections, otherTexts)
+                                    onComplete(formState.answers, formState.otherSelections, formState.otherTexts)
                                 })
                                 .frame(height: 48)
                             } else {

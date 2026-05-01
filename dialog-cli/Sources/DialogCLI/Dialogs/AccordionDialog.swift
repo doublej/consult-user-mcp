@@ -250,24 +250,19 @@ struct SwiftUIAccordionDialog: View {
                         onAskDifferently: onAskDifferently
                     )
 
-                    // Footer buttons
-                    VStack(spacing: 8) {
-                        KeyboardHintsView(hints: [
+                    DialogFooter(
+                        hints: [
                             KeyboardHint(key: "↑↓", label: "navigate"),
                             KeyboardHint(key: "Space", label: "select"),
                             KeyboardHint(key: "⏎", label: "done"),
-                        ] + KeyboardHint.toolbarHints)
-                        HStack(spacing: 10) {
-                            FocusableButton(title: "Cancel", isPrimary: false, action: onCancel)
-                                .frame(height: 48)
-                            FocusableButton(title: "Done", isPrimary: true, isDisabled: answeredCount == 0, showReturnHint: true, action: {
+                        ] + KeyboardHint.toolbarHints,
+                        buttons: [
+                            .init("Cancel", action: onCancel),
+                            .init("Done", isPrimary: true, isDisabled: answeredCount == 0, showReturnHint: true, action: {
                                 onComplete(formState.answers, formState.otherSelections, formState.otherTexts)
-                            })
-                            .frame(height: 48)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                            }),
+                        ]
+                    )
                 }
                 .background(Theme.Colors.windowBackground)
             }

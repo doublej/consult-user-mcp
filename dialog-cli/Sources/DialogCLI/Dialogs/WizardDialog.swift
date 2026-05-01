@@ -213,35 +213,23 @@ struct SwiftUIWizardDialog: View {
                         onAskDifferently: onAskDifferently
                     )
 
-                    // Navigation buttons
-                    VStack(spacing: 8) {
-                        KeyboardHintsView(hints: [
+                    DialogFooter(
+                        hints: [
                             KeyboardHint(key: "↑↓", label: "navigate"),
                             KeyboardHint(key: "Space", label: "select"),
                             KeyboardHint(key: "⏎", label: isLast ? "done" : "next"),
-                        ] + KeyboardHint.toolbarHints)
-                        HStack(spacing: 10) {
-                            if isFirst {
-                                FocusableButton(title: "Cancel", isPrimary: false, action: onCancel)
-                                    .frame(height: 48)
-                            } else {
-                                FocusableButton(title: "Back", isPrimary: false, action: goBack)
-                                    .frame(height: 48)
-                            }
-
-                            if isLast {
-                                FocusableButton(title: "Done", isPrimary: true, isDisabled: !currentHasValidAnswer, showReturnHint: true, action: {
+                        ] + KeyboardHint.toolbarHints,
+                        buttons: [
+                            isFirst
+                                ? .init("Cancel", action: onCancel)
+                                : .init("Back", action: goBack),
+                            isLast
+                                ? .init("Done", isPrimary: true, isDisabled: !currentHasValidAnswer, showReturnHint: true, action: {
                                     onComplete(formState.answers, formState.otherSelections, formState.otherTexts)
                                 })
-                                .frame(height: 48)
-                            } else {
-                                FocusableButton(title: "Next", isPrimary: true, isDisabled: !currentHasValidAnswer, showReturnHint: true, action: goNext)
-                                    .frame(height: 48)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
+                                : .init("Next", isPrimary: true, isDisabled: !currentHasValidAnswer, showReturnHint: true, action: goNext),
+                        ]
+                    )
                 }
                 .background(Theme.Colors.windowBackground)
             }

@@ -55,7 +55,39 @@ struct SwiftUITweakDialog: View {
 
     var body: some View {
         DialogContainer(
-            keyHandler: handleKeyPress,
+            bindings: DialogKeyBindings(
+                canSubmit: { true },
+                onSubmit: { if hasChanges { saveToFile() } else { onCancel() } },
+                onCancel: onCancel,
+                onArrowLeft: {
+                    if KeyboardContext.isEditingText { return false }
+                    adjustFocusedValue(by: -1)
+                    return focusedIndex != nil
+                },
+                onArrowRight: {
+                    if KeyboardContext.isEditingText { return false }
+                    adjustFocusedValue(by: 1)
+                    return focusedIndex != nil
+                },
+                onArrowUp: {
+                    if KeyboardContext.isEditingText { return false }
+                    if let current = focusedIndex {
+                        focusedIndex = max(current - 1, 0)
+                    } else {
+                        focusedIndex = parameters.count - 1
+                    }
+                    return true
+                },
+                onArrowDown: {
+                    if KeyboardContext.isEditingText { return false }
+                    if let current = focusedIndex {
+                        focusedIndex = min(current + 1, parameters.count - 1)
+                    } else {
+                        focusedIndex = 0
+                    }
+                    return true
+                }
+            ),
             currentDialogType: "tweak",
             onAskDifferently: onAskDifferently
         ) { expandedTool in
@@ -219,43 +251,6 @@ struct SwiftUITweakDialog: View {
                     .id(entry.index)
                 }
             }
-        }
-    }
-
-    private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
-        let isEditingText: Bool = {
-            guard let responder = NSApp.keyWindow?.firstResponder else { return false }
-            return responder is NSTextView || (responder as? NSTextField)?.isEditable == true
-        }()
-
-        switch keyCode {
-        case KeyCode.escape:
-            return false
-        case KeyCode.returnKey:
-            if hasChanges { saveToFile() } else { onCancel() }
-            return true
-        case KeyCode.downArrow where !isEditingText:
-            if let current = focusedIndex {
-                focusedIndex = min(current + 1, parameters.count - 1)
-            } else {
-                focusedIndex = 0
-            }
-            return true
-        case KeyCode.upArrow where !isEditingText:
-            if let current = focusedIndex {
-                focusedIndex = max(current - 1, 0)
-            } else {
-                focusedIndex = parameters.count - 1
-            }
-            return true
-        case KeyCode.leftArrow where !isEditingText:
-            adjustFocusedValue(by: -1)
-            return focusedIndex != nil
-        case KeyCode.rightArrow where !isEditingText:
-            adjustFocusedValue(by: 1)
-            return focusedIndex != nil
-        default:
-            return false
         }
     }
 

@@ -449,8 +449,7 @@ struct DialogFooter: View {
 // MARK: - Dialog Container (Composable)
 
 struct DialogContainer<Content: View>: View {
-    let onEscape: (() -> Void)?
-    let keyHandler: ((UInt16, NSEvent.ModifierFlags) -> Bool)?
+    let bindings: DialogKeyBindings
     let currentDialogType: String
     let onAskDifferently: ((String) -> Void)?
     let contentBuilder: (Binding<DialogToolbar.ToolbarTool?>) -> Content
@@ -471,14 +470,12 @@ struct DialogContainer<Content: View>: View {
     }
 
     init(
-        onEscape: (() -> Void)? = nil,
-        keyHandler: ((UInt16, NSEvent.ModifierFlags) -> Bool)? = nil,
+        bindings: DialogKeyBindings = DialogKeyBindings(),
         currentDialogType: String = "",
         onAskDifferently: ((String) -> Void)? = nil,
         @ViewBuilder content: @escaping (Binding<DialogToolbar.ToolbarTool?>) -> Content
     ) {
-        self.onEscape = onEscape
-        self.keyHandler = keyHandler
+        self.bindings = bindings
         self.currentDialogType = currentDialogType
         self.onAskDifferently = onAskDifferently
         self.contentBuilder = content
@@ -564,82 +561,14 @@ struct DialogContainer<Content: View>: View {
     }
 
     private func setupKeyboardNavigation() {
-        keyboardMonitor = KeyboardNavigationMonitor { keyCode, modifiers in
-            // Universal cooldown check — blocks rapid keypresses for all keys
-            if CooldownManager.shared.shouldBlockKey(keyCode) {
-                return true
-            }
-            if keyCode == KeyCode.escape && showReportOverlay {
-                dismissOverlay()
-                return true
-            }
-            // When report overlay is open, pass all other keys to its first responder
-            if showReportOverlay {
-                return false
-            }
-            if keyCode == KeyCode.escape && expandedTool != nil {
-                toggleTool(expandedTool!)
-                return true
-            }
-            // Skip character hotkeys when a text field is being edited
-            let isEditingText: Bool = {
-                guard let responder = NSApp.keyWindow?.firstResponder else { return false }
-                if responder is NSTextView { return true }
-                if let tf = responder as? NSTextField, tf.isEditable { return true }
-                return false
-            }()
-            // Global: when editing text, only process navigation keys and Cmd shortcuts
-            if isEditingText {
-                let isNavigationKey = keyCode == KeyCode.escape || keyCode == KeyCode.returnKey || keyCode == KeyCode.tab
-                if !isNavigationKey && !modifiers.contains(.command) {
-                    return false
-                }
-            }
-            if keyCode == KeyCode.s && expandedTool != .snooze {
-                toggleTool(.snooze)
-                return true
-            }
-            if keyCode == KeyCode.f && expandedTool != .feedback {
-                toggleTool(.feedback)
-                return true
-            }
-            if keyCode == KeyCode.a && onAskDifferently != nil {
-                if let type = AskDifferentlyMenuHelper.show(currentDialogType: currentDialogType) {
-                    onAskDifferently?(type)
-                }
-                return true
-            }
-            if keyCode == KeyCode.returnKey && expandedTool == .feedback {
-                return false
-            }
-
-            // Let custom handler try next
-            if let handler = keyHandler, handler(keyCode, modifiers) {
-                return true
-            }
-
-            // Default navigation via FocusManager (skip when editing text)
-            if !isEditingText {
-                switch keyCode {
-                case KeyCode.tab:
-                    if modifiers.contains(.shift) {
-                        FocusManager.shared.focusPrevious()
-                    } else {
-                        FocusManager.shared.focusNext()
-                    }
-                    return true
-                case KeyCode.downArrow:
-                    FocusManager.shared.focusNextContent()
-                    return true
-                case KeyCode.upArrow:
-                    FocusManager.shared.focusPreviousContent()
-                    return true
-                default:
-                    break
-                }
-            }
-
-            return false
-        }
+        keyboardMonitor = DialogKeyRouter.install(
+            bindings: bindings,
+            currentDialogType: currentDialogType,
+            onAskDifferently: onAskDifferently,
+            expandedTool: $expandedTool,
+            showReportOverlay: $showReportOverlay,
+            toggleTool: { tool in toggleTool(tool) },
+            dismissOverlay: { dismissOverlay() }
+        )
     }
 }

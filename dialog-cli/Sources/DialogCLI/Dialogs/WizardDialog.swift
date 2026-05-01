@@ -141,7 +141,27 @@ struct SwiftUIWizardDialog: View {
 
     var body: some View {
         DialogContainer(
-            keyHandler: handleKeyPress,
+            bindings: DialogKeyBindings(
+                canSubmit: { currentHasValidAnswer },
+                onSubmit: {
+                    if isLast {
+                        onComplete(answers, otherSelections, otherTexts)
+                    } else {
+                        goNext()
+                    }
+                },
+                onCancel: onCancel,
+                onArrowLeft: {
+                    if KeyboardContext.isEditingText { return false }
+                    if !isFirst { goBack() }
+                    return true
+                },
+                onArrowRight: {
+                    if KeyboardContext.isEditingText { return false }
+                    if !isLast && currentHasValidAnswer { goNext() }
+                    return true
+                }
+            ),
             currentDialogType: "form-wizard",
             onAskDifferently: onAskDifferently
         ) { expandedTool in
@@ -247,31 +267,6 @@ struct SwiftUIWizardDialog: View {
                 FocusManager.shared.focusFirst()
                 NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
             }
-        }
-    }
-
-    private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
-        let isEditingText: Bool = {
-            guard let responder = NSApp.keyWindow?.firstResponder else { return false }
-            return responder is NSTextView || (responder as? NSTextField)?.isEditable == true
-        }()
-        switch keyCode {
-        case KeyCode.escape:
-            onCancel()
-            return true
-        case KeyCode.returnKey:
-            if currentHasValidAnswer {
-                if isLast { onComplete(answers, otherSelections, otherTexts) } else { goNext() }
-            }
-            return true
-        case KeyCode.rightArrow where !isEditingText:
-            if !isLast && currentHasValidAnswer { goNext() }
-            return true
-        case KeyCode.leftArrow where !isEditingText:
-            if !isFirst { goBack() }
-            return true
-        default:
-            return false
         }
     }
 

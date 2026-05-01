@@ -138,7 +138,11 @@ struct SwiftUIChooseDialog: View {
 
     var body: some View {
         DialogContainer(
-            keyHandler: handleKeyPress,
+            bindings: DialogKeyBindings(
+                canSubmit: { hasValidSelection },
+                onSubmit: { onComplete(selectedIndices, otherSelected ? otherText : nil) },
+                onCancel: onCancel
+            ),
             currentDialogType: allowMultiple ? "pick-multi" : "pick",
             onAskDifferently: onAskDifferently
         ) { expandedTool in
@@ -224,20 +228,6 @@ struct SwiftUIChooseDialog: View {
                 })
             ]
         )
-    }
-
-    private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
-        switch keyCode {
-        case KeyCode.escape:
-            return false
-        case KeyCode.returnKey:
-            if hasValidSelection {
-                onComplete(selectedIndices, otherSelected ? otherText : nil)
-            }
-            return true
-        default:
-            return false
-        }
     }
 
     private func toggleSelection(at index: Int) {

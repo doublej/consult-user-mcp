@@ -40,18 +40,11 @@ struct SwiftUITextInputDialog: View {
 
     var body: some View {
         DialogContainer(
-            keyHandler: { keyCode, _ in
-                switch keyCode {
-                case KeyCode.escape:
-                    onCancel()
-                    return true
-                case KeyCode.returnKey:
-                    onSubmit(inputText)
-                    return true
-                default:
-                    return false
-                }
-            },
+            bindings: DialogKeyBindings(
+                canSubmit: { true },
+                onSubmit: { onSubmit(inputText) },
+                onCancel: onCancel
+            ),
             currentDialogType: isHidden ? "text-hidden" : "text",
             onAskDifferently: onAskDifferently
         ) { expandedTool in

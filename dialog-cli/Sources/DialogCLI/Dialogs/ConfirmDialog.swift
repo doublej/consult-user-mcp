@@ -16,17 +16,11 @@ struct SwiftUIConfirmDialog: View {
 
     var body: some View {
         DialogContainer(
-            keyHandler: { keyCode, _ in
-                switch keyCode {
-                case KeyCode.escape:
-                    return false
-                case KeyCode.returnKey:
-                    onConfirm()
-                    return true
-                default:
-                    return false
-                }
-            },
+            bindings: DialogKeyBindings(
+                canSubmit: { true },
+                onSubmit: onConfirm,
+                onCancel: onCancel
+            ),
             currentDialogType: "confirm",
             onAskDifferently: onAskDifferently
         ) { expandedTool in

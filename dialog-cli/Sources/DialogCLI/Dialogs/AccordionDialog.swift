@@ -189,7 +189,12 @@ struct SwiftUIAccordionDialog: View {
 
     var body: some View {
         DialogContainer(
-            keyHandler: handleKeyPress,
+            bindings: DialogKeyBindings(
+                canSubmit: { answeredCount > 0 },
+                onSubmit: { onComplete(answers, otherSelections, otherTexts) },
+                onCancel: onCancel,
+                onTab: { modifiers in jumpSection(reverse: modifiers.contains(.shift)) }
+            ),
             currentDialogType: "form-accordion",
             onAskDifferently: onAskDifferently
         ) { expandedTool in
@@ -319,42 +324,16 @@ struct SwiftUIAccordionDialog: View {
         }
     }
 
-    private func handleKeyPress(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags) -> Bool {
-        switch keyCode {
-        case KeyCode.escape:
-            onCancel()
-            return true
-        case KeyCode.returnKey:
-            if answeredCount > 0 {
-                onComplete(answers, otherSelections, otherTexts)
-            }
-            return true
-        case KeyCode.tab:
-            if modifiers.contains(.shift) {
-                if let currentId = expandedId,
-                   let currentIdx = questions.firstIndex(where: { $0.id == currentId }),
-                   currentIdx > 0 {
-                    let prevIdx = currentIdx - 1
-                    withConditionalAnimation {
-                        expandedId = questions[prevIdx].id
-                    }
-                    return true
-                }
-            } else {
-                if let currentId = expandedId,
-                   let currentIdx = questions.firstIndex(where: { $0.id == currentId }) {
-                    if currentIdx < questions.count - 1 {
-                        let nextIdx = currentIdx + 1
-                        withConditionalAnimation {
-                            expandedId = questions[nextIdx].id
-                        }
-                        return true
-                    }
-                }
-            }
-            return false
-        default:
+    private func jumpSection(reverse: Bool) -> Bool {
+        guard let currentId = expandedId,
+              let currentIdx = questions.firstIndex(where: { $0.id == currentId }) else {
             return false
         }
+        let targetIdx = reverse ? currentIdx - 1 : currentIdx + 1
+        guard targetIdx >= 0, targetIdx < questions.count else { return false }
+        withConditionalAnimation {
+            expandedId = questions[targetIdx].id
+        }
+        return true
     }
 }

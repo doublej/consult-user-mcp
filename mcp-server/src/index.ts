@@ -199,20 +199,25 @@ const tweakParameterSchema = z.object({
   index: z.number().int().min(0).optional(),
   fn: z.string().max(50).optional(),
   // Text search (resolved by server)
-  search: z.string().max(500).optional(),
+  search: z.string().max(500).optional()
+    .describe("Pattern with a single `{v}` placeholder marking the numeric value to capture (e.g. `filter: blur({v}px)`, `padding: {v}rem`). When two parameters share the same pattern in the same file, `current` disambiguates by value."),
   // Direct location (or filled by resolver)
   line: z.number().int().min(1).optional(),
   column: z.number().int().min(1).optional(),
   expectedText: z.string().min(1).max(50).optional(),
-  current: z.number().optional(),
+  current: z.number().optional()
+    .describe("The numeric value currently in the file at the matched location. Required when `search` is set: must equal the actual file value (used to disambiguate when multiple matches exist) and to seed the slider."),
   // Range
   min: z.number(),
   max: z.number(),
   step: z.number().positive().optional(),
   unit: z.string().max(10).optional(),
 }).refine(
-  (p) => (p.selector && p.property) || (p.line != null && p.column != null && p.expectedText && p.current != null) || p.search,
-  { message: "Provide selector+property (CSS), search (text search), or line+column+expectedText+current (direct)" },
+  (p) =>
+    (p.selector && p.property)
+    || (p.line != null && p.column != null && p.expectedText && p.current != null)
+    || (p.search && p.current != null),
+  { message: "Provide selector+property (CSS), search+current (text search), or line+column+expectedText+current (direct)" },
 );
 
 const tweakSchema = z.object({
@@ -224,7 +229,7 @@ const tweakSchema = z.object({
 });
 
 server.registerTool("tweak", {
-  description: "Value tweak pane. Opens an always-on-top slider panel for real-time numeric value adjustment with live file writes. User completes via \"Save to File\" (keeps file writes, action:\"file\") or \"Tell Agent\" (reverts files, returns desired values for you to apply, action:\"agent\"). 10min timeout. If snoozed: sleep remainingSeconds, retry.",
+  description: "Value tweak pane. Opens an always-on-top slider panel for real-time numeric value adjustment with live file writes. User completes via \"Save to File\" (keeps file writes, action:\"file\") or \"Tell Agent\" (reverts files, returns desired values for you to apply, action:\"agent\"). When using `search`: pattern must contain a single `{v}` placeholder (e.g. `padding: {v}px`); `current` must equal the actual file value and is used to pick the right occurrence when the pattern matches multiple lines. 10min timeout. If snoozed: sleep remainingSeconds, retry.",
   inputSchema: tweakSchema,
 }, async (p, extra) => {
   provider.pulse();
@@ -255,7 +260,7 @@ server.registerTool("tweak", {
 
     if (param.search) {
       const filePath = resolve(projectPath, param.file);
-      const result = resolveTextSearch(filePath, param.search);
+      const result = resolveTextSearch(filePath, param.search, { current: param.current });
       return {
         ...param, id,
         line: result.line, column: result.column,
@@ -270,6 +275,22 @@ server.registerTool("tweak", {
   const ids = parameters.map((p) => p.id);
   const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
   if (dupes.length) throw new Error(`Duplicate parameter ids: ${[...new Set(dupes)].join(", ")}`);
+
+  // Defensive: catch parameters that resolved to the same file location.
+  // Covers genuinely-ambiguous search collisions and accidental direct-coord duplication.
+  const locationOwners = new Map<string, string>();
+  for (const param of parameters) {
+    if (param.line == null || param.column == null) continue;
+    const key = `${param.file}:${param.line}:${param.column}`;
+    const prev = locationOwners.get(key);
+    if (prev) {
+      throw new Error(
+        `Parameters "${prev}" and "${param.id}" resolved to the same location ${key}. ` +
+        `Make their 'search' patterns more specific or pass distinct line+column+expectedText directly.`
+      );
+    }
+    locationOwners.set(key, param.id);
+  }
 
   const raw = await tracked(provider.tweak({
     body,

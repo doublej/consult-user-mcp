@@ -771,11 +771,11 @@ describe("resolveTextSearch", () => {
     expect(r.expectedText).toBe("80%");
   });
 
-  test("uses first match", () => {
+  test("multi-match disambiguates by current", () => {
     const content = "a { margin: 10px; }\nb { margin: 20px; }";
-    const r = resolveTextSearch("test.css", "margin: {v}px", { content });
-    expect(r.current).toBe(10);
-    expect(r.line).toBe(1);
+    const r = resolveTextSearch("test.css", "margin: {v}px", { content, current: 20 });
+    expect(r.current).toBe(20);
+    expect(r.line).toBe(2);
   });
 
   test("throws on missing {v} placeholder", () => {
@@ -828,13 +828,16 @@ describe("tweak schema", () => {
     step: z.number().positive().optional(),
     unit: z.string().max(10).optional(),
   }).refine(
-    (p) => (p.selector && p.property) || (p.line != null && p.column != null && p.expectedText && p.current != null) || p.search,
-    { message: "Provide selector+property (CSS), search (text search), or line+column+expectedText+current (direct)" },
+    (p) =>
+      (p.selector && p.property)
+      || (p.line != null && p.column != null && p.expectedText && p.current != null)
+      || (p.search && p.current != null),
+    { message: "Provide selector+property (CSS), search+current (text search), or line+column+expectedText+current (direct)" },
   );
 
   test("search mode accepted", () => {
     const r = tweakParameterSchema.parse({
-      label: "Padding", file: "style.css", search: "padding: {v}px", min: 0, max: 60,
+      label: "Padding", file: "style.css", search: "padding: {v}px", current: 16, min: 0, max: 60,
     });
     expect(r.search).toBe("padding: {v}px");
     expect(r.id).toBeUndefined();
@@ -862,9 +865,15 @@ describe("tweak schema", () => {
     })).toThrow();
   });
 
+  test("rejects search without current", () => {
+    expect(() => tweakParameterSchema.parse({
+      label: "Padding", file: "style.css", search: "padding: {v}px", min: 0, max: 60,
+    })).toThrow(/search\+current/);
+  });
+
   test("id is optional", () => {
     const r = tweakParameterSchema.parse({
-      label: "Padding", file: "style.css", search: "padding: {v}px", min: 0, max: 60,
+      label: "Padding", file: "style.css", search: "padding: {v}px", current: 16, min: 0, max: 60,
     });
     expect(r.id).toBeUndefined();
   });
@@ -963,5 +972,66 @@ describe("resolveTextSearch roundtrip (simulates FileRewriter)", () => {
 
     const written = simulateWrite(content, r, 2.0);
     expect(written).toBe("p { line-height: 2; }");
+  });
+});
+
+describe("resolveTextSearch disambiguation (multiple matches)", () => {
+  // Repro: two `filter: blur({v}px)` parameters in the same file.
+  const multiBlur =
+    ".modal {\n" +
+    "  filter: blur(8px);\n" +
+    "}\n" +
+    "\n" +
+    ".tooltip {\n" +
+    "  filter: blur(10px);\n" +
+    "}\n";
+
+  test("two same-pattern params with distinct currents resolve to distinct lines", () => {
+    const r1 = resolveTextSearch("f", "filter: blur({v}px)", { content: multiBlur, current: 8 });
+    const r2 = resolveTextSearch("f", "filter: blur({v}px)", { content: multiBlur, current: 10 });
+    expect(r1.line).toBe(2);
+    expect(r1.current).toBe(8);
+    expect(r2.line).toBe(6);
+    expect(r2.current).toBe(10);
+    expect(r1.line).not.toBe(r2.line);
+  });
+
+  test("single match works regardless of current (back-compat fast path)", () => {
+    const content = "div { padding: 16px; }";
+    // current matches actual file value
+    const r1 = resolveTextSearch("f", "padding: {v}px", { content, current: 16 });
+    expect(r1.line).toBe(1);
+    expect(r1.current).toBe(16);
+    // current intentionally mismatched → still returns the only match
+    const r2 = resolveTextSearch("f", "padding: {v}px", { content, current: 999 });
+    expect(r2.line).toBe(1);
+    expect(r2.current).toBe(16);
+  });
+
+  test("multi-match without current throws disambiguation error listing all locations", () => {
+    expect(() => resolveTextSearch("f", "filter: blur({v}px)", { content: multiBlur }))
+      .toThrow(/matched 2 locations.*no "current".*8px.*10px/s);
+  });
+
+  test("multi-match where no value matches current throws with found values", () => {
+    expect(() => resolveTextSearch("f", "filter: blur({v}px)", { content: multiBlur, current: 99 }))
+      .toThrow(/none had value 99.*8px.*10px/s);
+  });
+
+  test("multi-match where 2+ matches share the same current throws ambiguity error", () => {
+    const content =
+      ".a { filter: blur(8px); }\n" +
+      ".b { filter: blur(8px); }\n";
+    expect(() => resolveTextSearch("f", "filter: blur({v}px)", { content, current: 8 }))
+      .toThrow(/share value 8.*genuinely ambiguous/s);
+  });
+
+  test("epsilon tolerance for floats", () => {
+    const content =
+      ".a { opacity: 0.3; }\n" +
+      ".b { opacity: 0.7; }\n";
+    const r = resolveTextSearch("f", "opacity: {v};", { content, current: 0.1 + 0.2 });
+    expect(r.line).toBe(1);
+    expect(r.current).toBeCloseTo(0.3);
   });
 });

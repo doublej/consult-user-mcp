@@ -687,8 +687,8 @@
   }
 
   .active-name {
-    color: rgba(255, 255, 255, 0.85);
-    font-weight: 600;
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 500;
     display: inline-block;
     animation: nameIn 0.35s cubic-bezier(0.23, 1, 0.32, 1);
   }
@@ -726,7 +726,7 @@
   }
 
   .logo-item.active img {
-    opacity: 0.9;
+    opacity: 0.55;
   }
 
   /* Platform tabs */

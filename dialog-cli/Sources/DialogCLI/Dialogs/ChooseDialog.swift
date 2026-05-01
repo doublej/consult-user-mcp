@@ -113,8 +113,13 @@ struct SwiftUIChooseDialog: View {
     @State private var otherSelected: Bool = false
     @State private var otherText: String = ""
 
-    private var hasValidOther: Bool { otherSelected && !otherText.isEmpty }
-    private var hasValidSelection: Bool { !selectedIndices.isEmpty || hasValidOther }
+    private var hasValidSelection: Bool {
+        QuestionAnswer.isAnswered(
+            answer: .choices(selectedIndices),
+            otherSelected: otherSelected,
+            otherText: otherText
+        )
+    }
 
     init(title: String, body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, allowOther: Bool = true, defaultSelection: String?, onComplete: @escaping (Set<Int>, String?) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String, Set<Int>, String?) -> Void, onAskDifferently: @escaping (String) -> Void) {
         self.title = title

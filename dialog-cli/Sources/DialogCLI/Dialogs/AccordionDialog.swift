@@ -175,12 +175,11 @@ struct SwiftUIAccordionDialog: View {
     }
 
     private func isAnswered(_ questionId: String) -> Bool {
-        if let answer = answers[questionId], !answer.isEmpty {
-            return true
-        }
-        let hasOther = otherSelections[questionId] == true
-        let other = otherTexts[questionId] ?? ""
-        return hasOther && !other.isEmpty
+        QuestionAnswer.isAnswered(
+            answer: answers[questionId],
+            otherSelected: otherSelections[questionId] ?? false,
+            otherText: otherTexts[questionId] ?? ""
+        )
     }
 
     private var expandedQuestion: QuestionItem? {

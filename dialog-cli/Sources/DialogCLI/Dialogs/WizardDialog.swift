@@ -133,10 +133,11 @@ struct SwiftUIWizardDialog: View {
     private var isLast: Bool { currentIndex == questions.count - 1 }
 
     private var currentHasValidAnswer: Bool {
-        if !currentAnswer.isEmpty { return true }
-        let hasOther = otherSelections[currentQuestion.id] == true
-        let other = otherTexts[currentQuestion.id] ?? ""
-        return hasOther && !other.isEmpty
+        QuestionAnswer.isAnswered(
+            answer: currentAnswer,
+            otherSelected: otherSelections[currentQuestion.id] ?? false,
+            otherText: otherTexts[currentQuestion.id] ?? ""
+        )
     }
 
     var body: some View {

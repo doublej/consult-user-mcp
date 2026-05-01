@@ -46,12 +46,18 @@ extension DialogManager {
             var completedCount = 0
 
             for question in request.questions {
-                let hasOther = otherSelections[question.id] == true
                 let otherText = otherTexts[question.id] ?? ""
-                let hasValidOther = hasOther && !otherText.isEmpty
+                let otherSelected = otherSelections[question.id] ?? false
+                let hasValidOther = otherSelected && !otherText.isEmpty
+
+                guard QuestionAnswer.isAnswered(
+                    answer: answers[question.id],
+                    otherSelected: otherSelected,
+                    otherText: otherText
+                ) else { continue }
+                completedCount += 1
 
                 if let answer = answers[question.id], !answer.isEmpty {
-                    completedCount += 1
                     switch answer {
                     case .choices(let indices):
                         var labels = indices.sorted().map { question.options[$0].label }
@@ -69,7 +75,6 @@ extension DialogManager {
                         responseAnswers[question.id] = .single(str)
                     }
                 } else if hasValidOther {
-                    completedCount += 1
                     responseAnswers[question.id] = .single(otherText)
                 }
             }

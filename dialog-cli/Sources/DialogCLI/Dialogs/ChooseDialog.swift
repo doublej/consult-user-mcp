@@ -236,18 +236,23 @@ struct SwiftUIChooseDialog: View {
     }
 
     private func toggleSelection(at index: Int) {
-        if !allowMultiple {
-            otherSelected = false
-        }
-        selectedIndices.toggle(index, multiSelect: allowMultiple)
+        let result = QuestionAnswer.toggling(
+            choice: index,
+            in: .choices(selectedIndices),
+            otherSelected: otherSelected,
+            multiSelect: allowMultiple
+        )
+        if case .choices(let set) = result.answer { selectedIndices = set }
+        otherSelected = result.otherSelected
     }
 
     private func toggleOther() {
-        if allowMultiple {
-            otherSelected.toggle()
-        } else {
-            selectedIndices = []
-            otherSelected = true
-        }
+        let result = QuestionAnswer.togglingOther(
+            in: .choices(selectedIndices),
+            otherSelected: otherSelected,
+            multiSelect: allowMultiple
+        )
+        if case .choices(let set) = result.answer { selectedIndices = set }
+        otherSelected = result.otherSelected
     }
 }

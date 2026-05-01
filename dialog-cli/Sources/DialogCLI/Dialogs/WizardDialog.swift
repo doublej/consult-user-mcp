@@ -90,21 +90,24 @@ struct QuestionSection: View {
     }
 
     private func toggleSelection(at index: Int) {
-        if !question.multiSelect {
-            otherSelected = false
-        }
-        var current = selectedIndices
-        current.toggle(index, multiSelect: question.multiSelect)
-        answer = .choices(current)
+        let result = QuestionAnswer.toggling(
+            choice: index,
+            in: answer,
+            otherSelected: otherSelected,
+            multiSelect: question.multiSelect
+        )
+        answer = result.answer
+        otherSelected = result.otherSelected
     }
 
     private func toggleOther() {
-        if question.multiSelect {
-            otherSelected.toggle()
-        } else {
-            answer = .choices([])
-            otherSelected = true
-        }
+        let result = QuestionAnswer.togglingOther(
+            in: answer,
+            otherSelected: otherSelected,
+            multiSelect: question.multiSelect
+        )
+        answer = result.answer
+        otherSelected = result.otherSelected
     }
 }
 

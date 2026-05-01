@@ -128,27 +128,29 @@ struct AccordionSection: View {
     }
 
     private func toggleSelection(at index: Int) {
+        let result = QuestionAnswer.toggling(
+            choice: index,
+            in: answer,
+            otherSelected: otherSelected,
+            multiSelect: question.multiSelect
+        )
+        answer = result.answer
+        otherSelected = result.otherSelected
         if !question.multiSelect {
-            otherSelected = false
-        }
-        var current = selectedIndices
-        current.toggle(index, multiSelect: question.multiSelect)
-        if !question.multiSelect {
-            // Auto-advance to next section after single-select
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                 onAutoAdvance()
             }
         }
-        answer = .choices(current)
     }
 
     private func toggleOther() {
-        if question.multiSelect {
-            otherSelected.toggle()
-        } else {
-            answer = .choices([])
-            otherSelected = true
-        }
+        let result = QuestionAnswer.togglingOther(
+            in: answer,
+            otherSelected: otherSelected,
+            multiSelect: question.multiSelect
+        )
+        answer = result.answer
+        otherSelected = result.otherSelected
     }
 }
 

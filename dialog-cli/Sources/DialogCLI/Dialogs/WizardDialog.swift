@@ -197,7 +197,7 @@ struct SwiftUIWizardDialog: View {
                         .padding(.bottom, 8)
                     }
                     .onChange(of: focusedOptionIndex) { newIndex in
-                        withAnimation(.easeOut(duration: 0.15)) {
+                        withAnimation(.easeOut(duration: Theme.Animation.card)) {
                             proxy.scrollTo(newIndex, anchor: .center)
                         }
                     }
@@ -236,7 +236,7 @@ struct SwiftUIWizardDialog: View {
         }
         .onChange(of: currentIndex) { _ in
             focusedOptionIndex = 0
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.focusAfterTransition) {
                 FocusManager.shared.focusFirst()
                 NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
             }

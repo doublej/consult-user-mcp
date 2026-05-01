@@ -77,7 +77,7 @@ struct AccordionSection: View {
                 if reduceMotion {
                     isHovered = hovering
                 } else {
-                    withAnimation(.easeOut(duration: 0.12)) {
+                    withAnimation(.easeOut(duration: Theme.Animation.hover)) {
                         isHovered = hovering
                     }
                 }
@@ -137,7 +137,7 @@ struct AccordionSection: View {
         answer = result.answer
         otherSelected = result.otherSelected
         if !question.multiSelect {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.accordionAutoAdvance) {
                 onAutoAdvance()
             }
         }
@@ -234,7 +234,7 @@ struct SwiftUIAccordionDialog: View {
                         .padding(.bottom, 8)
                     }
                     .onChange(of: focusedOptionIndex) { newIndex in
-                        withAnimation(.easeOut(duration: 0.15)) {
+                        withAnimation(.easeOut(duration: Theme.Animation.card)) {
                             proxy.scrollTo(newIndex, anchor: .center)
                         }
                     }
@@ -274,7 +274,7 @@ struct SwiftUIAccordionDialog: View {
         }
         .onChange(of: expandedId) { _ in
             focusedOptionIndex = 0
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.focusAfterExpand) {
                 FocusManager.shared.focusFirst()
                 NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
             }

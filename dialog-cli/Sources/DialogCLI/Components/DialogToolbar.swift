@@ -76,7 +76,7 @@ struct DialogToolbar: View {
         .onChange(of: expandedTool) { newTool in
             NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
             if newTool == .feedback {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.focusAfterExpand) {
                     FocusManager.shared.focusLast()
                 }
             }
@@ -87,7 +87,7 @@ struct DialogToolbar: View {
         if reduceMotion {
             expandedTool = expandedTool == tool ? nil : tool
         } else {
-            withAnimation(.easeOut(duration: 0.2)) {
+            withAnimation(.easeOut(duration: Theme.Animation.overlay)) {
                 expandedTool = expandedTool == tool ? nil : tool
             }
         }

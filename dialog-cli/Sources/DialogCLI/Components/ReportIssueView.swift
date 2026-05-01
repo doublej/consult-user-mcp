@@ -42,7 +42,7 @@ struct ReportIssueView: View {
                         ))
                 }
             }
-            .animation(.easeOut(duration: 0.2), value: step)
+            .animation(.easeOut(duration: Theme.Animation.overlay), value: step)
             .padding(16)
         }
     }
@@ -123,7 +123,7 @@ struct ReportIssueView: View {
         if reduceMotion {
             step = .clipboardConfirm
         } else {
-            withAnimation(.easeOut(duration: 0.2)) { step = .clipboardConfirm }
+            withAnimation(.easeOut(duration: Theme.Animation.overlay)) { step = .clipboardConfirm }
         }
     }
 

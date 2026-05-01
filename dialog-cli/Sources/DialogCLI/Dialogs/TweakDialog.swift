@@ -211,7 +211,7 @@ struct SwiftUITweakDialog: View {
             .background(NonDraggableArea())
             .onChange(of: focusedIndex) { _, newIndex in
                 guard let newIndex else { return }
-                withAnimation(.easeOut(duration: 0.15)) {
+                withAnimation(.easeOut(duration: Theme.Animation.card)) {
                     proxy.scrollTo(newIndex, anchor: .center)
                 }
             }

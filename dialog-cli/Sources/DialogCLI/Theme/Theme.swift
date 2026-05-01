@@ -138,6 +138,20 @@ struct Theme {
     static var buttonRadius: CGFloat { current.buttonRadius }
     static var cardRadius: CGFloat { current.cardRadius }
 
+    enum Animation {
+        static let card: Double = 0.15
+        static let overlay: Double = 0.20
+        static let hover: Double = 0.12
+    }
+
+    enum Timing {
+        static let focusAfterAppear: Double = 0.10
+        static let focusAfterTransition: Double = 0.15
+        static let focusAfterExpand: Double = 0.25
+        static let testPaneReveal: Double = 0.30
+        static let accordionAutoAdvance: Double = 0.15
+    }
+
     // SwiftUI Color accessors
     enum Colors {
         private static var current: ThemeProtocol { ThemeManager.shared.current }

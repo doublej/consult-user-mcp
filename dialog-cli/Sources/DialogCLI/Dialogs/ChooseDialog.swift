@@ -212,7 +212,7 @@ struct SwiftUIChooseDialog: View {
                 .padding(.bottom, 8)
             }
             .onChange(of: focusedIndex) { newIndex in
-                withAnimation(.easeOut(duration: 0.15)) {
+                withAnimation(.easeOut(duration: Theme.Animation.card)) {
                     proxy.scrollTo(newIndex, anchor: .center)
                 }
             }

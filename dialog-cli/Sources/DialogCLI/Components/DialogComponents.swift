@@ -511,17 +511,17 @@ struct DialogContainer<Content: View>: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: showReportOverlay)
+        .animation(reduceMotion ? nil : .easeOut(duration: Theme.Animation.overlay), value: showReportOverlay)
         .onAppear {
             FocusManager.shared.reset()
             setupKeyboardNavigation()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.focusAfterAppear) {
                 FocusManager.shared.focusFirst()
             }
             if let pane = DialogManager.shared.testPane {
                 let tool: DialogToolbar.ToolbarTool? = pane == "snooze" ? .snooze : pane == "feedback" ? .feedback : nil
                 if let tool {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.testPaneReveal) {
                         toggleTool(tool)
                     }
                 }
@@ -545,7 +545,7 @@ struct DialogContainer<Content: View>: View {
     private func dismissOverlay() {
         showReportOverlay = false
         ReportIssueOverlayManager.shared.isShowing = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.focusAfterAppear) {
             FocusManager.shared.focusFirst()
         }
     }
@@ -554,7 +554,7 @@ struct DialogContainer<Content: View>: View {
         if reduceMotion {
             expandedTool = expandedTool == tool ? nil : tool
         } else {
-            withAnimation(.easeOut(duration: 0.2)) {
+            withAnimation(.easeOut(duration: Theme.Animation.overlay)) {
                 expandedTool = expandedTool == tool ? nil : tool
             }
         }

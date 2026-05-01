@@ -8,7 +8,7 @@ func withConditionalAnimation<Result>(_ body: () -> Result) -> Result {
     if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
         return body()
     } else {
-        return withAnimation(.easeInOut(duration: 0.2)) { body() }
+        return withAnimation(.easeInOut(duration: Theme.Animation.overlay)) { body() }
     }
 }
 

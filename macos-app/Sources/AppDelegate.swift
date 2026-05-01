@@ -170,7 +170,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         questionsItem.submenu = questionsSubmenu
         debugMenu.addItem(questionsItem)
 
-        addDebugMenuItem(debugMenu, title: "Test Tweak", action: #selector(testTweak), key: "6")
+        let tweakItem = NSMenuItem(title: "Test Tweak", action: nil, keyEquivalent: "")
+        let tweakSubmenu = NSMenu()
+        addDebugMenuItem(tweakSubmenu, title: "Basic", action: #selector(testTweak), key: "6")
+        addDebugMenuItem(tweakSubmenu, title: "Same Pattern (multi-match)", action: #selector(testTweakSamePattern))
+        tweakItem.submenu = tweakSubmenu
+        debugMenu.addItem(tweakItem)
         addDebugMenuItem(debugMenu, title: "Test Notification", action: #selector(testNotifyTool), key: "4")
         addDebugMenuItem(debugMenu, title: "Test Update Notification", action: #selector(testNotifyUpdate), key: "5")
         addDebugMenuItem(debugMenu, title: "Test Changelist", action: #selector(testChangelist), key: "7")
@@ -439,6 +444,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             try? FileManager.default.copyItem(atPath: src, toPath: dst)
         }
         guard let tc = loadTestCase(category: "tweak", name: "basic") else { return }
+        runDialogCli(command: "tweak", json: tc.json, projectPath: tc.projectPath)
+    }
+
+    @objc private func testTweakSamePattern() {
+        // Two sliders share `filter: blur({v}px)` — exercises current-as-disambiguator.
+        if let root = projectRoot() {
+            let src = "\(root)/test-cases/cases/tweak/same-pattern-multi.css"
+            let dst = "/tmp/tweak-test.css"
+            try? FileManager.default.removeItem(atPath: dst)
+            try? FileManager.default.copyItem(atPath: src, toPath: dst)
+        }
+        guard let tc = loadTestCase(category: "tweak", name: "same-pattern-multi") else { return }
         runDialogCli(command: "tweak", json: tc.json, projectPath: tc.projectPath)
     }
 

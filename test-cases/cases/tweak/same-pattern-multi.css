@@ -1,0 +1,9 @@
+.modal {
+  filter: blur(8px);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.tooltip {
+  filter: blur(10px);
+  opacity: 0.95;
+}

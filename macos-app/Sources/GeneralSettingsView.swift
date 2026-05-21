@@ -19,6 +19,7 @@ struct GeneralSettingsView: View {
                 }
 
                 StartupSettingsSection()
+                AwaySettingsSection()
                 PositionSettingsSection()
                 AppearanceSettingsSection()
                 NotificationSettingsSection()
@@ -113,6 +114,74 @@ private struct StartupSettingsSection: View {
                 launchAtLogin = SMAppService.mainApp.status == .enabled
             }
         }
+    }
+}
+
+// MARK: - Away Section
+
+private struct AwaySettingsSection: View {
+    @ObservedObject private var settings = DialogSettings.shared
+
+    private var idleMinutes: Int { Int(settings.autoAfkIdleMinutes) }
+
+    var body: some View {
+        SettingsSectionContainer(title: "Away (AFK)") {
+            VStack(spacing: 0) {
+                SettingsToggleRow(
+                    icon: "figure.walk",
+                    title: "Away mode",
+                    subtitle: "Auto-respond to interactive requests instead of showing a dialog",
+                    isOn: $settings.afkMode
+                )
+
+                Divider().padding(.leading, 40)
+
+                SettingsToggleRow(
+                    icon: "powersleep",
+                    title: "Enable when Mac sleeps",
+                    subtitle: "Turn Away on at sleep, off on wake",
+                    isOn: $settings.autoAfkOnSleep
+                )
+
+                Divider().padding(.leading, 40)
+
+                SettingsToggleRow(
+                    icon: "clock.badge.exclamationmark",
+                    title: "Enable when inactive",
+                    subtitle: "Turn Away on after no keyboard or mouse activity",
+                    isOn: $settings.autoAfkOnIdle
+                )
+
+                if settings.autoAfkOnIdle {
+                    Divider().padding(.leading, 40)
+
+                    HStack(spacing: 14) {
+                        Image(systemName: "hourglass")
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                            .frame(width: 24)
+
+                        Slider(
+                            value: $settings.autoAfkIdleMinutes,
+                            in: 1...60,
+                            step: 1
+                        )
+
+                        Text("\(idleMinutes) min")
+                            .font(.system(size: 11, design: .monospaced))
+                            .foregroundColor(.secondary)
+                            .frame(width: 55, alignment: .trailing)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 14)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+        .onChange(of: settings.afkMode) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.autoAfkOnSleep) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.autoAfkOnIdle) { _, _ in settings.saveToFile() }
+        .onChange(of: settings.autoAfkIdleMinutes) { _, _ in settings.saveToFile() }
     }
 }
 

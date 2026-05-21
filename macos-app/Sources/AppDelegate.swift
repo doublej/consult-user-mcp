@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import Combine
+import CoreGraphics
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
@@ -10,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var updateObserver: AnyCancellable?
     private var afkObserver: AnyCancellable?
     private var afkMenuItem: NSMenuItem?
+    private var idleTimer: Timer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -20,6 +22,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         observeSnooze()
         observeSnoozeEnd()
         observeAfkMode()
+        observeSleepWake()
+        startIdleMonitoring()
         observeUpdateAvailable()
         observeProjectNotifications()
         checkBasePromptUpdate()
@@ -742,6 +746,59 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.refreshAfkMenuItem()
                 self?.updateStatusIcon()
             }
+    }
+
+    // MARK: - Auto-AFK Triggers
+
+    private func observeSleepWake() {
+        let workspaceCenter = NSWorkspace.shared.notificationCenter
+        workspaceCenter.addObserver(
+            self,
+            selector: #selector(handleSystemWillSleep),
+            name: NSWorkspace.willSleepNotification,
+            object: nil
+        )
+        workspaceCenter.addObserver(
+            self,
+            selector: #selector(handleSystemDidWake),
+            name: NSWorkspace.didWakeNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleSystemWillSleep() {
+        guard DialogSettings.shared.autoAfkOnSleep else { return }
+        DialogSettings.shared.setAfkFromTrigger(true)
+    }
+
+    @objc private func handleSystemDidWake() {
+        guard DialogSettings.shared.autoAfkOnSleep else { return }
+        DialogSettings.shared.setAfkFromTrigger(false)
+    }
+
+    private func startIdleMonitoring() {
+        idleTimer?.invalidate()
+        idleTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: true) { [weak self] _ in
+            self?.checkIdle()
+        }
+    }
+
+    /// Seconds since the most recent keyboard, mouse, or trackpad event from the user.
+    private func userIdleSeconds() -> TimeInterval {
+        let combined = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: CGEventType(rawValue: ~0)!)
+        return combined
+    }
+
+    private func checkIdle() {
+        let settings = DialogSettings.shared
+        guard settings.autoAfkOnIdle else { return }
+        let threshold = settings.autoAfkIdleMinutes * 60
+        let idle = userIdleSeconds()
+        if idle >= threshold {
+            settings.setAfkFromTrigger(true)
+        } else if settings.afkAutoEnabled {
+            settings.setAfkFromTrigger(false)
+        }
     }
 
     private func observeSnoozeEnd() {

@@ -25,6 +25,11 @@ final class DialogSettings: ObservableObject {
     @AppStorage("humanizeResponses") var humanizeResponses: Bool = true
     @AppStorage("reviewBeforeSend") var reviewBeforeSend: Bool = false
     @AppStorage("afkMode") var afkMode: Bool = false
+    @AppStorage("autoAfkOnSleep") var autoAfkOnSleep: Bool = false
+    @AppStorage("autoAfkOnIdle") var autoAfkOnIdle: Bool = false
+    @AppStorage("autoAfkIdleMinutes") var autoAfkIdleMinutes: Double = 5
+    /// True when AFK was turned on by a trigger (sleep/idle). Used to avoid auto-clearing a manual toggle.
+    @AppStorage("afkAutoEnabled") var afkAutoEnabled: Bool = false
 
     // MARK: - Update Settings (persisted via AppStorage)
 
@@ -158,6 +163,10 @@ final class DialogSettings: ObservableObject {
         var humanizeResponses: Bool?
         var reviewBeforeSend: Bool?
         var afkMode: Bool?
+        var autoAfkOnSleep: Bool?
+        var autoAfkOnIdle: Bool?
+        var autoAfkIdleMinutes: Double?
+        var afkAutoEnabled: Bool?
     }
 
     func saveToFile() {
@@ -182,7 +191,11 @@ final class DialogSettings: ObservableObject {
             buttonCooldownDuration: buttonCooldownDuration,
             humanizeResponses: humanizeResponses,
             reviewBeforeSend: reviewBeforeSend,
-            afkMode: afkMode
+            afkMode: afkMode,
+            autoAfkOnSleep: autoAfkOnSleep,
+            autoAfkOnIdle: autoAfkOnIdle,
+            autoAfkIdleMinutes: autoAfkIdleMinutes,
+            afkAutoEnabled: afkAutoEnabled
         )
 
         let encoder = JSONEncoder()
@@ -251,12 +264,40 @@ final class DialogSettings: ObservableObject {
         if let afk = settings.afkMode {
             afkMode = afk
         }
+        if let onSleep = settings.autoAfkOnSleep {
+            autoAfkOnSleep = onSleep
+        }
+        if let onIdle = settings.autoAfkOnIdle {
+            autoAfkOnIdle = onIdle
+        }
+        if let idleMin = settings.autoAfkIdleMinutes {
+            autoAfkIdleMinutes = idleMin
+        }
+        if let auto = settings.afkAutoEnabled {
+            afkAutoEnabled = auto
+        }
     }
 
     // MARK: - AFK Mode
 
+    /// User-initiated toggle. Clears the auto-enabled flag so the manual choice stays sticky.
     func toggleAfkMode() {
         afkMode.toggle()
+        afkAutoEnabled = false
+        saveToFile()
+    }
+
+    /// Trigger-initiated change. Tags the AFK state so later triggers know whether to clear it.
+    func setAfkFromTrigger(_ enabled: Bool) {
+        if enabled {
+            guard !afkMode else { return }
+            afkMode = true
+            afkAutoEnabled = true
+        } else {
+            guard afkMode && afkAutoEnabled else { return }
+            afkMode = false
+            afkAutoEnabled = false
+        }
         saveToFile()
     }
 

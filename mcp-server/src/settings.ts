@@ -5,9 +5,10 @@ import { homedir } from "node:os";
 interface Settings {
   humanizeResponses: boolean;
   reviewBeforeSend: boolean;
+  afkMode: boolean;
 }
 
-const defaults: Settings = { humanizeResponses: true, reviewBeforeSend: false };
+const defaults: Settings = { humanizeResponses: true, reviewBeforeSend: false, afkMode: false };
 
 function settingsPath(): string {
   if (process.platform === "win32") {
@@ -23,6 +24,7 @@ export function readSettings(): Settings {
     return {
       humanizeResponses: raw.humanizeResponses ?? defaults.humanizeResponses,
       reviewBeforeSend: raw.reviewBeforeSend ?? defaults.reviewBeforeSend,
+      afkMode: raw.afkMode ?? defaults.afkMode,
     };
   } catch {
     return { ...defaults };

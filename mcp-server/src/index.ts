@@ -20,6 +20,15 @@ import { validateNoAllOfAbove } from "./validate-choices.js";
 const DIALOG_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 const HEARTBEAT_INTERVAL_MS = 15_000;
 
+const AFK_MESSAGE =
+  "The user has enabled Away (AFK) mode in Consult User MCP, so no dialog will be shown. " +
+  "Fall back to Claude's native AskUserQuestion tool for this request, " +
+  "or proceed with a reasonable default if no input is strictly required.";
+
+function afkResponse() {
+  return { content: [{ type: "text" as const, text: AFK_MESSAGE }] };
+}
+
 /** Unescape literal \n and \t that LLMs commonly embed in text instead of actual newlines/tabs. */
 function unescLiterals(s: string): string {
   return s.replace(/\\n/g, "\n").replace(/\\t/g, "\t");
@@ -115,6 +124,8 @@ server.registerTool("ask", {
   provider.pulse();
 
   if (p.project_path) cachedProjectPath = p.project_path;
+  if (readSettings().afkMode) return afkResponse();
+
   const projectPath = p.project_path ?? cachedProjectPath ?? "";
   const position = p.position as DialogPosition | undefined;
 
@@ -235,6 +246,8 @@ server.registerTool("tweak", {
   provider.pulse();
 
   if (p.project_path) cachedProjectPath = p.project_path;
+  if (readSettings().afkMode) return afkResponse();
+
   const projectPath = p.project_path ?? cachedProjectPath ?? "";
   const position = p.position as DialogPosition | undefined;
   const body = unescLiterals(p.body);
@@ -410,6 +423,7 @@ server.registerTool("propose_layout", {
     throw new Error("An interactive layout session is already running. Complete or cancel it first.");
   }
   if (p.project_path) cachedProjectPath = p.project_path;
+  if (readSettings().afkMode) return afkResponse();
 
   proposeLayoutActive = true;
   const controller = new AbortController();

@@ -81,9 +81,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             button.image = addBadgeDot(to: baseImage)
             button.contentTintColor = nil
         } else {
-            baseImage.isTemplate = !isOverride
+            // Template mode lets contentTintColor apply and lets the system pick the right
+            // foreground color in light/dark menu bars when no tint is set.
+            baseImage.isTemplate = true
             button.image = baseImage
-            button.contentTintColor = isSnoozed ? .orange : (isAfk ? .systemPurple : nil)
+            button.contentTintColor = isSnoozed ? .systemOrange : (isAfk ? .systemPurple : nil)
         }
     }
 
@@ -219,10 +221,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
+        settingsItem.image = menuIcon("gearshape")
         contextMenu.addItem(settingsItem)
 
         let afkItem = NSMenuItem(title: "Away (AFK)", action: #selector(toggleAfkMode), keyEquivalent: "")
         afkItem.target = self
+        afkItem.image = menuIcon("figure.walk")
         afkItem.toolTip = "Auto-respond to interactive requests with an instruction to use Claude's native AskUserQuestion tool."
         contextMenu.addItem(afkItem)
         afkMenuItem = afkItem
@@ -230,12 +234,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "u")
         updateItem.target = self
+        updateItem.image = menuIcon("arrow.down.circle")
         contextMenu.addItem(updateItem)
 
         contextMenu.addItem(NSMenuItem.separator())
 
         let quitItem = NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        quitItem.image = menuIcon("power")
         contextMenu.addItem(quitItem)
+    }
+
+    /// SF Symbol icon for an NSMenuItem. Template mode lets AppKit pick the correct
+    /// foreground color in both light and dark menu bars.
+    private func menuIcon(_ name: String) -> NSImage? {
+        let image = NSImage(systemSymbolName: name, accessibilityDescription: nil)
+        image?.isTemplate = true
+        return image
     }
 
     private func refreshAfkMenuItem() {

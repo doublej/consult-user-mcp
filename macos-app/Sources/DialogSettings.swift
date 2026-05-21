@@ -24,6 +24,7 @@ final class DialogSettings: ObservableObject {
     @AppStorage("muteSoundsWhileSnoozed") var muteSoundsWhileSnoozed: Bool = true
     @AppStorage("humanizeResponses") var humanizeResponses: Bool = true
     @AppStorage("reviewBeforeSend") var reviewBeforeSend: Bool = false
+    @AppStorage("afkMode") var afkMode: Bool = false
 
     // MARK: - Update Settings (persisted via AppStorage)
 
@@ -156,6 +157,7 @@ final class DialogSettings: ObservableObject {
         var buttonCooldownDuration: Double?
         var humanizeResponses: Bool?
         var reviewBeforeSend: Bool?
+        var afkMode: Bool?
     }
 
     func saveToFile() {
@@ -179,7 +181,8 @@ final class DialogSettings: ObservableObject {
             buttonCooldownEnabled: buttonCooldownEnabled,
             buttonCooldownDuration: buttonCooldownDuration,
             humanizeResponses: humanizeResponses,
-            reviewBeforeSend: reviewBeforeSend
+            reviewBeforeSend: reviewBeforeSend,
+            afkMode: afkMode
         )
 
         let encoder = JSONEncoder()
@@ -245,6 +248,16 @@ final class DialogSettings: ObservableObject {
         if let review = settings.reviewBeforeSend {
             reviewBeforeSend = review
         }
+        if let afk = settings.afkMode {
+            afkMode = afk
+        }
+    }
+
+    // MARK: - AFK Mode
+
+    func toggleAfkMode() {
+        afkMode.toggle()
+        saveToFile()
     }
 
     // MARK: - Snooze

@@ -7,6 +7,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.3.0] (macOS) - 2026-05-21
+
+### Added
+- New Away (AFK) mode auto-responds to interactive dialogs so the agent falls back to its native question tool instead of waiting on you
+- Away can turn on automatically when the Mac sleeps and turn off when it wakes
+- Away can turn on after a configurable period of keyboard and mouse inactivity (1–60 minutes), and clears as soon as you're back
+- Right-click the menu bar icon to toggle Away (AFK) without opening Settings
+
+### Fixed
+- Menu bar icon and right-click menu icons now adapt correctly to light and dark menu bars
+
 ## [2.2.0] (macOS) - 2026-05-01
 
 ### Changed

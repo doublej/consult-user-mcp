@@ -3,6 +3,19 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.3.0",
+      "platform": "macos",
+      "date": "2026-05-21",
+      "highlight": "Away (AFK) mode with auto-triggers for sleep and inactivity",
+      "changes": [
+        { "text": "New Away (AFK) mode auto-responds to interactive dialogs so the agent falls back to its native question tool instead of waiting on you", "type": "added", "scope": "app", "pane": "general", "featured": true, "starred": true },
+        { "text": "Away can turn on automatically when the Mac sleeps and turn off when it wakes", "type": "added", "scope": "app", "pane": "general", "featured": true },
+        { "text": "Away can turn on after a configurable period of keyboard and mouse inactivity (1–60 minutes), and clears as soon as you're back", "type": "added", "scope": "app", "pane": "general", "featured": true },
+        { "text": "Right-click the menu bar icon to toggle Away (AFK) without opening Settings", "type": "added", "scope": "app", "pane": "general" },
+        { "text": "Menu bar icon and right-click menu icons now adapt correctly to light and dark menu bars", "type": "fixed", "scope": "app", "pane": "general" }
+      ]
+    },
+    {
       "version": "2.2.0",
       "platform": "macos",
       "date": "2026-05-01",

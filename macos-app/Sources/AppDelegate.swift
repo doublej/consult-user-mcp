@@ -8,6 +8,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var contextMenu: NSMenu!
     private var snoozeObserver: AnyCancellable?
     private var updateObserver: AnyCancellable?
+    private var afkObserver: AnyCancellable?
+    private var afkMenuItem: NSMenuItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -17,6 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupContextMenu()
         observeSnooze()
         observeSnoozeEnd()
+        observeAfkMode()
         observeUpdateAvailable()
         observeProjectNotifications()
         checkBasePromptUpdate()
@@ -50,18 +53,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let button = statusItem.button else { return }
 
         let isSnoozed = DialogSettings.shared.snoozeRemaining > 0
+        let isAfk = DialogSettings.shared.afkMode
         let hasUpdate = DialogSettings.shared.updateAvailable != nil
-        let iconName = isSnoozed ? "moon.zzz.fill" : "bubble.left.and.bubble.right"
 
-        guard let baseImage = NSImage(systemSymbolName: iconName, accessibilityDescription: isSnoozed ? "Snooze Active" : "Settings") else { return }
+        let iconName: String
+        let accessibilityDescription: String
+        if isSnoozed {
+            iconName = "moon.zzz.fill"
+            accessibilityDescription = "Snooze Active"
+        } else if isAfk {
+            iconName = "figure.walk"
+            accessibilityDescription = "Away (AFK)"
+        } else {
+            iconName = "bubble.left.and.bubble.right"
+            accessibilityDescription = "Settings"
+        }
 
-        if hasUpdate && !isSnoozed {
+        guard let baseImage = NSImage(systemSymbolName: iconName, accessibilityDescription: accessibilityDescription) else { return }
+
+        let isOverride = isSnoozed || isAfk
+
+        if hasUpdate && !isOverride {
             button.image = addBadgeDot(to: baseImage)
             button.contentTintColor = nil
         } else {
-            baseImage.isTemplate = !isSnoozed
+            baseImage.isTemplate = !isOverride
             button.image = baseImage
-            button.contentTintColor = isSnoozed ? .orange : nil
+            button.contentTintColor = isSnoozed ? .orange : (isAfk ? .systemPurple : nil)
         }
     }
 
@@ -199,6 +217,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         settingsItem.target = self
         contextMenu.addItem(settingsItem)
 
+        let afkItem = NSMenuItem(title: "Away (AFK)", action: #selector(toggleAfkMode), keyEquivalent: "")
+        afkItem.target = self
+        afkItem.toolTip = "Auto-respond to interactive requests with an instruction to use Claude's native AskUserQuestion tool."
+        contextMenu.addItem(afkItem)
+        afkMenuItem = afkItem
+        refreshAfkMenuItem()
+
         let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(checkForUpdates), keyEquivalent: "u")
         updateItem.target = self
         contextMenu.addItem(updateItem)
@@ -207,6 +232,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let quitItem = NSMenuItem(title: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         contextMenu.addItem(quitItem)
+    }
+
+    private func refreshAfkMenuItem() {
+        afkMenuItem?.state = DialogSettings.shared.afkMode ? .on : .off
+    }
+
+    @objc private func toggleAfkMode() {
+        DialogSettings.shared.toggleAfkMode()
     }
 
     // MARK: - Open Settings
@@ -698,6 +731,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         snoozeObserver = DialogSettings.shared.$snoozeRemaining
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
+                self?.updateStatusIcon()
+            }
+    }
+
+    private func observeAfkMode() {
+        afkObserver = DialogSettings.shared.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.refreshAfkMenuItem()
                 self?.updateStatusIcon()
             }
     }

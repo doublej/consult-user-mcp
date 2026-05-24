@@ -466,6 +466,7 @@ struct DialogContainer<Content: View>: View {
     let bindings: DialogKeyBindings
     let currentDialogType: String
     let dialogPosition: DialogPosition
+    let globalFeedbackSubject: FeedbackSubject
     let onAskDifferently: ((String) -> Void)?
     let feedbackBindingForQuestion: ((String) -> Binding<String>)?
     let contentBuilder: (FeedbackController) -> Content
@@ -491,6 +492,7 @@ struct DialogContainer<Content: View>: View {
         bindings: DialogKeyBindings = DialogKeyBindings(),
         currentDialogType: String = "",
         dialogPosition: DialogPosition = .center,
+        globalFeedbackSubject: FeedbackSubject,
         onAskDifferently: ((String) -> Void)? = nil,
         feedbackBindingForQuestion: ((String) -> Binding<String>)? = nil,
         @ViewBuilder content: @escaping (FeedbackController) -> Content
@@ -498,6 +500,7 @@ struct DialogContainer<Content: View>: View {
         self.bindings = bindings
         self.currentDialogType = currentDialogType
         self.dialogPosition = dialogPosition
+        self.globalFeedbackSubject = globalFeedbackSubject
         self.onAskDifferently = onAskDifferently
         self.feedbackBindingForQuestion = feedbackBindingForQuestion
         self.contentBuilder = content
@@ -519,13 +522,14 @@ struct DialogContainer<Content: View>: View {
         }
     }
 
-    private var feedbackTitle: String {
-        guard let target = feedbackTarget else { return "" }
+    private var currentFeedbackSubject: FeedbackSubject {
+        guard let target = feedbackTarget else { return globalFeedbackSubject }
         switch target {
         case .global:
-            return "Add a note for the agent"
+            return globalFeedbackSubject
         case .question(let id):
-            return DialogManager.shared.questionLabelLookup?(id) ?? "Question note"
+            let text = DialogManager.shared.questionLabelLookup?(id) ?? "(this question)"
+            return FeedbackSubject(kind: .question, text: text)
         }
     }
 
@@ -642,7 +646,7 @@ struct DialogContainer<Content: View>: View {
     @ViewBuilder
     private var paneView: some View {
         FeedbackPane(
-            title: feedbackTitle,
+            subject: currentFeedbackSubject,
             draft: feedbackBinding,
             onClose: { closePane() },
             onClear: { feedbackBinding.wrappedValue = "" }

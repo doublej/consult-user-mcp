@@ -197,6 +197,7 @@ struct SwiftUIWizardDialog: View {
             ),
             currentDialogType: "form-wizard",
             dialogPosition: position,
+            globalFeedbackSubject: FeedbackSubject(kind: .form, text: bodyText ?? title),
             onAskDifferently: onAskDifferently,
             feedbackBindingForQuestion: { id in formState.bindingForFeedback(id) }
         ) { controller in

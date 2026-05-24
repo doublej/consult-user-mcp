@@ -156,6 +156,7 @@ struct SwiftUIChooseDialog: View {
             ),
             currentDialogType: allowMultiple ? "pick-multi" : "pick",
             dialogPosition: position,
+            globalFeedbackSubject: FeedbackSubject(kind: .dialog, text: bodyText),
             onAskDifferently: onAskDifferently
         ) { controller in
             VStack(spacing: 0) {

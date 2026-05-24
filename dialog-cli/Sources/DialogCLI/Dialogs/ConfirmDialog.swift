@@ -29,6 +29,7 @@ struct SwiftUIConfirmDialog: View {
             ),
             currentDialogType: "confirm",
             dialogPosition: position,
+            globalFeedbackSubject: FeedbackSubject(kind: .dialog, text: bodyText),
             onAskDifferently: onAskDifferently
         ) { controller in
             VStack(spacing: 0) {

@@ -53,6 +53,7 @@ struct SwiftUITextInputDialog: View {
             ),
             currentDialogType: isHidden ? "text-hidden" : "text",
             dialogPosition: position,
+            globalFeedbackSubject: FeedbackSubject(kind: .dialog, text: bodyText),
             onAskDifferently: onAskDifferently
         ) { controller in
             VStack(spacing: 0) {

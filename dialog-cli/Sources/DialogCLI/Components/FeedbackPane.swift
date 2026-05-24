@@ -16,13 +16,45 @@ enum FeedbackTarget: Equatable {
     }
 }
 
+// MARK: - Feedback Subject
+
+/// Describes the prompt the user is annotating. Drives the prominent
+/// header card so the user (and a glance-from-across-the-room view) can
+/// see exactly what the note is attached to.
+struct FeedbackSubject {
+    enum Kind {
+        case question
+        case dialog
+        case form
+    }
+
+    let kind: Kind
+    let text: String
+
+    var caption: String {
+        switch kind {
+        case .question: return "Note on this question"
+        case .dialog: return "Note on this dialog"
+        case .form: return "Note on this form"
+        }
+    }
+
+    var icon: String {
+        switch kind {
+        case .question: return "questionmark.bubble"
+        case .dialog: return "bubble.left"
+        case .form: return "list.bullet.rectangle"
+        }
+    }
+}
+
 // MARK: - Feedback Pane
 
 /// Slide-out pane bound to a single feedback draft (either the consult-level
 /// note or a specific question). The pane stays "armed" while text is in the
 /// draft; closing simply hides it.
 struct FeedbackPane: View {
-    let title: String
+    let subject: FeedbackSubject
     @Binding var draft: String
     let onClose: () -> Void
     let onClear: () -> Void
@@ -32,6 +64,7 @@ struct FeedbackPane: View {
     var body: some View {
         VStack(spacing: 0) {
             header
+            subjectCard
             editor
             footer
         }
@@ -46,19 +79,20 @@ struct FeedbackPane: View {
     }
 
     private var header: some View {
-        HStack(alignment: .top, spacing: 8) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Note")
-                    .font(.system(size: 10, weight: .semibold))
-                    .foregroundColor(Theme.Colors.textMuted)
+        HStack(spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: subject.icon)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(Theme.Colors.accentBlue)
+                Text(subject.caption)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(Theme.Colors.accentBlue)
                     .textCase(.uppercase)
-                Text(title)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Theme.Colors.textPrimary)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .kerning(0.4)
             }
+
             Spacer(minLength: 0)
+
             Button(action: onClose) {
                 Image(systemName: "xmark")
                     .font(.system(size: 11, weight: .semibold))
@@ -76,16 +110,56 @@ struct FeedbackPane: View {
         .padding(.bottom, 10)
     }
 
+    private var subjectCard: some View {
+        HStack(alignment: .top, spacing: 10) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Theme.Colors.accentBlue)
+                .frame(width: 3)
+
+            ScrollView {
+                Text(subject.text)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                    .textSelection(.enabled)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 2)
+            }
+            .frame(maxHeight: 88)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Theme.Colors.accentBlue.opacity(0.08))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .strokeBorder(Theme.Colors.accentBlue.opacity(0.25), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 16)
+        .padding(.bottom, 10)
+    }
+
     private var editor: some View {
-        FeedbackEditor(text: $draft)
-            .background(Theme.Colors.inputBackground)
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Theme.Colors.border.opacity(0.6), lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .padding(.horizontal, 16)
-            .frame(maxHeight: .infinity)
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Your note")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundColor(Theme.Colors.textMuted)
+                .textCase(.uppercase)
+                .padding(.leading, 2)
+
+            FeedbackEditor(text: $draft)
+                .background(Theme.Colors.inputBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Theme.Colors.border.opacity(0.6), lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+        .padding(.horizontal, 16)
+        .frame(maxHeight: .infinity)
     }
 
     private var footer: some View {

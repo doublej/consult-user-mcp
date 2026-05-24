@@ -665,11 +665,8 @@ struct DialogContainer<Content: View>: View {
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
         }
-        if feedbackTarget != nil {
-            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.focusAfterExpand) {
-                FocusManager.shared.focusLast()
-            }
-        }
+        // Focus is handled inside FeedbackEditor — it grabs first responder
+        // on its first updateNSView, so the editor is ready to type into.
     }
 
     private func closePane() {

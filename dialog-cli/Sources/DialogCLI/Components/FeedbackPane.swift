@@ -65,10 +65,10 @@ struct FeedbackPane: View {
         VStack(spacing: 0) {
             header
             subjectCard
-            editor
+            editorSection
             footer
         }
-        .frame(width: 360)
+        .frame(width: 340)
         .background(Theme.Colors.cardBackground)
         .overlay(
             Rectangle()
@@ -116,17 +116,15 @@ struct FeedbackPane: View {
                 .fill(Theme.Colors.accentBlue)
                 .frame(width: 3)
 
-            ScrollView {
-                Text(subject.text)
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Theme.Colors.textPrimary)
-                    .textSelection(.enabled)
-                    .multilineTextAlignment(.leading)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 2)
-            }
-            .frame(maxHeight: 88)
+            Text(subject.text)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Theme.Colors.textPrimary)
+                .textSelection(.enabled)
+                .multilineTextAlignment(.leading)
+                .lineLimit(4)
+                .truncationMode(.tail)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
@@ -142,7 +140,7 @@ struct FeedbackPane: View {
         .padding(.bottom, 10)
     }
 
-    private var editor: some View {
+    private var editorSection: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Your note")
                 .font(.system(size: 10, weight: .semibold))
@@ -157,9 +155,10 @@ struct FeedbackPane: View {
                         .strokeBorder(Theme.Colors.border.opacity(0.6), lineWidth: 1)
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .frame(minHeight: 180)
         }
         .padding(.horizontal, 16)
-        .frame(maxHeight: .infinity)
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 
     private var footer: some View {
@@ -201,13 +200,17 @@ struct FeedbackPane: View {
 
 // MARK: - Feedback Editor (NSTextView-backed multi-line)
 
+/// Multi-line text editor backed by NSTextView. Important: every NSView in
+/// this stack must override `mouseDownCanMoveWindow` to `false` — the
+/// dialog window's `DraggableView` background otherwise eats clicks before
+/// the text view can become first responder.
 struct FeedbackEditor: NSViewRepresentable {
     @Binding var text: String
 
     func makeCoordinator() -> Coordinator { Coordinator(text: $text) }
 
-    func makeNSView(context: Context) -> NSScrollView {
-        let textView = NSTextView()
+    func makeNSView(context: Context) -> FeedbackEditorScrollView {
+        let textView = FeedbackEditorTextView()
         textView.isEditable = true
         textView.isSelectable = true
         textView.font = NSFont.systemFont(ofSize: 13)
@@ -220,24 +223,34 @@ struct FeedbackEditor: NSViewRepresentable {
         textView.allowsUndo = true
         textView.delegate = context.coordinator
         textView.string = text
+        textView.autoresizingMask = [.width]
 
-        let scrollView = NSScrollView()
+        let scrollView = FeedbackEditorScrollView()
         scrollView.documentView = textView
         scrollView.hasVerticalScroller = true
         scrollView.drawsBackground = false
         scrollView.borderType = .noBorder
+        scrollView.autohidesScrollers = true
         return scrollView
     }
 
-    func updateNSView(_ scrollView: NSScrollView, context: Context) {
+    func updateNSView(_ scrollView: FeedbackEditorScrollView, context: Context) {
         guard let textView = scrollView.documentView as? NSTextView else { return }
         if textView.string != text {
             textView.string = text
+        }
+        // Pane just appeared → take focus so the user can type immediately.
+        if !context.coordinator.didAutoFocus {
+            context.coordinator.didAutoFocus = true
+            DispatchQueue.main.async {
+                textView.window?.makeFirstResponder(textView)
+            }
         }
     }
 
     final class Coordinator: NSObject, NSTextViewDelegate {
         @Binding var text: String
+        var didAutoFocus = false
 
         init(text: Binding<String>) {
             self._text = text
@@ -248,4 +261,18 @@ struct FeedbackEditor: NSViewRepresentable {
             text = textView.string
         }
     }
+}
+
+/// NSTextView that refuses to participate in window dragging so clicks
+/// land on the text view itself.
+final class FeedbackEditorTextView: NSTextView {
+    override var mouseDownCanMoveWindow: Bool { false }
+    override var acceptsFirstResponder: Bool { true }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+}
+
+/// NSScrollView wrapper — also has to refuse window-drag so clicks
+/// reaching the scroll area first don't slip up to `DraggableView`.
+final class FeedbackEditorScrollView: NSScrollView {
+    override var mouseDownCanMoveWindow: Bool { false }
 }

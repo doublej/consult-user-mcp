@@ -102,10 +102,10 @@ struct SwiftUIChooseDialog: View {
     let allowMultiple: Bool
     let allowOther: Bool
     let defaultSelection: String?
-    let onComplete: (Set<Int>, String?) -> Void
-    let onCancel: () -> Void
+    let position: DialogPosition
+    let onComplete: (Set<Int>, String?, String?) -> Void
+    let onCancel: (String?) -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String, Set<Int>, String?) -> Void
     let onAskDifferently: (String) -> Void
 
     @State private var selectedIndices: Set<Int> = []
@@ -121,7 +121,13 @@ struct SwiftUIChooseDialog: View {
         )
     }
 
-    init(title: String, body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, allowOther: Bool = true, defaultSelection: String?, onComplete: @escaping (Set<Int>, String?) -> Void, onCancel: @escaping () -> Void, onSnooze: @escaping (Int) -> Void, onFeedback: @escaping (String, Set<Int>, String?) -> Void, onAskDifferently: @escaping (String) -> Void) {
+    private func globalDraft() -> String? {
+        let raw = DialogManager.shared.globalFeedbackBinding?.wrappedValue ?? ""
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    init(title: String, body: String, choices: [String], descriptions: [String]?, allowMultiple: Bool, allowOther: Bool = true, defaultSelection: String?, position: DialogPosition, onComplete: @escaping (Set<Int>, String?, String?) -> Void, onCancel: @escaping (String?) -> Void, onSnooze: @escaping (Int) -> Void, onAskDifferently: @escaping (String) -> Void) {
         self.title = title
         self.bodyText = body
         self.choices = choices
@@ -129,10 +135,10 @@ struct SwiftUIChooseDialog: View {
         self.allowMultiple = allowMultiple
         self.allowOther = allowOther
         self.defaultSelection = defaultSelection
+        self.position = position
         self.onComplete = onComplete
         self.onCancel = onCancel
         self.onSnooze = onSnooze
-        self.onFeedback = onFeedback
         self.onAskDifferently = onAskDifferently
 
         if let defaultSel = defaultSelection, let idx = choices.firstIndex(of: defaultSel) {
@@ -145,22 +151,24 @@ struct SwiftUIChooseDialog: View {
         DialogContainer(
             bindings: DialogKeyBindings(
                 canSubmit: { hasValidSelection },
-                onSubmit: { onComplete(selectedIndices, otherSelected ? otherText : nil) },
-                onCancel: onCancel
+                onSubmit: { onComplete(selectedIndices, otherSelected ? otherText : nil, globalDraft()) },
+                onCancel: { onCancel(globalDraft()) }
             ),
             currentDialogType: allowMultiple ? "pick-multi" : "pick",
+            dialogPosition: position,
             onAskDifferently: onAskDifferently
-        ) { expandedTool in
+        ) { controller in
             VStack(spacing: 0) {
                 headerView
                 choicesScrollView
                     .clipped()
 
                 DialogToolbar(
-                    expandedTool: expandedTool,
+                    expandedTool: controller.expandedTool,
                     currentDialogType: allowMultiple ? "pick-multi" : "pick",
+                    hasFeedback: controller.hasFeedback(.global),
                     onSnooze: onSnooze,
-                    onFeedback: { feedback in onFeedback(feedback, selectedIndices, otherSelected ? otherText : nil) },
+                    onOpenFeedback: { controller.openFeedback(.global) },
                     onAskDifferently: onAskDifferently
                 )
 
@@ -227,9 +235,9 @@ struct SwiftUIChooseDialog: View {
                 KeyboardHint(key: "⏎", label: "done"),
             ] + KeyboardHint.toolbarHints,
             buttons: [
-                .init("Cancel", action: onCancel),
+                .init("Cancel", action: { onCancel(globalDraft()) }),
                 .init("Done", isPrimary: true, isDisabled: !hasValidSelection, showReturnHint: true, action: {
-                    onComplete(selectedIndices, otherSelected ? otherText : nil)
+                    onComplete(selectedIndices, otherSelected ? otherText : nil, globalDraft())
                 })
             ]
         )

@@ -12,27 +12,26 @@ extension DialogManager {
         NSApp.setActivationPolicy(.accessory)
 
         var result: ConfirmResponse?
+        let position = effectivePosition(request.position)
 
         let swiftUIDialog = SwiftUIConfirmDialog(
             title: request.title,
             bodyText: request.body,
             confirmLabel: request.confirmLabel,
             cancelLabel: request.cancelLabel,
-            onConfirm: {
-                result = ConfirmResponse(dialogType: "confirm", confirmed: true, cancelled: false, dismissed: false, answer: request.confirmLabel, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+            position: position,
+            onConfirm: { feedback in
+                result = ConfirmResponse(dialogType: "confirm", confirmed: true, cancelled: false, dismissed: false, answer: request.confirmLabel, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
                 NSApp.stopModal()
             },
-            onCancel: {
-                result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: request.cancelLabel, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+            onCancel: { feedback in
+                let hasFeedback = feedback != nil
+                result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: !hasFeedback, dismissed: false, answer: hasFeedback ? nil : request.cancelLabel, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
                 NSApp.stopModal()
             },
             onSnooze: { minutes in
                 UserSettings.setSnooze(minutes: minutes)
                 result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: nil, comment: nil, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, askDifferently: nil, instruction: self.snoozeInstruction(minutes: minutes))
-                NSApp.stopModal()
-            },
-            onFeedback: { feedback in
-                result = ConfirmResponse(dialogType: "confirm", confirmed: false, cancelled: false, dismissed: false, answer: nil, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
                 NSApp.stopModal()
             },
             onAskDifferently: { type in
@@ -41,7 +40,6 @@ extension DialogManager {
             }
         )
 
-        let position = effectivePosition(request.position)
         let (window, _, _) = createAutoSizedWindow(content: swiftUIDialog, position: position)
 
         positionWindow(window, position: position)

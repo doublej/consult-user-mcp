@@ -446,15 +446,33 @@ struct DialogFooter: View {
     }
 }
 
+// MARK: - Feedback Controller
+
+/// Passed to every dialog body so it can open the feedback pane or query
+/// whether a target already has draft text. The dialog uses this in three
+/// places: the toolbar button, the keyboard shortcut, and (for forms) the
+/// per-question affordance. Also carries the snooze-toolbar expansion
+/// binding so the dialog can wire `DialogToolbar` without owning that state.
+struct FeedbackController {
+    let currentTarget: FeedbackTarget?
+    let openFeedback: (FeedbackTarget) -> Void
+    let hasFeedback: (FeedbackTarget) -> Bool
+    let expandedTool: Binding<DialogToolbar.ToolbarTool?>
+}
+
 // MARK: - Dialog Container (Composable)
 
 struct DialogContainer<Content: View>: View {
     let bindings: DialogKeyBindings
     let currentDialogType: String
+    let dialogPosition: DialogPosition
     let onAskDifferently: ((String) -> Void)?
-    let contentBuilder: (Binding<DialogToolbar.ToolbarTool?>) -> Content
+    let feedbackBindingForQuestion: ((String) -> Binding<String>)?
+    let contentBuilder: (FeedbackController) -> Content
 
     @State private var keyboardMonitor: KeyboardNavigationMonitor?
+    @State private var feedbackTarget: FeedbackTarget?
+    @State private var globalDraft: String = ""
     @State private var expandedTool: DialogToolbar.ToolbarTool?
     @State private var showReportOverlay = false
     @State private var reportScreenshot: Data?
@@ -472,28 +490,105 @@ struct DialogContainer<Content: View>: View {
     init(
         bindings: DialogKeyBindings = DialogKeyBindings(),
         currentDialogType: String = "",
+        dialogPosition: DialogPosition = .center,
         onAskDifferently: ((String) -> Void)? = nil,
-        @ViewBuilder content: @escaping (Binding<DialogToolbar.ToolbarTool?>) -> Content
+        feedbackBindingForQuestion: ((String) -> Binding<String>)? = nil,
+        @ViewBuilder content: @escaping (FeedbackController) -> Content
     ) {
         self.bindings = bindings
         self.currentDialogType = currentDialogType
+        self.dialogPosition = dialogPosition
         self.onAskDifferently = onAskDifferently
+        self.feedbackBindingForQuestion = feedbackBindingForQuestion
         self.contentBuilder = content
     }
 
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                ReportFeedbackButton(action: captureAndShowOverlay)
-                Spacer(minLength: 0)
-                if let name = projectName, let path = projectPath {
-                    ProjectBadge(projectName: name, projectPath: path)
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 12)
+    /// Edge the feedback pane should slide in from. `.left` dialog → pane on
+    /// the right; `.right` dialog → pane on the left; `.center` → default
+    /// trailing unless the dialog is closer to the right edge of the screen.
+    private var paneEdge: Edge {
+        switch dialogPosition {
+        case .left:
+            return .trailing
+        case .right:
+            return .leading
+        case .center:
+            guard let screen = NSScreen.main else { return .trailing }
+            let screenMid = screen.visibleFrame.midX
+            return screenMid > screen.visibleFrame.midX ? .leading : .trailing
+        }
+    }
 
-            contentBuilder($expandedTool)
+    private var feedbackTitle: String {
+        guard let target = feedbackTarget else { return "" }
+        switch target {
+        case .global:
+            return "Add a note for the agent"
+        case .question(let id):
+            return DialogManager.shared.questionLabelLookup?(id) ?? "Question note"
+        }
+    }
+
+    private var feedbackBinding: Binding<String> {
+        guard let target = feedbackTarget else {
+            return Binding(get: { "" }, set: { _ in })
+        }
+        switch target {
+        case .global:
+            return Binding(
+                get: { globalDraft },
+                set: { globalDraft = $0 }
+            )
+        case .question(let id):
+            if let resolver = feedbackBindingForQuestion {
+                return resolver(id)
+            }
+            return Binding(get: { "" }, set: { _ in })
+        }
+    }
+
+    private var controller: FeedbackController {
+        FeedbackController(
+            currentTarget: feedbackTarget,
+            openFeedback: { target in setFeedbackTarget(target) },
+            hasFeedback: { target in
+                switch target {
+                case .global:
+                    return !globalDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                case .question(let id):
+                    let value = feedbackBindingForQuestion?(id).wrappedValue ?? ""
+                    return !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                }
+            },
+            expandedTool: $expandedTool
+        )
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            if paneEdge == .leading, feedbackTarget != nil {
+                paneView
+                    .transition(reduceMotion ? .identity : .move(edge: .leading))
+            }
+
+            VStack(spacing: 0) {
+                HStack {
+                    ReportFeedbackButton(action: captureAndShowOverlay)
+                    Spacer(minLength: 0)
+                    if let name = projectName, let path = projectPath {
+                        ProjectBadge(projectName: name, projectPath: path)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.top, 12)
+
+                contentBuilder(controller)
+            }
+
+            if paneEdge == .trailing, feedbackTarget != nil {
+                paneView
+                    .transition(reduceMotion ? .identity : .move(edge: .trailing))
+            }
         }
         .overlay {
             if showReportOverlay {
@@ -514,25 +609,86 @@ struct DialogContainer<Content: View>: View {
         .animation(reduceMotion ? nil : .easeOut(duration: Theme.Animation.overlay), value: showReportOverlay)
         .onAppear {
             FocusManager.shared.reset()
+            DialogManager.shared.globalFeedbackBinding = Binding(
+                get: { globalDraft },
+                set: { globalDraft = $0 }
+            )
             setupKeyboardNavigation()
             DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.focusAfterAppear) {
                 FocusManager.shared.focusFirst()
             }
             if let pane = DialogManager.shared.testPane {
-                let tool: DialogToolbar.ToolbarTool? = pane == "snooze" ? .snooze : pane == "feedback" ? .feedback : nil
-                if let tool {
+                if pane == "snooze" {
                     DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.testPaneReveal) {
-                        toggleTool(tool)
+                        toggleSnooze()
+                    }
+                } else if pane == "feedback" {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.testPaneReveal) {
+                        setFeedbackTarget(.global)
                     }
                 }
             }
         }
         .onDisappear {
             keyboardMonitor = nil
+            DialogManager.shared.globalFeedbackBinding = nil
             FocusManager.shared.reset()
         }
         .onReceive(NotificationCenter.default.publisher(for: .dismissReportOverlay)) { _ in
             dismissOverlay()
+        }
+    }
+
+    @ViewBuilder
+    private var paneView: some View {
+        FeedbackPane(
+            title: feedbackTitle,
+            draft: feedbackBinding,
+            onClose: { closePane() },
+            onClear: { feedbackBinding.wrappedValue = "" }
+        )
+    }
+
+    private func setFeedbackTarget(_ target: FeedbackTarget) {
+        let willClose = feedbackTarget == target
+        if reduceMotion {
+            feedbackTarget = willClose ? nil : target
+        } else {
+            withAnimation(.easeOut(duration: Theme.Animation.overlay)) {
+                feedbackTarget = willClose ? nil : target
+            }
+        }
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
+        }
+        if feedbackTarget != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.focusAfterExpand) {
+                FocusManager.shared.focusLast()
+            }
+        }
+    }
+
+    private func closePane() {
+        if reduceMotion {
+            feedbackTarget = nil
+        } else {
+            withAnimation(.easeOut(duration: Theme.Animation.overlay)) {
+                feedbackTarget = nil
+            }
+        }
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
+        }
+    }
+
+    private func toggleSnooze() {
+        let next: DialogToolbar.ToolbarTool? = expandedTool == .snooze ? nil : .snooze
+        if reduceMotion {
+            expandedTool = next
+        } else {
+            withAnimation(.easeOut(duration: Theme.Animation.overlay)) {
+                expandedTool = next
+            }
         }
     }
 
@@ -550,24 +706,17 @@ struct DialogContainer<Content: View>: View {
         }
     }
 
-    private func toggleTool(_ tool: DialogToolbar.ToolbarTool) {
-        if reduceMotion {
-            expandedTool = expandedTool == tool ? nil : tool
-        } else {
-            withAnimation(.easeOut(duration: Theme.Animation.overlay)) {
-                expandedTool = expandedTool == tool ? nil : tool
-            }
-        }
-    }
-
     private func setupKeyboardNavigation() {
         keyboardMonitor = DialogKeyRouter.install(
             bindings: bindings,
             currentDialogType: currentDialogType,
             onAskDifferently: onAskDifferently,
             expandedTool: $expandedTool,
+            isFeedbackPaneOpen: { feedbackTarget != nil },
             showReportOverlay: $showReportOverlay,
-            toggleTool: { tool in toggleTool(tool) },
+            toggleSnooze: { toggleSnooze() },
+            openFeedback: { setFeedbackTarget(.global) },
+            closePane: { closePane() },
             dismissOverlay: { dismissOverlay() }
         )
     }

@@ -8,31 +8,39 @@ struct SwiftUIConfirmDialog: View {
     let bodyText: String
     let confirmLabel: String
     let cancelLabel: String
-    let onConfirm: () -> Void
-    let onCancel: () -> Void
+    let position: DialogPosition
+    let onConfirm: (String?) -> Void
+    let onCancel: (String?) -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String) -> Void
     let onAskDifferently: (String) -> Void
+
+    private func globalDraft() -> String? {
+        let raw = DialogManager.shared.globalFeedbackBinding?.wrappedValue ?? ""
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
 
     var body: some View {
         DialogContainer(
             bindings: DialogKeyBindings(
                 canSubmit: { true },
-                onSubmit: onConfirm,
-                onCancel: onCancel
+                onSubmit: { onConfirm(globalDraft()) },
+                onCancel: { onCancel(globalDraft()) }
             ),
             currentDialogType: "confirm",
+            dialogPosition: position,
             onAskDifferently: onAskDifferently
-        ) { expandedTool in
+        ) { controller in
             VStack(spacing: 0) {
                 DialogHeader(icon: "questionmark", title: title, body: bodyText)
                     .padding(.bottom, 12)
 
                 DialogToolbar(
-                    expandedTool: expandedTool,
+                    expandedTool: controller.expandedTool,
                     currentDialogType: "confirm",
+                    hasFeedback: controller.hasFeedback(.global),
                     onSnooze: onSnooze,
-                    onFeedback: onFeedback,
+                    onOpenFeedback: { controller.openFeedback(.global) },
                     onAskDifferently: onAskDifferently
                 )
 
@@ -42,8 +50,8 @@ struct SwiftUIConfirmDialog: View {
                         KeyboardHint(key: "Esc", label: "cancel"),
                     ] + KeyboardHint.toolbarHints,
                     buttons: [
-                        .init(cancelLabel, action: onCancel),
-                        .init(confirmLabel, isPrimary: true, showReturnHint: true, action: onConfirm)
+                        .init(cancelLabel, action: { onCancel(globalDraft()) }),
+                        .init(confirmLabel, isPrimary: true, showReturnHint: true, action: { onConfirm(globalDraft()) })
                     ]
                 )
             }

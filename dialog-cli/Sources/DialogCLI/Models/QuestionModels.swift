@@ -68,6 +68,7 @@ struct QuestionsResponse: Codable {
     let snoozeMinutes: Int?
     let remainingSeconds: Int?
     let feedbackText: String?
+    let feedbackByQuestion: [String: String]?
     let askDifferently: String?
     let instruction: String?
 }

@@ -7,6 +7,7 @@ struct AccordionSection: View {
     let question: QuestionItem
     let isExpanded: Bool
     let isAnswered: Bool
+    let hasFeedback: Bool
     @Binding var answer: QuestionAnswer
     @Binding var textValue: String
     @Binding var focusedIndex: Int
@@ -14,6 +15,7 @@ struct AccordionSection: View {
     @Binding var otherText: String
     let onToggle: () -> Void
     let onAutoAdvance: () -> Void
+    let onOpenFeedback: () -> Void
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
     @State private var isHovered = false
@@ -26,48 +28,51 @@ struct AccordionSection: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            Button(action: onToggle) {
-                HStack {
-                    // Status indicator
-                    ZStack {
-                        Circle()
-                            .fill(isAnswered ? Theme.Colors.accentBlue : Theme.Colors.cardBackground)
-                            .frame(width: 22, height: 22)
-                            .overlay(
-                                Circle()
-                                    .strokeBorder(isAnswered ? Color.clear : Theme.Colors.border, lineWidth: 2)
-                            )
-
-                        if isAnswered {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(.white)
-                        } else {
+            HStack(spacing: 8) {
+                Button(action: onToggle) {
+                    HStack {
+                        ZStack {
                             Circle()
-                                .fill(Theme.Colors.textMuted)
-                                .frame(width: 6, height: 6)
+                                .fill(isAnswered ? Theme.Colors.accentBlue : Theme.Colors.cardBackground)
+                                .frame(width: 22, height: 22)
+                                .overlay(
+                                    Circle()
+                                        .strokeBorder(isAnswered ? Color.clear : Theme.Colors.border, lineWidth: 2)
+                                )
+
+                            if isAnswered {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(.white)
+                            } else {
+                                Circle()
+                                    .fill(Theme.Colors.textMuted)
+                                    .frame(width: 6, height: 6)
+                            }
                         }
+
+                        Text(question.question)
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(Theme.Colors.textPrimary)
+                            .lineLimit(nil)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(Theme.Colors.textSecondary)
                     }
-
-                    Text(question.question)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Theme.Colors.textPrimary)
-                        .lineLimit(nil)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Theme.Colors.textSecondary)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(isHovered ? Theme.Colors.cardHover : Theme.Colors.cardBackground)
-                )
+                .buttonStyle(.plain)
+                .focusEffectDisabled()
+
+                QuestionNoteAffordance(hasFeedback: hasFeedback, action: onOpenFeedback)
             }
-            .buttonStyle(.plain)
-            .focusEffectDisabled()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(isHovered ? Theme.Colors.cardHover : Theme.Colors.cardBackground)
+            )
             .onHover { hovering in
                 if hovering {
                     NSCursor.pointingHand.push()
@@ -83,7 +88,6 @@ struct AccordionSection: View {
                 }
             }
 
-            // Expanded content
             if isExpanded {
                 VStack(spacing: 8) {
                     if question.type == .text {
@@ -158,10 +162,10 @@ struct SwiftUIAccordionDialog: View {
     let title: String
     let bodyText: String?
     let questions: [QuestionItem]
-    let onComplete: ([String: QuestionAnswer], [String: Bool], [String: String]) -> Void
-    let onCancel: () -> Void
+    let position: DialogPosition
+    let onComplete: ([String: QuestionAnswer], [String: Bool], [String: String], [String: String], String?) -> Void
+    let onCancel: (String?, [String: String]) -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String, [String: QuestionAnswer], [String: Bool], [String: String]) -> Void
     let onAskDifferently: (String) -> Void
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
@@ -177,17 +181,25 @@ struct SwiftUIAccordionDialog: View {
         questions.first { $0.id == expandedId }
     }
 
+    private func globalDraft() -> String? {
+        let raw = DialogManager.shared.globalFeedbackBinding?.wrappedValue ?? ""
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     var body: some View {
         DialogContainer(
             bindings: DialogKeyBindings(
                 canSubmit: { answeredCount > 0 },
-                onSubmit: { onComplete(formState.answers, formState.otherSelections, formState.otherTexts) },
-                onCancel: onCancel,
+                onSubmit: { onComplete(formState.answers, formState.otherSelections, formState.otherTexts, formState.feedbackDrafts, globalDraft()) },
+                onCancel: { onCancel(globalDraft(), formState.feedbackDrafts) },
                 onTab: { modifiers in jumpSection(reverse: modifiers.contains(.shift)) }
             ),
             currentDialogType: "form-accordion",
-            onAskDifferently: onAskDifferently
-        ) { expandedTool in
+            dialogPosition: position,
+            onAskDifferently: onAskDifferently,
+            feedbackBindingForQuestion: { id in formState.bindingForFeedback(id) }
+        ) { controller in
             VStack(spacing: 0) {
                 DialogHeader(
                     icon: "rectangle.stack",
@@ -196,7 +208,6 @@ struct SwiftUIAccordionDialog: View {
                 )
                 .padding(.bottom, 4)
 
-                // Progress
                 HStack {
                     Spacer()
                     Text("\(answeredCount)/\(questions.count) answered")
@@ -206,7 +217,6 @@ struct SwiftUIAccordionDialog: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 8)
 
-                // Accordion sections
                 ScrollViewReader { proxy in
                     AutoSizingScrollView {
                         VStack(spacing: 8) {
@@ -215,6 +225,7 @@ struct SwiftUIAccordionDialog: View {
                                     question: question,
                                     isExpanded: expandedId == question.id,
                                     isAnswered: formState.isAnswered(question.id),
+                                    hasFeedback: formState.hasFeedback(question.id),
                                     answer: formState.bindingForAnswer(question),
                                     textValue: formState.bindingForText(question.id),
                                     focusedIndex: Binding(
@@ -224,7 +235,8 @@ struct SwiftUIAccordionDialog: View {
                                     otherSelected: formState.bindingForOtherSelected(question.id),
                                     otherText: formState.bindingForOtherText(question.id),
                                     onToggle: { toggleExpanded(question.id) },
-                                    onAutoAdvance: { advanceToNextSection(from: question.id) }
+                                    onAutoAdvance: { advanceToNextSection(from: question.id) },
+                                    onOpenFeedback: { controller.openFeedback(.question(id: question.id)) }
                                 )
                                 .id(question.id)
                             }
@@ -243,10 +255,11 @@ struct SwiftUIAccordionDialog: View {
 
                 VStack(spacing: 0) {
                     DialogToolbar(
-                        expandedTool: expandedTool,
+                        expandedTool: controller.expandedTool,
                         currentDialogType: "form-accordion",
+                        hasFeedback: controller.hasFeedback(.global),
                         onSnooze: onSnooze,
-                        onFeedback: { feedback in onFeedback(feedback, formState.answers, formState.otherSelections, formState.otherTexts) },
+                        onOpenFeedback: { controller.openFeedback(.global) },
                         onAskDifferently: onAskDifferently
                     )
 
@@ -257,9 +270,9 @@ struct SwiftUIAccordionDialog: View {
                             KeyboardHint(key: "⏎", label: "done"),
                         ] + KeyboardHint.toolbarHints,
                         buttons: [
-                            .init("Cancel", action: onCancel),
+                            .init("Cancel", action: { onCancel(globalDraft(), formState.feedbackDrafts) }),
                             .init("Done", isPrimary: true, isDisabled: answeredCount == 0, showReturnHint: true, action: {
-                                onComplete(formState.answers, formState.otherSelections, formState.otherTexts)
+                                onComplete(formState.answers, formState.otherSelections, formState.otherTexts, formState.feedbackDrafts, globalDraft())
                             }),
                         ]
                     )
@@ -268,9 +281,15 @@ struct SwiftUIAccordionDialog: View {
             }
         }
         .onAppear {
+            DialogManager.shared.questionLabelLookup = { id in
+                questions.first(where: { $0.id == id })?.question
+            }
             if let first = questions.first {
                 expandedId = first.id
             }
+        }
+        .onDisappear {
+            DialogManager.shared.questionLabelLookup = nil
         }
         .onChange(of: expandedId) { _ in
             focusedOptionIndex = 0

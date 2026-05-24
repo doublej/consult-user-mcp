@@ -11,6 +11,7 @@ extension DialogManager {
         snoozeMinutes: Int? = nil,
         remainingSeconds: Int? = nil,
         feedbackText: String? = nil,
+        feedbackByQuestion: [String: String]? = nil,
         askDifferently: String? = nil,
         instruction: String? = nil
     ) -> QuestionsResponse {
@@ -24,6 +25,7 @@ extension DialogManager {
             snoozeMinutes: snoozeMinutes,
             remainingSeconds: remainingSeconds,
             feedbackText: feedbackText,
+            feedbackByQuestion: feedbackByQuestion,
             askDifferently: askDifferently,
             instruction: instruction
         )
@@ -41,7 +43,15 @@ extension DialogManager {
 
         var result: QuestionsResponse?
 
-        func buildResponse(answers: [String: QuestionAnswer], otherSelections: [String: Bool], otherTexts: [String: String], cancelled: Bool, dismissed: Bool) -> QuestionsResponse {
+        func compactFeedback(_ drafts: [String: String]) -> [String: String]? {
+            let cleaned = drafts.compactMapValues { value -> String? in
+                let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                return trimmed.isEmpty ? nil : trimmed
+            }
+            return cleaned.isEmpty ? nil : cleaned
+        }
+
+        func buildResponse(answers: [String: QuestionAnswer], otherSelections: [String: Bool], otherTexts: [String: String], feedbackDrafts: [String: String], globalFeedback: String?, cancelled: Bool, dismissed: Bool) -> QuestionsResponse {
             var responseAnswers: [String: StringOrStrings] = [:]
             var completedCount = 0
 
@@ -79,28 +89,31 @@ extension DialogManager {
                 }
             }
 
-            return makeQuestionsResponse(answers: responseAnswers, cancelled: cancelled, dismissed: dismissed, completedCount: completedCount)
+            return makeQuestionsResponse(
+                answers: responseAnswers,
+                cancelled: cancelled,
+                dismissed: dismissed,
+                completedCount: completedCount,
+                feedbackText: globalFeedback,
+                feedbackByQuestion: compactFeedback(feedbackDrafts)
+            )
         }
 
-        let onComplete: ([String: QuestionAnswer], [String: Bool], [String: String]) -> Void = { answers, otherSelections, otherTexts in
-            result = buildResponse(answers: answers, otherSelections: otherSelections, otherTexts: otherTexts, cancelled: false, dismissed: false)
+        let onComplete: ([String: QuestionAnswer], [String: Bool], [String: String], [String: String], String?) -> Void = { answers, otherSelections, otherTexts, feedbackDrafts, globalFeedback in
+            result = buildResponse(answers: answers, otherSelections: otherSelections, otherTexts: otherTexts, feedbackDrafts: feedbackDrafts, globalFeedback: globalFeedback, cancelled: false, dismissed: false)
             NSApp.stopModal()
         }
 
-        let onCancel: () -> Void = {
-            result = self.makeQuestionsResponse(cancelled: true)
+        let onCancel: (String?, [String: String]) -> Void = { globalFeedback, feedbackDrafts in
+            let cleanedDrafts = compactFeedback(feedbackDrafts)
+            let hasNotes = globalFeedback != nil || cleanedDrafts != nil
+            result = self.makeQuestionsResponse(cancelled: !hasNotes, feedbackText: globalFeedback, feedbackByQuestion: cleanedDrafts)
             NSApp.stopModal()
         }
 
         let onSnooze: (Int) -> Void = { minutes in
             UserSettings.setSnooze(minutes: minutes)
             result = self.makeQuestionsResponse(snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, instruction: self.snoozeInstruction(minutes: minutes))
-            NSApp.stopModal()
-        }
-
-        let onFeedback: (String, [String: QuestionAnswer], [String: Bool], [String: String]) -> Void = { feedback, currentAnswers, otherSelections, otherTexts in
-            let response = buildResponse(answers: currentAnswers, otherSelections: otherSelections, otherTexts: otherTexts, cancelled: false, dismissed: false)
-            result = self.makeQuestionsResponse(answers: response.answers, completedCount: response.completedCount, feedbackText: feedback)
             NSApp.stopModal()
         }
 
@@ -111,6 +124,7 @@ extension DialogManager {
 
         let dialogTitle = request.title ?? buildTitle()
         let dialogBody = request.body
+        let position = effectivePosition(request.position)
 
         let dialogContent: AnyView
         switch request.mode {
@@ -119,10 +133,10 @@ extension DialogManager {
                 title: dialogTitle,
                 bodyText: dialogBody,
                 questions: request.questions,
+                position: position,
                 onComplete: onComplete,
                 onCancel: onCancel,
                 onSnooze: onSnooze,
-                onFeedback: onFeedback,
                 onAskDifferently: onAskDifferently
             ))
         default:
@@ -130,15 +144,14 @@ extension DialogManager {
                 title: dialogTitle,
                 bodyText: dialogBody,
                 questions: request.questions,
+                position: position,
                 onComplete: onComplete,
                 onCancel: onCancel,
                 onSnooze: onSnooze,
-                onFeedback: onFeedback,
                 onAskDifferently: onAskDifferently
             ))
         }
 
-        let position = effectivePosition(request.position)
         let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460, position: position)
 
         positionWindow(window, position: position)
@@ -156,7 +169,6 @@ extension DialogManager {
 
         let response = result ?? makeQuestionsResponse(cancelled: true, dismissed: true)
 
-        // Record to history (skip if snoozed)
         if response.snoozed != true {
             let questionSummary = request.questions.first?.question ?? "Multiple questions"
             let answerStrings = response.answers.map { key, value -> String in

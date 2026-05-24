@@ -6,6 +6,18 @@ final class QuestionFormState: ObservableObject {
     @Published var textInputs: [String: String] = [:]
     @Published var otherSelections: [String: Bool] = [:]
     @Published var otherTexts: [String: String] = [:]
+    @Published var feedbackDrafts: [String: String] = [:]
+
+    func bindingForFeedback(_ id: String) -> Binding<String> {
+        Binding(
+            get: { self.feedbackDrafts[id] ?? "" },
+            set: { self.feedbackDrafts[id] = $0 }
+        )
+    }
+
+    func hasFeedback(_ questionId: String) -> Bool {
+        !(feedbackDrafts[questionId]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+    }
 
     func answer(for question: QuestionItem) -> QuestionAnswer {
         answers[question.id] ?? .empty(for: question)

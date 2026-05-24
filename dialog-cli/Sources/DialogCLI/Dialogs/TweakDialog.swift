@@ -9,11 +9,10 @@ struct SwiftUITweakDialog: View {
     let fileRewriter: FileRewriter
     let detectedFramework: DetectedFramework?
     let position: DialogPosition
-    let onSaveToFile: ([String: Double], Bool) -> Void
-    let onTellAgent: ([String: Double], Bool) -> Void
-    let onCancel: () -> Void
+    let onSaveToFile: ([String: Double], Bool, String?) -> Void
+    let onTellAgent: ([String: Double], Bool, String?) -> Void
+    let onCancel: (String?) -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String, [String: Double]) -> Void
     let onAskDifferently: (String) -> Void
 
     @State private var values: [String: Double] = [:]
@@ -29,11 +28,10 @@ struct SwiftUITweakDialog: View {
         parameters: [TweakParameter],
         fileRewriter: FileRewriter,
         position: DialogPosition,
-        onSaveToFile: @escaping ([String: Double], Bool) -> Void,
-        onTellAgent: @escaping ([String: Double], Bool) -> Void,
-        onCancel: @escaping () -> Void,
+        onSaveToFile: @escaping ([String: Double], Bool, String?) -> Void,
+        onTellAgent: @escaping ([String: Double], Bool, String?) -> Void,
+        onCancel: @escaping (String?) -> Void,
         onSnooze: @escaping (Int) -> Void,
-        onFeedback: @escaping (String, [String: Double]) -> Void,
         onAskDifferently: @escaping (String) -> Void
     ) {
         self.bodyText = bodyText
@@ -45,7 +43,6 @@ struct SwiftUITweakDialog: View {
         self.onTellAgent = onTellAgent
         self.onCancel = onCancel
         self.onSnooze = onSnooze
-        self.onFeedback = onFeedback
         self.onAskDifferently = onAskDifferently
 
         var initial: [String: Double] = [:]
@@ -53,12 +50,18 @@ struct SwiftUITweakDialog: View {
         _values = State(initialValue: initial)
     }
 
+    private func globalDraft() -> String? {
+        let raw = DialogManager.shared.globalFeedbackBinding?.wrappedValue ?? ""
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     var body: some View {
         DialogContainer(
             bindings: DialogKeyBindings(
                 canSubmit: { true },
-                onSubmit: { if hasChanges { saveToFile() } else { onCancel() } },
-                onCancel: onCancel,
+                onSubmit: { if hasChanges { saveToFile() } else { onCancel(globalDraft()) } },
+                onCancel: { onCancel(globalDraft()) },
                 onArrowLeft: {
                     if KeyboardContext.isEditingText { return false }
                     adjustFocusedValue(by: -1)
@@ -89,8 +92,9 @@ struct SwiftUITweakDialog: View {
                 }
             ),
             currentDialogType: "tweak",
+            dialogPosition: position,
             onAskDifferently: onAskDifferently
-        ) { expandedTool in
+        ) { controller in
             VStack(spacing: 0) {
                 DialogHeader(
                     icon: "slider.horizontal.3",
@@ -107,10 +111,11 @@ struct SwiftUITweakDialog: View {
                     .clipped()
 
                 DialogToolbar(
-                    expandedTool: expandedTool,
+                    expandedTool: controller.expandedTool,
                     currentDialogType: "tweak",
+                    hasFeedback: controller.hasFeedback(.global),
                     onSnooze: onSnooze,
-                    onFeedback: { feedback in onFeedback(feedback, values) },
+                    onOpenFeedback: { controller.openFeedback(.global) },
                     onAskDifferently: onAskDifferently
                 )
 
@@ -128,7 +133,7 @@ struct SwiftUITweakDialog: View {
                             .init("Save to File", isPrimary: true, showReturnHint: true, action: saveToFile),
                         ]
                         : [
-                            .init("Cancel", isPrimary: true, showReturnHint: true, action: { onCancel() }),
+                            .init("Cancel", isPrimary: true, showReturnHint: true, action: { onCancel(globalDraft()) }),
                         ]
                 )
             }
@@ -267,13 +272,13 @@ struct SwiftUITweakDialog: View {
 
     private func saveToFile() {
         flushPendingWrites()
-        onSaveToFile(values, replayAnimations)
+        onSaveToFile(values, replayAnimations, globalDraft())
     }
 
     private func tellAgent() {
         let desiredValues = values
         cancelPendingWrites()
-        onTellAgent(desiredValues, replayAnimations)
+        onTellAgent(desiredValues, replayAnimations, globalDraft())
     }
 
     private func revertAll() {

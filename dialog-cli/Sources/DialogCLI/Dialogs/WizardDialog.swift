@@ -34,6 +34,8 @@ struct QuestionSection: View {
     @Binding var focusedIndex: Int
     @Binding var otherSelected: Bool
     @Binding var otherText: String
+    let hasFeedback: Bool
+    let onOpenFeedback: () -> Void
 
     private var selectedIndices: Set<Int> {
         if case .choices(let set) = answer { return set }
@@ -42,14 +44,18 @@ struct QuestionSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(question.question)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(Theme.Colors.textPrimary)
-                .multilineTextAlignment(.leading)
-                .lineLimit(nil)
-                .textSelection(.enabled)
-                .frame(idealWidth: 380, maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
+            HStack(alignment: .top, spacing: 8) {
+                Text(question.question)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(nil)
+                    .textSelection(.enabled)
+                    .frame(idealWidth: 380, maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                QuestionNoteAffordance(hasFeedback: hasFeedback, action: onOpenFeedback)
+            }
 
             if question.type == .text {
                 FocusableTextField(
@@ -111,16 +117,40 @@ struct QuestionSection: View {
     }
 }
 
+// MARK: - Per-question Note Affordance
+
+struct QuestionNoteAffordance: View {
+    let hasFeedback: Bool
+    let action: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: hasFeedback ? "bubble.left.fill" : "bubble.left")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(hasFeedback ? Theme.Colors.accentBlue : Theme.Colors.textMuted)
+                .frame(width: 22, height: 22)
+                .background(
+                    Circle().fill(isHovered ? Theme.Colors.cardHover : Color.clear)
+                )
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .help(hasFeedback ? "Edit note" : "Add a note for the agent")
+    }
+}
+
 // MARK: - Wizard Mode Dialog
 
 struct SwiftUIWizardDialog: View {
     let title: String
     let bodyText: String?
     let questions: [QuestionItem]
-    let onComplete: ([String: QuestionAnswer], [String: Bool], [String: String]) -> Void
-    let onCancel: () -> Void
+    let position: DialogPosition
+    let onComplete: ([String: QuestionAnswer], [String: Bool], [String: String], [String: String], String?) -> Void
+    let onCancel: (String?, [String: String]) -> Void
     let onSnooze: (Int) -> Void
-    let onFeedback: (String, [String: QuestionAnswer], [String: Bool], [String: String]) -> Void
     let onAskDifferently: (String) -> Void
 
     @State private var currentIndex = 0
@@ -136,18 +166,24 @@ struct SwiftUIWizardDialog: View {
         formState.isAnswered(currentQuestion.id)
     }
 
+    private func globalDraft() -> String? {
+        let raw = DialogManager.shared.globalFeedbackBinding?.wrappedValue ?? ""
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     var body: some View {
         DialogContainer(
             bindings: DialogKeyBindings(
                 canSubmit: { currentHasValidAnswer },
                 onSubmit: {
                     if isLast {
-                        onComplete(formState.answers, formState.otherSelections, formState.otherTexts)
+                        onComplete(formState.answers, formState.otherSelections, formState.otherTexts, formState.feedbackDrafts, globalDraft())
                     } else {
                         goNext()
                     }
                 },
-                onCancel: onCancel,
+                onCancel: { onCancel(globalDraft(), formState.feedbackDrafts) },
                 onArrowLeft: {
                     if KeyboardContext.isEditingText { return false }
                     if !isFirst { goBack() }
@@ -160,8 +196,10 @@ struct SwiftUIWizardDialog: View {
                 }
             ),
             currentDialogType: "form-wizard",
-            onAskDifferently: onAskDifferently
-        ) { expandedTool in
+            dialogPosition: position,
+            onAskDifferently: onAskDifferently,
+            feedbackBindingForQuestion: { id in formState.bindingForFeedback(id) }
+        ) { controller in
             VStack(spacing: 0) {
                 DialogHeader(
                     icon: "list.number",
@@ -170,18 +208,15 @@ struct SwiftUIWizardDialog: View {
                 )
                 .padding(.bottom, 8)
 
-                // Progress bar
                 ProgressBar(current: currentIndex + 1, total: questions.count)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
 
-                // Progress text
                 Text("\(currentIndex + 1) of \(questions.count)")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(Theme.Colors.textMuted)
                     .padding(.bottom, 16)
 
-                // Question content
                 ScrollViewReader { proxy in
                     AutoSizingScrollView {
                         QuestionSection(
@@ -190,7 +225,9 @@ struct SwiftUIWizardDialog: View {
                             textValue: formState.bindingForText(currentQuestion.id),
                             focusedIndex: $focusedOptionIndex,
                             otherSelected: formState.bindingForOtherSelected(currentQuestion.id),
-                            otherText: formState.bindingForOtherText(currentQuestion.id)
+                            otherText: formState.bindingForOtherText(currentQuestion.id),
+                            hasFeedback: formState.hasFeedback(currentQuestion.id),
+                            onOpenFeedback: { controller.openFeedback(.question(id: currentQuestion.id)) }
                         )
                         .padding(.horizontal, 20)
                         .padding(.top, 6)
@@ -206,10 +243,11 @@ struct SwiftUIWizardDialog: View {
 
                 VStack(spacing: 0) {
                     DialogToolbar(
-                        expandedTool: expandedTool,
+                        expandedTool: controller.expandedTool,
                         currentDialogType: "form-wizard",
+                        hasFeedback: controller.hasFeedback(.global),
                         onSnooze: onSnooze,
-                        onFeedback: { feedback in onFeedback(feedback, formState.answers, formState.otherSelections, formState.otherTexts) },
+                        onOpenFeedback: { controller.openFeedback(.global) },
                         onAskDifferently: onAskDifferently
                     )
 
@@ -221,11 +259,11 @@ struct SwiftUIWizardDialog: View {
                         ] + KeyboardHint.toolbarHints,
                         buttons: [
                             isFirst
-                                ? .init("Cancel", action: onCancel)
+                                ? .init("Cancel", action: { onCancel(globalDraft(), formState.feedbackDrafts) })
                                 : .init("Back", action: goBack),
                             isLast
                                 ? .init("Done", isPrimary: true, isDisabled: !currentHasValidAnswer, showReturnHint: true, action: {
-                                    onComplete(formState.answers, formState.otherSelections, formState.otherTexts)
+                                    onComplete(formState.answers, formState.otherSelections, formState.otherTexts, formState.feedbackDrafts, globalDraft())
                                 })
                                 : .init("Next", isPrimary: true, isDisabled: !currentHasValidAnswer, showReturnHint: true, action: goNext),
                         ]
@@ -233,6 +271,14 @@ struct SwiftUIWizardDialog: View {
                 }
                 .background(Theme.Colors.windowBackground)
             }
+        }
+        .onAppear {
+            DialogManager.shared.questionLabelLookup = { id in
+                questions.first(where: { $0.id == id })?.question
+            }
+        }
+        .onDisappear {
+            DialogManager.shared.questionLabelLookup = nil
         }
         .onChange(of: currentIndex) { _ in
             focusedOptionIndex = 0
@@ -251,3 +297,4 @@ struct SwiftUIWizardDialog: View {
         currentIndex -= 1
     }
 }
+

@@ -23,8 +23,11 @@ enum DialogKeyRouter {
         currentDialogType: String,
         onAskDifferently: ((String) -> Void)?,
         expandedTool: Binding<DialogToolbar.ToolbarTool?>,
+        isFeedbackPaneOpen: @escaping () -> Bool,
         showReportOverlay: Binding<Bool>,
-        toggleTool: @escaping (DialogToolbar.ToolbarTool) -> Void,
+        toggleSnooze: @escaping () -> Void,
+        openFeedback: @escaping () -> Void,
+        closePane: @escaping () -> Void,
         dismissOverlay: @escaping () -> Void
     ) -> KeyboardNavigationMonitor {
         KeyboardNavigationMonitor { keyCode, modifiers in
@@ -33,14 +36,18 @@ enum DialogKeyRouter {
                 return true
             }
 
-            // 2. Escape: report overlay → expanded toolbar → dialog cancel.
+            // 2. Escape: report overlay → feedback pane → snooze panel → cancel.
             if keyCode == KeyCode.escape {
                 if showReportOverlay.wrappedValue {
                     dismissOverlay()
                     return true
                 }
-                if let tool = expandedTool.wrappedValue {
-                    toggleTool(tool)
+                if isFeedbackPaneOpen() {
+                    closePane()
+                    return true
+                }
+                if expandedTool.wrappedValue == .snooze {
+                    toggleSnooze()
                     return true
                 }
                 bindings.onCancel()
@@ -62,9 +69,6 @@ enum DialogKeyRouter {
                 && keyCode != KeyCode.returnKey
                 && keyCode != KeyCode.tab
                 && !modifiers.contains(.command) {
-                // Arrow keys are still routed to dialog-specific handlers
-                // (e.g. tweak's value adjustment) below; everything else
-                // falls through to AppKit.
                 if !isArrow(keyCode) {
                     return false
                 }
@@ -73,11 +77,11 @@ enum DialogKeyRouter {
             // 4. Character hotkeys (only when not editing text).
             if !editingText {
                 if keyCode == KeyCode.s && expandedTool.wrappedValue != .snooze {
-                    toggleTool(.snooze)
+                    toggleSnooze()
                     return true
                 }
-                if keyCode == KeyCode.f && expandedTool.wrappedValue != .feedback {
-                    toggleTool(.feedback)
+                if keyCode == KeyCode.f && !isFeedbackPaneOpen() {
+                    openFeedback()
                     return true
                 }
                 if keyCode == KeyCode.a && onAskDifferently != nil {
@@ -88,10 +92,10 @@ enum DialogKeyRouter {
                 }
             }
 
-            // 5. Return: feedback toolbar gets to insert newlines; otherwise
+            // 5. Return: feedback pane editor gets to insert newlines; otherwise
             //    submit if the dialog is in a submittable state.
             if keyCode == KeyCode.returnKey {
-                if expandedTool.wrappedValue == .feedback {
+                if isFeedbackPaneOpen() && editingText {
                     return false
                 }
                 if bindings.canSubmit() {

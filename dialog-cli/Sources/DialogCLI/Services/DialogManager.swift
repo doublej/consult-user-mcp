@@ -10,6 +10,13 @@ class DialogManager {
     var sizeObserver: WindowSizeObserver?
     var currentCommand: String?
     var currentCallJSON: String?
+    /// Resolves a question id to its display label so the FeedbackPane header
+    /// can show what the note belongs to. Set per-dialog by form dialogs.
+    var questionLabelLookup: ((String) -> String?)?
+    /// Live binding to the consult-level (.global) feedback draft owned by
+    /// the current `DialogContainer`. Single-question dialogs use this to
+    /// retrieve the draft on submit; forms read it for the consult-level note.
+    var globalFeedbackBinding: Binding<String>?
 
     func setClientName(_ name: String) {
         clientName = name

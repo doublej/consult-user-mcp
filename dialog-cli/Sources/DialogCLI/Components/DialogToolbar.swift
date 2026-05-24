@@ -25,41 +25,40 @@ enum SnoozeDuration: Int, CaseIterable {
 
 struct DialogToolbar: View {
     @Binding var expandedTool: ToolbarTool?
-    @State private var feedbackText: String = ""
     let currentDialogType: String
+    let hasFeedback: Bool
     let onSnooze: (Int) -> Void
-    let onFeedback: (String) -> Void
+    let onOpenFeedback: () -> Void
     let onAskDifferently: (String) -> Void
 
+    /// Only snooze still uses the inline-expansion toolbar pattern. Feedback
+    /// now opens the slide-out pane via `onOpenFeedback`.
     enum ToolbarTool {
         case snooze
-        case feedback
     }
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
 
     var body: some View {
         VStack(spacing: 0) {
-            // Expanded content
-            if let tool = expandedTool {
-                expandedContent(for: tool)
+            if expandedTool == .snooze {
+                snoozePanel
                     .transition(reduceMotion ? .identity : .opacity.combined(with: .move(edge: .bottom)))
             }
 
-            // Collapsed toolbar buttons
             HStack(spacing: 12) {
                 ToolbarButton(
                     icon: "clock.arrow.circlepath",
                     label: "Snooze",
                     isActive: expandedTool == .snooze,
-                    action: { toggleTool(.snooze) }
+                    action: { toggleSnooze() }
                 )
 
                 ToolbarButton(
-                    icon: "bubble.left",
+                    icon: hasFeedback ? "bubble.left.fill" : "bubble.left",
                     label: "Feedback",
-                    isActive: expandedTool == .feedback,
-                    action: { toggleTool(.feedback) }
+                    isActive: hasFeedback,
+                    action: onOpenFeedback
                 )
 
                 AskDifferentlyButton(
@@ -73,33 +72,18 @@ struct DialogToolbar: View {
             .padding(.vertical, 8)
         }
         .background(Theme.Colors.cardBackground)
-        .onChange(of: expandedTool) { newTool in
+        .onChange(of: expandedTool) { _ in
             NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
-            if newTool == .feedback {
-                DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Timing.focusAfterExpand) {
-                    FocusManager.shared.focusLast()
-                }
-            }
         }
     }
 
-    private func toggleTool(_ tool: ToolbarTool) {
+    private func toggleSnooze() {
         if reduceMotion {
-            expandedTool = expandedTool == tool ? nil : tool
+            expandedTool = expandedTool == .snooze ? nil : .snooze
         } else {
             withAnimation(.easeOut(duration: Theme.Animation.overlay)) {
-                expandedTool = expandedTool == tool ? nil : tool
+                expandedTool = expandedTool == .snooze ? nil : .snooze
             }
-        }
-    }
-
-    @ViewBuilder
-    private func expandedContent(for tool: ToolbarTool) -> some View {
-        switch tool {
-        case .snooze:
-            snoozePanel
-        case .feedback:
-            feedbackPanel
         }
     }
 
@@ -119,39 +103,6 @@ struct DialogToolbar: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-    }
-
-    private var feedbackPanel: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Send feedback to agent:")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Theme.Colors.textSecondary)
-
-            HStack(spacing: 8) {
-                FocusableTextField(
-                    placeholder: "Type your feedback...",
-                    text: $feedbackText,
-                    onSubmit: { submitFeedback() }
-                )
-                .frame(height: 40)
-
-                FocusableButton(
-                    title: "Send",
-                    isPrimary: true,
-                    isDisabled: feedbackText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-                    action: { submitFeedback() }
-                )
-                .frame(width: 70, height: 40)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-    }
-
-    private func submitFeedback() {
-        let trimmed = feedbackText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        onFeedback(trimmed)
     }
 }
 

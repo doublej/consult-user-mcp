@@ -12,27 +12,25 @@ extension DialogManager {
         NSApp.setActivationPolicy(.accessory)
 
         var result: TextInputResponse?
+        let position = effectivePosition(request.position)
 
         let swiftUIDialog = SwiftUITextInputDialog(
             title: request.title,
             bodyText: request.body,
             isHidden: request.hidden,
             defaultValue: request.defaultValue,
-            onSubmit: { text in
-                result = TextInputResponse(dialogType: "textInput", answer: text, cancelled: false, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+            position: position,
+            onSubmit: { text, feedback in
+                result = TextInputResponse(dialogType: "textInput", answer: text, cancelled: false, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
                 NSApp.stopModal()
             },
-            onCancel: {
-                result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
+            onCancel: { feedback in
+                result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: feedback == nil, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
                 NSApp.stopModal()
             },
             onSnooze: { minutes in
                 UserSettings.setSnooze(minutes: minutes)
                 result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: false, dismissed: false, comment: nil, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, askDifferently: nil, instruction: self.snoozeInstruction(minutes: minutes))
-                NSApp.stopModal()
-            },
-            onFeedback: { feedback, currentText in
-                result = TextInputResponse(dialogType: "textInput", answer: currentText.isEmpty ? nil : currentText, cancelled: false, dismissed: false, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: feedback, askDifferently: nil, instruction: nil)
                 NSApp.stopModal()
             },
             onAskDifferently: { type in
@@ -41,7 +39,6 @@ extension DialogManager {
             }
         )
 
-        let position = effectivePosition(request.position)
         let (window, _, _) = createAutoSizedWindow(content: swiftUIDialog, position: position)
 
         positionWindow(window, position: position)
@@ -59,7 +56,6 @@ extension DialogManager {
 
         let response = result ?? TextInputResponse(dialogType: "textInput", answer: nil, cancelled: true, dismissed: true, comment: nil, snoozed: nil, snoozeMinutes: nil, remainingSeconds: nil, feedbackText: nil, askDifferently: nil, instruction: nil)
 
-        // Record to history (skip if snoozed)
         if response.snoozed != true {
             let entry = HistoryEntry(
                 id: UUID(),

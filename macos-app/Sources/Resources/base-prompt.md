@@ -1,4 +1,4 @@
-<!-- version: 2.12.1 -->
+<!-- version: 2.13.0 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
@@ -122,8 +122,18 @@ if (!window.__tweakReplayConnected) {
 |-------|-------|-----------------|
 | Snoozed | `{"snoozed": true, "remainingSeconds": N}` | Run `sleep N` via Bash, then retry the **exact** same question. Do NOT proceed or ask something else. |
 | Ask differently | `{"askDifferently": "<type>"}` | Re-ask the **same question** as the requested type. Do NOT skip or change topic. |
-| Feedback | `{"feedbackText": "..."}` | Read feedback and adjust. If it asks for context, provide it. If it says "cancel"/"skip", use a reasonable default. |
 | Cancelled | `{"cancelled": true}` | Proceed with a reasonable default. |
+
+### Feedback annotations (travel alongside the answer)
+
+Feedback is now an annotation, **not** a redirect. The user types it in a slide-out pane next to the dialog. It arrives **together with the answer** — you should accept the answer and incorporate the note as additional context. Do not re-ask just because a note was attached.
+
+Two shapes can appear:
+
+- `{"feedbackText": "..."}` — consult-level note (any dialog type). On forms this is the "general note" channel.
+- `{"feedbackByQuestion": {"<questionId>": "..."}}` — per-question notes (forms only). Each entry annotates the corresponding answer.
+
+Both can appear alongside `answer`/`completedCount`. If the user cancelled but left a note, the response carries the note (no `cancelled: true`). Treat that as "user redirected — read the note, adjust, then continue."
 
 ### askDifferently type mapping
 

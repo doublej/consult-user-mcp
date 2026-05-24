@@ -1,0 +1,38 @@
+{
+  "body": "Open the slide-out pane via the bubble next to each question to leave per-question notes.",
+  "title": "Per-question Feedback",
+  "questions": [
+    {
+      "id": "stack",
+      "question": "Pick the backend stack:",
+      "type": "choice",
+      "options": [
+        {"label": "Node + Fastify", "description": "TS, ESM, lean"},
+        {"label": "Python + FastAPI", "description": "Pydantic-driven"},
+        {"label": "Go + Gin", "description": "Compiled, lightweight"}
+      ],
+      "multiSelect": false
+    },
+    {
+      "id": "db",
+      "question": "Pick the database:",
+      "type": "choice",
+      "options": [
+        {"label": "PostgreSQL", "description": "Relational"},
+        {"label": "SQLite", "description": "Embedded"}
+      ],
+      "multiSelect": false
+    },
+    {
+      "id": "cache",
+      "question": "Cache layer (optional):",
+      "type": "text",
+      "options": [],
+      "multiSelect": false,
+      "placeholder": "e.g. Redis, Memcached, none"
+    }
+  ],
+  "mode": "wizard",
+  "position": "left",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

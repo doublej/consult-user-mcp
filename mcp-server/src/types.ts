@@ -143,6 +143,7 @@ export interface QuestionsResult {
   snoozeMinutes?: number;
   remainingSeconds?: number;
   feedbackText?: string;
+  feedbackByQuestion?: Record<string, string>;
   askDifferently?: string;
   instruction?: string;
 }

@@ -22,6 +22,11 @@ function formatAnswer(answer: unknown, completedCount?: number): string {
   return `The user responded: ${String(answer)}`;
 }
 
+function formatFeedbackByQuestion(map: Record<string, string>): string {
+  const parts = Object.entries(map).map(([k, v]) => `${k}: "${v}"`);
+  return `Notes by question: ${parts.join(", ")}.`;
+}
+
 /**
  * Central gateway that converts compact responses into plain-text.
  * Every response becomes a human-readable string — no JSON for the LLM to parse.
@@ -37,13 +42,25 @@ export function humanize(compact: Record<string, unknown>): string {
     return `The user wants this question re-asked as ${desc}.`;
   }
 
-  if (compact.feedbackText) {
-    return `The user gave feedback: "${compact.feedbackText}". Adjust your approach, then re-ask.`;
-  }
+  const segments: string[] = [];
 
   if (compact.cancelled) {
+    segments.push("The user cancelled. Proceed with a reasonable default.");
+  } else if (compact.answer !== undefined) {
+    segments.push(formatAnswer(compact.answer, compact.completedCount as number | undefined));
+  }
+
+  if (compact.feedbackText) {
+    segments.push(`The user added a note: "${compact.feedbackText}".`);
+  }
+
+  if (compact.feedbackByQuestion) {
+    segments.push(formatFeedbackByQuestion(compact.feedbackByQuestion as Record<string, string>));
+  }
+
+  if (segments.length === 0) {
     return "The user cancelled. Proceed with a reasonable default.";
   }
 
-  return formatAnswer(compact.answer, compact.completedCount as number | undefined);
+  return segments.join(" ");
 }

@@ -25,15 +25,31 @@ export function compactResponse(type: AskType, raw: unknown): Record<string, unk
   // Ask differently takes priority over feedback/normal/cancelled
   if (r.askDifferently) return { askDifferently: r.askDifferently };
 
-  // Feedback — accumulate (don't early-return) so partial answers are included
+  // Feedback — accumulate (don't early-return) so the answer is included
   if (r.feedbackText) out.feedbackText = r.feedbackText;
 
-  // Cancelled/dismissed (skip when feedback — user gave input, not a cancel)
-  if (!r.feedbackText && (r.cancelled || r.dismissed)) out.cancelled = true;
+  // Per-question feedback (forms only)
+  let feedbackByQuestion: Record<string, string> | undefined;
+  if (type === "form") {
+    const f = r as QuestionsResult;
+    if (f.feedbackByQuestion && Object.keys(f.feedbackByQuestion).length > 0) {
+      feedbackByQuestion = f.feedbackByQuestion;
+      out.feedbackByQuestion = feedbackByQuestion;
+    }
+  }
+
+  // Cancelled/dismissed — only when there's no feedback (notes mean the
+  // user gave input, not a pure cancel).
+  const hasFeedback = !!r.feedbackText || !!feedbackByQuestion;
+  if (!hasFeedback && (r.cancelled || r.dismissed)) out.cancelled = true;
 
   // Type-specific answer extraction
   if (type === "confirm") {
-    if (!out.cancelled && !out.feedbackText) out.answer = (r as ConfirmResult).confirmed;
+    // Surface the boolean answer whenever the user actually clicked confirm/
+    // cancel (i.e. answer label was recorded). On a cancel-with-note path the
+    // dialog clears `answer` and we stay quiet.
+    const c = r as ConfirmResult;
+    if (!out.cancelled && c.answer != null) out.answer = c.confirmed;
   } else if (type === "form") {
     const f = r as QuestionsResult;
     if (f.answers && Object.keys(f.answers).length > 0) out.answer = f.answers;

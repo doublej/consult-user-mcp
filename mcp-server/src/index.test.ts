@@ -228,7 +228,16 @@ describe("compactResponse", () => {
     expect(r).toEqual({ snoozed: true, remainingSeconds: 300 });
   });
 
-  test("confirm: feedback (no partial answer)", () => {
+  test("confirm: feedback travels with confirmed answer", () => {
+    const r = compactResponse("confirm", {
+      dialogType: "confirm", confirmed: true, cancelled: false,
+      dismissed: false, answer: "Yes", comment: null,
+      feedbackText: "fyi this matters because X",
+    });
+    expect(r).toEqual({ feedbackText: "fyi this matters because X", answer: true });
+  });
+
+  test("confirm: feedback on cancel-with-note keeps cancel hidden", () => {
     const r = compactResponse("confirm", {
       dialogType: "confirm", confirmed: false, cancelled: false,
       dismissed: false, answer: null, comment: null,
@@ -262,6 +271,43 @@ describe("compactResponse", () => {
       feedbackText: "Need more options",
     });
     expect(r).toEqual({ feedbackText: "Need more options", answer: { lang: "TypeScript" }, completedCount: 1 });
+  });
+
+  test("form: per-question feedback included alongside answers", () => {
+    const r = compactResponse("form", {
+      dialogType: "questions", answers: { q1: "TypeScript", q2: "Vitest" },
+      cancelled: false, dismissed: false, completedCount: 2,
+      feedbackByQuestion: { q1: "TS preferred over JS for type-safety", q2: "" },
+    });
+    expect(r).toEqual({
+      answer: { q1: "TypeScript", q2: "Vitest" },
+      completedCount: 2,
+      feedbackByQuestion: { q1: "TS preferred over JS for type-safety", q2: "" },
+    });
+  });
+
+  test("form: per-question + global feedback both surface", () => {
+    const r = compactResponse("form", {
+      dialogType: "questions", answers: { q1: "PostgreSQL" },
+      cancelled: false, dismissed: false, completedCount: 1,
+      feedbackText: "Overall pick the simplest stack",
+      feedbackByQuestion: { q1: "open to MySQL too" },
+    });
+    expect(r).toEqual({
+      feedbackText: "Overall pick the simplest stack",
+      feedbackByQuestion: { q1: "open to MySQL too" },
+      answer: { q1: "PostgreSQL" },
+      completedCount: 1,
+    });
+  });
+
+  test("form: per-question feedback on cancel keeps cancel hidden", () => {
+    const r = compactResponse("form", {
+      dialogType: "questions", answers: {},
+      cancelled: true, dismissed: false, completedCount: 0,
+      feedbackByQuestion: { q1: "skip this one" },
+    });
+    expect(r).toEqual({ feedbackByQuestion: { q1: "skip this one" } });
   });
 
   test("tweak: feedback with values", () => {
@@ -427,9 +473,22 @@ describe("humanize", () => {
       .toBe("The user wants this question re-asked as future-type.");
   });
 
-  test("feedbackText → plain text with feedback", () => {
+  test("feedbackText alone → cancellation + note", () => {
     expect(humanize({ feedbackText: "be more specific" }))
-      .toBe('The user gave feedback: "be more specific". Adjust your approach, then re-ask.');
+      .toBe('The user added a note: "be more specific".');
+  });
+
+  test("feedbackText alongside answer → answer then note", () => {
+    expect(humanize({ answer: "PostgreSQL", feedbackText: "open to MySQL too" }))
+      .toBe('The user responded: PostgreSQL The user added a note: "open to MySQL too".');
+  });
+
+  test("feedbackByQuestion (forms) renders per-question notes", () => {
+    expect(humanize({
+      answer: { q1: "TS", q2: "Vitest" },
+      completedCount: 2,
+      feedbackByQuestion: { q1: "type-safety matters" },
+    })).toBe('The user answered: q1: TS, q2: Vitest (2/2 completed) Notes by question: q1: "type-safety matters".');
   });
 
   test("cancelled → plain text", () => {

@@ -1,0 +1,9 @@
+{
+  "body": "Dialog is anchored left → pane should slide in from the right.",
+  "title": "Pane Edge Test (Left)",
+  "confirmLabel": "Apply",
+  "cancelLabel": "Cancel",
+  "position": "left",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "feedback"
+}

@@ -73,7 +73,7 @@ function loadBasePrompt(): string | undefined {
   const here = dirname(fileURLToPath(import.meta.url)); // .../mcp-server/dist
   const candidates = [
     join(here, "..", "..", "macos-app", "Sources", "Resources", "base-prompt.md"), // dev/repo
-    join(here, "..", "..", "..", "base-prompt.md"),                                 // app bundle Resources/
+    join(here, "..", "..", "base-prompt.md"),                                       // app bundle Resources/ (.../mcp-server/dist -> Resources/)
   ];
   const path = candidates.find(existsSync);
   return path ? readFileSync(path, "utf8") : undefined;

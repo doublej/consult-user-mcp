@@ -28,6 +28,8 @@ if [ -d "$APP_PATH" ]; then
     mkdir -p "$APP_PATH/Contents/Resources/sketch-cli"
     cp "$ROOT/sketch-cli/.build/debug/SketchCLI" "$APP_PATH/Contents/Resources/sketch-cli/sketch-cli"
     cp -r "$ROOT/mcp-server/dist/"* "$APP_PATH/Contents/Resources/mcp-server/dist/"
+    # Refresh base-prompt.md so the server emits current MCP `instructions` (single source of truth)
+    cp "$ROOT/macos-app/Sources/Resources/base-prompt.md" "$APP_PATH/Contents/Resources/base-prompt.md"
     echo "Done. Restart the app to pick up changes."
 else
     echo "App not found at $APP_PATH — run 'bun run build:bundle' first to create it."

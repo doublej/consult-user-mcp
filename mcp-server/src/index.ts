@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { resolve, join } from "path";
-import { writeFileSync, mkdirSync } from "fs";
+import { resolve, join, dirname } from "path";
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from "fs";
+import { fileURLToPath } from "url";
 import { tmpdir } from "os";
 import { z } from "zod";
 import { resolveCSS } from "./css-resolver.js";
@@ -64,7 +65,24 @@ function tracked<T>(promise: Promise<T>, extra: Parameters<typeof withHeartbeat>
   return withHeartbeat(withTimeout(promise, DIALOG_TIMEOUT_MS), extra);
 }
 
-const server = new McpServer({ name: "consult-user-mcp-server", version: "1.0.0" });
+// Load the base prompt (usage instructions for ask/notify/tweak) so it can be
+// exposed via the MCP protocol `instructions` field. Single source of truth is
+// macos-app/Sources/Resources/base-prompt.md; the app bundle copies it to
+// Contents/Resources/base-prompt.md. Search both layouts; omit if not found.
+function loadBasePrompt(): string | undefined {
+  const here = dirname(fileURLToPath(import.meta.url)); // .../mcp-server/dist
+  const candidates = [
+    join(here, "..", "..", "macos-app", "Sources", "Resources", "base-prompt.md"), // dev/repo
+    join(here, "..", "..", "..", "base-prompt.md"),                                 // app bundle Resources/
+  ];
+  const path = candidates.find(existsSync);
+  return path ? readFileSync(path, "utf8") : undefined;
+}
+
+const server = new McpServer(
+  { name: "consult-user-mcp-server", version: "1.0.0" },
+  { instructions: loadBasePrompt() },
+);
 function createProvider(): DialogProvider {
   if (process.platform === "win32") return new WindowsDialogProvider();
   return new SwiftDialogProvider();

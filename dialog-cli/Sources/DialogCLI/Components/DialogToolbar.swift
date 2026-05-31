@@ -57,7 +57,7 @@ struct DialogToolbar: View {
                 ToolbarButton(
                     icon: hasFeedback ? "bubble.left.fill" : "bubble.left",
                     label: "Feedback",
-                    isActive: hasFeedback,
+                    isActive: false,
                     action: onOpenFeedback
                 )
 

@@ -210,17 +210,18 @@ struct FeedbackPane: View {
             Spacer()
 
             Button(action: onClose) {
-                Text("Done")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 16)
+                Text("Close")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(Theme.Colors.textSecondary)
+                    .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(Theme.Colors.accentBlue)
+                            .strokeBorder(Theme.Colors.border, lineWidth: 1)
                     )
             }
             .buttonStyle(.plain)
+            .help("Close pane (note is preserved)")
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

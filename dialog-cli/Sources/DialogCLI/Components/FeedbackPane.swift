@@ -91,6 +91,7 @@ struct FeedbackPane: View {
             editorSection
             footer
         }
+        .frame(minWidth: 300, idealWidth: 360, maxWidth: 420)
         .background(Theme.Colors.cardBackground)
         .overlay(
             Rectangle()

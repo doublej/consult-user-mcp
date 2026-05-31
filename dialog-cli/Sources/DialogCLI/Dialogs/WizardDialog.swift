@@ -125,14 +125,28 @@ struct QuestionNoteAffordance: View {
 
     @State private var isHovered = false
 
+    private var backgroundOpacity: Double {
+        if hasFeedback { return 0.18 }
+        if isHovered { return 0.15 }
+        return 0.06
+    }
+
+    private var backgroundColor: Color {
+        hasFeedback ? Theme.Colors.accentBlue : Theme.Colors.textMuted
+    }
+
     var body: some View {
         Button(action: action) {
-            Image(systemName: hasFeedback ? "bubble.left.fill" : "bubble.left")
-                .font(.system(size: 11, weight: .medium))
+            Image(systemName: "bubble.left.fill")
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(hasFeedback ? Theme.Colors.accentBlue : Theme.Colors.textMuted)
-                .frame(width: 22, height: 22)
+                .frame(width: 28, height: 28)
                 .background(
-                    Circle().fill(isHovered ? Theme.Colors.cardHover : Color.clear)
+                    Circle().fill(backgroundColor.opacity(backgroundOpacity))
+                )
+                .overlay(
+                    Circle()
+                        .strokeBorder(Theme.Colors.accentBlue.opacity(hasFeedback ? 0.9 : 0), lineWidth: 1)
                 )
         }
         .buttonStyle(.plain)

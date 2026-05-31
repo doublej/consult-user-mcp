@@ -507,8 +507,10 @@ struct DialogContainer<Content: View>: View {
     }
 
     /// Edge the feedback pane should slide in from. `.left` dialog → pane on
-    /// the right; `.right` dialog → pane on the left; `.center` → default
-    /// trailing unless the dialog is closer to the right edge of the screen.
+    /// the right; `.right` dialog → pane on the left; `.center` → compare
+    /// the dialog window's mid-X to the screen mid-X and slide the pane
+    /// toward whichever side has more room. If no window/screen is
+    /// available yet (first layout pass), default to `.trailing`.
     private var paneEdge: Edge {
         switch dialogPosition {
         case .left:
@@ -517,8 +519,10 @@ struct DialogContainer<Content: View>: View {
             return .leading
         case .center:
             guard let screen = NSScreen.main else { return .trailing }
+            let window = NSApp.modalWindow ?? NSApp.keyWindow
+            guard let frame = window?.frame else { return .trailing }
             let screenMid = screen.visibleFrame.midX
-            return screenMid > screen.visibleFrame.midX ? .leading : .trailing
+            return frame.midX > screenMid ? .leading : .trailing
         }
     }
 

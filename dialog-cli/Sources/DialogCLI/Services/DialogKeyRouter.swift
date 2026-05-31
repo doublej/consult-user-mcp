@@ -62,6 +62,16 @@ enum DialogKeyRouter {
 
             let editingText = KeyboardContext.isEditingText
 
+            // 3a. ⌘F opens the feedback pane regardless of first-responder
+            //     context — text-input dialogs need a chord because the
+            //     plain-`f` hotkey reaches the field.
+            if keyCode == KeyCode.f
+                && modifiers.contains(.command)
+                && !isFeedbackPaneOpen() {
+                openFeedback()
+                return true
+            }
+
             // 3. While editing text only Return / Tab and ⌘-shortcuts reach
             //    the rest of the pipeline; plain character hotkeys must go
             //    to the field.

@@ -94,12 +94,14 @@ Repo: `C:\Users\jurre\PycharmProjects\consult-user-mcp`. Commands run via `cmd.e
 
 ## Baseprompt Versioning
 
-The base prompt has an independent version number.
+The base prompt has an independent version number embedded at runtime
+in the `<consult-user-mcp-baseprompt version="X.Y.Z">` envelope.
 
-- **Location:** `macos-app/Sources/Resources/base-prompt.md` (first line: `<!-- version: X.Y.Z -->`)
-- **Current:** v2.12.0
-- **Validate:** `bash scripts/validate-baseprompt-version.sh` (also runs in CI)
-- **Bump:** Major = breaking tool/workflow changes, Minor = new features/guidance, Patch = fixes/typos
+- **Source:** `macos-app/Sources/Resources/base-prompt.md` (first line: `<!-- version: X.Y.Z -->`)
+- **Bundled (live) copy:** `/Applications/Consult User MCP.app/Contents/Resources/base-prompt.md` — refreshed by `bun run dev`
+- **Loaded by Claude Code:** `~/.claude/CLAUDE.md` `@`-imports the bundled copy directly. Do not embed the guide content inline in any `CLAUDE.md`.
+- **Validate:** `bash scripts/validate-baseprompt-version.sh` — checks the `@`-import line is still present in `~/.claude/CLAUDE.md`.
+- **Bump:** Major = breaking tool/workflow changes, Minor = new features/guidance, Patch = fixes/typos. Update the version comment in the source file; `bun run dev` propagates it to the bundle.
 
 ## Windows Project Structure
 

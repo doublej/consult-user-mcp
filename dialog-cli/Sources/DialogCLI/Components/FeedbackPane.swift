@@ -29,7 +29,10 @@ struct FeedbackSubject {
     }
 
     let kind: Kind
-    let text: String
+    /// Optional reminder text shown in the subject card. `nil`/empty hides
+    /// the card entirely — used by single-question dialogs (body already on
+    /// screen) and forms without a `body` field.
+    let text: String?
 
     var caption: String {
         switch kind {
@@ -61,14 +64,33 @@ struct FeedbackPane: View {
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
 
+    /// Single-question dialogs (`.dialog`) already render the prompt
+    /// directly above the dialog body, so the subject card would just
+    /// duplicate the text. Forms (`.form`) only show the card when the
+    /// dialog passed an explicit body; falling back to the app title was
+    /// gibberish ("Note on this form: MCP"). Per-question subjects always
+    /// show — they narrow a multi-question form to one prompt.
+    private var shouldShowSubjectCard: Bool {
+        switch subject.kind {
+        case .dialog:
+            return false
+        case .form:
+            guard let text = subject.text else { return false }
+            return !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case .question:
+            return true
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             header
-            subjectCard
+            if shouldShowSubjectCard {
+                subjectCard
+            }
             editorSection
             footer
         }
-        .frame(width: 340)
         .background(Theme.Colors.cardBackground)
         .overlay(
             Rectangle()
@@ -110,34 +132,41 @@ struct FeedbackPane: View {
         .padding(.bottom, 10)
     }
 
+    @ViewBuilder
     private var subjectCard: some View {
-        HStack(alignment: .top, spacing: 10) {
-            RoundedRectangle(cornerRadius: 2)
-                .fill(Theme.Colors.accentBlue)
-                .frame(width: 3)
+        if let raw = subject.text {
+            HStack(alignment: .top, spacing: 10) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Theme.Colors.accentBlue)
+                    .frame(width: 3)
 
-            Text(subject.text)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Theme.Colors.textPrimary)
-                .textSelection(.enabled)
-                .multilineTextAlignment(.leading)
-                .lineLimit(4)
-                .truncationMode(.tail)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(AttributedString(MarkdownParser.parse(
+                    raw,
+                    fontSize: 14,
+                    color: NSColor(Theme.Colors.textPrimary),
+                    alignment: .left
+                )))
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(Theme.Colors.textPrimary)
+                    .textSelection(.enabled)
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(3)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: .infinity, maxHeight: 80, alignment: .topLeading)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Theme.Colors.accentBlue.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .strokeBorder(Theme.Colors.accentBlue.opacity(0.25), lineWidth: 1)
+                    )
+            )
+            .padding(.horizontal, 16)
+            .padding(.bottom, 10)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Theme.Colors.accentBlue.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(Theme.Colors.accentBlue.opacity(0.25), lineWidth: 1)
-                )
-        )
-        .padding(.horizontal, 16)
-        .padding(.bottom, 10)
     }
 
     private var editorSection: some View {

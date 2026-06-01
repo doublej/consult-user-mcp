@@ -99,8 +99,9 @@ in the `<consult-user-mcp-baseprompt version="X.Y.Z">` envelope.
 
 - **Source:** `macos-app/Sources/Resources/base-prompt.md` (first line: `<!-- version: X.Y.Z -->`)
 - **Bundled (live) copy:** `/Applications/Consult User MCP.app/Contents/Resources/base-prompt.md` — refreshed by `bun run dev`
-- **Loaded by Claude Code:** `~/.claude/CLAUDE.md` `@`-imports the bundled copy directly. Do not embed the guide content inline in any `CLAUDE.md`.
-- **Validate:** `bash scripts/validate-baseprompt-version.sh` — checks the `@`-import line is still present in `~/.claude/CLAUDE.md`.
+- **Delivery:** The MCP server reads the bundled file and exposes it via the protocol's `instructions` field (`mcp-server/src/index.ts:loadBasePrompt`). Claude Code receives it per-session on connect — never inlined into any `CLAUDE.md`.
+- **Global pointer:** `~/.claude/CLAUDE.md` only records the path as an HTML-comment marker (no `@`-import — that would expand the file inline and double the prompt).
+- **Validate:** `bash scripts/validate-baseprompt-version.sh` — confirms the marker exists in `~/.claude/CLAUDE.md` AND that no `@`-import is hiding there.
 - **Bump:** Major = breaking tool/workflow changes, Minor = new features/guidance, Patch = fixes/typos. Update the version comment in the source file; `bun run dev` propagates it to the bundle.
 
 ## Windows Project Structure

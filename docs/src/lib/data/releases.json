@@ -3,6 +3,20 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.4.0",
+      "platform": "macos",
+      "date": "2026-07-07",
+      "highlight": "Per-question feedback pane for steering the agent",
+      "changes": [
+        { "text": "Slide out a feedback pane on any dialog to leave a targeted note on a specific question — or the whole prompt — so the agent knows exactly how to adjust", "type": "added", "scope": "cli", "pane": "form", "featured": true, "starred": true },
+        { "text": "Feedback notes render markdown and show the question you're responding to right in the header", "type": "added", "scope": "cli", "pane": "form", "featured": true },
+        { "text": "Press ⌘F to open the feedback pane, including on text-input and password dialogs", "type": "added", "scope": "cli", "pane": "text" },
+        { "text": "Tall forms and pick lists no longer get stuck endlessly resizing between two layouts", "type": "fixed", "scope": "cli", "pane": "form", "featured": true },
+        { "text": "The base prompt is now delivered to the agent automatically each session through the MCP server, instead of being copied into your global CLAUDE.md", "type": "changed", "scope": "server", "pane": "general" },
+        { "text": "Updated baseprompt to v2.13.0 with per-question feedback guidance", "type": "changed", "scope": "server", "pane": "general" }
+      ]
+    },
+    {
       "version": "2.3.0",
       "platform": "macos",
       "date": "2026-05-21",

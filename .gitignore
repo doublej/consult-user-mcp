@@ -55,6 +55,8 @@ test-cases/screenshots/
 .beads/
 CLAUDE.md
 INVESTIGATION_*.md
+*_PLAN.md
+BRIEFING.md
 
 # Confidential / local-only
 local/

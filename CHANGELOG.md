@@ -7,6 +7,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.4.0] (macOS) - 2026-07-07
+
+### Added
+- Slide out a feedback pane on any dialog to leave a targeted note on a specific question — or the whole prompt — so the agent knows exactly how to adjust
+- Feedback notes render markdown and show the question you're responding to right in the header
+- Press ⌘F to open the feedback pane, including on text-input and password dialogs
+
+### Changed
+- The base prompt is now delivered to the agent automatically each session through the MCP server, instead of being copied into your global CLAUDE.md
+- Updated baseprompt to v2.13.0 with per-question feedback guidance
+
+### Fixed
+- Tall forms and pick lists no longer get stuck endlessly resizing between two layouts
+
 ## [2.3.0] (macOS) - 2026-05-21
 
 ### Added

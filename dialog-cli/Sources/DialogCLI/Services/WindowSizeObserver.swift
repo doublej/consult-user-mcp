@@ -40,11 +40,18 @@ class WindowSizeObserver: NSObject {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
 
+            let currentFrame = window.frame
+
+            // Width is fixed for the window's lifetime — it's determined once by
+            // the two-pass layout in createAutoSizedWindow. Recomputing it here
+            // from a single-pass fittingSize couples width to the current text-wrap
+            // state, which feeds back into wrapping and makes the window oscillate
+            // endlessly (scrollbar appears → narrower → wraps taller → repeat).
+            // At runtime only height reflows; content taller than maxHeight scrolls.
             let fittingSize = hostingView.fittingSize
-            let newWidth = max(self.minWidth, fittingSize.width) + 16
+            let newWidth = currentFrame.width
             let newHeight = min(max(fittingSize.height + 16, self.minHeight), self.maxHeight)
 
-            let currentFrame = window.frame
             let widthDelta = abs(currentFrame.width - newWidth)
             let heightDelta = abs(currentFrame.height - newHeight)
             if widthDelta < 1 && heightDelta < 1 { return }

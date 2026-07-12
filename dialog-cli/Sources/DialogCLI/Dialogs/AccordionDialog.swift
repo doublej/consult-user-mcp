@@ -197,6 +197,7 @@ struct SwiftUIAccordionDialog: View {
             ),
             currentDialogType: "form-accordion",
             dialogPosition: position,
+            contentMinWidth: 460,
             globalFeedbackSubject: FeedbackSubject(kind: .form, text: bodyText),
             onAskDifferently: onAskDifferently,
             feedbackBindingForQuestion: { id in formState.bindingForFeedback(id) }

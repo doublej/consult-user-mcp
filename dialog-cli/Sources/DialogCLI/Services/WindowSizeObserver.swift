@@ -5,6 +5,12 @@ extension Notification.Name {
     static let dismissReportOverlay = Notification.Name("dismissReportOverlay")
 }
 
+extension Notification {
+    var shouldResizeDialogWidth: Bool {
+        userInfo?["resizeWidth"] as? Bool == true
+    }
+}
+
 class WindowSizeObserver: NSObject {
     private weak var window: NSWindow?
     private weak var hostingView: NSView?
@@ -29,12 +35,12 @@ class WindowSizeObserver: NSObject {
             forName: .dialogContentSizeChanged,
             object: nil,
             queue: .main
-        ) { [weak self] _ in
-            self?.updateWindowSize()
+        ) { [weak self] notification in
+            self?.updateWindowSize(resizeWidth: notification.shouldResizeDialogWidth)
         }
     }
 
-    private func updateWindowSize() {
+    private func updateWindowSize(resizeWidth: Bool = false) {
         guard let window = window, let hostingView = hostingView, let bgView = bgView else { return }
 
         DispatchQueue.main.async { [weak self] in
@@ -47,9 +53,13 @@ class WindowSizeObserver: NSObject {
             // from a single-pass fittingSize couples width to the current text-wrap
             // state, which feeds back into wrapping and makes the window oscillate
             // endlessly (scrollbar appears → narrower → wraps taller → repeat).
-            // At runtime only height reflows; content taller than maxHeight scrolls.
+            // At runtime only height reflows, except explicit pane transitions
+            // that add/remove a fixed-width side panel.
             let fittingSize = hostingView.fittingSize
-            let newWidth = currentFrame.width
+            let screenWidth = NSScreen.main?.visibleFrame.width ?? 1200
+            let maxWidth = max(self.minWidth + 16, screenWidth - 80)
+            let fittedWidth = min(max(fittingSize.width + 16, self.minWidth + 16), maxWidth)
+            let newWidth = resizeWidth ? fittedWidth : currentFrame.width
             let newHeight = min(max(fittingSize.height + 16, self.minHeight), self.maxHeight)
 
             let widthDelta = abs(currentFrame.width - newWidth)

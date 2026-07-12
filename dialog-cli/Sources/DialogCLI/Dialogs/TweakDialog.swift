@@ -93,6 +93,7 @@ struct SwiftUITweakDialog: View {
             ),
             currentDialogType: "tweak",
             dialogPosition: position,
+            contentMinWidth: 460,
             globalFeedbackSubject: FeedbackSubject(kind: .dialog, text: bodyText),
             onAskDifferently: onAskDifferently
         ) { controller in

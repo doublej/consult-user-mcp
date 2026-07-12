@@ -466,6 +466,7 @@ struct DialogContainer<Content: View>: View {
     let bindings: DialogKeyBindings
     let currentDialogType: String
     let dialogPosition: DialogPosition
+    let contentMinWidth: CGFloat
     let globalFeedbackSubject: FeedbackSubject
     let onAskDifferently: ((String) -> Void)?
     let feedbackBindingForQuestion: ((String) -> Binding<String>)?
@@ -492,6 +493,7 @@ struct DialogContainer<Content: View>: View {
         bindings: DialogKeyBindings = DialogKeyBindings(),
         currentDialogType: String = "",
         dialogPosition: DialogPosition = .center,
+        contentMinWidth: CGFloat = 420,
         globalFeedbackSubject: FeedbackSubject,
         onAskDifferently: ((String) -> Void)? = nil,
         feedbackBindingForQuestion: ((String) -> Binding<String>)? = nil,
@@ -500,6 +502,7 @@ struct DialogContainer<Content: View>: View {
         self.bindings = bindings
         self.currentDialogType = currentDialogType
         self.dialogPosition = dialogPosition
+        self.contentMinWidth = contentMinWidth
         self.globalFeedbackSubject = globalFeedbackSubject
         self.onAskDifferently = onAskDifferently
         self.feedbackBindingForQuestion = feedbackBindingForQuestion
@@ -592,6 +595,7 @@ struct DialogContainer<Content: View>: View {
 
                 contentBuilder(controller)
             }
+            .frame(minWidth: contentMinWidth)
 
             if paneEdge == .trailing, feedbackTarget != nil {
                 paneView
@@ -667,7 +671,11 @@ struct DialogContainer<Content: View>: View {
             }
         }
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
+            NotificationCenter.default.post(
+                name: .dialogContentSizeChanged,
+                object: nil,
+                userInfo: ["resizeWidth": true]
+            )
         }
         // Focus is handled inside FeedbackEditor — it grabs first responder
         // on its first updateNSView, so the editor is ready to type into.
@@ -682,7 +690,11 @@ struct DialogContainer<Content: View>: View {
             }
         }
         DispatchQueue.main.async {
-            NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
+            NotificationCenter.default.post(
+                name: .dialogContentSizeChanged,
+                object: nil,
+                userInfo: ["resizeWidth": true]
+            )
         }
     }
 

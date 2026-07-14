@@ -5,7 +5,7 @@
 		text: string;
 		type: 'added' | 'changed' | 'fixed' | 'removed';
 		scope?: 'app' | 'server' | 'docs' | 'cli';
-		pane?: 'general' | 'confirm' | 'pick' | 'text' | 'form' | 'wizard' | 'accordion' | 'tweak' | 'notify' | 'layout';
+		pane?: 'general' | 'confirm' | 'pick' | 'text' | 'form' | 'wizard' | 'tweak' | 'notify' | 'layout';
 		featured?: boolean;
 	};
 
@@ -40,7 +40,6 @@
 		text: 'Text',
 		form: 'Form',
 		wizard: 'Wizard',
-		accordion: 'Accordion',
 		tweak: 'Tweak',
 		notify: 'Notify',
 		layout: 'Layout'

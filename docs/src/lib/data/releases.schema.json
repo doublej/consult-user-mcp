@@ -54,7 +54,7 @@
                 },
                 "pane": {
                   "type": "string",
-                  "enum": ["general", "confirm", "pick", "text", "form", "wizard", "accordion", "tweak", "notify", "layout"],
+                  "enum": ["general", "confirm", "pick", "text", "form", "wizard", "tweak", "notify", "layout"],
                   "description": "Which dialog pane this change affects"
                 },
                 "featured": {

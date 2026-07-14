@@ -120,7 +120,7 @@ export interface Question {
 }
 
 // Mode for multi-question display
-export type QuestionsMode = "wizard" | "accordion";
+export type QuestionsMode = "wizard";
 
 // Options for multi-question dialog
 export interface QuestionsOptions {

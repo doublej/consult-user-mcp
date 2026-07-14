@@ -60,8 +60,7 @@ export interface DialogProvider {
   preview(opts: PreviewOptions): Promise<PreviewResult>;
 
   /**
-   * Display multiple questions in a single dialog.
-   * Supports wizard and accordion modes.
+   * Display multiple questions in a single dialog (step-by-step wizard).
    */
   questions(opts: QuestionsOptions): Promise<QuestionsResult>;
 

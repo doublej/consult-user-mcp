@@ -6,7 +6,7 @@ An MCP server for interacting with users through native dialogs. Supports macOS 
 
 | Tool | Description |
 |------|-------------|
-| `ask` | Interactive dialog — type: `confirm` (yes/no), `pick` (list picker), `text` (free-form input), `form` (multi-question wizard/accordion) |
+| `ask` | Interactive dialog — type: `confirm` (yes/no), `pick` (list picker), `text` (free-form input), `form` (multi-question wizard) |
 | `notify` | Notification banner (non-blocking) |
 | `tweak` | Real-time numeric value adjustment with live file writes |
 | `propose_layout` | Interactive grid layout editor (macOS only) |

@@ -130,7 +130,7 @@ const askSchema = z.object({
   hidden: z.boolean().default(false),
   // form
   questions: z.array(questionSchema).min(1).max(10).optional(),
-  mode: z.enum(["wizard", "accordion"]).default("wizard"),
+  mode: z.enum(["wizard"]).default("wizard"),
   // shared
   title: z.string().max(80).optional(),
   position: z.enum(["left", "right", "center"]).optional(),

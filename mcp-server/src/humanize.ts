@@ -5,8 +5,7 @@ const askDifferentlyMap: Record<string, string> = {
   "pick-multi": "a multi-select list (type: pick, multi: true)",
   "text": "a text input (type: text)",
   "text-hidden": "a password input (type: text, hidden: true)",
-  "form-wizard": "a step-by-step wizard (type: form, mode: wizard)",
-  "form-accordion": "an accordion form (type: form, mode: accordion)",
+  "form-wizard": "a step-by-step wizard (type: form)",
 };
 
 function formatAnswer(answer: unknown, completedCount?: number): string {

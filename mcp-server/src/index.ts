@@ -163,8 +163,10 @@ const askSchema = z.object({
 });
 
 server.registerTool("ask", {
+  title: "Ask the user",
   description: "Interactive dialog. Types: confirm (yes/no), pick (select from list), text (free input), form (multi-question). 10min timeout. If snoozed: sleep remainingSeconds, retry.",
   inputSchema: askSchema,
+  annotations: { readOnlyHint: true, openWorldHint: false },
 }, async (p, extra) => {
   provider.pulse();
 
@@ -301,6 +303,8 @@ const tweakSchema = z.object({
 });
 
 server.registerTool("tweak", {
+  title: "Tweak values live",
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   description: "Value tweak pane. Opens an always-on-top slider panel for real-time numeric value adjustment with live file writes. User completes via \"Save to File\" (keeps file writes, action:\"file\") or \"Tell Agent\" (reverts files, returns desired values for you to apply, action:\"agent\"). When using `search`: pattern must contain a single `{v}` placeholder (e.g. `padding: {v}px`); `current` must equal the actual file value and is used to pick the right occurrence when the pattern matches multiple lines. 10min timeout. If snoozed: sleep remainingSeconds, retry.",
   inputSchema: tweakSchema,
 }, async (p, extra) => {
@@ -387,6 +391,8 @@ server.registerTool("tweak", {
 });
 
 server.registerTool("notify", {
+  title: "Notify the user",
+  annotations: { readOnlyHint: true, openWorldHint: false },
   description: "Non-blocking notification. Returns {success}.",
   inputSchema: z.object({
     body: z.string().min(1).max(1000)
@@ -461,6 +467,8 @@ const layoutNodeSchema: z.ZodType = z.lazy(() =>
 let proposeLayoutActive = false;
 
 server.registerTool("propose_layout", {
+  title: "Propose a layout",
+  annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   description: "Open interactive grid layout editor. Accepts either explicit grid blocks or a semantic structure tree (direction/constraints-based). User can drag/resize/add/remove blocks. Returns structured layout data + ASCII + SVG. 10 min timeout. macOS only.",
   inputSchema: z.object({
     width: z.number().int().min(3).max(20).default(12).describe("Grid columns (3-20)"),

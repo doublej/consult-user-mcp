@@ -1,4 +1,4 @@
-<!-- version: 2.14.0 -->
+<!-- version: 2.15.0 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
@@ -8,6 +8,21 @@ Batch 2+ questions using `ask` with `type: "form"` instead of asking one at a ti
 
 Pass `project_path` on your first `ask`, `notify`, or `tweak` call. It's cached for the session — subsequent calls can omit it.
 </critical_rules>
+
+<response_handling>
+Every interactive dialog returns structured JSON. Special states (at most one per response) and the required reaction:
+
+| State | Shape | Required action |
+|-------|-------|-----------------|
+| Snoozed | `{"snoozed": true, "remainingSeconds": N}` | Run `sleep N` via Bash, then retry the **exact** same question. Do NOT proceed or ask something else. |
+| Ask differently | `{"askDifferently": "<type>"}` | Re-ask the **same question** as the requested type: `confirm`, `pick`, `pick-multi` (`multi: true`), `text`, `text-hidden` (`hidden: true`), or `form-wizard` (`type: "form"`). Do NOT skip or change topic. |
+| Cancelled | `{"cancelled": true}` | Proceed with a reasonable default. |
+| AFK | `{"afk": true}` | Away mode — no dialog was shown. Proceed autonomously with defaults; note open questions in your final response. |
+
+Feedback is an annotation, not a redirect: `feedbackText` (any dialog) and `feedbackByQuestion` (forms, keyed by question id) arrive **alongside** the answer. Accept the answer, incorporate the note, do not re-ask. If the user cancelled but left a note, the response carries the note without `cancelled: true` — treat as "user redirected: read the note, adjust, continue."
+
+Normal answers: boolean (confirm), string (pick/text — a custom "Other" answer arrives as typed), string[] (pick with `multi`), question-id → answer map plus `completedCount` (form), parameter-id → number map plus `action` (tweak).
+</response_handling>
 
 <anti_patterns>
 Common mistakes — do this instead:
@@ -19,58 +34,28 @@ Common mistakes — do this instead:
 
 ## Tools
 
-Three tools: `ask` (interactive dialogs), `notify` (fire-and-forget notifications), and `tweak` (real-time value adjustment).
+- `ask` — interactive dialog. `type`: `confirm` (yes/no), `pick` (select from list, `multi` for multi-select), `text` (free input, `hidden` for passwords), `form` (multi-question wizard — the batching tool).
+- `notify` — fire-and-forget notification.
+- `tweak` — always-on-top slider pane for real-time numeric value adjustment with live file writes.
+- `propose_layout` — interactive grid layout editor (macOS only).
 
-### ask — Interactive Dialog
+Parameter details are in each tool's input schema. Pick dialogs and form choice questions include an "Other" free-text option by default (`other: true`); the custom text is returned as the answer value (never the literal "Other").
 
-| Type | Purpose | Key params |
-|------|---------|-----------|
-| `confirm` | Yes/no decision | `yes`, `no` (custom labels) |
-| `pick` | Select from list | `choices`, `multi`, `descriptions`, `default`, `other` (default `true`) |
-| `text` | Free-form input | `hidden`, `default` |
-| `form` | Multi-question | `questions` (step-by-step wizard). Questions support `type: "choice"` (default, `other` default `true`) or `"text"` |
-
-All types share: `body` (required), `title`, `position` (`"left"` \| `"center"` \| `"right"`), `project_path`.
-
-"Other" option: Pick dialogs and form choice questions include an "Other" option by default (`other: true`), allowing users to type a custom answer. The custom text is returned as the `answer` value (never the literal "Other"). Set `other: false` only for closed-ended questions.
-
-### notify — Notification
-
-Params: `body` (required), `title`, `sound`, `project_path`.
-
-### tweak — Value Adjustment Pane
-
-Opens a slider panel for real-time numeric value adjustment with live file writes.
+## tweak — when and how
 
 Offer tweak when:
-1. User adjusts visual/layout values — subjective choices benefit from interactive tuning
-2. User rejects your numeric guess — offer tweak instead of guessing again
+1. The user tunes visual/layout values — subjective choices benefit from interactive tuning ("make the padding feel right", "the spacing looks off")
+2. The user rejects your numeric guess ("that's too small") — offer tweak instead of guessing again
 3. Multiple related values need coordinated tuning
+4. The user asks for it ("let me adjust this interactively")
 
-### Workflow
-
-Confirm first, then open if accepted:
+Workflow — confirm first, then open if accepted:
 1. `ask` → `{"type": "confirm", "body": "Adjust values interactively?", "yes": "Open tweak", "no": "Just pick values"}`
-2. If confirmed → call `tweak` with parameters
-3. `action: "file"` → values already written to disk. `action: "agent"` → files reverted, apply returned values yourself.
-
-### Parameter formats
-
-One per slider:
-
-| Format | When to use | Required fields |
-|--------|-------------|----------------|
-| **Text search** | Any file type | `label`, `file`, `search` (pattern with single `{v}`), `current`, `min`, `max` |
-| **CSS reference** | Stylesheets (preferred) | `label`, `file`, `selector`, `property`, `min`, `max` |
-| **Direct** | Fallback / computed locations | `label`, `file`, `line`, `column`, `expectedText`, `current`, `min`, `max` |
-
-For text search: `current` must equal the actual numeric value at the file location. When two parameters share the same `search` pattern in the same file, `current` is what disambiguates them — pass `current: 8` for the line that reads `8px` and `current: 10` for the line that reads `10px`.
-
-- `label` is required for all formats; `id` auto-derives as kebab-case if omitted.
-- Optional: `step`, `unit`, `index` (for multi-value CSS like `margin: 10px 20px`), `fn` (for CSS functions like `rotateY`).
-- CSS reference auto-resolves `line`, `column`, `expectedText`, `current`, `unit`.
-
-Response: `{"answer": {"<id>": <number>}, "action": "file" | "agent"}`
+2. If confirmed → call `tweak`, one parameter per slider, using one of three formats:
+   - **Text search** (any file type): `search` pattern with a single `{v}` placeholder (e.g. `padding: {v}rem`) plus `current` equal to the actual numeric value at that location — it disambiguates duplicate matches and seeds the slider
+   - **CSS reference** (stylesheets, preferred): `selector` + `property` — auto-resolves location, current value and unit
+   - **Direct** (fallback / computed locations): `line` + `column` + `expectedText` + `current`
+3. Response `action: "file"` → values already written to disk. `action: "agent"` → files reverted; apply the returned values yourself.
 
 ### CSS animation replay
 
@@ -95,53 +80,3 @@ if (!window.__tweakReplayConnected) {
   ws.onclose = () => { window.__tweakReplayConnected = false; };
 }
 ```
-
-### Trigger patterns
-
-| User prompt | Why tweak? |
-|-------------|-----------|
-| "Make the padding feel right" | Subjective — no correct answer |
-| "The spacing looks off" | Visual judgment needed |
-| "Hmm, that's too small" | Rejected your guess |
-| "Balance the margins and padding together" | Multiple related values |
-| "Let me adjust this interactively" | Explicit request |
-
-## Responses
-
-| Type | Normal answer |
-|------|---------------|
-| confirm | `{"answer": true}` or `{"answer": false}` |
-| pick | `{"answer": "PostgreSQL"}` or `{"answer": ["Auth", "UI"]}` |
-| text | `{"answer": "user input"}` |
-| form | `{"answer": {"lang": "TypeScript"}, "completedCount": 2}` |
-| tweak | `{"answer": {"font-size": 18}, "action": "file", "replayAnimations": true}` |
-
-### Special responses (priority order — only one per response)
-
-| State | Shape | Action required |
-|-------|-------|-----------------|
-| Snoozed | `{"snoozed": true, "remainingSeconds": N}` | Run `sleep N` via Bash, then retry the **exact** same question. Do NOT proceed or ask something else. |
-| Ask differently | `{"askDifferently": "<type>"}` | Re-ask the **same question** as the requested type. Do NOT skip or change topic. |
-| Cancelled | `{"cancelled": true}` | Proceed with a reasonable default. |
-
-### Feedback annotations (travel alongside the answer)
-
-Feedback is now an annotation, **not** a redirect. The user types it in a slide-out pane next to the dialog. It arrives **together with the answer** — you should accept the answer and incorporate the note as additional context. Do not re-ask just because a note was attached.
-
-Two shapes can appear:
-
-- `{"feedbackText": "..."}` — consult-level note (any dialog type). On forms this is the "general note" channel.
-- `{"feedbackByQuestion": {"<questionId>": "..."}}` — per-question notes (forms only). Each entry annotates the corresponding answer.
-
-Both can appear alongside `answer`/`completedCount`. If the user cancelled but left a note, the response carries the note (no `cancelled: true`). Treat that as "user redirected — read the note, adjust, then continue."
-
-### askDifferently type mapping
-
-| Value | Re-ask as |
-|-------|-----------|
-| `confirm` | Yes/no confirmation |
-| `pick` | Single-select list |
-| `pick-multi` | Multi-select list (`multi: true`) |
-| `text` | Free-form text input |
-| `text-hidden` | Password input (`hidden: true`) |
-| `form-wizard` | Wizard form (`type: "form"`) |

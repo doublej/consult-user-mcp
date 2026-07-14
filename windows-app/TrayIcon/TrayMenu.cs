@@ -49,9 +49,6 @@ public static class TrayMenu
         AddItem(debug, "Test Wizard", "questions",
             """{"questions":[{"id":"language","question":"What programming language?","options":[{"label":"TypeScript","description":"Strongly typed JavaScript"},{"label":"Python","description":"Dynamic scripting language"},{"label":"Go","description":"Fast compiled language"}],"type":"choice","multiSelect":false},{"id":"framework","question":"Which framework?","options":[{"label":"Express","description":"Minimal Node.js"},{"label":"FastAPI","description":"Modern Python API"},{"label":"Gin","description":"High-performance Go"}],"type":"choice","multiSelect":false}],"mode":"wizard","position":"left"}""");
 
-        AddItem(debug, "Test Accordion", "questions",
-            """{"questions":[{"id":"database","question":"Select database:","options":[{"label":"PostgreSQL","description":"Relational database"},{"label":"MongoDB","description":"Document NoSQL"},{"label":"Redis","description":"Key-value store"}],"type":"choice","multiSelect":false},{"id":"auth","question":"Authentication:","options":[{"label":"OAuth 2.0","description":"Third-party"},{"label":"JWT","description":"Stateless tokens"},{"label":"Session","description":"Server-side"}],"type":"choice","multiSelect":true}],"mode":"accordion","position":"left"}""");
-
         AddItem(debug, "Test Notify", "notify",
             """{"body":"This is a test notification from the debug menu.","title":"Test","sound":true}""");
 

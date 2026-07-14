@@ -23,11 +23,14 @@ const HEARTBEAT_INTERVAL_MS = 15_000;
 
 const AFK_MESSAGE =
   "The user has enabled Away (AFK) mode in Consult User MCP, so no dialog will be shown. " +
-  "Fall back to Claude's native AskUserQuestion tool for this request, " +
-  "or proceed with a reasonable default if no input is strictly required.";
+  "Proceed autonomously with a reasonable default and note the open question in your final response. " +
+  "Do not fall back to other interactive question tools.";
 
 function afkResponse() {
-  return { content: [{ type: "text" as const, text: AFK_MESSAGE }] };
+  return {
+    content: [{ type: "text" as const, text: AFK_MESSAGE }],
+    structuredContent: { afk: true },
+  };
 }
 
 /** Unescape literal \n and \t that LLMs commonly embed in text instead of actual newlines/tabs. */

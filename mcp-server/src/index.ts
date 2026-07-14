@@ -84,8 +84,19 @@ function loadBasePrompt(): string | undefined {
   return path ? readFileSync(path, "utf8") : undefined;
 }
 
+// Report the real package version to clients (package.json sits next to dist/
+// in both the repo and the app bundle).
+function loadServerVersion(): string {
+  try {
+    const here = dirname(fileURLToPath(import.meta.url)); // .../mcp-server/dist
+    const pkg = JSON.parse(readFileSync(join(here, "..", "package.json"), "utf8"));
+    if (typeof pkg.version === "string") return pkg.version;
+  } catch { /* fall through */ }
+  return "0.0.0";
+}
+
 const server = new McpServer(
-  { name: "consult-user-mcp-server", version: "1.0.0" },
+  { name: "consult-user-mcp-server", title: "Consult User", version: loadServerVersion() },
   { instructions: loadBasePrompt() },
 );
 function createProvider(): DialogProvider {
@@ -541,7 +552,7 @@ const layoutOutputSchema = z.object({
     .describe("Away mode is on; no editor was shown. Proceed autonomously."),
 });
 
-server.registerTool("propose_layout", {
+const proposeLayoutTool = server.registerTool("propose_layout", {
   title: "Propose a layout",
   outputSchema: layoutOutputSchema,
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
@@ -624,6 +635,9 @@ server.registerTool("propose_layout", {
     proposeLayoutActive = false;
   }
 });
+
+// macOS-only tool — don't advertise it where it can never run.
+if (process.platform === "win32") proposeLayoutTool.remove();
 
 async function main(): Promise<void> {
   const transport = new StdioServerTransport();

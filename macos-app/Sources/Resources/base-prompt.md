@@ -1,4 +1,4 @@
-<!-- version: 2.13.0 -->
+<!-- version: 2.14.0 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
@@ -28,7 +28,7 @@ Three tools: `ask` (interactive dialogs), `notify` (fire-and-forget notification
 | `confirm` | Yes/no decision | `yes`, `no` (custom labels) |
 | `pick` | Select from list | `choices`, `multi`, `descriptions`, `default`, `other` (default `true`) |
 | `text` | Free-form input | `hidden`, `default` |
-| `form` | Multi-question | `questions`, `mode` (`"wizard"` \| `"accordion"`). Questions support `type: "choice"` (default, `other` default `true`) or `"text"` |
+| `form` | Multi-question | `questions` (step-by-step wizard). Questions support `type: "choice"` (default, `other` default `true`) or `"text"` |
 
 All types share: `body` (required), `title`, `position` (`"left"` \| `"center"` \| `"right"`), `project_path`.
 
@@ -144,5 +144,4 @@ Both can appear alongside `answer`/`completedCount`. If the user cancelled but l
 | `pick-multi` | Multi-select list (`multi: true`) |
 | `text` | Free-form text input |
 | `text-hidden` | Password input (`hidden: true`) |
-| `form-wizard` | Wizard form (`mode: "wizard"`) |
-| `form-accordion` | Accordion form (`mode: "accordion"`) |
+| `form-wizard` | Wizard form (`type: "form"`) |

@@ -189,8 +189,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let questionsSubmenu = NSMenu()
         addDebugMenuItem(questionsSubmenu, title: "Wizard", action: #selector(testQuestionsWizard))
         addDebugMenuItem(questionsSubmenu, title: "Wizard Mixed", action: #selector(testQuestionsWizardMixed))
-        addDebugMenuItem(questionsSubmenu, title: "Accordion", action: #selector(testQuestionsAccordion))
-        addDebugMenuItem(questionsSubmenu, title: "Accordion Mixed", action: #selector(testQuestionsAccordionMixed))
         questionsItem.submenu = questionsSubmenu
         debugMenu.addItem(questionsItem)
 
@@ -476,16 +474,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         runDialogCli(command: "questions", json: tc.json, projectPath: tc.projectPath)
     }
 
-    @objc private func testQuestionsAccordion() {
-        guard let tc = loadTestCase(category: "questions", name: "accordion-basic") else { return }
-        runDialogCli(command: "questions", json: tc.json, projectPath: tc.projectPath)
-    }
-
-    @objc private func testQuestionsAccordionMixed() {
-        guard let tc = loadTestCase(category: "questions", name: "accordion-mixed") else { return }
-        runDialogCli(command: "questions", json: tc.json, projectPath: tc.projectPath)
-    }
-
     @objc private func testTweak() {
         // Copy companion CSS to /tmp so tweak can find it
         if let root = projectRoot() {
@@ -553,7 +541,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 7.5) { self.testTextInputPassword() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 9.0) { self.testTextInputMarkdown() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 10.5) { self.testQuestionsWizard() }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 12.0) { self.testQuestionsAccordion() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 13.5) { self.testTweak() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 15.0) { self.testNotifyTool() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 16.0) { self.testNotifyUpdate() }

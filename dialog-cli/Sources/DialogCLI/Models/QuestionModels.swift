@@ -54,7 +54,7 @@ struct QuestionsRequest: Codable {
     let body: String?
     let title: String?
     let questions: [QuestionItem]
-    let mode: String  // "wizard" | "accordion"
+    let mode: String  // always "wizard" (retained for wire compatibility)
     let position: DialogPosition?
 }
 

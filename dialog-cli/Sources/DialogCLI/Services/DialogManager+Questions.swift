@@ -126,31 +126,16 @@ extension DialogManager {
         let dialogBody = request.body
         let position = effectivePosition(request.position)
 
-        let dialogContent: AnyView
-        switch request.mode {
-        case "wizard":
-            dialogContent = AnyView(SwiftUIWizardDialog(
-                title: dialogTitle,
-                bodyText: dialogBody,
-                questions: request.questions,
-                position: position,
-                onComplete: onComplete,
-                onCancel: onCancel,
-                onSnooze: onSnooze,
-                onAskDifferently: onAskDifferently
-            ))
-        default:
-            dialogContent = AnyView(SwiftUIAccordionDialog(
-                title: dialogTitle,
-                bodyText: dialogBody,
-                questions: request.questions,
-                position: position,
-                onComplete: onComplete,
-                onCancel: onCancel,
-                onSnooze: onSnooze,
-                onAskDifferently: onAskDifferently
-            ))
-        }
+        let dialogContent = AnyView(SwiftUIWizardDialog(
+            title: dialogTitle,
+            bodyText: dialogBody,
+            questions: request.questions,
+            position: position,
+            onComplete: onComplete,
+            onCancel: onCancel,
+            onSnooze: onSnooze,
+            onAskDifferently: onAskDifferently
+        ))
 
         let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460, position: position)
 

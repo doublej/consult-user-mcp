@@ -149,7 +149,6 @@ struct Theme {
         static let focusAfterTransition: Double = 0.15
         static let focusAfterExpand: Double = 0.25
         static let testPaneReveal: Double = 0.30
-        static let accordionAutoAdvance: Double = 0.15
     }
 
     // SwiftUI Color accessors

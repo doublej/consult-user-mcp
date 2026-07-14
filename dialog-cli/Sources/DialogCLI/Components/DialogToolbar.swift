@@ -221,7 +221,6 @@ class AskDifferentlyMenuHelper: NSObject, NSMenuDelegate {
         ("Text Input", "text"),
         ("Password", "text-hidden"),
         ("Wizard Form", "form-wizard"),
-        ("Accordion Form", "form-accordion"),
     ]
 
     func menu(_ menu: NSMenu, willHighlight item: NSMenuItem?) {

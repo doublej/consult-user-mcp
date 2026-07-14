@@ -132,13 +132,6 @@ Use this checklist when reviewing screenshots from `test-runner.sh`.
 - [ ] Navigation (Next/Previous) present
 - [ ] Step indicator visible (1/2, etc.)
 
-### `questions/accordion-basic.json`
-- [ ] Accordion mode: all sections visible
-- [ ] Sections expandable/collapsible
-- [ ] Current section expanded
-- [ ] Other sections collapsed showing summary
-- [ ] Multi-select question shows checkbox indicators
-
 ### `questions/pane-snooze.json`
 - [ ] Snooze pane visible in questions flow
 - [ ] Question list and footer remain readable
@@ -194,7 +187,6 @@ The dialog system respects macOS "Reduce motion" setting via `@Environment(\.acc
 - `ConfirmDialog.swift` - toolbar expand/collapse animations
 - `TextInputDialog.swift` - toolbar expand/collapse animations
 - `DialogToolbar.swift` - snooze/feedback panel transitions
-- `AccordionDialog.swift` - section expand/collapse, option selection, button interactions
 
 **When reduce motion is enabled:**
 - State changes happen immediately (no `withAnimation`)
@@ -218,7 +210,6 @@ defaults write com.apple.universalaccess reduceMotion -bool false
 
 **Verification checklist:**
 - [ ] Toolbar panels appear/disappear instantly (no slide)
-- [ ] Accordion sections expand/collapse without animation
 - [ ] Button hover states change immediately
 - [ ] No motion sickness triggers
 

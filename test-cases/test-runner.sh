@@ -122,15 +122,8 @@ extract_expected_words() {
             text+=" $(jq -r 'try ([.descriptions[]][0:5][])' "$json_file")"
             ;;
         questions)
-            local mode
-            mode=$(jq -r '.mode // "accordion"' "$json_file")
-            if [ "$mode" = "wizard" ]; then
-                # Wizard: only first question page visible
-                text+=" $(jq -r 'try (.questions[0].question)' "$json_file")"
-            else
-                # Accordion: all question headers visible (collapsed)
-                text+=" $(jq -r 'try (.questions[].question)' "$json_file")"
-            fi
+            # Wizard: only the first question page is visible
+            text+=" $(jq -r 'try (.questions[0].question)' "$json_file")"
             text+=" $(jq -r 'try (.questions[0].options[].label // .questions[0].options[])' "$json_file")"
             text+=" $(jq -r 'try (.questions[0].options[].description // empty)' "$json_file")"
             ;;

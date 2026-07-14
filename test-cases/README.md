@@ -21,7 +21,7 @@ test-cases/
     confirm/            # Confirmation dialogs
     choose/             # Multiple choice dialogs
     text-input/         # Text input dialogs
-    questions/          # Multi-question wizard/accordion
+    questions/          # Multi-question wizard
     notify/             # Notification panes
     tweak/              # Value adjustment pane
     sketch/             # Layout editor (propose_layout)

@@ -32,7 +32,7 @@
       "multiSelect": false
     }
   ],
-  "mode": "accordion",
+  "mode": "wizard",
   "position": "center",
   "projectPath": "/Users/example/projects/web-dashboard"
 }

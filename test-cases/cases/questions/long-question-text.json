@@ -37,7 +37,7 @@
       "placeholder": ""
     }
   ],
-  "mode": "accordion",
+  "mode": "wizard",
   "position": "center",
   "projectPath": "/Users/example/projects/consult-user-mcp"
 }

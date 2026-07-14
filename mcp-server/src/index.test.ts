@@ -66,7 +66,6 @@ describe("ask schema", () => {
     default: z.string().optional(),
     hidden: z.boolean().default(false),
     questions: z.array(questionSchema).min(1).max(10).optional(),
-    mode: z.enum(["wizard"]).default("wizard"),
     title: z.string().max(80).optional(),
     position: z.enum(["left", "right", "center"]).optional(),
     project_path: z.string().optional(),

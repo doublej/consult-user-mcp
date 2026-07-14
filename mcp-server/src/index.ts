@@ -98,15 +98,24 @@ const provider = createProvider();
 let cachedProjectPath: string | undefined;
 
 const questionSchema = z.object({
-  id: z.string().min(1).max(50),
-  question: z.string().min(1).max(500),
-  type: z.enum(["choice", "text"]).default("choice"),
-  options: z.array(z.string().min(1).max(100)).min(2).max(10).optional(),
-  descriptions: z.array(z.string().max(200)).optional(),
-  multi: z.boolean().default(false),
-  other: z.boolean().default(true),
-  placeholder: z.string().max(200).optional(),
-  hidden: z.boolean().default(false),
+  id: z.string().min(1).max(50)
+    .describe("Stable key for this question; the form answer is keyed by it."),
+  question: z.string().min(1).max(500)
+    .describe("The question text shown to the user."),
+  type: z.enum(["choice", "text"]).default("choice")
+    .describe("choice = pick from options, text = free-form input."),
+  options: z.array(z.string().min(1).max(100)).min(2).max(10).optional()
+    .describe("Choices to pick from. Required (min 2) when type=choice."),
+  descriptions: z.array(z.string().max(200)).optional()
+    .describe("Optional per-option descriptions, index-aligned with options."),
+  multi: z.boolean().default(false)
+    .describe("Allow selecting multiple options (choice only); answer becomes string[]."),
+  other: z.boolean().default(true)
+    .describe("Include an 'Other' option so the user can type a custom answer (returned as the answer value, never the literal 'Other'). Set false only for closed-ended lists."),
+  placeholder: z.string().max(200).optional()
+    .describe("Placeholder text for text questions."),
+  hidden: z.boolean().default(false)
+    .describe("Mask input like a password field (text only)."),
 }).superRefine((data, ctx) => {
   if (data.type === "choice" && (!data.options || data.options.length < 2)) {
     ctx.addIssue({
@@ -118,26 +127,39 @@ const questionSchema = z.object({
 });
 
 const askSchema = z.object({
-  type: z.enum(["confirm", "pick", "text", "form"]),
-  body: z.string().min(1).max(1000),
+  type: z.enum(["confirm", "pick", "text", "form"])
+    .describe("Dialog type: confirm (yes/no), pick (select from list), text (free input), form (multi-question wizard — use it to batch 2+ questions)."),
+  body: z.string().min(1).max(1000)
+    .describe("The question or message shown to the user. Supports markdown."),
   // confirm
-  yes: z.string().max(20).default("Yes"),
-  no: z.string().max(20).default("No"),
+  yes: z.string().max(20).default("Yes")
+    .describe("Confirm-button label (confirm only)."),
+  no: z.string().max(20).default("No")
+    .describe("Decline-button label (confirm only)."),
   // pick
-  choices: z.array(z.string().min(1).max(100)).min(2).max(20).optional(),
-  multi: z.boolean().default(false),
-  other: z.boolean().default(true),
-  descriptions: z.array(z.string().max(200)).optional(),
-  default: z.string().optional(),
+  choices: z.array(z.string().min(1).max(100)).min(2).max(20).optional()
+    .describe("Options to pick from. Required (min 2) when type=pick."),
+  multi: z.boolean().default(false)
+    .describe("Allow selecting multiple choices (pick only); answer becomes string[]."),
+  other: z.boolean().default(true)
+    .describe("Include an 'Other' option so the user can type a custom answer (returned as the answer value, never the literal 'Other'). Set false only for closed-ended lists (pick only)."),
+  descriptions: z.array(z.string().max(200)).optional()
+    .describe("Optional per-choice descriptions, index-aligned with choices (pick only)."),
+  default: z.string().optional()
+    .describe("Preselected choice (pick) or prefilled text (text)."),
   // text
-  hidden: z.boolean().default(false),
+  hidden: z.boolean().default(false)
+    .describe("Mask input like a password field (text only)."),
   // form
-  questions: z.array(questionSchema).min(1).max(10).optional(),
-  mode: z.enum(["wizard"]).default("wizard"),
+  questions: z.array(questionSchema).min(1).max(10).optional()
+    .describe("Questions for the step-by-step wizard. Required when type=form."),
   // shared
-  title: z.string().max(80).optional(),
-  position: z.enum(["left", "right", "center"]).optional(),
-  project_path: z.string().optional(),
+  title: z.string().max(80).optional()
+    .describe("Dialog title. The client name is prefixed automatically."),
+  position: z.enum(["left", "right", "center"]).optional()
+    .describe("Screen position of the dialog."),
+  project_path: z.string().optional()
+    .describe("Absolute project path, shown as a badge. Cached for the session after the first call — later calls may omit it."),
 });
 
 server.registerTool("ask", {
@@ -198,7 +220,7 @@ server.registerTool("ask", {
           placeholder: q.placeholder,
           hidden: q.hidden,
         })),
-        mode: p.mode as QuestionsMode,
+        mode: "wizard" satisfies QuestionsMode,
         position, projectPath,
       }), extra);
       break;
@@ -223,29 +245,40 @@ function toKebabCase(label: string): string {
 }
 
 const tweakParameterSchema = z.object({
-  id: z.string().min(1).max(50).optional(),
-  label: z.string().min(1).max(100),
-  element: z.string().max(100).optional(),
-  file: z.string().min(1),
+  id: z.string().min(1).max(50).optional()
+    .describe("Stable key in the response answer map. Auto-derived from label as kebab-case if omitted."),
+  label: z.string().min(1).max(100)
+    .describe("Human-readable slider label, e.g. \"Font Size\"."),
+  element: z.string().max(100).optional()
+    .describe("Optional element/selector hint shown under the label."),
+  file: z.string().min(1)
+    .describe("File to edit, relative to project_path (or absolute)."),
   // CSS reference (resolved by server)
-  selector: z.string().max(200).optional(),
-  property: z.string().max(100).optional(),
-  index: z.number().int().min(0).optional(),
-  fn: z.string().max(50).optional(),
+  selector: z.string().max(200).optional()
+    .describe("CSS selector for the rule to edit (CSS format, together with property). Auto-resolves line/column/expectedText/current/unit."),
+  property: z.string().max(100).optional()
+    .describe("CSS property name within the selector's rule (CSS format)."),
+  index: z.number().int().min(0).optional()
+    .describe("Zero-based value index for multi-value CSS properties like `margin: 10px 20px` (CSS format)."),
+  fn: z.string().max(50).optional()
+    .describe("CSS function whose argument to target, e.g. `rotateY` in a transform (CSS format)."),
   // Text search (resolved by server)
   search: z.string().max(500).optional()
     .describe("Pattern with a single `{v}` placeholder marking the numeric value to capture (e.g. `filter: blur({v}px)`, `padding: {v}rem`). When two parameters share the same pattern in the same file, `current` disambiguates by value."),
   // Direct location (or filled by resolver)
-  line: z.number().int().min(1).optional(),
-  column: z.number().int().min(1).optional(),
-  expectedText: z.string().min(1).max(50).optional(),
+  line: z.number().int().min(1).optional()
+    .describe("1-based line number of the value (direct format)."),
+  column: z.number().int().min(1).optional()
+    .describe("1-based column where the numeric value starts (direct format)."),
+  expectedText: z.string().min(1).max(50).optional()
+    .describe("Exact text expected at line/column, used as a safety check before writing (direct format)."),
   current: z.number().optional()
     .describe("The numeric value currently in the file at the matched location. Required when `search` is set: must equal the actual file value (used to disambiguate when multiple matches exist) and to seed the slider."),
   // Range
-  min: z.number(),
-  max: z.number(),
-  step: z.number().positive().optional(),
-  unit: z.string().max(10).optional(),
+  min: z.number().describe("Slider minimum."),
+  max: z.number().describe("Slider maximum."),
+  step: z.number().positive().optional().describe("Slider step size."),
+  unit: z.string().max(10).optional().describe("Display unit, e.g. \"px\" or \"rem\". Auto-detected for CSS/search formats."),
 }).refine(
   (p) =>
     (p.selector && p.property)
@@ -255,11 +288,16 @@ const tweakParameterSchema = z.object({
 );
 
 const tweakSchema = z.object({
-  body: z.string().min(1).max(1000),
-  parameters: z.array(tweakParameterSchema).min(1).max(20),
-  title: z.string().max(80).optional(),
-  position: z.enum(["left", "right", "center"]).optional(),
-  project_path: z.string().optional(),
+  body: z.string().min(1).max(1000)
+    .describe("Message explaining what is being tuned. Supports markdown."),
+  parameters: z.array(tweakParameterSchema).min(1).max(20)
+    .describe("One slider per parameter. Each uses one of three formats: text search (search+current), CSS reference (selector+property), or direct (line+column+expectedText+current)."),
+  title: z.string().max(80).optional()
+    .describe("Pane title. The client name is prefixed automatically."),
+  position: z.enum(["left", "right", "center"]).optional()
+    .describe("Screen position of the pane."),
+  project_path: z.string().optional()
+    .describe("Absolute project path; relative parameter files resolve against it. Cached for the session after the first call."),
 });
 
 server.registerTool("tweak", {
@@ -351,10 +389,14 @@ server.registerTool("tweak", {
 server.registerTool("notify", {
   description: "Non-blocking notification. Returns {success}.",
   inputSchema: z.object({
-    body: z.string().min(1).max(1000),
-    title: z.string().max(80).default("Notice"),
-    sound: z.boolean().default(true),
-    project_path: z.string().optional(),
+    body: z.string().min(1).max(1000)
+      .describe("Notification message shown to the user."),
+    title: z.string().max(80).default("Notice")
+      .describe("Notification title. The client name is prefixed automatically."),
+    sound: z.boolean().default(true)
+      .describe("Play a notification sound."),
+    project_path: z.string().optional()
+      .describe("Absolute project path, shown as a badge. Cached for the session after the first call."),
   }),
 }, async (p) => {
   provider.pulse();

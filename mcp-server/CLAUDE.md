@@ -62,7 +62,7 @@ The `ask` tool routes to provider methods via `type` field:
 - `confirm` → `provider.confirm()` — Yes/No
 - `pick` → `provider.choose()` — List picker (single or multi-select)
 - `text` → `provider.textInput()` — Free-form input (supports password masking)
-- `form` → `provider.questions()` — Multi-question (wizard or accordion)
+- `form` → `provider.questions()` — Multi-question wizard
 
 Responses are transformed by `compact.ts` to strip verbose/null fields.
 
@@ -195,7 +195,7 @@ export class LinuxDialogProvider implements DialogProvider {
 | `confirm` | Yes/No dialog | `{confirmed: false, cancelled: true, ...}` |
 | `choose` | Single/multi-select | `{answer: null, cancelled: true, ...}` |
 | `textInput` | Text field + hidden mode | `{answer: null, cancelled: true, ...}` |
-| `questions` | Multi-question wizard/accordion | `{answers: {}, cancelled: true, ...}` |
+| `questions` | Multi-question wizard | `{answers: {}, cancelled: true, ...}` |
 | `tweak` | Numeric sliders with live file writes | `{answers: {}, cancelled: true, ...}` |
 | `notify` | Non-blocking notification | `{success: true/false}` |
 | `preview` | Response preview before send | `{success: true/false}` |

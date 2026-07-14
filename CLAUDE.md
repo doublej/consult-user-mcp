@@ -44,10 +44,9 @@ Use `--dry-run` to validate preconditions without executing.
 | 3 | **Multi-select** | `pick` | `choose` | `body`, `choices[]`, `descriptions[]?`, `multi: true` | `answer: string[]` |
 | 4 | **Text input** | `text` | `textInput` | `body`, `title`, `default` | `answer: string` |
 | 5 | **Password input** | `text` | `textInput` | `body`, `title`, `hidden: true` | `answer: string` |
-| 6 | **Wizard form** | `form` | `questions` | `body`, `questions[]`, `mode: "wizard"` | `answer: Record<id, string\|string[]>` |
-| 7 | **Accordion form** | `form` | `questions` | `body`, `questions[]`, `mode: "accordion"` | `answer: Record<id, string\|string[]>` |
-| 8 | **Notification** | — (`notify`) | `notify` | `body`, `title`, `sound` | fire-and-forget |
-| 9 | **Value tweak** | — (`tweak`) | `tweak` | `body`, `parameters[]` | `answer: Record<id, number>` |
+| 6 | **Wizard form** | `form` | `questions` | `body`, `questions[]` | `answer: Record<id, string\|string[]>` |
+| 7 | **Notification** | — (`notify`) | `notify` | `body`, `title`, `sound` | fire-and-forget |
+| 8 | **Value tweak** | — (`tweak`) | `tweak` | `body`, `parameters[]` | `answer: Record<id, number>` |
 
 `questions[]` items: `id`, `question`, `type?` (`"choice"` default, `"text"`), `options[]` (required for choice), `descriptions[]?`, `multi`, `placeholder?`, `hidden?`.
 

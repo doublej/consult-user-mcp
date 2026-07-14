@@ -162,10 +162,44 @@ const askSchema = z.object({
     .describe("Absolute project path, shown as a badge. Cached for the session after the first call — later calls may omit it."),
 });
 
+// Response-state fields shared by every interactive dialog. At most one
+// special state appears per response (priority: snoozed > askDifferently >
+// feedbackText > cancelled); feedback can travel alongside a normal answer.
+const responseStateFields = {
+  snoozed: z.boolean().optional()
+    .describe("User snoozed the dialog. Sleep remainingSeconds, then re-ask the exact same question. Do not proceed or ask something else."),
+  remainingSeconds: z.number().optional()
+    .describe("Seconds until the snooze expires."),
+  askDifferently: z.string().optional()
+    .describe("Re-ask the same question as this dialog type: confirm, pick, pick-multi, text, text-hidden, or form-wizard. Do not skip or change topic."),
+  feedbackText: z.string().optional()
+    .describe("Note from the user that travels alongside the answer. Accept the answer and incorporate the note; do not re-ask."),
+  cancelled: z.boolean().optional()
+    .describe("User dismissed the dialog. Proceed with a reasonable default."),
+  afk: z.boolean().optional()
+    .describe("Away mode is on; no dialog was shown. Proceed autonomously with reasonable defaults."),
+};
+
+const askOutputSchema = z.object({
+  answer: z.union([
+    z.boolean(),
+    z.string(),
+    z.array(z.string()),
+    z.record(z.union([z.string(), z.array(z.string())])),
+  ]).optional()
+    .describe("The user's answer: boolean (confirm), string (pick/text — a custom 'Other' answer arrives here as typed), string[] (pick multi), or question-id → answer map (form)."),
+  completedCount: z.number().optional()
+    .describe("Form only: number of questions answered."),
+  feedbackByQuestion: z.record(z.string()).optional()
+    .describe("Form only: per-question notes keyed by question id, annotating the corresponding answers."),
+  ...responseStateFields,
+});
+
 server.registerTool("ask", {
   title: "Ask the user",
   description: "Interactive dialog. Types: confirm (yes/no), pick (select from list), text (free input), form (multi-question). 10min timeout. If snoozed: sleep remainingSeconds, retry.",
   inputSchema: askSchema,
+  outputSchema: askOutputSchema,
   annotations: { readOnlyHint: true, openWorldHint: false },
 }, async (p, extra) => {
   provider.pulse();
@@ -238,7 +272,7 @@ server.registerTool("ask", {
     await provider.preview({ body: text }).catch(() => {});
   }
 
-  return { content: [{ type: "text", text }] };
+  return { content: [{ type: "text", text }], structuredContent: compact };
 });
 
 /** Convert label to kebab-case id: "Font Size" → "font-size", "Line Height (px)" → "line-height-px" */
@@ -302,8 +336,19 @@ const tweakSchema = z.object({
     .describe("Absolute project path; relative parameter files resolve against it. Cached for the session after the first call."),
 });
 
+const tweakOutputSchema = z.object({
+  answer: z.record(z.number()).optional()
+    .describe("Final values keyed by parameter id."),
+  action: z.enum(["file", "agent"]).optional()
+    .describe("file = values already written to disk, nothing to do; agent = files reverted, apply the returned values yourself."),
+  replayAnimations: z.boolean().optional()
+    .describe("A CSS animation replay client was connected during the session."),
+  ...responseStateFields,
+});
+
 server.registerTool("tweak", {
   title: "Tweak values live",
+  outputSchema: tweakOutputSchema,
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   description: "Value tweak pane. Opens an always-on-top slider panel for real-time numeric value adjustment with live file writes. User completes via \"Save to File\" (keeps file writes, action:\"file\") or \"Tell Agent\" (reverts files, returns desired values for you to apply, action:\"agent\"). When using `search`: pattern must contain a single `{v}` placeholder (e.g. `padding: {v}px`); `current` must equal the actual file value and is used to pick the right occurrence when the pattern matches multiple lines. 10min timeout. If snoozed: sleep remainingSeconds, retry.",
   inputSchema: tweakSchema,
@@ -387,11 +432,14 @@ server.registerTool("tweak", {
     await provider.preview({ body: text }).catch(() => {});
   }
 
-  return { content: [{ type: "text", text }] };
+  return { content: [{ type: "text", text }], structuredContent: compact };
 });
 
 server.registerTool("notify", {
   title: "Notify the user",
+  outputSchema: z.object({
+    success: z.boolean().describe("Whether the notification was displayed."),
+  }),
   annotations: { readOnlyHint: true, openWorldHint: false },
   description: "Non-blocking notification. Returns {success}.",
   inputSchema: z.object({
@@ -409,7 +457,10 @@ server.registerTool("notify", {
   if (p.project_path) cachedProjectPath = p.project_path;
   const projectPath = p.project_path ?? cachedProjectPath;
   const r = await provider.notify({ body: unescLiterals(p.body), title: p.title, sound: p.sound, projectPath });
-  return { content: [{ type: "text", text: JSON.stringify({ success: r.success }) }] };
+  return {
+    content: [{ type: "text", text: JSON.stringify({ success: r.success }) }],
+    structuredContent: { success: r.success },
+  };
 });
 
 function isHeadless(): boolean {
@@ -466,8 +517,33 @@ const layoutNodeSchema: z.ZodType = z.lazy(() =>
 
 let proposeLayoutActive = false;
 
+const layoutOutputSchema = z.object({
+  status: z.enum(["accepted", "modified", "cancelled"]).optional()
+    .describe("accepted = layout kept as proposed; modified = user changed it (see changes/layout); cancelled = no layout."),
+  summary: z.string().optional(),
+  changes: z.array(z.string()).optional()
+    .describe("Human-readable list of the user's modifications."),
+  layout: z.object({
+    columns: z.number(),
+    rows: z.number(),
+    blocks: z.array(z.object({
+      label: z.string(),
+      x: z.number(),
+      y: z.number(),
+      w: z.number(),
+      h: z.number(),
+    }).passthrough()),
+  }).passthrough().optional()
+    .describe("Final grid layout with block positions and sizes."),
+  imagePath: z.string().optional()
+    .describe("Path to an SVG rendering of the final layout."),
+  afk: z.boolean().optional()
+    .describe("Away mode is on; no editor was shown. Proceed autonomously."),
+});
+
 server.registerTool("propose_layout", {
   title: "Propose a layout",
+  outputSchema: layoutOutputSchema,
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   description: "Open interactive grid layout editor. Accepts either explicit grid blocks or a semantic structure tree (direction/constraints-based). User can drag/resize/add/remove blocks. Returns structured layout data + ASCII + SVG. 10 min timeout. macOS only.",
   inputSchema: z.object({
@@ -528,15 +604,21 @@ server.registerTool("propose_layout", {
 
     const content: { type: "text"; text: string }[] = [{ type: "text", text: lines.join("\n") }];
 
+    const structured: Record<string, unknown> = { status: r.status };
+    if (r.summary) structured.summary = r.summary;
+    if (r.changes?.length) structured.changes = r.changes;
+    if (r.layout) structured.layout = r.layout;
+
     if (r.image) {
       const dir = join(tmpdir(), "consult-user-sketch");
       mkdirSync(dir, { recursive: true });
       const svgPath = join(dir, `layout-${Date.now()}.svg`);
       writeFileSync(svgPath, r.image);
       content.push({ type: "text", text: `\nImage: ${svgPath}` });
+      structured.imagePath = svgPath;
     }
 
-    return { content };
+    return { content, structuredContent: structured };
   } finally {
     clearTimeout(timeout);
     proposeLayoutActive = false;

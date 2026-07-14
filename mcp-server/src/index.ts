@@ -573,7 +573,8 @@ const proposeLayoutTool = server.registerTool("propose_layout", {
       y: z.number().int().min(0),
       text: z.string().min(1).max(100),
     })).optional().describe("Numbered callout markers at grid coordinates with legend text."),
-    project_path: z.string().optional(),
+    project_path: z.string().optional()
+      .describe("Absolute project path, shown as a badge. Cached for the session after the first call."),
   }),
 }, async (p, extra) => {
   if (isHeadless()) {

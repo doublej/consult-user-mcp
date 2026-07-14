@@ -7,6 +7,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.5.0] (macOS) - 2026-07-14
+
+### Added
+- Every tool now returns machine-readable structured responses, so agents reliably recognize answers, snoozes, cancellations, and feedback notes — even in clients that trim long instructions
+- Tools now declare display titles and behavior hints (read-only, non-destructive), so clients can show friendlier names and skip unnecessary permission prompts
+- Every tool parameter is now documented directly in the schema, so agents fill in dialogs correctly without guessing at field semantics
+
+### Changed
+- Base prompt v2.15.0 puts response-handling rules first, so critical guidance survives clients that truncate long instructions
+- The layout editor tool is no longer offered on Windows, where it cannot run
+
+### Fixed
+- Away (AFK) mode now tells the agent to proceed with sensible defaults instead of pointing it at a disabled question tool
+- The MCP server now reports its real version to connected clients
+
 ## [2.4.0] (macOS) - 2026-07-07
 
 ### Added

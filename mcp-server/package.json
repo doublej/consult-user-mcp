@@ -1,6 +1,6 @@
 {
   "name": "consult-user-mcp-server",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "mcpName": "io.github.doublej/consult-user",
   "description": "Native dialog system for MCP servers — confirm, pick, text input, forms, notifications, and value tweaking via native OS dialogs",
   "type": "module",

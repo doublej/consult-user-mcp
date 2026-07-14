@@ -3,6 +3,21 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.5.0",
+      "platform": "macos",
+      "date": "2026-07-14",
+      "highlight": "Smarter tool briefing for agents — structured responses and self-documenting schemas",
+      "changes": [
+        { "text": "Every tool now returns machine-readable structured responses, so agents reliably recognize answers, snoozes, cancellations, and feedback notes — even in clients that trim long instructions", "type": "added", "scope": "server", "pane": "general", "featured": true, "starred": true },
+        { "text": "Tools now declare display titles and behavior hints (read-only, non-destructive), so clients can show friendlier names and skip unnecessary permission prompts", "type": "added", "scope": "server", "pane": "general", "featured": true },
+        { "text": "Every tool parameter is now documented directly in the schema, so agents fill in dialogs correctly without guessing at field semantics", "type": "added", "scope": "server", "pane": "general" },
+        { "text": "Base prompt v2.15.0 puts response-handling rules first, so critical guidance survives clients that truncate long instructions", "type": "changed", "scope": "server", "pane": "general", "featured": true },
+        { "text": "Away (AFK) mode now tells the agent to proceed with sensible defaults instead of pointing it at a disabled question tool", "type": "fixed", "scope": "server", "pane": "general" },
+        { "text": "The layout editor tool is no longer offered on Windows, where it cannot run", "type": "changed", "scope": "server", "pane": "layout" },
+        { "text": "The MCP server now reports its real version to connected clients", "type": "fixed", "scope": "server", "pane": "general" }
+      ]
+    },
+    {
       "version": "2.4.0",
       "platform": "macos",
       "date": "2026-07-07",

@@ -91,7 +91,13 @@ struct FeedbackPane: View {
             editorSection
             footer
         }
-        .frame(minWidth: 300, idealWidth: 360, maxWidth: 420)
+        // Fixed width, deliberately: a flexible range here made the container
+        // HStack resolve wider than NSHostingView.fittingSize (the window is
+        // sized from ideals, but at render time the HStack splits the proposal
+        // evenly and the pane accepted more while the content column refused
+        // less than its minWidth) — the 30pt overflow escaped the unclipped
+        // hosting view and broke the card edges.
+        .frame(width: 360)
         .background(Theme.Colors.cardBackground)
         .overlay(
             Rectangle()

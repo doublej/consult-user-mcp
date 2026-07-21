@@ -270,18 +270,10 @@ struct FeedbackEditor: NSViewRepresentable {
         if textView.string != text {
             textView.string = text
         }
-        // Pane just appeared → take focus so the user can type immediately.
-        if !context.coordinator.didAutoFocus {
-            context.coordinator.didAutoFocus = true
-            DispatchQueue.main.async {
-                textView.window?.makeFirstResponder(textView)
-            }
-        }
     }
 
     final class Coordinator: NSObject, NSTextViewDelegate {
         @Binding var text: String
-        var didAutoFocus = false
 
         init(text: Binding<String>) {
             self._text = text
@@ -300,6 +292,14 @@ final class FeedbackEditorTextView: NSTextView {
     override var mouseDownCanMoveWindow: Bool { false }
     override var acceptsFirstResponder: Bool { true }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    /// Take focus the instant the pane lands in the window — synchronously,
+    /// not via an async hop — so keystrokes racing the pane-open animation
+    /// reach the editor instead of a stale first responder.
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        window?.makeFirstResponder(self)
+    }
 }
 
 /// NSScrollView wrapper — also has to refuse window-drag so clicks

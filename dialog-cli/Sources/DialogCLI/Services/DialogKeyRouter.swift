@@ -84,8 +84,13 @@ enum DialogKeyRouter {
                 }
             }
 
-            // 4. Character hotkeys (only when not editing text).
-            if !editingText {
+            // 4. Character hotkeys (only when not editing text AND no
+            //    feedback pane is open). The pane check is deliberate:
+            //    while the pane is up the user's intent is typing, and
+            //    focus may still be in flight to the editor — the pane
+            //    state flips synchronously inside the opening keystroke,
+            //    so unlike the first-responder check it cannot race.
+            if !editingText && !isFeedbackPaneOpen() {
                 if keyCode == KeyCode.s && expandedTool.wrappedValue != .snooze {
                     toggleSnooze()
                     return true

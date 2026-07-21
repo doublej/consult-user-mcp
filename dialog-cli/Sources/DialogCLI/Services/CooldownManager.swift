@@ -63,6 +63,7 @@ final class CooldownManager {
         keyCode == KeyCode.returnKey ||
         keyCode == KeyCode.s ||
         keyCode == KeyCode.f ||
+        keyCode == KeyCode.a ||
         keyCode == KeyCode.space
     }
 

@@ -88,6 +88,15 @@ class WindowSizeObserver: NSObject {
                 hostingView.animator().frame = newHostingFrame
                 bgView.animator().frame = newBgFrame
             }
+
+            if ProcessInfo.processInfo.environment["DIALOG_TEST_DEBUG_LAYOUT"] != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    let fs = hostingView.fittingSize
+                    fputs("LAYOUT window=\(window.frame.width)x\(window.frame.height) " +
+                          "hosting=\(hostingView.frame) fitting=\(fs) " +
+                          "subviews=\(hostingView.subviews.map { $0.frame })\n", stderr)
+                }
+            }
         }
     }
 

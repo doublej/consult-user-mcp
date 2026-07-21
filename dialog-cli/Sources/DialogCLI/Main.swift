@@ -127,6 +127,9 @@ static func run() {
         manager.testPane = testPane
     }
 
+    // Automated keystroke injection (for automated testing)
+    TestKeyDriver.installIfRequested()
+
     guard let jsonData = jsonInput.data(using: .utf8) else {
         fputs("Invalid JSON input\n", stderr)
         exit(1)

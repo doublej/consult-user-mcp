@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.5.1] (macOS) - 2026-07-21
+
+### Fixed
+- Typing in the feedback pane no longer triggers keyboard shortcuts — even the first characters typed right after opening it land in your note instead of toggling the snooze panel or opening menus
+- The feedback pane no longer breaks the dialog layout — toolbar edges sticking out past the rounded corners and clipped buttons on right-positioned dialogs are gone
+- The feedback editor is focused the instant the pane opens, so you can start typing immediately
+- Fast typists can no longer accidentally open the ask-differently menu while a dialog is still appearing
+
 ## [2.5.0] (macOS) - 2026-07-14
 
 ### Added

@@ -3,18 +3,92 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.5.1",
+      "platform": "macos",
+      "date": "2026-07-21",
+      "highlight": "Feedback pane fixes — typing no longer fights the hotkeys or breaks the layout",
+      "changes": [
+        {
+          "text": "Typing in the feedback pane no longer triggers keyboard shortcuts — even the first characters typed right after opening it land in your note instead of toggling the snooze panel or opening menus",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "The feedback pane no longer breaks the dialog layout — toolbar edges sticking out past the rounded corners and clipped buttons on right-positioned dialogs are gone",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "The feedback editor is focused the instant the pane opens, so you can start typing immediately",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        },
+        {
+          "text": "Fast typists can no longer accidentally open the ask-differently menu while a dialog is still appearing",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        }
+      ]
+    },
+    {
       "version": "2.5.0",
       "platform": "macos",
       "date": "2026-07-14",
       "highlight": "Smarter tool briefing for agents — structured responses and self-documenting schemas",
       "changes": [
-        { "text": "Every tool now returns machine-readable structured responses, so agents reliably recognize answers, snoozes, cancellations, and feedback notes — even in clients that trim long instructions", "type": "added", "scope": "server", "pane": "general", "featured": true, "starred": true },
-        { "text": "Tools now declare display titles and behavior hints (read-only, non-destructive), so clients can show friendlier names and skip unnecessary permission prompts", "type": "added", "scope": "server", "pane": "general", "featured": true },
-        { "text": "Every tool parameter is now documented directly in the schema, so agents fill in dialogs correctly without guessing at field semantics", "type": "added", "scope": "server", "pane": "general" },
-        { "text": "Base prompt v2.15.0 puts response-handling rules first, so critical guidance survives clients that truncate long instructions", "type": "changed", "scope": "server", "pane": "general", "featured": true },
-        { "text": "Away (AFK) mode now tells the agent to proceed with sensible defaults instead of pointing it at a disabled question tool", "type": "fixed", "scope": "server", "pane": "general" },
-        { "text": "The layout editor tool is no longer offered on Windows, where it cannot run", "type": "changed", "scope": "server", "pane": "layout" },
-        { "text": "The MCP server now reports its real version to connected clients", "type": "fixed", "scope": "server", "pane": "general" }
+        {
+          "text": "Every tool now returns machine-readable structured responses, so agents reliably recognize answers, snoozes, cancellations, and feedback notes — even in clients that trim long instructions",
+          "type": "added",
+          "scope": "server",
+          "pane": "general",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Tools now declare display titles and behavior hints (read-only, non-destructive), so clients can show friendlier names and skip unnecessary permission prompts",
+          "type": "added",
+          "scope": "server",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "Every tool parameter is now documented directly in the schema, so agents fill in dialogs correctly without guessing at field semantics",
+          "type": "added",
+          "scope": "server",
+          "pane": "general"
+        },
+        {
+          "text": "Base prompt v2.15.0 puts response-handling rules first, so critical guidance survives clients that truncate long instructions",
+          "type": "changed",
+          "scope": "server",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "Away (AFK) mode now tells the agent to proceed with sensible defaults instead of pointing it at a disabled question tool",
+          "type": "fixed",
+          "scope": "server",
+          "pane": "general"
+        },
+        {
+          "text": "The layout editor tool is no longer offered on Windows, where it cannot run",
+          "type": "changed",
+          "scope": "server",
+          "pane": "layout"
+        },
+        {
+          "text": "The MCP server now reports its real version to connected clients",
+          "type": "fixed",
+          "scope": "server",
+          "pane": "general"
+        }
       ]
     },
     {
@@ -23,12 +97,46 @@
       "date": "2026-07-07",
       "highlight": "Per-question feedback pane for steering the agent",
       "changes": [
-        { "text": "Slide out a feedback pane on any dialog to leave a targeted note on a specific question — or the whole prompt — so the agent knows exactly how to adjust", "type": "added", "scope": "cli", "pane": "form", "featured": true, "starred": true },
-        { "text": "Feedback notes render markdown and show the question you're responding to right in the header", "type": "added", "scope": "cli", "pane": "form", "featured": true },
-        { "text": "Press ⌘F to open the feedback pane, including on text-input and password dialogs", "type": "added", "scope": "cli", "pane": "text" },
-        { "text": "Tall forms and pick lists no longer get stuck endlessly resizing between two layouts", "type": "fixed", "scope": "cli", "pane": "form", "featured": true },
-        { "text": "The base prompt is now delivered to the agent automatically each session through the MCP server, instead of being copied into your global CLAUDE.md", "type": "changed", "scope": "server", "pane": "general" },
-        { "text": "Updated baseprompt to v2.13.0 with per-question feedback guidance", "type": "changed", "scope": "server", "pane": "general" }
+        {
+          "text": "Slide out a feedback pane on any dialog to leave a targeted note on a specific question — or the whole prompt — so the agent knows exactly how to adjust",
+          "type": "added",
+          "scope": "cli",
+          "pane": "form",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Feedback notes render markdown and show the question you're responding to right in the header",
+          "type": "added",
+          "scope": "cli",
+          "pane": "form",
+          "featured": true
+        },
+        {
+          "text": "Press ⌘F to open the feedback pane, including on text-input and password dialogs",
+          "type": "added",
+          "scope": "cli",
+          "pane": "text"
+        },
+        {
+          "text": "Tall forms and pick lists no longer get stuck endlessly resizing between two layouts",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "form",
+          "featured": true
+        },
+        {
+          "text": "The base prompt is now delivered to the agent automatically each session through the MCP server, instead of being copied into your global CLAUDE.md",
+          "type": "changed",
+          "scope": "server",
+          "pane": "general"
+        },
+        {
+          "text": "Updated baseprompt to v2.13.0 with per-question feedback guidance",
+          "type": "changed",
+          "scope": "server",
+          "pane": "general"
+        }
       ]
     },
     {
@@ -37,11 +145,40 @@
       "date": "2026-05-21",
       "highlight": "Away (AFK) mode with auto-triggers for sleep and inactivity",
       "changes": [
-        { "text": "New Away (AFK) mode auto-responds to interactive dialogs so the agent falls back to its native question tool instead of waiting on you", "type": "added", "scope": "app", "pane": "general", "featured": true, "starred": true },
-        { "text": "Away can turn on automatically when the Mac sleeps and turn off when it wakes", "type": "added", "scope": "app", "pane": "general", "featured": true },
-        { "text": "Away can turn on after a configurable period of keyboard and mouse inactivity (1–60 minutes), and clears as soon as you're back", "type": "added", "scope": "app", "pane": "general", "featured": true },
-        { "text": "Right-click the menu bar icon to toggle Away (AFK) without opening Settings", "type": "added", "scope": "app", "pane": "general" },
-        { "text": "Menu bar icon and right-click menu icons now adapt correctly to light and dark menu bars", "type": "fixed", "scope": "app", "pane": "general" }
+        {
+          "text": "New Away (AFK) mode auto-responds to interactive dialogs so the agent falls back to its native question tool instead of waiting on you",
+          "type": "added",
+          "scope": "app",
+          "pane": "general",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Away can turn on automatically when the Mac sleeps and turn off when it wakes",
+          "type": "added",
+          "scope": "app",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "Away can turn on after a configurable period of keyboard and mouse inactivity (1–60 minutes), and clears as soon as you're back",
+          "type": "added",
+          "scope": "app",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "Right-click the menu bar icon to toggle Away (AFK) without opening Settings",
+          "type": "added",
+          "scope": "app",
+          "pane": "general"
+        },
+        {
+          "text": "Menu bar icon and right-click menu icons now adapt correctly to light and dark menu bars",
+          "type": "fixed",
+          "scope": "app",
+          "pane": "general"
+        }
       ]
     },
     {
@@ -50,11 +187,38 @@
       "date": "2026-05-01",
       "highlight": "Form reliability and tweak slider precision",
       "changes": [
-        { "text": "Tweak sliders now disambiguate same-pattern matches in code, picking the right value when multiple identical literals exist", "type": "fixed", "scope": "cli", "pane": "tweak", "featured": true },
-        { "text": "Wizard and accordion forms reliably count answers when only the Other field is filled", "type": "fixed", "scope": "cli", "pane": "form", "featured": true },
-        { "text": "Login Items no longer accumulates duplicate entries when the app starts", "type": "fixed", "scope": "app", "pane": "general" },
-        { "text": "Accordion auto-advance, single-select clearing, and other-text behavior now stay consistent across all form types", "type": "changed", "scope": "cli", "pane": "form" },
-        { "text": "Updated baseprompt to v2.12.1 with clearer guidance for current selection and disambiguation", "type": "changed", "scope": "server", "pane": "general" }
+        {
+          "text": "Tweak sliders now disambiguate same-pattern matches in code, picking the right value when multiple identical literals exist",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "tweak",
+          "featured": true
+        },
+        {
+          "text": "Wizard and accordion forms reliably count answers when only the Other field is filled",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "form",
+          "featured": true
+        },
+        {
+          "text": "Login Items no longer accumulates duplicate entries when the app starts",
+          "type": "fixed",
+          "scope": "app",
+          "pane": "general"
+        },
+        {
+          "text": "Accordion auto-advance, single-select clearing, and other-text behavior now stay consistent across all form types",
+          "type": "changed",
+          "scope": "cli",
+          "pane": "form"
+        },
+        {
+          "text": "Updated baseprompt to v2.12.1 with clearer guidance for current selection and disambiguation",
+          "type": "changed",
+          "scope": "server",
+          "pane": "general"
+        }
       ]
     },
     {
@@ -63,7 +227,13 @@
       "date": "2026-03-22",
       "highlight": "Dialog body text now visible on macOS Sequoia",
       "changes": [
-        { "text": "Dialog body text now renders reliably on macOS Sequoia instead of collapsing to zero height", "type": "fixed", "scope": "cli", "pane": "general", "featured": true }
+        {
+          "text": "Dialog body text now renders reliably on macOS Sequoia instead of collapsing to zero height",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        }
       ]
     },
     {
@@ -72,8 +242,20 @@
       "date": "2026-03-10",
       "highlight": "Keyboard shortcuts and markdown text fixes",
       "changes": [
-        { "text": "Keyboard shortcuts (S, F, A) no longer fire while typing in text fields", "type": "fixed", "scope": "cli", "pane": "general", "featured": true },
-        { "text": "Dialog body text now renders markdown formatting including newlines and bullet points", "type": "fixed", "scope": "cli", "pane": "general", "featured": true }
+        {
+          "text": "Keyboard shortcuts (S, F, A) no longer fire while typing in text fields",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "Dialog body text now renders markdown formatting including newlines and bullet points",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        }
       ]
     },
     {
@@ -82,7 +264,13 @@
       "date": "2026-03-08",
       "highlight": "Dialog text wrapping fix",
       "changes": [
-        { "text": "Dialogs with long descriptions now wrap text correctly instead of expanding wider than the screen", "type": "fixed", "scope": "cli", "pane": "general", "featured": true }
+        {
+          "text": "Dialogs with long descriptions now wrap text correctly instead of expanding wider than the screen",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        }
       ]
     },
     {
@@ -91,12 +279,46 @@
       "date": "2026-03-08",
       "highlight": "Precision slider with vertical sensitivity and tweak panel improvements",
       "changes": [
-        { "text": "Custom scrub slider with vertical-distance sensitivity — drag up while sliding for fine-grained control", "type": "added", "scope": "cli", "pane": "tweak", "featured": true },
-        { "text": "Cogwheel settings button on each parameter card lets you reset values and expand slider min/max range", "type": "added", "scope": "cli", "pane": "tweak", "featured": true },
-        { "text": "Show Edits console now opens as a separate floating panel that doesn't resize or disturb the main dialog", "type": "changed", "scope": "cli", "pane": "tweak", "featured": true },
-        { "text": "Wizard form body text and question text now render reliably on macOS Sequoia", "type": "fixed", "scope": "cli", "pane": "wizard", "featured": true },
-        { "text": "Parameter labels now wrap instead of truncating at 100px, with flexible width up to 120px", "type": "changed", "scope": "cli", "pane": "tweak" },
-        { "text": "Framework badge, replay animations toggle, and show edits button are now grouped together", "type": "changed", "scope": "cli", "pane": "tweak" }
+        {
+          "text": "Custom scrub slider with vertical-distance sensitivity — drag up while sliding for fine-grained control",
+          "type": "added",
+          "scope": "cli",
+          "pane": "tweak",
+          "featured": true
+        },
+        {
+          "text": "Cogwheel settings button on each parameter card lets you reset values and expand slider min/max range",
+          "type": "added",
+          "scope": "cli",
+          "pane": "tweak",
+          "featured": true
+        },
+        {
+          "text": "Show Edits console now opens as a separate floating panel that doesn't resize or disturb the main dialog",
+          "type": "changed",
+          "scope": "cli",
+          "pane": "tweak",
+          "featured": true
+        },
+        {
+          "text": "Wizard form body text and question text now render reliably on macOS Sequoia",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "wizard",
+          "featured": true
+        },
+        {
+          "text": "Parameter labels now wrap instead of truncating at 100px, with flexible width up to 120px",
+          "type": "changed",
+          "scope": "cli",
+          "pane": "tweak"
+        },
+        {
+          "text": "Framework badge, replay animations toggle, and show edits button are now grouped together",
+          "type": "changed",
+          "scope": "cli",
+          "pane": "tweak"
+        }
       ]
     },
     {
@@ -105,9 +327,26 @@
       "date": "2026-03-03",
       "highlight": "Wizard text and tweak footer stability fixes",
       "changes": [
-        { "text": "Wizard form body text and question text now appear reliably on first render", "type": "fixed", "scope": "cli", "pane": "wizard", "featured": true },
-        { "text": "Tweak dialog footer no longer grows when switching between save and cancel states", "type": "fixed", "scope": "cli", "pane": "tweak", "featured": true },
-        { "text": "Smaller blocks in ASCII layout sketches now render on top of larger overlapping blocks", "type": "fixed", "scope": "cli", "pane": "layout" }
+        {
+          "text": "Wizard form body text and question text now appear reliably on first render",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "wizard",
+          "featured": true
+        },
+        {
+          "text": "Tweak dialog footer no longer grows when switching between save and cancel states",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "tweak",
+          "featured": true
+        },
+        {
+          "text": "Smaller blocks in ASCII layout sketches now render on top of larger overlapping blocks",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "layout"
+        }
       ]
     },
     {
@@ -116,10 +355,32 @@
       "date": "2026-03-03",
       "highlight": "Layout editor drag and grid improvements",
       "changes": [
-        { "text": "Annotations now move with their parent block when dragged in the layout editor", "type": "added", "scope": "cli", "pane": "layout", "featured": true },
-        { "text": "Layout editor grid cells are now square, maintaining proper aspect ratio instead of stretching to fill", "type": "fixed", "scope": "cli", "pane": "layout", "featured": true },
-        { "text": "Drop-to-stash hint now floats as an overlay instead of pushing layout content around", "type": "fixed", "scope": "cli", "pane": "layout" },
-        { "text": "Annotation legend now aligns to the left edge consistently", "type": "fixed", "scope": "cli", "pane": "layout" }
+        {
+          "text": "Annotations now move with their parent block when dragged in the layout editor",
+          "type": "added",
+          "scope": "cli",
+          "pane": "layout",
+          "featured": true
+        },
+        {
+          "text": "Layout editor grid cells are now square, maintaining proper aspect ratio instead of stretching to fill",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "layout",
+          "featured": true
+        },
+        {
+          "text": "Drop-to-stash hint now floats as an overlay instead of pushing layout content around",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "layout"
+        },
+        {
+          "text": "Annotation legend now aligns to the left edge consistently",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "layout"
+        }
       ]
     },
     {
@@ -128,10 +389,31 @@
       "date": "2026-03-03",
       "highlight": "Keyboard hotkeys no longer fire while typing",
       "changes": [
-        { "text": "Keyboard hotkeys (S, F, A) no longer trigger while typing in the Other text field", "type": "fixed", "scope": "cli", "pane": "general", "featured": true },
-        { "text": "Arrow keys and Tab now work normally inside text fields instead of moving dialog focus", "type": "fixed", "scope": "cli", "pane": "general" },
-        { "text": "Clicking the Other card now auto-focuses the text field for immediate typing", "type": "fixed", "scope": "cli", "pane": "pick" },
-        { "text": "Left/right arrow keys in wizard forms no longer navigate steps while editing text", "type": "fixed", "scope": "cli", "pane": "wizard" }
+        {
+          "text": "Keyboard hotkeys (S, F, A) no longer trigger while typing in the Other text field",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "Arrow keys and Tab now work normally inside text fields instead of moving dialog focus",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        },
+        {
+          "text": "Clicking the Other card now auto-focuses the text field for immediate typing",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "pick"
+        },
+        {
+          "text": "Left/right arrow keys in wizard forms no longer navigate steps while editing text",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "wizard"
+        }
       ]
     },
     {
@@ -140,9 +422,26 @@
       "date": "2026-03-02",
       "highlight": "Report button everywhere",
       "changes": [
-        { "text": "Report button renamed from \"Feedback\" to \"Report\" for clarity", "type": "changed", "scope": "cli", "pane": "general", "featured": true },
-        { "text": "Notification and preview panes now include a report button for quick bug reporting", "type": "added", "scope": "cli", "pane": "notify", "featured": true },
-        { "text": "Layout sketch editor now includes a report button in the title bar", "type": "added", "scope": "cli", "pane": "layout" }
+        {
+          "text": "Report button renamed from \"Feedback\" to \"Report\" for clarity",
+          "type": "changed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "Notification and preview panes now include a report button for quick bug reporting",
+          "type": "added",
+          "scope": "cli",
+          "pane": "notify",
+          "featured": true
+        },
+        {
+          "text": "Layout sketch editor now includes a report button in the title bar",
+          "type": "added",
+          "scope": "cli",
+          "pane": "layout"
+        }
       ]
     },
     {
@@ -151,15 +450,63 @@
       "date": "2026-03-02",
       "highlight": "Interactive layout sketch editor",
       "changes": [
-        { "text": "New `propose_layout` tool opens an interactive grid editor where users can drag, resize, and arrange UI blocks visually", "type": "added", "scope": "server", "pane": "layout", "featured": true, "starred": true },
-        { "text": "Layout blocks support semantic roles (header, sidebar, canvas, footer), importance hierarchy, and elevation shadows", "type": "added", "scope": "cli", "pane": "layout", "featured": true },
-        { "text": "Device frame chrome (browser, phone, tablet) wraps the sketch canvas for realistic previews", "type": "added", "scope": "cli", "pane": "layout", "featured": true },
-        { "text": "Annotation callouts with numbered markers and a legend can be added to layouts", "type": "added", "scope": "cli", "pane": "layout" },
-        { "text": "Alignment guide lines appear on hover and drag to help position blocks precisely", "type": "added", "scope": "cli", "pane": "layout" },
-        { "text": "Wireframe content shapes (text, image, button, input, list, chart, etc.) render inside blocks", "type": "added", "scope": "cli", "pane": "layout" },
-        { "text": "Layouts can be defined as a semantic structure tree with direction and constraints as an alternative to explicit grid coordinates", "type": "added", "scope": "server", "pane": "layout" },
-        { "text": "Layout results include structured data, ASCII art, and SVG output", "type": "added", "scope": "server", "pane": "layout" },
-        { "text": "Base prompt updated to v2.12.0 with positive framing and emphasis rebalancing", "type": "changed", "scope": "prompt" }
+        {
+          "text": "New `propose_layout` tool opens an interactive grid editor where users can drag, resize, and arrange UI blocks visually",
+          "type": "added",
+          "scope": "server",
+          "pane": "layout",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Layout blocks support semantic roles (header, sidebar, canvas, footer), importance hierarchy, and elevation shadows",
+          "type": "added",
+          "scope": "cli",
+          "pane": "layout",
+          "featured": true
+        },
+        {
+          "text": "Device frame chrome (browser, phone, tablet) wraps the sketch canvas for realistic previews",
+          "type": "added",
+          "scope": "cli",
+          "pane": "layout",
+          "featured": true
+        },
+        {
+          "text": "Annotation callouts with numbered markers and a legend can be added to layouts",
+          "type": "added",
+          "scope": "cli",
+          "pane": "layout"
+        },
+        {
+          "text": "Alignment guide lines appear on hover and drag to help position blocks precisely",
+          "type": "added",
+          "scope": "cli",
+          "pane": "layout"
+        },
+        {
+          "text": "Wireframe content shapes (text, image, button, input, list, chart, etc.) render inside blocks",
+          "type": "added",
+          "scope": "cli",
+          "pane": "layout"
+        },
+        {
+          "text": "Layouts can be defined as a semantic structure tree with direction and constraints as an alternative to explicit grid coordinates",
+          "type": "added",
+          "scope": "server",
+          "pane": "layout"
+        },
+        {
+          "text": "Layout results include structured data, ASCII art, and SVG output",
+          "type": "added",
+          "scope": "server",
+          "pane": "layout"
+        },
+        {
+          "text": "Base prompt updated to v2.12.0 with positive framing and emphasis rebalancing",
+          "type": "changed",
+          "scope": "prompt"
+        }
       ]
     },
     {
@@ -168,10 +515,32 @@
       "date": "2026-03-01",
       "highlight": "\"Other\" option and click-through focus",
       "changes": [
-        { "text": "Choose and form dialogs now include an \"Other\" option so users can type a custom answer not in the predefined list", "type": "added", "scope": "cli", "pane": "pick", "featured": true, "starred": true },
-        { "text": "Clicking an unfocused dialog now both activates the window and registers the action in a single click", "type": "fixed", "scope": "cli", "pane": "general", "featured": true },
-        { "text": "Clickable elements (choice cards, buttons, accordion headers) now show a pointer cursor on hover", "type": "fixed", "scope": "cli", "pane": "general" },
-        { "text": "Base prompt updated to v2.11.0 with \"Other\" option documentation", "type": "changed", "scope": "prompt" }
+        {
+          "text": "Choose and form dialogs now include an \"Other\" option so users can type a custom answer not in the predefined list",
+          "type": "added",
+          "scope": "cli",
+          "pane": "pick",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Clicking an unfocused dialog now both activates the window and registers the action in a single click",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "Clickable elements (choice cards, buttons, accordion headers) now show a pointer cursor on hover",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        },
+        {
+          "text": "Base prompt updated to v2.11.0 with \"Other\" option documentation",
+          "type": "changed",
+          "scope": "prompt"
+        }
       ]
     },
     {
@@ -180,10 +549,28 @@
       "date": "2026-03-01",
       "highlight": "Text rendering fixes",
       "changes": [
-        { "text": "Buttons with long labels now truncate cleanly instead of overflowing", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Choice card subtitles now wrap at the correct width", "type": "fixed", "scope": "cli" },
-        { "text": "Dialog body text now sizes correctly after text wrapping, preventing cut-off content", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Dialog header text no longer extends past the window edges", "type": "fixed", "scope": "cli" }
+        {
+          "text": "Buttons with long labels now truncate cleanly instead of overflowing",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Choice card subtitles now wrap at the correct width",
+          "type": "fixed",
+          "scope": "cli"
+        },
+        {
+          "text": "Dialog body text now sizes correctly after text wrapping, preventing cut-off content",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Dialog header text no longer extends past the window edges",
+          "type": "fixed",
+          "scope": "cli"
+        }
       ]
     },
     {
@@ -192,12 +579,40 @@
       "date": "2026-02-28",
       "highlight": "In-dialog feedback and GitHub issue reporting",
       "changes": [
-        { "text": "Every dialog now has a Feedback button that opens a two-step issue reporter with optional screenshot", "type": "added", "scope": "cli", "featured": true, "starred": true },
-        { "text": "Feedback responses now include any partial input so the agent has full context", "type": "fixed", "scope": "server", "featured": true },
-        { "text": "Dialog text now adapts to window width instead of being capped at a fixed pixel size", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Dialog windows now anchor to their position edge when resizing", "type": "fixed", "scope": "cli" },
-        { "text": "Notify and preview dialogs now scroll long text instead of clipping it", "type": "fixed", "scope": "cli" },
-        { "text": "Build script now generates the app icon automatically on fresh clones", "type": "fixed", "scope": "app" }
+        {
+          "text": "Every dialog now has a Feedback button that opens a two-step issue reporter with optional screenshot",
+          "type": "added",
+          "scope": "cli",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Feedback responses now include any partial input so the agent has full context",
+          "type": "fixed",
+          "scope": "server",
+          "featured": true
+        },
+        {
+          "text": "Dialog text now adapts to window width instead of being capped at a fixed pixel size",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Dialog windows now anchor to their position edge when resizing",
+          "type": "fixed",
+          "scope": "cli"
+        },
+        {
+          "text": "Notify and preview dialogs now scroll long text instead of clipping it",
+          "type": "fixed",
+          "scope": "cli"
+        },
+        {
+          "text": "Build script now generates the app icon automatically on fresh clones",
+          "type": "fixed",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -206,11 +621,35 @@
       "date": "2026-02-25",
       "highlight": "Mixed question types in wizard and accordion forms",
       "changes": [
-        { "text": "Form dialogs now support mixed question types — combine choice selectors and text inputs in a single wizard or accordion", "type": "added", "scope": "server", "featured": true, "starred": true },
-        { "text": "Text questions in forms support placeholder text and hidden/password input mode", "type": "added", "scope": "server", "featured": true },
-        { "text": "Dialog window now resizes correctly when switching between question types of different heights", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Debug menu now includes Wizard Mixed and Accordion Mixed test cases", "type": "added", "scope": "app" },
-        { "text": "Base prompt updated to v2.10.0 with mixed question type documentation and examples", "type": "changed", "scope": "prompt" }
+        {
+          "text": "Form dialogs now support mixed question types — combine choice selectors and text inputs in a single wizard or accordion",
+          "type": "added",
+          "scope": "server",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Text questions in forms support placeholder text and hidden/password input mode",
+          "type": "added",
+          "scope": "server",
+          "featured": true
+        },
+        {
+          "text": "Dialog window now resizes correctly when switching between question types of different heights",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Debug menu now includes Wizard Mixed and Accordion Mixed test cases",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Base prompt updated to v2.10.0 with mixed question type documentation and examples",
+          "type": "changed",
+          "scope": "prompt"
+        }
       ]
     },
     {
@@ -219,9 +658,23 @@
       "date": "2026-02-24",
       "highlight": "Launch at login and Cmd+Tab support",
       "changes": [
-        { "text": "New 'Start with Mac' toggle in General settings to automatically launch at login", "type": "added", "scope": "app", "featured": true },
-        { "text": "Settings window now appears in Cmd+Tab when open", "type": "added", "scope": "app", "featured": true },
-        { "text": "Uninstall removes the login item registration when cleaning up", "type": "added", "scope": "app" }
+        {
+          "text": "New 'Start with Mac' toggle in General settings to automatically launch at login",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Settings window now appears in Cmd+Tab when open",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Uninstall removes the login item registration when cleaning up",
+          "type": "added",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -230,14 +683,48 @@
       "date": "2026-02-24",
       "highlight": "Tweak pane animation replay and dialog sizing fixes",
       "changes": [
-        { "text": "Tweak pane now detects CSS framework (Tailwind, Bootstrap, etc.) and shows it in the header", "type": "added", "scope": "cli" },
-        { "text": "Tweak pane replays CSS animations after each value change via WebSocket broadcast", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Debug menu now loads test cases from JSON files instead of hardcoded data", "type": "changed", "scope": "app" },
-        { "text": "Dialog windows now reliably auto-size to fit their content on every step change", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Wizard and form question text now appears immediately on first load", "type": "fixed", "scope": "cli" },
-        { "text": "Choice card subtitles no longer overlap with titles", "type": "fixed", "scope": "cli" },
-        { "text": "Windows dialogs now use selectable text for markdown content", "type": "added", "scope": "cli" },
-        { "text": "Base prompt updated with tweak animation replay instructions (v2.9.0)", "type": "changed", "scope": "prompt" }
+        {
+          "text": "Tweak pane now detects CSS framework (Tailwind, Bootstrap, etc.) and shows it in the header",
+          "type": "added",
+          "scope": "cli"
+        },
+        {
+          "text": "Tweak pane replays CSS animations after each value change via WebSocket broadcast",
+          "type": "added",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Debug menu now loads test cases from JSON files instead of hardcoded data",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Dialog windows now reliably auto-size to fit their content on every step change",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Wizard and form question text now appears immediately on first load",
+          "type": "fixed",
+          "scope": "cli"
+        },
+        {
+          "text": "Choice card subtitles no longer overlap with titles",
+          "type": "fixed",
+          "scope": "cli"
+        },
+        {
+          "text": "Windows dialogs now use selectable text for markdown content",
+          "type": "added",
+          "scope": "cli"
+        },
+        {
+          "text": "Base prompt updated with tweak animation replay instructions (v2.9.0)",
+          "type": "changed",
+          "scope": "prompt"
+        }
       ]
     },
     {
@@ -246,7 +733,11 @@
       "date": "2026-02-23",
       "highlight": "Clearer uninstall descriptions",
       "changes": [
-        { "text": "Uninstall UI now clarifies that only consult-user-mcp entries are removed from config files, not the entire files", "type": "fixed", "scope": "app" }
+        {
+          "text": "Uninstall UI now clarifies that only consult-user-mcp entries are removed from config files, not the entire files",
+          "type": "fixed",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -255,10 +746,27 @@
       "date": "2026-02-23",
       "highlight": "Uninstall UI and CLI scripts",
       "changes": [
-        { "text": "Settings now includes an Uninstall section to completely remove the app and all MCP configurations", "type": "added", "scope": "app", "featured": true },
-        { "text": "Uninstaller shows exactly what will be removed before proceeding", "type": "added", "scope": "app" },
-        { "text": "Option to keep settings and dialog history when uninstalling", "type": "added", "scope": "app" },
-        { "text": "CLI uninstall scripts (uninstall.sh for macOS, uninstall.ps1 for Windows) as fallback options", "type": "added", "scope": "app" }
+        {
+          "text": "Settings now includes an Uninstall section to completely remove the app and all MCP configurations",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Uninstaller shows exactly what will be removed before proceeding",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Option to keep settings and dialog history when uninstalling",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "CLI uninstall scripts (uninstall.sh for macOS, uninstall.ps1 for Windows) as fallback options",
+          "type": "added",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -267,12 +775,39 @@
       "date": "2026-02-22",
       "highlight": "Automatic prompt update checks and dialog titles",
       "changes": [
-        { "text": "App checks on launch if usage hints in CLAUDE.md are outdated and offers to update them", "type": "added", "scope": "app", "featured": true },
-        { "text": "Menu bar icon shows an orange badge dot when an app update is available", "type": "added", "scope": "app", "featured": true },
-        { "text": "Clicking the menu bar icon while an update is available opens the Updates tab directly", "type": "added", "scope": "app" },
-        { "text": "Updates settings now show a Usage Hints section with per-target version status and update buttons", "type": "added", "scope": "app", "featured": true },
-        { "text": "Choose and form dialogs now display a proper header with icon and title instead of plain text", "type": "changed", "scope": "cli" },
-        { "text": "Form dialogs (wizard and accordion) now support body text for additional context", "type": "added", "scope": "cli" }
+        {
+          "text": "App checks on launch if usage hints in CLAUDE.md are outdated and offers to update them",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Menu bar icon shows an orange badge dot when an app update is available",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Clicking the menu bar icon while an update is available opens the Updates tab directly",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Updates settings now show a Usage Hints section with per-target version status and update buttons",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Choose and form dialogs now display a proper header with icon and title instead of plain text",
+          "type": "changed",
+          "scope": "cli"
+        },
+        {
+          "text": "Form dialogs (wizard and accordion) now support body text for additional context",
+          "type": "added",
+          "scope": "cli"
+        }
       ]
     },
     {
@@ -281,10 +816,30 @@
       "date": "2026-02-22",
       "highlight": "Tweak tool for real-time value adjustment",
       "changes": [
-        { "text": "New tweak tool opens a slider panel for real-time numeric value tuning with live file writes", "type": "added", "scope": "server", "featured": true, "starred": true },
-        { "text": "Three parameter formats: text search patterns, CSS selector references, and direct file locations", "type": "added", "scope": "server", "featured": true },
-        { "text": "Save to File keeps live edits, Tell Agent reverts files and returns values for the agent to apply", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Base prompt restructured to v2.7.0 with 25% fewer tokens and tweak documentation", "type": "changed", "scope": "server" }
+        {
+          "text": "New tweak tool opens a slider panel for real-time numeric value tuning with live file writes",
+          "type": "added",
+          "scope": "server",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Three parameter formats: text search patterns, CSS selector references, and direct file locations",
+          "type": "added",
+          "scope": "server",
+          "featured": true
+        },
+        {
+          "text": "Save to File keeps live edits, Tell Agent reverts files and returns values for the agent to apply",
+          "type": "added",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Base prompt restructured to v2.7.0 with 25% fewer tokens and tweak documentation",
+          "type": "changed",
+          "scope": "server"
+        }
       ]
     },
     {
@@ -293,11 +848,36 @@
       "date": "2026-02-16",
       "highlight": "Ask differently, humanize responses, and review before send",
       "changes": [
-        { "text": "Ask differently: toolbar button lets you request a different dialog type mid-conversation", "type": "added", "scope": "cli", "featured": true, "starred": true },
-        { "text": "Humanize responses: answers returned as plain text instead of JSON (e.g. \"The user confirmed.\" instead of {\"answer\": true})", "type": "added", "scope": "server", "featured": true, "starred": true },
-        { "text": "Review before send: preview exactly what gets returned to the agent before it's sent", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Validate choices: agents can no longer offer \"All of the above\" options — must use multi-select instead", "type": "added", "scope": "server" },
-        { "text": "Base prompt updated to v2.2.0 with ask-differently and humanize guidance", "type": "changed", "scope": "server" }
+        {
+          "text": "Ask differently: toolbar button lets you request a different dialog type mid-conversation",
+          "type": "added",
+          "scope": "cli",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Humanize responses: answers returned as plain text instead of JSON (e.g. \"The user confirmed.\" instead of {\"answer\": true})",
+          "type": "added",
+          "scope": "server",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Review before send: preview exactly what gets returned to the agent before it's sent",
+          "type": "added",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Validate choices: agents can no longer offer \"All of the above\" options — must use multi-select instead",
+          "type": "added",
+          "scope": "server"
+        },
+        {
+          "text": "Base prompt updated to v2.2.0 with ask-differently and humanize guidance",
+          "type": "changed",
+          "scope": "server"
+        }
       ]
     },
     {
@@ -306,9 +886,22 @@
       "date": "2026-02-09",
       "highlight": "Per-platform versioning and Windows support",
       "changes": [
-        { "text": "macOS and Windows now have independent version numbers and release cycles", "type": "added", "scope": "app", "featured": true },
-        { "text": "Auto-updater now correctly identifies macOS releases when both platforms are published", "type": "changed", "scope": "app" },
-        { "text": "Install script now uses GitHub API to find the latest macOS release", "type": "changed", "scope": "cli" }
+        {
+          "text": "macOS and Windows now have independent version numbers and release cycles",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Auto-updater now correctly identifies macOS releases when both platforms are published",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Install script now uses GitHub API to find the latest macOS release",
+          "type": "changed",
+          "scope": "cli"
+        }
       ]
     },
     {
@@ -317,10 +910,27 @@
       "date": "2026-02-08",
       "highlight": "Notify now shows project badge",
       "changes": [
-        { "text": "Notifications now show the project badge when `project_path` is provided, matching all other dialog types", "type": "added", "scope": "server", "featured": true },
-        { "text": "Project path is cached across both `ask` and `notify` — set it once on either tool and all subsequent calls inherit it", "type": "changed", "scope": "server" },
-        { "text": "Base prompt updated to v2.1.0 with notify project_path guidance", "type": "changed", "scope": "server" },
-        { "text": "App now checks for updates automatically on MCP server startup", "type": "added", "scope": "app" }
+        {
+          "text": "Notifications now show the project badge when `project_path` is provided, matching all other dialog types",
+          "type": "added",
+          "scope": "server",
+          "featured": true
+        },
+        {
+          "text": "Project path is cached across both `ask` and `notify` — set it once on either tool and all subsequent calls inherit it",
+          "type": "changed",
+          "scope": "server"
+        },
+        {
+          "text": "Base prompt updated to v2.1.0 with notify project_path guidance",
+          "type": "changed",
+          "scope": "server"
+        },
+        {
+          "text": "App now checks for updates automatically on MCP server startup",
+          "type": "added",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -329,11 +939,33 @@
       "date": "2026-02-10",
       "highlight": "Installer and auto-updates",
       "changes": [
-        { "text": "Professional installer with automatic setup — no more manual zip extraction", "type": "added", "scope": "app", "featured": true },
-        { "text": "Auto-updates with delta downloads — only download what changed between versions", "type": "added", "scope": "app", "featured": true },
-        { "text": "First-run wizard automatically configures Claude Code MCP server", "type": "added", "scope": "app" },
-        { "text": "Launch at startup toggle in Settings", "type": "added", "scope": "app" },
-        { "text": "Executables renamed to cross-platform convention (dialog-cli.exe, consult-user-mcp.exe)", "type": "changed", "scope": "app" }
+        {
+          "text": "Professional installer with automatic setup — no more manual zip extraction",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Auto-updates with delta downloads — only download what changed between versions",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "First-run wizard automatically configures Claude Code MCP server",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Launch at startup toggle in Settings",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Executables renamed to cross-platform convention (dialog-cli.exe, consult-user-mcp.exe)",
+          "type": "changed",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -342,12 +974,38 @@
       "date": "2026-02-09",
       "highlight": "Initial Windows release",
       "changes": [
-        { "text": "Native Windows dialogs that let AI agents ask you questions", "type": "added", "scope": "app", "featured": true },
-        { "text": "Four dialog types: yes/no, multiple choice, text input, and multi-question wizards", "type": "added", "scope": "app", "featured": true },
-        { "text": "System tray app with settings, snooze management, and auto-updates", "type": "added", "scope": "app" },
-        { "text": "Dark-themed WPF dialogs with keyboard shortcuts and markdown support", "type": "added", "scope": "cli" },
-        { "text": "Snooze dialogs for 1-60 minutes when you're busy", "type": "added", "scope": "app" },
-        { "text": "Provide feedback to redirect the agent mid-conversation", "type": "added", "scope": "app" }
+        {
+          "text": "Native Windows dialogs that let AI agents ask you questions",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Four dialog types: yes/no, multiple choice, text input, and multi-question wizards",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "System tray app with settings, snooze management, and auto-updates",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Dark-themed WPF dialogs with keyboard shortcuts and markdown support",
+          "type": "added",
+          "scope": "cli"
+        },
+        {
+          "text": "Snooze dialogs for 1-60 minutes when you're busy",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Provide feedback to redirect the agent mid-conversation",
+          "type": "added",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -356,11 +1014,33 @@
       "date": "2026-02-08",
       "highlight": "Unified 2-tool MCP interface",
       "changes": [
-        { "text": "MCP interface consolidated from 5 tools to 2: `ask` (with type=confirm/pick/text/form) and `notify`", "type": "changed", "scope": "server", "featured": true },
-        { "text": "Responses are now compact — only meaningful fields are returned, no more null padding", "type": "changed", "scope": "server", "featured": true },
-        { "text": "Project path is cached after the first call, saving tokens on every subsequent dialog", "type": "added", "scope": "server" },
-        { "text": "Single-select is now the default for pick dialogs (was multi-select)", "type": "changed", "scope": "server" },
-        { "text": "Base prompt updated to v2.0.0 with streamlined tool reference and examples", "type": "changed", "scope": "server" }
+        {
+          "text": "MCP interface consolidated from 5 tools to 2: `ask` (with type=confirm/pick/text/form) and `notify`",
+          "type": "changed",
+          "scope": "server",
+          "featured": true
+        },
+        {
+          "text": "Responses are now compact — only meaningful fields are returned, no more null padding",
+          "type": "changed",
+          "scope": "server",
+          "featured": true
+        },
+        {
+          "text": "Project path is cached after the first call, saving tokens on every subsequent dialog",
+          "type": "added",
+          "scope": "server"
+        },
+        {
+          "text": "Single-select is now the default for pick dialogs (was multi-select)",
+          "type": "changed",
+          "scope": "server"
+        },
+        {
+          "text": "Base prompt updated to v2.0.0 with streamlined tool reference and examples",
+          "type": "changed",
+          "scope": "server"
+        }
       ]
     },
     {
@@ -369,13 +1049,44 @@
       "date": "2026-02-07",
       "highlight": "About pane and smarter update controls",
       "changes": [
-        { "text": "Settings now include a dedicated About pane with version details and a direct GitHub Issues feedback link", "type": "added", "scope": "app", "featured": true },
-        { "text": "Updates settings now support automatic-check toggle, daily/weekly/manual cadence, reminder interval, and pre-release channel selection", "type": "added", "scope": "app", "featured": true },
-        { "text": "General settings now let you choose notification sounds separately for question dialogs and informational notifications", "type": "added", "scope": "app", "featured": true },
-        { "text": "Update reminder dialogs now respect your configured reminder interval instead of fixed 1-hour/24-hour options", "type": "changed", "scope": "app" },
-        { "text": "Project badges now stay compact as text-sized pills in the top-right corner without overlapping dialog content", "type": "fixed", "scope": "cli" },
-        { "text": "Notification dialogs now render as native SwiftUI panes with optional sound and history logging", "type": "changed", "scope": "cli" },
-        { "text": "Visual test scenarios now cover notify dialogs and expanded snooze/feedback panes with full current CLI arguments", "type": "changed", "scope": "cli" }
+        {
+          "text": "Settings now include a dedicated About pane with version details and a direct GitHub Issues feedback link",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Updates settings now support automatic-check toggle, daily/weekly/manual cadence, reminder interval, and pre-release channel selection",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "General settings now let you choose notification sounds separately for question dialogs and informational notifications",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Update reminder dialogs now respect your configured reminder interval instead of fixed 1-hour/24-hour options",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Project badges now stay compact as text-sized pills in the top-right corner without overlapping dialog content",
+          "type": "fixed",
+          "scope": "cli"
+        },
+        {
+          "text": "Notification dialogs now render as native SwiftUI panes with optional sound and history logging",
+          "type": "changed",
+          "scope": "cli"
+        },
+        {
+          "text": "Visual test scenarios now cover notify dialogs and expanded snooze/feedback panes with full current CLI arguments",
+          "type": "changed",
+          "scope": "cli"
+        }
       ]
     },
     {
@@ -384,8 +1095,18 @@
       "date": "2026-02-02",
       "highlight": "Duplicate dialog prevention",
       "changes": [
-        { "text": "Long-running dialogs no longer spawn duplicates when the MCP client retries after timeout", "type": "fixed", "scope": "server", "featured": true },
-        { "text": "Progress heartbeat keeps the MCP client connection alive during slow dialog interactions", "type": "added", "scope": "server", "featured": true }
+        {
+          "text": "Long-running dialogs no longer spawn duplicates when the MCP client retries after timeout",
+          "type": "fixed",
+          "scope": "server",
+          "featured": true
+        },
+        {
+          "text": "Progress heartbeat keeps the MCP client connection alive during slow dialog interactions",
+          "type": "added",
+          "scope": "server",
+          "featured": true
+        }
       ]
     },
     {
@@ -394,12 +1115,38 @@
       "date": "2026-02-01",
       "highlight": "Settings UI polish",
       "changes": [
-        { "text": "Sidebar badges now align vertically across all rows", "type": "fixed", "scope": "app", "featured": true },
-        { "text": "Install wizard now has a persistent footer bar with Back/Next buttons", "type": "changed", "scope": "app", "featured": true },
-        { "text": "Install wizard progress stepper uses evenly-spaced columns with centered labels", "type": "changed", "scope": "app" },
-        { "text": "Project rows now have consistent height and larger action button hit targets", "type": "changed", "scope": "app" },
-        { "text": "Base prompt toggle, status badge, and file options grouped in a single container", "type": "changed", "scope": "app" },
-        { "text": "History row status dot and chevron grouped as a tighter trailing cluster", "type": "changed", "scope": "app" }
+        {
+          "text": "Sidebar badges now align vertically across all rows",
+          "type": "fixed",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Install wizard now has a persistent footer bar with Back/Next buttons",
+          "type": "changed",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Install wizard progress stepper uses evenly-spaced columns with centered labels",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Project rows now have consistent height and larger action button hit targets",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Base prompt toggle, status badge, and file options grouped in a single container",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "History row status dot and chevron grouped as a tighter trailing cluster",
+          "type": "changed",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -408,8 +1155,18 @@
       "date": "2026-02-01",
       "highlight": "Hotkey fix & compact settings",
       "changes": [
-        { "text": "Keyboard shortcuts (S, F) no longer trigger while typing in text input fields", "type": "fixed", "scope": "cli", "featured": true },
-        { "text": "Settings version panel is now more compact with a cleaner layout", "type": "changed", "scope": "app", "featured": true }
+        {
+          "text": "Keyboard shortcuts (S, F) no longer trigger while typing in text input fields",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Settings version panel is now more compact with a cleaner layout",
+          "type": "changed",
+          "scope": "app",
+          "featured": true
+        }
       ]
     },
     {
@@ -418,12 +1175,39 @@
       "date": "2026-01-31",
       "highlight": "Searchable history & per-day storage",
       "changes": [
-        { "text": "History view now includes a search field to filter entries by question, answer, or client name", "type": "added", "scope": "app", "featured": true, "starred": true },
-        { "text": "Day sections in history are now collapsible, with today expanded by default", "type": "added", "scope": "app", "featured": true },
-        { "text": "History entries are now stored in per-day files for better performance and organization", "type": "changed", "scope": "app" },
-        { "text": "Existing history is automatically migrated to the new per-day format", "type": "changed", "scope": "app" },
-        { "text": "Toolbar keyboard shortcuts (S, F, Esc) now handled consistently across all dialog types", "type": "changed", "scope": "cli" },
-        { "text": "History footer now has a button to reveal the data folder in Finder", "type": "added", "scope": "app" }
+        {
+          "text": "History view now includes a search field to filter entries by question, answer, or client name",
+          "type": "added",
+          "scope": "app",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Day sections in history are now collapsible, with today expanded by default",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "History entries are now stored in per-day files for better performance and organization",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Existing history is automatically migrated to the new per-day format",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Toolbar keyboard shortcuts (S, F, Esc) now handled consistently across all dialog types",
+          "type": "changed",
+          "scope": "cli"
+        },
+        {
+          "text": "History footer now has a button to reveal the data folder in Finder",
+          "type": "added",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -432,12 +1216,38 @@
       "date": "2026-01-31",
       "highlight": "SwiftUI text input & settings overhaul",
       "changes": [
-        { "text": "Text input dialog now supports snooze and feedback, matching all other dialogs", "type": "added", "scope": "app", "featured": true },
-        { "text": "Dev build workflow now installs directly to the running app with one command", "type": "added", "scope": "app" },
-        { "text": "Test dialogs are now hidden behind option+click on the tray icon", "type": "changed", "scope": "app" },
-        { "text": "Right-click tray menu now shows settings, updates, and quit only", "type": "changed", "scope": "app" },
-        { "text": "Settings window split into modular views for better maintainability", "type": "changed", "scope": "app" },
-        { "text": "Text input dialog migrated from AppKit to SwiftUI for consistency", "type": "changed", "scope": "app", "featured": true }
+        {
+          "text": "Text input dialog now supports snooze and feedback, matching all other dialogs",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Dev build workflow now installs directly to the running app with one command",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Test dialogs are now hidden behind option+click on the tray icon",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Right-click tray menu now shows settings, updates, and quit only",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Settings window split into modular views for better maintainability",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Text input dialog migrated from AppKit to SwiftUI for consistency",
+          "type": "changed",
+          "scope": "app",
+          "featured": true
+        }
       ]
     },
     {
@@ -446,10 +1256,28 @@
       "date": "2026-01-30",
       "highlight": "Enhanced documentation site",
       "changes": [
-        { "text": "Documentation site now features interactive dialog examples from real development history", "type": "added", "scope": "docs", "featured": true },
-        { "text": "28 real questions displayed in scrollable gallery with actual options and answers", "type": "added", "scope": "docs", "featured": true },
-        { "text": "Settings window height increased to reduce scrolling and better use screen space", "type": "changed", "scope": "app" },
-        { "text": "Replaced static screenshots with interactive feature panels showing Snooze and Feedback dialogs", "type": "changed", "scope": "docs" }
+        {
+          "text": "Documentation site now features interactive dialog examples from real development history",
+          "type": "added",
+          "scope": "docs",
+          "featured": true
+        },
+        {
+          "text": "28 real questions displayed in scrollable gallery with actual options and answers",
+          "type": "added",
+          "scope": "docs",
+          "featured": true
+        },
+        {
+          "text": "Settings window height increased to reduce scrolling and better use screen space",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Replaced static screenshots with interactive feature panels showing Snooze and Feedback dialogs",
+          "type": "changed",
+          "scope": "docs"
+        }
       ]
     },
     {
@@ -458,10 +1286,27 @@
       "date": "2026-01-30",
       "highlight": "Improved agent workflows",
       "changes": [
-        { "text": "Agents now batch multiple questions together instead of asking one at a time", "type": "changed", "scope": "server", "featured": true },
-        { "text": "Agents continue working smoothly after receiving answers without checking back in", "type": "changed", "scope": "server" },
-        { "text": "Usage hints now include concrete examples of correct vs incorrect question patterns", "type": "added", "scope": "server" },
-        { "text": "Better guidance for when agents should batch questions vs ask sequentially", "type": "added", "scope": "server" }
+        {
+          "text": "Agents now batch multiple questions together instead of asking one at a time",
+          "type": "changed",
+          "scope": "server",
+          "featured": true
+        },
+        {
+          "text": "Agents continue working smoothly after receiving answers without checking back in",
+          "type": "changed",
+          "scope": "server"
+        },
+        {
+          "text": "Usage hints now include concrete examples of correct vs incorrect question patterns",
+          "type": "added",
+          "scope": "server"
+        },
+        {
+          "text": "Better guidance for when agents should batch questions vs ask sequentially",
+          "type": "added",
+          "scope": "server"
+        }
       ]
     },
     {
@@ -470,10 +1315,27 @@
       "date": "2026-01-28",
       "highlight": "Project context & versioned hints",
       "changes": [
-        { "text": "Dialogs now show which project they belong to via project_path parameter", "type": "added", "scope": "app", "featured": true },
-        { "text": "Usage hints now include version info for detecting when updates are available", "type": "added", "scope": "server" },
-        { "text": "Install wizard shows update option when newer usage hints are bundled", "type": "added", "scope": "app" },
-        { "text": "Button cooldown now prevents accidental rapid clicks across all dialogs", "type": "fixed", "scope": "app" }
+        {
+          "text": "Dialogs now show which project they belong to via project_path parameter",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Usage hints now include version info for detecting when updates are available",
+          "type": "added",
+          "scope": "server"
+        },
+        {
+          "text": "Install wizard shows update option when newer usage hints are bundled",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Button cooldown now prevents accidental rapid clicks across all dialogs",
+          "type": "fixed",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -482,10 +1344,27 @@
       "date": "2026-01-27",
       "highlight": "Markdown support",
       "changes": [
-        { "text": "Text input dialogs now support markdown formatting in the body text", "type": "added", "scope": "app", "featured": true },
-        { "text": "Inline code blocks are now properly rendered in dialog text", "type": "added", "scope": "app" },
-        { "text": "Partial answers are now preserved when providing feedback mid-dialog", "type": "added", "scope": "app" },
-        { "text": "Button cooldown now works correctly across multiple interactions", "type": "fixed", "scope": "app" }
+        {
+          "text": "Text input dialogs now support markdown formatting in the body text",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Inline code blocks are now properly rendered in dialog text",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Partial answers are now preserved when providing feedback mid-dialog",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Button cooldown now works correctly across multiple interactions",
+          "type": "fixed",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -494,9 +1373,22 @@
       "date": "2026-01-25",
       "highlight": "History detail view",
       "changes": [
-        { "text": "View full question details, answers, and metadata in history", "type": "added", "scope": "app", "featured": true },
-        { "text": "Navigate through history entries with back button support", "type": "added", "scope": "app" },
-        { "text": "History rows now show hover states and navigation indicators", "type": "added", "scope": "app" }
+        {
+          "text": "View full question details, answers, and metadata in history",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Navigate through history entries with back button support",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "History rows now show hover states and navigation indicators",
+          "type": "added",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -505,13 +1397,43 @@
       "date": "2026-01-20",
       "highlight": "Dialog history tracking",
       "changes": [
-        { "text": "All dialog interactions are now tracked and viewable in settings", "type": "added", "scope": "app", "featured": true },
-        { "text": "iOS PWA now supports full keyboard navigation", "type": "added", "scope": "app" },
-        { "text": "App now checks for updates automatically via GitHub", "type": "added", "scope": "app", "featured": true },
-        { "text": "iOS PWA now works on home screen with proper icons", "type": "added", "scope": "app" },
-        { "text": "Snooze state now syncs properly between CLI and menu bar", "type": "fixed", "scope": "app" },
-        { "text": "Better error messages when Dialog CLI isn't found", "type": "fixed", "scope": "cli" },
-        { "text": "Long-running dialogs no longer timeout unexpectedly", "type": "fixed", "scope": "app" }
+        {
+          "text": "All dialog interactions are now tracked and viewable in settings",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "iOS PWA now supports full keyboard navigation",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "App now checks for updates automatically via GitHub",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "iOS PWA now works on home screen with proper icons",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Snooze state now syncs properly between CLI and menu bar",
+          "type": "fixed",
+          "scope": "app"
+        },
+        {
+          "text": "Better error messages when Dialog CLI isn't found",
+          "type": "fixed",
+          "scope": "cli"
+        },
+        {
+          "text": "Long-running dialogs no longer timeout unexpectedly",
+          "type": "fixed",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -520,9 +1442,22 @@
       "date": "2026-01-10",
       "highlight": "Native Swift dialogs",
       "changes": [
-        { "text": "Dialogs are now native Swift for better performance and reliability", "type": "changed", "scope": "app", "featured": true },
-        { "text": "Snooze feature now works reliably without crashes", "type": "fixed", "scope": "app" },
-        { "text": "Menu bar icon now matches your system theme", "type": "fixed", "scope": "app" }
+        {
+          "text": "Dialogs are now native Swift for better performance and reliability",
+          "type": "changed",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Snooze feature now works reliably without crashes",
+          "type": "fixed",
+          "scope": "app"
+        },
+        {
+          "text": "Menu bar icon now matches your system theme",
+          "type": "fixed",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -531,7 +1466,11 @@
       "date": "2025-12-16",
       "highlight": "Install script fix",
       "changes": [
-        { "text": "Installation script now runs without permission errors", "type": "fixed", "scope": "cli" }
+        {
+          "text": "Installation script now runs without permission errors",
+          "type": "fixed",
+          "scope": "cli"
+        }
       ]
     },
     {
@@ -540,9 +1479,22 @@
       "date": "2025-12-16",
       "highlight": "Easier installation",
       "changes": [
-        { "text": "One-line install script with clear setup instructions", "type": "added", "scope": "cli", "featured": true },
-        { "text": "Faster builds using bun instead of npm", "type": "changed", "scope": "cli" },
-        { "text": "Dialog CLI now works correctly regardless of install location", "type": "fixed", "scope": "cli" }
+        {
+          "text": "One-line install script with clear setup instructions",
+          "type": "added",
+          "scope": "cli",
+          "featured": true
+        },
+        {
+          "text": "Faster builds using bun instead of npm",
+          "type": "changed",
+          "scope": "cli"
+        },
+        {
+          "text": "Dialog CLI now works correctly regardless of install location",
+          "type": "fixed",
+          "scope": "cli"
+        }
       ]
     },
     {
@@ -551,11 +1503,32 @@
       "date": "2025-12-11",
       "highlight": "Renamed to Consult User MCP",
       "changes": [
-        { "text": "Renamed from 'Speak MCP' to 'Consult User MCP'", "type": "changed", "scope": "app", "featured": true },
-        { "text": "Dialogs now focus correctly when switching between apps", "type": "changed", "scope": "app" },
-        { "text": "Keyboard hints are now more compact and less intrusive", "type": "changed", "scope": "app" },
-        { "text": "Typing 's' or 'f' in feedback fields no longer triggers shortcuts", "type": "fixed", "scope": "app" },
-        { "text": "Removed experimental shader overlay effect", "type": "removed", "scope": "app" }
+        {
+          "text": "Renamed from 'Speak MCP' to 'Consult User MCP'",
+          "type": "changed",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Dialogs now focus correctly when switching between apps",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Keyboard hints are now more compact and less intrusive",
+          "type": "changed",
+          "scope": "app"
+        },
+        {
+          "text": "Typing 's' or 'f' in feedback fields no longer triggers shortcuts",
+          "type": "fixed",
+          "scope": "app"
+        },
+        {
+          "text": "Removed experimental shader overlay effect",
+          "type": "removed",
+          "scope": "app"
+        }
       ]
     },
     {
@@ -564,12 +1537,38 @@
       "date": "2025-11-27",
       "highlight": "Initial release",
       "changes": [
-        { "text": "Native macOS dialogs that let AI agents ask you questions", "type": "added", "scope": "app", "featured": true },
-        { "text": "Four dialog types: yes/no, multiple choice, text input, and multi-question wizards", "type": "added", "scope": "app", "featured": true },
-        { "text": "Snooze dialogs for 1-60 minutes when you're busy", "type": "added", "scope": "app" },
-        { "text": "Provide feedback to redirect the agent mid-conversation", "type": "added", "scope": "app" },
-        { "text": "iOS companion app for answering dialogs remotely", "type": "added", "scope": "app" },
-        { "text": "Menu bar app with settings and status display", "type": "added", "scope": "app" }
+        {
+          "text": "Native macOS dialogs that let AI agents ask you questions",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Four dialog types: yes/no, multiple choice, text input, and multi-question wizards",
+          "type": "added",
+          "scope": "app",
+          "featured": true
+        },
+        {
+          "text": "Snooze dialogs for 1-60 minutes when you're busy",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Provide feedback to redirect the agent mid-conversation",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "iOS companion app for answering dialogs remotely",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "Menu bar app with settings and status display",
+          "type": "added",
+          "scope": "app"
+        }
       ]
     }
   ]

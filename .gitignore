@@ -53,7 +53,7 @@ test-cases/screenshots/
 .mcp.json
 .plan.md
 .beads/
-CLAUDE.md
+CLAUDE.local.md
 INVESTIGATION_*.md
 *_PLAN.md
 BRIEFING.md

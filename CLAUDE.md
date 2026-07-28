@@ -1,147 +1,79 @@
 # Consult User MCP
 
-## Development Workflow
+An MCP server that gives an agent a way to actually ask the user something — native dialogs on macOS and Windows, returning structured JSON. The agent blocks until the user answers, snoozes, or cancels.
 
-The installed app at `/Applications/Consult User MCP.app` runs its own bundled binaries. Local builds do NOT update the installed app.
+<vocabulary>
+Canonical terms are defined in GLOSSARY.md. Use these names exactly — they are this project's ubiquitous language.
+Core: Dialog, Pane, Feedback, Form, Wizard, Snooze, Ask Differently, Skin, Theme, Baseprompt, Provider, Dialog CLI, Tray App.
+The same dialog has a different name at each layer (MCP `pick` = CLI `choose` = `SwiftUIChooseDialog`). That is by design — see the Layer Translation table in GLOSSARY.md before renaming anything.
+Full glossary: ./GLOSSARY.md
+</vocabulary>
 
-**MUST use `bun run dev` for all development builds.** Builds dialog-cli, mcp-server, macos-app in debug mode and copies binaries into the installed app bundle. Restart the tray app after to pick up changes.
+## Architecture map
 
-```bash
-bun run dev          # Build all + install to /Applications (dev workflow)
-bun run build        # Build mcp-server + dialog-cli only (no install)
-bun run build:bundle # Full release build + create app bundle from scratch
-```
+One MCP server, two platform implementations behind a single `DialogProvider` interface.
 
-**NEVER** use bare `swift build` or `bun run build` during development — those compile locally but do not update the running app.
-
-## Release Checklist
-
-### macOS
-
-1. Update `macos-app/VERSION` with the new version number
-2. **If baseprompt changed:** update version in `macos-app/Sources/Resources/base-prompt.md` (first line comment)
-3. Update `docs/src/lib/data/releases.json` (single source of truth)
-4. Generate CHANGELOG: `bun run changelog`
-5. Validate versions: `bash scripts/validate-baseprompt-version.sh`
-6. Commit all changes
-7. Run: `bash scripts/release.sh --platform macos` — builds, zips, tags, creates GitHub release
-
-Use `--dry-run` to validate preconditions without executing.
-
-
-## Dialog Types & MCP Tools
-
-4 MCP tools: `ask` (interactive), `notify` (fire-and-forget), `tweak` (value adjustment pane), and `propose_layout` (grid layout editor, macOS only). When adding features, fixing bugs, or writing tests — **ALL dialog types MUST be considered**.
-
-**Invariant:** The debug menu loads test cases from `test-cases/cases/` JSON files — no hardcoded dialog JSON in AppDelegate. When adding a new dialog type, add JSON files to `test-cases/cases/` and wire them into the debug menu. The `test-runner.sh` command mapping must also include the new type.
-
-### All dialog types (flattened)
-
-| # | Dialog | `ask` type | CLI command | Key params | Response |
-|---|--------|-----------|-------------|------------|----------|
-| 1 | **Confirm** | `confirm` | `confirm` | `body`, `title`, `yes`, `no` | `answer: bool` |
-| 2 | **Single-select** | `pick` | `choose` | `body`, `choices[]`, `descriptions[]?`, `default?` | `answer: string` |
-| 3 | **Multi-select** | `pick` | `choose` | `body`, `choices[]`, `descriptions[]?`, `multi: true` | `answer: string[]` |
-| 4 | **Text input** | `text` | `textInput` | `body`, `title`, `default` | `answer: string` |
-| 5 | **Password input** | `text` | `textInput` | `body`, `title`, `hidden: true` | `answer: string` |
-| 6 | **Wizard form** | `form` | `questions` | `body`, `questions[]` | `answer: Record<id, string\|string[]>` |
-| 7 | **Notification** | — (`notify`) | `notify` | `body`, `title`, `sound` | fire-and-forget |
-| 8 | **Value tweak** | — (`tweak`) | `tweak` | `body`, `parameters[]` | `answer: Record<id, number>` |
-
-`questions[]` items: `id`, `question`, `type?` (`"choice"` default, `"text"`), `options[]` (required for choice), `descriptions[]?`, `multi`, `placeholder?`, `hidden?`.
-
-`parameters[]` items: `id`, `label`, `file`, `line`, `column`, `expectedText`, `current`, `min`, `max`, `step?`, `unit?`.
-
-### Shared parameters (all `ask` and `tweak` types)
-
-`position` (`"left"` / `"center"` / `"right"`), `project_path` (shows project badge), `MCP_CLIENT_NAME` env var (prefixes title), `DIALOG_THEME` env var (`"sunset"` / `"midnight"` / system default), `DIALOG_SKIN` env var (see below).
-
-### Dialog Skins (macOS)
-
-A **skin** is a complete visual implementation of the dialog set. `DialogManager` owns the modal lifecycle, response building, history and snooze; the skin only supplies views and window metrics. Full guide: `dialog-cli/Sources/DialogCLI/Skins/README.md`.
-
-| id | Directory | What it is |
-|----|-----------|-----------|
-| `classic` | `Skins/Classic/` | The shipping UI — wraps `Dialogs/SwiftUI*Dialog`, no visual change |
-| `alt` | `Skins/Alt/` | Scaffold for a second, independent UI |
-
-Switch precedence: `DIALOG_SKIN` env var → `"skin"` in `settings.json` → `classic`. Unknown ids warn on stderr and fall back.
-
-```bash
-DIALOG_SKIN=alt dialog-cli confirm '{"body":"Ship it?","title":"Deploy"}'
-```
-
-**Invariant:** every `DialogSkin` member has a default that falls through to `ClassicSkin`, so a skin implements only the dialogs it has reskinned. Adding a skin means one new type plus one line in `SkinRegistry.entries`. When adding a new dialog type, add it to `DialogKind`, the `DialogSkin` protocol, `ClassicSkin`, and the spec structs in `Skins/DialogSkin.swift`.
-
-### Shared response states (all interactive dialogs)
-
-Every `ask` and `tweak` dialog can return: normal `answer`, `snoozed: true`, `askDifferently: "<type>"`, `feedbackText`, or `cancelled: true`. Responses compacted by `compact.ts` (strips null fields, maps `confirmed` → `answer: bool`, merges `dismissed` into `cancelled`). Compact priority: snoozed > askDifferently > feedbackText > cancelled > answer.
-
-### Windows (MUST run on Windows machine)
-
-.NET/WPF and Velopack require a Windows environment.
-
-```bash
-ssh user@192.168.178.197
-```
-
-Repo: `C:\Users\jurre\PycharmProjects\consult-user-mcp`. Commands run via `cmd.exe` by default; use `powershell -Command "..."` or `powershell -ExecutionPolicy Bypass -File ...` for PowerShell.
-
-**Prerequisites:** `dotnet` SDK 8.0, `node`/`npm`, `gh` CLI (authenticated), `vpk` (`dotnet tool install -g vpk`).
-
-**Steps:**
-
-1. On macOS: update `windows-app/VERSION`, `releases.json`, `bun run changelog`, commit + push
-2. On Windows (via SSH):
-   ```bash
-   cd C:\Users\jurre\PycharmProjects\consult-user-mcp
-   git checkout main && git pull
-   powershell -ExecutionPolicy Bypass -File scripts\build-windows-installer.ps1
-   ```
-3. Create release from Windows (gh is authenticated, assets are local):
-   ```bash
-   git tag windows/vX.Y.Z HEAD && git push origin windows/vX.Y.Z
-   gh release create windows/vX.Y.Z --title "Windows vX.Y.Z — ..." --notes "..." releases/windows/*
-   ```
-
-**NEVER** run `gh release create` without attaching assets — releases without assets break the auto-updater.
-
-**Gotcha:** The build script uses `$ErrorActionPreference = "Stop"`, so Node.js stderr warnings (e.g. ExperimentalWarning) can abort it. The script temporarily sets `Continue` around npm/npx commands. Wrap new npm commands the same way.
-
-## Baseprompt Versioning
-
-The base prompt has an independent version number embedded at runtime
-in the `<consult-user-mcp-baseprompt version="X.Y.Z">` envelope.
-
-- **Source:** `macos-app/Sources/Resources/base-prompt.md` (first line: `<!-- version: X.Y.Z -->`)
-- **Bundled (live) copy:** `/Applications/Consult User MCP.app/Contents/Resources/base-prompt.md` — refreshed by `bun run dev`
-- **Delivery:** The MCP server reads the bundled file and exposes it via the protocol's `instructions` field (`mcp-server/src/index.ts:loadBasePrompt`). Claude Code receives it per-session on connect — never inlined into any `CLAUDE.md`.
-- **Global pointer:** `~/.claude/CLAUDE.md` only records the path as an HTML-comment marker (no `@`-import — that would expand the file inline and double the prompt).
-- **Validate:** `bash scripts/validate-baseprompt-version.sh` — confirms the marker exists in `~/.claude/CLAUDE.md` AND that no `@`-import is hiding there.
-- **Bump:** Major = breaking tool/workflow changes, Minor = new features/guidance, Patch = fixes/typos. Update the version comment in the source file; `bun run dev` propagates it to the bundle.
-
-## Windows Project Structure
-
-| Directory | Output | Purpose |
-|-----------|--------|---------|
-| `dialog-cli-windows/` | `dialog-cli.exe` | WPF dialog CLI (ephemeral, spawned per dialog) |
-| `windows-app/` | `consult-user-mcp.exe` | WPF tray app (persistent background process) |
-
-Installer: Velopack-based (`scripts/build-windows-installer.ps1`), delta updates from GitHub Releases. First-run auto-configures Claude Code MCP server. User data: `%APPDATA%\ConsultUserMCP\`.
-
-## Documentation Structure
-
-- **`docs/src/lib/data/releases.json`** — single source of truth for app releases. Feeds /docs page, generates CHANGELOG.md via `bun run changelog`. Only app changes, never docs-only.
-- **`CHANGELOG.md`** — auto-generated from releases.json. Do not edit manually.
-- **`docs/src/lib/data/releases.schema.json`** — JSON schema for validation.
-
-### Writing Changelists
-
-Write **user-facing features and benefits**, not commit messages:
-
-| Bad (commit-style) | Good (user-facing) |
+| Folder | What it is |
 |---|---|
-| Add markdown support | Text input dialogs now support markdown formatting |
-| Fix snooze crash | Snooze feature now works reliably without crashes |
-| Refactor DialogManager | Dialogs now focus correctly when switching apps |
-| Add execute permission | Installation script now runs without permission errors |
+| `mcp-server/` | The MCP server. Tool surface, response compaction, provider selection. TypeScript, Bun. |
+| `dialog-cli/` | macOS Dialog CLI. Ephemeral — spawned per dialog, prints JSON, exits. Swift/SwiftUI. |
+| `macos-app/` | macOS Tray App. Persistent. Owns settings, history, updates, install, debug menu. |
+| `dialog-cli-windows/` | Windows Dialog CLI. Mirrors `dialog-cli/`. .NET/WPF. |
+| `windows-app/` | Windows Tray App. Mirrors `macos-app/`. .NET/WPF. |
+| `sketch-cli/` | Grid layout editor behind `propose_layout`. Separate Swift CLI, macOS only. |
+| `test-cases/` | JSON fixtures + screenshot runner. Feeds both the test runner and the debug menu. |
+| `docs/` | SvelteKit docs site. Owns `releases.json`, the release source of truth. |
+| `scripts/` | Build, install, release, and validation shell scripts. |
+
+The two processes on each platform talk through files, not IPC: the Tray App writes `settings.json` and snooze state, the Dialog CLI reads them on launch.
+
+## Context boundaries
+
+Read the folder's `CLAUDE.md` before editing inside it. Each one carries invariants that are expensive to rediscover:
+
+- `dialog-cli/CLAUDE.md` — before touching any dialog, skin, or keyboard behaviour
+- `macos-app/CLAUDE.md` — before touching settings, the debug menu, or install/update flows
+- `mcp-server/CLAUDE.md` — before touching the tool surface or providers
+- `dialog-cli-windows/CLAUDE.md`, `windows-app/CLAUDE.md` — before any Windows work
+- `test-cases/CLAUDE.md` — before adding a dialog type or changing a fixture
+- `docs/CLAUDE.md`, `sketch-cli/CLAUDE.md`
+
+## Global invariants
+
+- **Development builds must go through `bun run dev`.** The installed app at `/Applications/Consult User MCP.app` runs its own bundled binaries. A bare `swift build` compiles locally and changes nothing about what actually runs. Restart the tray app afterwards.
+- **All dialog types must be considered together.** Adding or changing one touches the MCP server, both CLIs, the test fixtures, the test runner, and the debug menu. The full checklist is in `.claude/rules/dialog-parity.md`.
+- **Nothing Windows can be built or verified from macOS.** See the `windows-build` skill.
+- **`CHANGELOG.md` is generated** from `docs/src/lib/data/releases.json`. Never hand-edit it.
+- **The Baseprompt is versioned independently** of the apps, and its content and version bump together. See `.claude/rules/baseprompt.md`.
+
+## Dialog types
+
+Eight surfaces across four MCP tools: `ask` (interactive), `notify`, `tweak`, `propose_layout` (macOS only).
+
+| Dialog | `ask` type | CLI command | Response |
+|---|---|---|---|
+| Confirm | `confirm` | `confirm` | `answer: bool` |
+| Single-select | `pick` | `choose` | `answer: string` |
+| Multi-select | `pick` + `multi` | `choose` | `answer: string[]` |
+| Text input | `text` | `textInput` | `answer: string` |
+| Password input | `text` + `hidden` | `textInput` | `answer: string` |
+| Form | `form` | `questions` | `answer: Record<id, string \| string[]>` |
+| Notification | — (`notify`) | `notify` | fire-and-forget |
+| Value tweak | — (`tweak`) | `tweak` | `answer: Record<id, number>` |
+
+Every interactive dialog can also return `snoozed`, `askDifferently`, `feedbackText`, or `cancelled`. Field-level detail lives in the tool schemas and `mcp-server/CLAUDE.md`.
+
+Shared inputs: `position` (`left`/`center`/`right`), `project_path`, and the env vars `MCP_CLIENT_NAME`, `DIALOG_THEME`, `DIALOG_SKIN`.
+
+## Commands
+
+```bash
+bun run dev            # build all + install to /Applications — the dev workflow
+bun run build          # mcp-server + dialog-cli only, no install
+bun run build:bundle   # full release bundle from scratch
+bun test               # mcp-server tests
+bun run test:visual    # screenshot every test case
+bun run changelog      # regenerate CHANGELOG.md from releases.json
+```
+
+`just` also has recipes — `just --list`. Release procedures are in the `release-app` skill; Windows builds in `windows-build`.

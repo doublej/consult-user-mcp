@@ -44,8 +44,8 @@ extension DialogManager {
 
         let position = effectivePosition(request.position)
 
-        let dialogContent = SwiftUITweakDialog(
-            bodyText: request.body,
+        let spec = TweakSpec(
+            body: request.body,
             parameters: request.parameters,
             fileRewriter: fileRewriter,
             position: position,
@@ -55,7 +55,10 @@ extension DialogManager {
             onSnooze: onSnooze,
             onAskDifferently: onAskDifferently
         )
-        let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460, position: position)
+
+        let (window, _, _) = createSkinnedWindow(.tweak, position: position) { skin in
+            skin.tweakView(spec)
+        }
 
         positionWindow(window, position: position)
         window.makeKeyAndOrderFront(nil)

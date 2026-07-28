@@ -5,20 +5,13 @@ extension DialogManager {
     func notify(_ request: NotifyRequest) -> NotifyResponse {
         NSApp.setActivationPolicy(.accessory)
 
-        let pane = SwiftUINotifyPane(
-            title: request.title,
-            bodyText: request.body
-        )
+        let spec = NotifySpec(title: request.title, body: request.body)
 
         let position = DialogPosition(rawValue: getSettings().position) ?? .right
 
-        let (window, _, _) = createAutoSizedWindow(
-            content: pane,
-            minWidth: 360,
-            minHeight: 120,
-            maxHeightRatio: 0.45,
-            position: position
-        )
+        let (window, _, _) = createSkinnedWindow(.notify, position: position) { skin in
+            skin.notifyView(spec)
+        }
         positionWindow(window, position: position)
         window.level = .floating
         window.orderFrontRegardless()

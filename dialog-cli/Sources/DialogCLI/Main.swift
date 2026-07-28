@@ -117,6 +117,11 @@ static func run() {
         )
     }
 
+    // Pick the UI implementation: DIALOG_SKIN env > settings.json "skin" > classic.
+    // Runs before the theme block so an explicit DIALOG_THEME still wins over
+    // whatever theme the skin prefers.
+    SkinRegistry.resolve(settings: manager.getSettings())
+
     // Set theme from environment variable
     if let themeName = ProcessInfo.processInfo.environment["DIALOG_THEME"] {
         ThemeManager.shared.setTheme(named: themeName)

@@ -5,17 +5,13 @@ extension DialogManager {
     func preview(_ request: PreviewRequest) -> PreviewResponse {
         NSApp.setActivationPolicy(.accessory)
 
-        let pane = SwiftUIPreviewPane(bodyText: request.body)
+        let spec = PreviewSpec(body: request.body)
 
         let position = DialogPosition(rawValue: getSettings().position) ?? .right
 
-        let (window, _, _) = createAutoSizedWindow(
-            content: pane,
-            minWidth: 360,
-            minHeight: 120,
-            maxHeightRatio: 0.45,
-            position: position
-        )
+        let (window, _, _) = createSkinnedWindow(.preview, position: position) { skin in
+            skin.previewView(spec)
+        }
         positionWindow(window, position: position)
         window.level = .floating
         window.orderFrontRegardless()

@@ -14,9 +14,9 @@ extension DialogManager {
         var result: ConfirmResponse?
         let position = effectivePosition(request.position)
 
-        let swiftUIDialog = SwiftUIConfirmDialog(
+        let spec = ConfirmSpec(
             title: request.title,
-            bodyText: request.body,
+            body: request.body,
             confirmLabel: request.confirmLabel,
             cancelLabel: request.cancelLabel,
             position: position,
@@ -40,7 +40,9 @@ extension DialogManager {
             }
         )
 
-        let (window, _, _) = createAutoSizedWindow(content: swiftUIDialog, position: position)
+        let (window, _, _) = createSkinnedWindow(.confirm, position: position) { skin in
+            skin.confirmView(spec)
+        }
 
         positionWindow(window, position: position)
         window.makeKeyAndOrderFront(nil)

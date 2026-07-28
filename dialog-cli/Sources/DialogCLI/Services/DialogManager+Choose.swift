@@ -52,7 +52,7 @@ extension DialogManager {
         var result: ChoiceResponse?
         let position = effectivePosition(request.position)
 
-        let swiftUIDialog = SwiftUIChooseDialog(
+        let spec = ChooseSpec(
             title: request.title ?? buildTitle(),
             body: request.body,
             choices: request.choices,
@@ -94,7 +94,9 @@ extension DialogManager {
             }
         )
 
-        let (window, _, _) = createAutoSizedWindow(content: swiftUIDialog, position: position)
+        let (window, _, _) = createSkinnedWindow(.choose, position: position) { skin in
+            skin.chooseView(spec)
+        }
 
         positionWindow(window, position: position)
         window.makeKeyAndOrderFront(nil)

@@ -14,6 +14,8 @@ struct UserSettings {
     var snoozeUntil: Date?
     var buttonCooldownEnabled: Bool = true
     var buttonCooldownDuration: Double = 2.0
+    /// Which `DialogSkin` renders the dialogs. See `SkinRegistry.availableIDs`.
+    var skin: String = SkinRegistry.fallbackID
 
     enum SoundContext {
         case question
@@ -94,6 +96,9 @@ struct UserSettings {
         }
         if let cooldownDuration = json["buttonCooldownDuration"] as? Double {
             settings.buttonCooldownDuration = cooldownDuration
+        }
+        if let skin = json["skin"] as? String {
+            settings.skin = skin
         }
 
         return settings

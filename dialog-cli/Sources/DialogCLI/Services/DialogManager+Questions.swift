@@ -126,18 +126,20 @@ extension DialogManager {
         let dialogBody = request.body
         let position = effectivePosition(request.position)
 
-        let dialogContent = AnyView(SwiftUIWizardDialog(
+        let spec = QuestionsSpec(
             title: dialogTitle,
-            bodyText: dialogBody,
+            body: dialogBody,
             questions: request.questions,
             position: position,
             onComplete: onComplete,
             onCancel: onCancel,
             onSnooze: onSnooze,
             onAskDifferently: onAskDifferently
-        ))
+        )
 
-        let (window, _, _) = createAutoSizedWindow(content: dialogContent, minWidth: 460, position: position)
+        let (window, _, _) = createSkinnedWindow(.questions, position: position) { skin in
+            skin.questionsView(spec)
+        }
 
         positionWindow(window, position: position)
         window.makeKeyAndOrderFront(nil)

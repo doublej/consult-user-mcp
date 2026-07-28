@@ -139,6 +139,25 @@ class DialogManager {
         return (window, hostingView, bgView)
     }
 
+    /// Builds the dialog window from the active skin: the skin supplies both
+    /// the view and the window metrics, so a skin can size its dialogs
+    /// differently without touching `DialogManager`.
+    func createSkinnedWindow(
+        _ kind: DialogKind,
+        position: DialogPosition,
+        build: (DialogSkin) -> AnyView
+    ) -> (NSWindow, NSHostingView<AnyView>, DraggableView) {
+        let skin = SkinRegistry.active
+        let metrics = skin.metrics(for: kind)
+        return createAutoSizedWindow(
+            content: build(skin),
+            minWidth: metrics.minWidth,
+            minHeight: metrics.minHeight,
+            maxHeightRatio: metrics.maxHeightRatio,
+            position: position
+        )
+    }
+
     func captureWindowScreenshot() -> Data? {
         let window = NSApp.modalWindow
             ?? NSApp.windows.first(where: { $0 is BorderlessWindow && $0.isVisible })

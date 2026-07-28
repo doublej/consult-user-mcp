@@ -14,9 +14,9 @@ extension DialogManager {
         var result: TextInputResponse?
         let position = effectivePosition(request.position)
 
-        let swiftUIDialog = SwiftUITextInputDialog(
+        let spec = TextInputSpec(
             title: request.title,
-            bodyText: request.body,
+            body: request.body,
             isHidden: request.hidden,
             defaultValue: request.defaultValue,
             position: position,
@@ -39,7 +39,9 @@ extension DialogManager {
             }
         )
 
-        let (window, _, _) = createAutoSizedWindow(content: swiftUIDialog, position: position)
+        let (window, _, _) = createSkinnedWindow(.textInput, position: position) { skin in
+            skin.textInputView(spec)
+        }
 
         positionWindow(window, position: position)
         window.makeKeyAndOrderFront(nil)

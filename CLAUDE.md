@@ -54,7 +54,24 @@ Use `--dry-run` to validate preconditions without executing.
 
 ### Shared parameters (all `ask` and `tweak` types)
 
-`position` (`"left"` / `"center"` / `"right"`), `project_path` (shows project badge), `MCP_CLIENT_NAME` env var (prefixes title), `DIALOG_THEME` env var (`"sunset"` / `"midnight"` / system default).
+`position` (`"left"` / `"center"` / `"right"`), `project_path` (shows project badge), `MCP_CLIENT_NAME` env var (prefixes title), `DIALOG_THEME` env var (`"sunset"` / `"midnight"` / system default), `DIALOG_SKIN` env var (see below).
+
+### Dialog Skins (macOS)
+
+A **skin** is a complete visual implementation of the dialog set. `DialogManager` owns the modal lifecycle, response building, history and snooze; the skin only supplies views and window metrics. Full guide: `dialog-cli/Sources/DialogCLI/Skins/README.md`.
+
+| id | Directory | What it is |
+|----|-----------|-----------|
+| `classic` | `Skins/Classic/` | The shipping UI — wraps `Dialogs/SwiftUI*Dialog`, no visual change |
+| `alt` | `Skins/Alt/` | Scaffold for a second, independent UI |
+
+Switch precedence: `DIALOG_SKIN` env var → `"skin"` in `settings.json` → `classic`. Unknown ids warn on stderr and fall back.
+
+```bash
+DIALOG_SKIN=alt dialog-cli confirm '{"body":"Ship it?","title":"Deploy"}'
+```
+
+**Invariant:** every `DialogSkin` member has a default that falls through to `ClassicSkin`, so a skin implements only the dialogs it has reskinned. Adding a skin means one new type plus one line in `SkinRegistry.entries`. When adding a new dialog type, add it to `DialogKind`, the `DialogSkin` protocol, `ClassicSkin`, and the spec structs in `Skins/DialogSkin.swift`.
 
 ### Shared response states (all interactive dialogs)
 

@@ -14,7 +14,7 @@ Three layers, and most bugs come from confusing them.
 
 **`Skins/` — appearance.** A [[Skin]] is a complete visual implementation of the dialog set. `classic` wraps the original views; `alt` is an independent one. Skins receive a spec (request data + prebuilt callbacks) and return an `AnyView`. They also declare window metrics. Every `DialogSkin` member defaults to falling through to `ClassicSkin`, so a partial skin still runs. See `Sources/DialogCLI/Skins/README.md`.
 
-**`Components/DialogContainer.swift` — behaviour.** The chassis every dialog wraps itself in: key router, feedback pane, snooze panel, report overlay, project badge. A skin changes layout; it does not reimplement this.
+**`DialogContainer` (in `Components/DialogComponents.swift`) — behaviour.** The chassis every dialog wraps itself in: key router, feedback pane, snooze panel, report overlay, project badge. A skin changes layout; it does not reimplement this.
 
 ## Important invariants
 

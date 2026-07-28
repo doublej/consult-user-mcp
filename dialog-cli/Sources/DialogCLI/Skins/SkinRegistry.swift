@@ -14,6 +14,7 @@ enum SkinRegistry {
     /// The only wiring a new skin needs: add an entry, it becomes selectable.
     static let entries: [Entry] = [
         Entry(id: ClassicSkin.identifier, displayName: "Classic", make: { ClassicSkin() }),
+        Entry(id: AltSkin.identifier, displayName: "Alt", make: { AltSkin() }),
     ]
 
     static let fallbackID = ClassicSkin.identifier

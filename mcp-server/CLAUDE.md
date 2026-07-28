@@ -1,220 +1,57 @@
-# CLAUDE.md
+# MCP Server
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## What this is
 
-## Build & Run Commands
+The MCP server itself: the tool surface an agent sees, and the routing that turns a tool call into a spawned [[Dialog CLI]] process. TypeScript, built and tested with Bun.
 
-```bash
-bun install          # Install dependencies
-bun run build        # Compile TypeScript + Swift CLI
-bun run build:ts     # TypeScript only
-bun run start        # Run the compiled server
-bun run dev          # Watch mode for development
-bun test             # Run tests
-```
+## Mental model
 
-## Architecture
+**Four tools, one provider.** `ask`, `notify`, `tweak`, `propose_layout` are registered in `index.ts`. Each defines a Zod schema, registers via `server.registerTool()`, and delegates to a method on `DialogProvider`.
 
-This is an MCP (Model Context Protocol) server that exposes native UI dialogs as tools for LLMs. Supports macOS (Swift/AppKit) and Windows (WPF/.NET).
+`ask` is a router, not a dialog — its `type` field selects the method:
 
-```
-src/
-├── index.ts                 # MCP server + tool registration (ask, notify, tweak, propose_layout)
-├── compact.ts               # Response transformer (provider → compact output)
-├── css-resolver.ts          # CSS selector/property → file location resolver (for tweak)
-├── humanize.ts              # Optional human-readable response formatting
-├── resolve-utils.ts         # Shared resolution utilities for tweak parameters
-├── settings.ts              # User settings reader
-├── text-search-resolver.ts  # Text pattern search → file location resolver (for tweak)
-├── types.ts                 # Shared types and interfaces
-├── update-check.ts          # GitHub release update checker
-├── validate-choices.ts      # Choice validation (no "all of above")
-├── index.test.ts            # Tests
-├── providers/
-│   ├── interface.ts         # DialogProvider interface
-│   ├── swift.ts             # macOS: Swift CLI + sketch CLI implementation
-│   └── windows.ts           # Windows: WPF CLI implementation
-```
+| `ask` type | Provider method |
+|---|---|
+| `confirm` | `provider.confirm()` |
+| `pick` | `provider.choose()` |
+| `text` | `provider.textInput()` |
+| `form` | `provider.questions()` |
 
-**Provider pattern**: Platform-specific code is abstracted behind `DialogProvider` interface. `createProvider()` in `index.ts` selects `WindowsDialogProvider` on Windows, `SwiftDialogProvider` on macOS.
+**Platform lives behind the interface.** `createProvider()` returns `WindowsDialogProvider` on `win32`, `SwiftDialogProvider` otherwise. Everything platform-specific is inside `providers/`; nothing above that layer branches on OS.
 
-**Tool architecture**: Each tool in `index.ts`:
-1. Defines Zod schema for inputs
-2. Registers via `server.registerTool()` with metadata
-3. Delegates to `provider.methodName()` for platform execution
+**Responses are compacted before they reach the agent.** `compact.ts` strips null fields, maps `confirmed` → `answer`, merges `dismissed` into `cancelled`. Priority when several states could apply: snoozed > askDifferently > feedbackText > cancelled > answer.
 
-**Key files**:
-- `types.ts`: `DialogPosition`, option interfaces, result types
-- `providers/interface.ts`: `DialogProvider` interface contract
-- `providers/swift.ts`: macOS implementation using Swift CLI
-- `providers/windows.ts`: Windows implementation using WPF CLI
+**The `tweak` resolvers turn a description into a file location.** `css-resolver.ts` handles selector + property; `text-search-resolver.ts` handles a `{v}` search pattern; `resolve-utils.ts` is shared. This is why `tweak` can be called without line numbers.
 
-## Available Tools
+## Important invariants
 
-| Tool | Purpose |
-|------|---------|
-| `ask` | Unified interactive dialog (type: confirm/pick/text/form) |
-| `notify` | Notification banner |
-| `tweak` | Real-time numeric value adjustment with live file writes |
-| `propose_layout` | Interactive grid layout editor (macOS only) |
+- **`tweak` and `propose_layout` are macOS-only.** `WindowsDialogProvider` throws for both, and `propose_layout` is removed from the tool list entirely on `win32`. Keep the throw explicit.
+- **The [[Baseprompt]] ships through the protocol, not through a file.** `loadBasePrompt()` reads the bundled `base-prompt.md` and returns it in the `instructions` field. It is never inlined into a `CLAUDE.md`. See `.claude/rules/baseprompt.md`.
+- **`propose_layout` is single-flight.** A module-level `proposeLayoutActive` guard rejects a second concurrent call.
+- **Every response shape must survive `compact.ts`.** A new field that should reach the agent has to be handled there or it is silently dropped.
+- **Choices are validated.** `validate-choices.ts` rejects meta-options like "all of the above" — the dialog is for real choices.
 
-The `ask` tool routes to provider methods via `type` field:
-- `confirm` → `provider.confirm()` — Yes/No
-- `pick` → `provider.choose()` — List picker (single or multi-select)
-- `text` → `provider.textInput()` — Free-form input (supports password masking)
-- `form` → `provider.questions()` — Multi-question wizard
+## Common change patterns
 
-Responses are transformed by `compact.ts` to strip verbose/null fields.
+**Adding a tool** → Zod schema + `registerTool` in `index.ts`, types in `types.ts`, method on `providers/interface.ts`, both provider implementations, compaction in `compact.ts`, tests.
 
-## Checkpoints & Rewind Limitations
+**Adding a platform** → implement `DialogProvider` in `providers/<os>.ts` and add a branch to `createProvider()`. Every method must return a well-formed cancel result rather than throwing when the user dismisses.
 
-**IMPORTANT**: These tools are designed as checkpoints to replace `AskUserQuestion` in MCP workflows, BUT they have a critical limitation with Claude Code's rewind feature:
+**Changing a response shape** → `compact.ts` and its tests, then both CLIs. Full list: `.claude/rules/dialog-parity.md`.
 
-- ❌ **MCP tool interactions do NOT create rewind points**
-- ✅ **Only user text messages create rewind points**
-
-This means:
-- When Claude uses `ask`, your response via the dialog won't appear in the rewind timeline
-- You cannot rewind to restore code/conversation state at MCP interaction points
-- Only your typed messages in the chat create restore points
-
-**Recommended Workaround**: Use pre/post-change hooks to commit to a `claude/*` branch:
+## Verification
 
 ```bash
-# In your Claude Code settings, configure hooks:
-# Pre-change hook (before MCP checkpoint):
-git add -A && git commit -m "checkpoint: before $(date +%H:%M:%S)" --allow-empty
-
-# Post-change hook (after MCP response):
-git add -A && git commit -m "checkpoint: after user response $(date +%H:%M:%S)"
+bun test          # 144 tests, mostly compaction and validation
+bun run build     # compile
+bun run dev       # watch mode
 ```
 
-This creates git commits at each checkpoint, giving you:
-- ✅ Actual code state snapshots
-- ✅ Easy revert via `git checkout <commit>`
-- ✅ Timeline of all checkpoints via `git log`
-- ✅ Works independently of Claude Code's rewind feature
+`compact.ts` is the highest-value thing to test — it is where response bugs become invisible.
 
-**Alternative**: Send a brief text message (e.g., "approved") after checkpoints to create a rewind point, but this only restores conversation, not code state.
+## Related context
 
-**Why this matters**: While these tools provide excellent control over Claude's workflow, they're invisible to the rewind feature, making it harder to jump back to key decision points without git-based checkpoints.
-
-## Common Parameters
-
-All dialog tools support:
-- `position`: `"left"` | `"right"` | `"center"` (default: `"left"`) - screen position
-- Titles are automatically prefixed with the calling client name (e.g., "Claude Desktop - Confirmation")
-
-## Handling Snooze & Feedback Responses
-
-All interactive dialogs can return three types of responses:
-
-### Normal Response
-User answered the question. The `answer` field contains: `true/false` (confirm), `string` (pick single/text), `string[]` (pick multi), or `Record<string, string>` (form).
-
-### Snooze Response
-
-**CRITICAL**: When `snoozed: true` is returned, you MUST:
-1. **Actually wait** using `sleep` command (NOT just say "waiting")
-2. **Re-ask the same question** after the wait
-
-```bash
-# Example: User snoozed for 5 minutes (remainingSeconds: 300)
-sleep 300
-```
-
-**Response fields when snoozed:**
-- `snoozed: true`
-- `snoozeMinutes: 1 | 5 | 15 | 30 | 60` (original duration chosen by user)
-- `remainingSeconds: <int>` (seconds until snooze expires)
-- Normal response fields will be null/empty
-
-**Snooze is enforced globally**: During the snooze period, ALL subsequent dialog calls return immediately with `{ snoozed: true, remainingSeconds: X }` WITHOUT showing any dialog. This prevents interrupting the user.
-
-**Example handling:**
-```
-Tool response: { "snoozed": true, "snoozeMinutes": 1, "remainingSeconds": 60 }
-
-CORRECT:
-1. Run: sleep 60
-2. Re-call the same tool with same parameters
-
-WRONG:
-- Just saying "I'll wait" without running sleep
-- Asking a different question immediately
-- Moving on without re-asking
-```
-
-### Feedback Response
-User provided text feedback instead of answering. The `feedbackText` field contains their message - read it and adjust your approach accordingly.
-
-**Response fields when feedback given:**
-- `feedbackText: "user's message here"`
-- Normal response fields will be null/empty
-
-## Additional Tool Options
-
-`ask` with `type: "pick"` additionally supports:
-- `descriptions`: Array of description strings matching choices array. Displayed as `"Choice → Description"` format.
-
-## Platform Requirements
-
-- macOS (Swift CLI) or Windows (WPF CLI)
-- Node.js 18+
-
-## Creating a New Provider
-
-To add support for a new platform, implement the `DialogProvider` interface in `providers/interface.ts`:
-
-### 1. Create provider file
-
-```typescript
-// src/providers/linux.ts
-import type { DialogProvider } from "./interface.js";
-
-export class LinuxDialogProvider implements DialogProvider {
-  private clientName = "MCP";
-
-  setClientName(name: string): void { this.clientName = name; }
-  async pulse(): Promise<void> { /* keep-alive, can be no-op */ }
-  async confirm(opts) { /* zenity, kdialog, etc. */ }
-  async choose(opts) { /* ... */ }
-  async textInput(opts) { /* ... */ }
-  async notify(opts) { /* ... */ }
-  async preview(opts) { /* ... */ }
-  async questions(opts) { /* ... */ }
-  async tweak(opts) { /* ... */ }
-  async proposeLayout(opts) { /* ... */ }
-}
-```
-
-### 2. Required method behaviors
-
-| Method | Must handle | Return on cancel |
-|--------|-------------|------------------|
-| `confirm` | Yes/No dialog | `{confirmed: false, cancelled: true, ...}` |
-| `choose` | Single/multi-select | `{answer: null, cancelled: true, ...}` |
-| `textInput` | Text field + hidden mode | `{answer: null, cancelled: true, ...}` |
-| `questions` | Multi-question wizard | `{answers: {}, cancelled: true, ...}` |
-| `tweak` | Numeric sliders with live file writes | `{answers: {}, cancelled: true, ...}` |
-| `notify` | Non-blocking notification | `{success: true/false}` |
-| `preview` | Response preview before send | `{success: true/false}` |
-| `proposeLayout` | Interactive grid layout editor | `{status: "cancelled", ...}` |
-
-### 3. Wire up in index.ts
-
-Add platform detection in `createProvider()`:
-
-```typescript
-function createProvider(): DialogProvider {
-  if (process.platform === "linux") return new LinuxDialogProvider();
-  if (process.platform === "win32") return new WindowsDialogProvider();
-  return new SwiftDialogProvider();
-}
-```
-
-### 4. Implementation notes
-
-- `position` parameter controls dialog screen placement (left/right/center)
-- Prefix dialog titles with `clientName` via `buildTitle()` helper
-- Handle user cancellation gracefully (Escape key, window close)
+- `../GLOSSARY.md` — Layer Translation table: MCP name ↔ CLI command ↔ platform type
+- `../dialog-cli/CLAUDE.md`, `../dialog-cli-windows/CLAUDE.md` — what the providers spawn
+- `.claude/rules/dialog-parity.md`
+- `docs/` — the rewind-checkpoint limitation and other product-level caveats belong there, not here

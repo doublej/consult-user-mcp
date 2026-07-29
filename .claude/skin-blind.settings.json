@@ -1,6 +1,8 @@
 {
   "//": "Blindfold for skin authoring. Launch with:  claude --settings .claude/skin-blind.settings.json",
   "//2": "Blocks every rendering of the CURRENT visual language while leaving the behaviour contract, the skin API, the shared chassis and the test fixtures readable. See .claude/commands/build-skin.md.",
+  "//3": "The Bash text-tool denials below exist because Read/Grep denials alone do not stop `grep -A 30 <pattern> Theme.swift` from reconstructing a blocked file. They are broad on purpose. build-skin.md reproduces every chassis declaration the agent needs, with types, so nothing legitimate requires reading a blocked path.",
+  "//4": "CONFLICT, needs a decision: Bash(screencapture:*) below is denied, but build-skin.md now requires the agent to screenshot every state of its own skin, and capture-states.sh cannot run without it. Remove that one deny line to use the harness. The rule that keeps it honest is behavioural, not enforced — capture only the window id returned by test-cases/capture-dialog.swift, and never run a dialog without DIALOG_SKIN set to the new skin's id.",
 
   "permissions": {
     "deny": [

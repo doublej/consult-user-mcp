@@ -87,6 +87,16 @@ struct CaretRails: View {
 
     private var inset: CGFloat { CaretStyle.caretRail / 2 }
 
+    /// Where the caret stands.
+    ///
+    /// It is a thickening of the stem, so it grows *inward* from the stem's
+    /// outer edge rather than straddling the line. Centred on the stem it puts
+    /// half its width outside the frame, which does not read as a thicker rail
+    /// — it reads as a mark falling off the left edge of the window.
+    private var caretCentre: CGFloat {
+        inset + (CaretStyle.caretWidth - CaretStyle.hair) / 2
+    }
+
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .topLeading) {
@@ -103,13 +113,13 @@ struct CaretRails: View {
                         .fill(progressTone ?? palette.caret)
                         .opacity(0.5)
                         .frame(width: CaretStyle.caretWidth, height: max(0, full * (1 - cooldown)))
-                        .position(x: inset, y: geo.size.height / 2)
+                        .position(x: caretCentre, y: geo.size.height / 2)
                 } else if let rect = focusRect {
                     // 3 units of cursor against 5 of stem, 18 of 30 tall.
                     Capsule()
                         .fill(palette.caret)
                         .frame(width: CaretStyle.caretWidth, height: max(CaretStyle.u(12), rect.height * 0.6))
-                        .position(x: inset, y: rect.midY)
+                        .position(x: caretCentre, y: rect.midY)
                 }
             }
         }

@@ -247,12 +247,33 @@ Two allowed hits and no others: `ClassicSkin.metrics(for: .tweak)`, if `tweak` i
 `SkinRegistry.entries` line. Everything else is a leak.
 
 **Structural.** Every `DialogSkin` member is implemented, or `tweak` alone is not and that is stated as a
-decision.
+decision (§7.3 permits exactly that, and warns the undefined surface will look visibly unlike the rest).
+
+**From §7.4 — requirements on any style, including this one.** All four are currently unmet across the product,
+so a new layer is where they get met, not inherited:
+
+- A **light palette exists**, and every requirement in the behaviour spec holds in it identically.
+- **No hardcoded colour anywhere.** One element ignoring the active palette breaks every other palette at once —
+  which also means a hit from the shipped theme is evidence of a leak, not of styling working.
+- **Right-to-left mirroring decided deliberately.** §4.5 and §3.9 are stated in reading order and therefore
+  mirror; nothing else in the spec does automatically.
+- **Text scaling handled.** §2.2's measure-once law still has to floor, cap and reflow correctly when a surface
+  is built at one text size and rendered at another.
+
+**From §3.8 — what the person is told about the keyboard tracks live availability.** The spec calls this "a
+requirement of any new style, not an option". Suppressed keys must read as unavailable; during the cooldown the
+affected ones do; while a caret sits in any text field the single-letter shortcuts do, **and the annotation
+shortcut presents as its modifier chord instead**, because that is the one that works.
 
 **Visual.** Every state in the capture manifest has been shot **and looked at**, including all four
-focus × selection combinations, both halves of the §3.3 presentation switch, masked versus plain, the disabled
-and enabled primary, the cooldown, the note pane on both anchors, the snooze tray, a drafted note, report flow
-step 1, every form step, and both transient popups.
+chosen × focused combinations, both halves of the §3.3 presentation switch, masked versus plain, unavailable
+and available commit, the cooldown, anything attached beside the surface on both anchors, the postpone options
+expanded, a drafted annotation showing its signal, report flow step 1, every form step, and both transient
+surfaces.
+
+**From §0.3 — run both tests on the finished thing, not only at the start.** The scramble test: if the spec's
+section numbering were shuffled, would the design change? The residue test: name three things the design does
+that the spec does not mention.
 
 **The honest one.** For each surface, the answer to *"which visible element here did I not draw?"* is
 **none** — the window's own rounded clip aside.

@@ -31,6 +31,23 @@ class WindowSizeObserver: NSObject {
         self.position = position
         super.init()
 
+        // Let AppKit carry the subviews, instead of animating their frames
+        // alongside the window's.
+        //
+        // AppKit's origin is bottom-left, so a subview given an explicit frame
+        // in a window that grows upward-from-a-fixed-top keeps its distance
+        // from the *bottom* and its top margin is what changes. Three separate
+        // animations — window, background, hosting view — also have to agree
+        // frame for frame, and any disagreement is content sliding inside the
+        // window while it travels.
+        //
+        // A flexible width and height with fixed margins is the standard fix:
+        // the 8-point inset is held on all four sides and the resize happens as
+        // part of the window's own animated setFrame, so there is exactly one
+        // animation and the content cannot drift against it.
+        bgView.autoresizingMask = [.width, .height]
+        hostingView.autoresizingMask = [.width, .height]
+
         notificationObserver = NotificationCenter.default.addObserver(
             forName: .dialogContentSizeChanged,
             object: nil,
@@ -77,16 +94,15 @@ class WindowSizeObserver: NSObject {
                 newX = currentFrame.origin.x + (currentFrame.width - newWidth) / 2
             }
             let newFrame = NSRect(x: newX, y: newY, width: newWidth, height: newHeight)
-            let newHostingFrame = NSRect(x: 8, y: 8, width: newWidth - 16, height: newHeight - 16)
-            let newBgFrame = NSRect(x: 0, y: 0, width: newWidth, height: newHeight)
 
+            // One animation. The subviews follow through their autoresizing
+            // masks, set in init, so they resize with the window rather than
+            // beside it.
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.2
                 context.timingFunction = CAMediaTimingFunction(name: .easeOut)
                 context.allowsImplicitAnimation = true
                 window.animator().setFrame(newFrame, display: true)
-                hostingView.animator().frame = newHostingFrame
-                bgView.animator().frame = newBgFrame
             }
 
             if ProcessInfo.processInfo.environment["DIALOG_TEST_DEBUG_LAYOUT"] != nil {

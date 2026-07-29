@@ -91,7 +91,12 @@ struct CaretFrame<Content: View>: View {
         }
         .padding(.top, inset + CaretStyle.u(10))
         .padding(.bottom, inset + CaretStyle.u(18))
-        .frame(minWidth: minSurfaceWidth, alignment: .top)
+        // A ceiling as well as a floor. Nothing above this stops a window
+        // growing: an option whose description happens not to break — a path,
+        // an identifier — is measured unwrapped, and the surface would ask for
+        // every point of it. A 1300-point dialog for one long line is not a
+        // dialog. Past this the line wraps instead.
+        .frame(minWidth: minSurfaceWidth, maxWidth: CaretStyle.u(660), alignment: .top)
         // §2.2 measured once, and then held to it.
         //
         // Until the window exists the surface asks for its ideal width, which
@@ -105,7 +110,13 @@ struct CaretFrame<Content: View>: View {
         // chord, the form's labels changing at each step, the note panel's own
         // caption row. Only the height still reflows.
         .frame(width: measuredWidth)
-        .fixedSize(horizontal: measuredWidth == nil, vertical: true)
+        // Width is held; height is not. A window has a floor of its own, so a
+        // short surface is put in a box taller than it asks for — and the frame
+        // has to reach the bottom of that box, not stop halfway down it with
+        // the ways out stranded in the middle. Letting the height give means
+        // the `Spacer` above the action bar takes up whatever the box has
+        // spare, so the top stays where it is and only the gap grows.
+        .fixedSize(horizontal: measuredWidth == nil, vertical: false)
         .coordinateSpace(name: CaretSpace.surface)
         .onPreferenceChange(CaretFocusKey.self) { rect in model.focusRect = rect }
         .overlay(

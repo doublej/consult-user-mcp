@@ -48,6 +48,7 @@ struct CaretNotePane: View {
                 Spacer(minLength: 0)
                 paneAction("Close", enabled: true, focused: $closeFocused) {
                     model.openNote = nil
+                    model.editing = false
                     model.reflow(resizingWidth: true)
                 }
             }

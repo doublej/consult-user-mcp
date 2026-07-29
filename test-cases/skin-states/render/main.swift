@@ -40,7 +40,12 @@ guard args.count >= 4 else {
 let manifestPath = args[1]
 let outDir = args[2]
 let skinID = args[3]
+/// A leading `=` means "this exact state and nothing else". The shell driver
+/// uses it to give every state its own process: a surface installs a key
+/// monitor and a size observer, and sharing a process between states let one
+/// state's leftovers eat the next state's script.
 let filter = args.count > 4 ? args[4] : ""
+let exact = filter.hasPrefix("=") ? String(filter.dropFirst()) : nil
 
 /// Most fixtures name a project, so the identity on the top arm has something
 /// to show. `MCP_PROJECT_PATH` overrides it; a manifest row can clear it with
@@ -225,7 +230,10 @@ func makeWindow(_ state: RenderState, data: Data) -> NSWindow? {
 
 // MARK: - Drive
 
-let states = loadManifest().filter { filter.isEmpty || $0.name.contains(filter) }
+let states = loadManifest().filter { state in
+    if let exact { return state.name == exact }
+    return filter.isEmpty || state.name.contains(filter)
+}
 var shot: [String] = []
 var missed: [String] = []
 
@@ -268,16 +276,30 @@ for state in states {
         print("MISS \(state.name)")
     }
 
+    // Tear the view tree down before the next state is built. Each surface
+    // installs a key monitor and holds it until `onDisappear`; leave one alive
+    // and it eats the next state's keys, which shows up as a surface that
+    // ignored its script. Dropping the content view forces the teardown, and
+    // the pump gives SwiftUI the turn it needs to run it.
+    unsetenv("DIALOG_TEST_KEYS")
     window.orderOut(nil)
+    window.contentView = nil
     window.close()
-    FocusManager.shared.reset()
-    CooldownManager.shared.reset()
     DialogManager.shared.sizeObserver = nil
     DialogManager.shared.testPane = nil
-    pump(0.05)
+    pump(0.30)
+    FocusManager.shared.reset()
+    CooldownManager.shared.reset()
 }
 
 // MARK: - Contact sheet
+//
+// Skipped when driven one state per process; the shell assembles it then.
+
+if exact != nil {
+    restoreSettings()
+    exit(missed.isEmpty ? 0 : 1)
+}
 
 let sheet = """
 <!doctype html><meta charset=utf-8><title>\(skinID) states</title>

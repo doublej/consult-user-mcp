@@ -20,6 +20,16 @@ enum CaretStyle {
     /// 1.0 at the stock 13pt UI text size.
     static let unit: CGFloat = max(0.75, min(1.6, NSFont.systemFontSize / 13.0))
 
+    /// Read once. Motion is a person-level preference.
+    static let animates: Bool = UserSettings.load().animationsEnabled
+
+    /// The curve the window's own resize runs on. Anything this layer animates
+    /// alongside a resize has to match it or the two read as two events.
+    static let resizeDuration: Double = 0.2
+    /// The window resize starts a run-loop turn or two after the content
+    /// changes, because the size observer measures before it animates.
+    static let resizeLag: Double = 0.03
+
     static func u(_ value: CGFloat) -> CGFloat { value * unit }
 
     // MARK: - Faces

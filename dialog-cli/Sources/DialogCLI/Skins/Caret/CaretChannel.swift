@@ -21,6 +21,35 @@ struct CaretChannel<Content: View>: View {
     }
 }
 
+/// Reveals something without moving anything.
+///
+/// The window is resized by a service this layer keeps, which measures the
+/// content and *then* animates the frame a run-loop turn later. So a layout
+/// that animates measures wrong — the measurement catches an interpolated
+/// size and the window settles at the wrong height. The layout change
+/// therefore lands instantly and correctly, and only opacity is animated, on
+/// the window's own curve and with its own lag, so the new element arrives as
+/// the frame finishes travelling instead of being pushed outside the clip and
+/// sliding back in.
+struct CaretReveal: ViewModifier {
+    @State private var shown = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .onAppear {
+                guard CaretStyle.animates else { shown = true; return }
+                withAnimation(.easeOut(duration: CaretStyle.resizeDuration).delay(CaretStyle.resizeLag)) {
+                    shown = true
+                }
+            }
+    }
+}
+
+extension View {
+    func caretReveal() -> some View { modifier(CaretReveal()) }
+}
+
 /// The caller's title. It is a label, not the question — the question is the
 /// body — so it is set in the mono face at rail scale, wraps freely and never
 /// truncates (§3.3).

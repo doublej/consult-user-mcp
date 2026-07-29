@@ -67,15 +67,21 @@ struct CaretFrame<Content: View>: View {
     private var surface: some View {
         VStack(spacing: 0) {
             topBar
-            if model.trayOpen { snoozeTray }
-            if model.shapesOpen { shapeList }
+            if model.trayOpen { snoozeTray.caretReveal() }
+            if model.shapesOpen { shapeList.caretReveal() }
 
             content()
                 .padding(.horizontal, CaretStyle.caretRail + CaretStyle.gutter)
                 .padding(.top, CaretStyle.u(18))
+                .padding(.bottom, CaretStyle.u(22))
                 .environment(\.caretInert, model.inert)
 
-            Spacer(minLength: CaretStyle.u(22))
+            // Collapsible to nothing on purpose. While the window is still
+            // travelling to its new height the frame is briefly shorter than
+            // the content; a gap that can give way absorbs that, where a
+            // floored one would push the lower arms outside the clip and let
+            // them slide back in.
+            Spacer(minLength: 0)
 
             if leadingAction != nil || trailingAction != nil { actionBar }
         }
@@ -295,6 +301,7 @@ struct CaretFrame<Content: View>: View {
         )
         .frame(width: CaretStyle.paneWidth)
         .environment(\.caretInert, false)
+        .caretReveal()
     }
 
     // MARK: - Report
@@ -305,6 +312,7 @@ struct CaretFrame<Content: View>: View {
                 CaretReportFlow(model: model)
                     .environment(\.caretPalette, palette)
                     .environment(\.caretInert, false)
+                    .caretReveal()
             }
         }
     }
@@ -369,8 +377,11 @@ struct CaretFrame<Content: View>: View {
                 if model.shapesOpen {
                     model.shapesOpen = false
                 } else {
-                    // The draft survives every route out of the editor.
+                    // The draft survives every route out of the editor. The
+                    // caret does not, so the bare letter works again and the
+                    // tool has to stop advertising the chord (§3.8).
                     model.openNote = nil
+                    model.editing = false
                 }
                 model.reflow(resizingWidth: true)
             },

@@ -40,7 +40,7 @@ choose-focused-and-selected	choose	multi-select	3.4	-	d2.4;space;down;down;space
 choose-selected-unfocused	choose	multi-select	3.4	-	d2.4;space;down
 choose-primary-enabled	choose	single-select	3.2	-	d2.4;space
 choose-helper-line	choose	single-select	3.4	-	d2.4;space;space
-choose-other-typed	choose	single-select-other	4.4	-	d2.4;down;down;down;space;p30;t:none of them
+choose-other-typed	choose	single-select-other	4.4	-	d2.4;down;down;down;space;p30;t:duckdb
 choose-pane-feedback	choose	pane-feedback	1.8	feedback	-
 choose-snooze-tray	choose	pane-snooze	1.8	snooze	-
 choose-multi-pane-feedback	choose	multi-select-pane-feedback	1.8	feedback	-

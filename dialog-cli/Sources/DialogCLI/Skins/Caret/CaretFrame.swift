@@ -39,8 +39,6 @@ struct CaretFrame<Content: View>: View {
     @State private var leadingFocused = false
     @State private var trailingFocused = false
 
-    private let clock = Timer.publish(every: 1.0 / 30.0, on: .main, in: .common).autoconnect()
-
     /// One inset all round, so the mark's corners nest concentrically inside
     /// the window's own radius.
     private var inset: CGFloat { CaretStyle.caretRail / 2 }
@@ -57,9 +55,8 @@ struct CaretFrame<Content: View>: View {
         .environment(\.caretPalette, palette)
         .overlay(reportFlow)
         .onAppear(perform: appear)
-        .onDisappear { monitor = nil; shapeKeys = nil }
-        .onReceive(clock) { _ in tickCooldown() }
-        .onReceive(NotificationCenter.default.publisher(for: .cooldownDidChange)) { _ in tickCooldown() }
+        .onDisappear { monitor = nil; shapeKeys = nil; model.stopClock() }
+        .onReceive(NotificationCenter.default.publisher(for: .cooldownDidChange)) { _ in model.startClock() }
     }
 
     // MARK: - The surface itself
@@ -336,6 +333,7 @@ struct CaretFrame<Content: View>: View {
 
     private func appear() {
         paneLeading = resolvePaneSide()
+        model.startClock()
 
         guard kind.interactive else { return }
 
@@ -425,12 +423,6 @@ struct CaretFrame<Content: View>: View {
             let roomRight = screen.visibleFrame.maxX - window.frame.maxX
             return roomLeft > roomRight
         }
-    }
-
-    private func tickCooldown() {
-        let manager = CooldownManager.shared
-        let value = manager.isCoolingDown ? manager.progress : 1
-        if abs(value - model.cooldown) > 0.004 { model.cooldown = value }
     }
 }
 

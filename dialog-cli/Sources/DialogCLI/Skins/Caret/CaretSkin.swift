@@ -46,6 +46,10 @@ struct CaretSkin: DialogSkin {
         wrap(CaretConfirmView(spec: spec))
     }
 
+    func chooseView(_ spec: ChooseSpec) -> AnyView {
+        wrap(CaretChooseView(spec: spec))
+    }
+
     private func wrap<V: View>(_ view: V) -> AnyView {
         AnyView(view.environment(\.caretPalette, palette))
     }

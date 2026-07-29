@@ -9,12 +9,20 @@ import SwiftUI
 /// layer fixes rather than inherits.
 struct CaretChannel<Content: View>: View {
     var cap: CGFloat = CaretStyle.channelCap
+    /// §5.2: focus moving to a row brings it to the centre of the region.
+    var centre: Int? = nil
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: true) {
-            content()
-                .frame(maxWidth: .infinity, alignment: .leading)
+        ScrollViewReader { proxy in
+            ScrollView(.vertical, showsIndicators: true) {
+                content()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .onChange(of: centre) { _, new in
+                guard let new else { return }
+                withAnimation(.easeOut(duration: 0.15)) { proxy.scrollTo(new, anchor: .center) }
+            }
         }
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxHeight: cap)

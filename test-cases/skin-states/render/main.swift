@@ -123,22 +123,110 @@ func fixtureData(_ state: RenderState) -> Data? {
     return FileManager.default.contents(atPath: local.path)
 }
 
-// MARK: - Run loop
-
-/// Drives `NSApp` directly. Local event monitors are invoked from `sendEvent`,
-/// so the key router sees injected keys exactly as it sees real ones, and the
-/// main queue drains so cooldown timers and reflow notifications land.
-func pump(_ seconds: TimeInterval) {
-    let deadline = Date().addingTimeInterval(seconds)
-    while Date() < deadline {
-        guard let event = app.nextEvent(matching: .any, until: deadline, inMode: .default, dequeue: true) else { continue }
-        app.sendEvent(event)
-    }
-}
-
 // MARK: - Capture
 
 let parkedOrigin = NSPoint(x: -30_000, y: -30_000)
+
+/// The window the current state is being rendered into, so `pump` knows where
+/// to hand a key the router did not take.
+var liveWindow: NSWindow?
+
+
+// MARK: - Keys
+//
+// The product's own `TestKeyDriver` is env-var driven and has no token for
+// Space — every `space` in the manifest was being dropped on the floor, which
+// looked exactly like a broken option row. This plans the same token language
+// plus Space onto a timeline the pump executes, so a state's script is
+// deterministic rather than racing `asyncAfter` against the settle delay.
+//
+//   d<seconds>  wait · p<millis> typing pause · t:<text> type · c:<char> ⌘-chord
+//   space left right up down esc return tab
+
+struct KeyStep {
+    var at: TimeInterval
+    var keyCode: UInt16
+    var characters: String
+    var modifiers: NSEvent.ModifierFlags = []
+}
+
+let specialKeys: [String: (UInt16, String)] = [
+    "left": (123, ""), "right": (124, ""), "down": (125, ""), "up": (126, ""),
+    "esc": (53, ""), "return": (36, ""), "tab": (48, ""), "space": (49, " "),
+]
+
+let qwerty: [Character: UInt16] = [
+    "a": 0, "s": 1, "d": 2, "f": 3, "h": 4, "g": 5, "z": 6, "x": 7,
+    "c": 8, "v": 9, "b": 11, "q": 12, "w": 13, "e": 14, "r": 15,
+    "y": 16, "t": 17, "1": 18, "2": 19, "3": 20, "4": 21, "6": 22,
+    "5": 23, "9": 25, "7": 26, "8": 28, "0": 29, "o": 31, "u": 32,
+    "i": 34, "p": 35, "l": 37, "j": 38, "k": 40, "n": 45, "m": 46,
+    " ": 49, ".": 47, ",": 43, "-": 27,
+]
+
+func plan(_ script: String) -> [KeyStep] {
+    var steps: [KeyStep] = []
+    var clock: TimeInterval = 0
+    var typingPause: TimeInterval = 0
+
+    for token in script.components(separatedBy: ";") where !token.isEmpty {
+        if token.hasPrefix("d"), let seconds = Double(token.dropFirst()) {
+            clock += seconds
+        } else if token.hasPrefix("p"), let millis = Double(token.dropFirst()) {
+            typingPause = millis / 1000
+        } else if token.hasPrefix("t:") {
+            for character in token.dropFirst(2) {
+                let code = qwerty[Character(character.lowercased())] ?? 0
+                steps.append(KeyStep(at: clock, keyCode: code, characters: String(character)))
+                clock += max(typingPause, 0.012)
+            }
+        } else if token.hasPrefix("c:"), let character = token.dropFirst(2).first {
+            let code = qwerty[Character(character.lowercased())] ?? 0
+            steps.append(KeyStep(at: clock, keyCode: code, characters: String(character), modifiers: .command))
+            clock += 0.05
+        } else if let (code, characters) = specialKeys[token] {
+            steps.append(KeyStep(at: clock, keyCode: code, characters: characters))
+            clock += 0.05
+        } else {
+            FileHandle.standardError.write("unknown key token '\(token)'\n".data(using: .utf8)!)
+        }
+    }
+    return steps
+}
+
+func post(_ step: KeyStep) {
+    let number = liveWindow?.windowNumber ?? 0
+    for type in [NSEvent.EventType.keyDown, .keyUp] {
+        guard let event = NSEvent.keyEvent(
+            with: type, location: .zero, modifierFlags: step.modifiers,
+            timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: number,
+            context: nil, characters: step.characters,
+            charactersIgnoringModifiers: step.characters, isARepeat: false, keyCode: step.keyCode
+        ) else { continue }
+        NSApp.postEvent(event, atStart: false)
+    }
+}
+
+/// Pumps for `seconds`, posting each planned key as its moment arrives.
+func pump(_ seconds: TimeInterval, script: [KeyStep] = []) {
+    let start = Date()
+    let deadline = start.addingTimeInterval(seconds)
+    var next = 0
+    while Date() < deadline {
+        while next < script.count, Date().timeIntervalSince(start) >= script[next].at {
+            post(script[next])
+            next += 1
+        }
+        let slice = min(deadline, Date().addingTimeInterval(0.008))
+        guard let event = app.nextEvent(matching: .any, until: slice, inMode: .default, dequeue: true) else { continue }
+        // `NSApplication.sendEvent` reaches the responder chain through the
+        // event's own window, so a parked window still gets its keys and the
+        // router's local monitor still runs first. Forwarding a second copy
+        // to the window here delivers everything twice, which reads as a
+        // control that ignores every other press.
+        app.sendEvent(event)
+    }
+}
 
 func capture(_ window: NSWindow, to path: String) -> Bool {
     guard let content = window.contentView else { return false }
@@ -245,13 +333,13 @@ for state in states {
 
     DialogManager.shared.setProjectPath(state.project == "none" ? nil : (state.project ?? defaultProject))
     DialogManager.shared.testPane = state.pane
-    if let keys = state.keys { setenv("DIALOG_TEST_KEYS", keys, 1) } else { unsetenv("DIALOG_TEST_KEYS") }
 
     guard let window = makeWindow(state, data: data) else {
         missed.append("\(state.name) (unknown kind \(state.dir))")
         continue
     }
 
+    liveWindow = window
     window.setFrameOrigin(parkedOrigin)
     window.orderFront(nil)
     window.makeKey()
@@ -264,10 +352,12 @@ for state in states {
     if state.dir != "notify" && state.dir != "preview" {
         CooldownManager.shared.startCooldown()
     }
-    TestKeyDriver.installIfRequested()
+    pump(state.settle, script: plan(state.keys ?? ""))
 
-    pump(state.settle)
-
+    if ProcessInfo.processInfo.environment["RENDER_DEBUG"] != nil {
+        let responder = window.firstResponder.map { String(describing: type(of: $0)) } ?? "nil"
+        print("   firstResponder=\(responder) cooling=\(CooldownManager.shared.isCoolingDown) progress=\(CooldownManager.shared.progress)")
+    }
     if capture(window, to: "\(outDir)/\(state.name).png") {
         shot.append(state.name)
         print("ok   \(state.name)")
@@ -281,7 +371,7 @@ for state in states {
     // and it eats the next state's keys, which shows up as a surface that
     // ignored its script. Dropping the content view forces the teardown, and
     // the pump gives SwiftUI the turn it needs to run it.
-    unsetenv("DIALOG_TEST_KEYS")
+    liveWindow = nil
     window.orderOut(nil)
     window.contentView = nil
     window.close()

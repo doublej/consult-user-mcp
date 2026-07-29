@@ -94,6 +94,36 @@ final class CaretSurfaceModel: ObservableObject {
 
     var reportShot: Data?
 
+    /// `CooldownManager` publishes nothing and exposes no duration, so the
+    /// remaining-time indication §4.6 requires has to be polled. The clock
+    /// lives here rather than on the view: a `Timer` held by a `View` struct is
+    /// rebuilt on every body evaluation, which cancels it before it ever fires
+    /// and leaves the surface damped for its whole life.
+    private var clock: Timer?
+
+    func startClock() {
+        tick()
+        clock?.invalidate()
+        let timer = Timer(timeInterval: 1.0 / 30.0, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.tick() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        clock = timer
+    }
+
+    func stopClock() {
+        clock?.invalidate()
+        clock = nil
+    }
+
+    private func tick() {
+        let manager = CooldownManager.shared
+        let value = manager.isCoolingDown ? manager.progress : 1
+        if abs(value - cooldown) > 0.004 { cooldown = value }
+        // It can only ever run down once, so stop watching when it is spent.
+        if value >= 1, !manager.isCoolingDown { stopClock() }
+    }
+
     /// Whitespace-only counts as empty everywhere (§3.6).
     func note(_ key: String) -> String? {
         let trimmed = (noteDrafts[key] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)

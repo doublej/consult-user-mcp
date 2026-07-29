@@ -17,8 +17,22 @@ import SwiftUI
 /// another therefore floors, caps and reflows against the same grid (§7.4).
 enum CaretStyle {
 
-    /// 1.0 at the stock 13pt UI text size.
-    static let unit: CGFloat = max(0.75, min(1.6, NSFont.systemFontSize / 13.0))
+    /// 1.0 at the stock 13pt UI text size, floored at 0.75 and capped at 1.6.
+    ///
+    /// §7.4's text-scaling requirement is answered by reading the size exactly
+    /// once, at process start, and expressing every other dimension in the
+    /// layer as a multiple of it. The CLI is ephemeral, so a surface is never
+    /// built at one text size and rendered at another — a changed size is a new
+    /// process reading a new grid — and within one process the grid cannot move
+    /// under a measurement, which is what keeps §2.2's measure-once law true.
+    /// The floor and cap keep the extremes from breaking the frame; past them
+    /// the type stops growing and the surface reflows instead.
+    static let unit: CGFloat = {
+        // A test hook, so the claim above can be shot rather than asserted.
+        let points = ProcessInfo.processInfo.environment["DIALOG_TEST_TEXT_SCALE"]
+            .flatMap(Double.init).map { CGFloat($0) * 13.0 } ?? NSFont.systemFontSize
+        return max(0.75, min(1.6, points / 13.0))
+    }()
 
     /// Read once. Motion is a person-level preference.
     static let animates: Bool = UserSettings.load().animationsEnabled
@@ -148,6 +162,32 @@ struct CaretKeycap: View {
     private var border: Color {
         guard available else { return palette.rail }
         return strong ? palette.caret.opacity(0.55) : palette.rail
+    }
+}
+
+// MARK: - Writing direction
+
+/// §7.4 asks for this to be decided rather than defaulted. The decision: the
+/// surface mirrors wholesale.
+///
+/// Every stack in the layer is expressed in leading/trailing terms, so the
+/// words, the rows, the tools and the ways out swap sides on their own. What
+/// does not is the drawn line — the frame, its lower corners and the row
+/// enclosure are `Path`s in absolute coordinates, and the caret is positioned
+/// at an absolute x. Those are reflected here, so the caret rail lands on the
+/// reading edge and every bracket still opens towards the content it holds.
+///
+/// A reflection is used rather than a second set of coordinates because the
+/// reflected content is lines and no glyphs: nothing inside it can come out
+/// backwards.
+extension View {
+    @ViewBuilder
+    func caretMirrored(_ direction: LayoutDirection) -> some View {
+        if direction == .rightToLeft {
+            scaleEffect(x: -1, y: 1, anchor: .center)
+        } else {
+            self
+        }
     }
 }
 

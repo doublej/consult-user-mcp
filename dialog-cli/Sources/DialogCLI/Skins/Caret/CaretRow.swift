@@ -61,6 +61,7 @@ struct CaretRow<Trailing: View>: View {
     @State private var hovered = false
     @State private var pressed = false
     @Environment(\.caretPalette) private var palette
+    @Environment(\.layoutDirection) private var direction
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: CaretStyle.u(12)) {
@@ -129,6 +130,7 @@ struct CaretRow<Trailing: View>: View {
             .frame(width: CaretStyle.u(7))
             .opacity(visible ? 1 : 0)
             .padding(.vertical, CaretStyle.u(4))
+            .caretMirrored(direction)
             .allowsHitTesting(false)
     }
 }

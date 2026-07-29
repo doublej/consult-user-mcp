@@ -83,6 +83,7 @@ struct CaretRails: View {
     var progressTone: Color? = nil
     var dimmed: Bool = false
     @Environment(\.caretPalette) private var palette
+    @Environment(\.layoutDirection) private var direction
 
     private var inset: CGFloat { CaretStyle.caretRail / 2 }
 
@@ -112,6 +113,7 @@ struct CaretRails: View {
                 }
             }
         }
+        .caretMirrored(direction)
         .allowsHitTesting(false)
     }
 

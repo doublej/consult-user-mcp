@@ -16,6 +16,7 @@ enum SkinRegistry {
         Entry(id: ClassicSkin.identifier, displayName: "Classic", make: { ClassicSkin() }),
         Entry(id: AltSkin.identifier, displayName: "Alt", make: { AltSkin() }),
         Entry(id: BracketSkin.identifier, displayName: "Bracket", make: { BracketSkin() }),
+        Entry(id: CaretSkin.identifier, displayName: "Caret", make: { CaretSkin() }),
     ]
 
     static let fallbackID = ClassicSkin.identifier

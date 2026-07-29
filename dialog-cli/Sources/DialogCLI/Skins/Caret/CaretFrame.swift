@@ -98,6 +98,10 @@ struct CaretFrame<Content: View>: View {
                 dimmed: model.inert
             )
         )
+        .background(palette.window)
+        // Holds its measured width while the window is still travelling, so
+        // the pane grows into the space the window is opening rather than
+        // shoving the surface sideways and letting it settle back.
         .layoutPriority(1)
     }
 

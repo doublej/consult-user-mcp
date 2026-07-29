@@ -50,6 +50,22 @@ struct CaretSkin: DialogSkin {
         wrap(CaretChooseView(spec: spec))
     }
 
+    func textInputView(_ spec: TextInputSpec) -> AnyView {
+        wrap(CaretTextInputView(spec: spec))
+    }
+
+    func questionsView(_ spec: QuestionsSpec) -> AnyView {
+        wrap(CaretQuestionsView(spec: spec))
+    }
+
+    func notifyView(_ spec: NotifySpec) -> AnyView {
+        wrap(CaretNotifyView(spec: spec))
+    }
+
+    func previewView(_ spec: PreviewSpec) -> AnyView {
+        wrap(CaretPreviewView(spec: spec))
+    }
+
     private func wrap<V: View>(_ view: V) -> AnyView {
         AnyView(view.environment(\.caretPalette, palette))
     }

@@ -91,6 +91,11 @@ final class CaretSurfaceModel: ObservableObject {
     /// keys are actually available right now.
     @Published var editing = false
     @Published var cooldown: Double = 1
+    /// §10.13 leaves a masked field unverifiable and §3.11 forbids revealing
+    /// it, so the one safe thing to say is whether the shift lock is on.
+    @Published var capsLock = false
+    /// Keeps the clock alive past the cooldown for the surfaces that need it.
+    var watchCaps = false
 
     var reportShot: Data?
 
@@ -120,8 +125,12 @@ final class CaretSurfaceModel: ObservableObject {
         let manager = CooldownManager.shared
         let value = manager.isCoolingDown ? manager.progress : 1
         if abs(value - cooldown) > 0.004 { cooldown = value }
+        if watchCaps {
+            let on = NSEvent.modifierFlags.contains(.capsLock)
+            if on != capsLock { capsLock = on }
+        }
         // It can only ever run down once, so stop watching when it is spent.
-        if value >= 1, !manager.isCoolingDown { stopClock() }
+        if value >= 1, !manager.isCoolingDown, !watchCaps { stopClock() }
     }
 
     /// Whitespace-only counts as empty everywhere (§3.6).

@@ -39,7 +39,10 @@ struct CaretNotePane: View {
 
             CaretNoteEditor(text: model.binding(key), onFocus: { model.editing = $0 })
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .frame(minHeight: CaretStyle.u(90))
+                // Kept small on purpose: a pane taller than the surface makes
+                // the window grow downward as well as sideways, so one gesture
+                // becomes two movements.
+                .frame(minHeight: CaretStyle.u(58))
 
             HStack(spacing: CaretStyle.u(16)) {
                 paneAction("Clear", enabled: !empty, focused: $clearFocused) {

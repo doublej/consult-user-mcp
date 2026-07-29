@@ -26,9 +26,11 @@ enum CaretStyle {
     /// The curve the window's own resize runs on. Anything this layer animates
     /// alongside a resize has to match it or the two read as two events.
     static let resizeDuration: Double = 0.2
-    /// The window resize starts a run-loop turn or two after the content
-    /// changes, because the size observer measures before it animates.
-    static let resizeLag: Double = 0.03
+    /// How long after the content changes the window's own resize actually
+    /// starts. The size observer measures first and animates a turn later;
+    /// measured at roughly this, and the compensation has to wait it out
+    /// rather than easing through it.
+    static let resizeLag: Double = 0.06
 
     static func u(_ value: CGFloat) -> CGFloat { value * unit }
 

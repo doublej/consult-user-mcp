@@ -77,8 +77,10 @@ struct CaretRails: View {
     let bottomLeading: CaretArmStyle
     let bottomTrailing: CaretArmStyle
     let focusRect: CGRect?
-    /// 1 when the surface is live; below 1 while the cooldown runs.
+    /// 1 when the surface is live; below 1 while the cooldown runs, or while
+    /// a transient surface's lifetime is running out.
     let cooldown: Double
+    var progressTone: Color? = nil
     var dimmed: Bool = false
     @Environment(\.caretPalette) private var palette
 
@@ -97,7 +99,7 @@ struct CaretRails: View {
                 if cooldown < 1 {
                     let full = geo.size.height - inset * 2
                     Capsule()
-                        .fill(palette.caret)
+                        .fill(progressTone ?? palette.caret)
                         .opacity(0.5)
                         .frame(width: CaretStyle.caretWidth, height: max(0, full * (1 - cooldown)))
                         .position(x: inset, y: geo.size.height / 2)

@@ -356,7 +356,7 @@ for state in states {
 
     if ProcessInfo.processInfo.environment["RENDER_DEBUG"] != nil {
         let responder = window.firstResponder.map { String(describing: type(of: $0)) } ?? "nil"
-        print("   firstResponder=\(responder) cooling=\(CooldownManager.shared.isCoolingDown) progress=\(CooldownManager.shared.progress)")
+        print("   firstResponder=\(responder) cooling=\(CooldownManager.shared.isCoolingDown) frame=\(Int(window.frame.origin.x)),\(Int(window.frame.origin.y)) \(Int(window.frame.width))x\(Int(window.frame.height))")
     }
     if capture(window, to: "\(outDir)/\(state.name).png") {
         shot.append(state.name)

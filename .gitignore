@@ -66,3 +66,14 @@ local/
 .dolt/
 *.db
 .claude/settings.local.json
+
+# Beads / Dolt files (added by bd init)
+.beads-credential-key
+.beads/proxieddb/
+
+# skin state renderer (build product + output)
+test-cases/skin-states/.render
+test-cases/skin-states/.render.log
+test-cases/skin-states/.findwin
+test-cases/skin-states/shots/
+test-cases/skin-states/index.html

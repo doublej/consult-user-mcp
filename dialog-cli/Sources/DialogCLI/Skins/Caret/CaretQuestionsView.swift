@@ -61,6 +61,8 @@ struct CaretQuestionsView: View {
                 label: step == 0 ? "Cancel" : "Back",
                 role: .decline,
                 key: step == 0 ? "esc" : "←",
+                reserving: CaretAction.widest("Cancel", "Back"),
+                reservingKey: "esc",
                 run: retreat
             ),
             trailingAction: CaretActionSpec(
@@ -69,6 +71,7 @@ struct CaretQuestionsView: View {
                 key: "⏎",
                 keyAvailable: answered,
                 enabled: answered,
+                reserving: CaretAction.widest("Done", "Next"),
                 run: advance
             ),
             bindings: CaretBindings(

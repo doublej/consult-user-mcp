@@ -137,6 +137,14 @@ struct CaretKeycap: View {
     let glyph: String
     var available: Bool = true
     var strong: Bool = false
+    /// The glyph the cap is *sized* for, when that is not the glyph it shows.
+    /// A key whose name changes while the surface is open — the annotation
+    /// shortcut becomes its modifier chord the moment a caret lands in a field
+    /// (§3.8) — would otherwise change this cap's width, and through it the
+    /// width the whole surface asks for. §2.2 fixes that width for life, so the
+    /// surface would keep its window and slide inside it instead. The cap is
+    /// therefore built at the widest name it will ever carry and never moves.
+    var reserving: String? = nil
     @Environment(\.caretPalette) private var palette
 
     var body: some View {
@@ -144,7 +152,7 @@ struct CaretKeycap: View {
             .font(Font(CaretStyle.monoKey))
             .kerning(CaretStyle.monoKey.pointSize * 0.06)
             .foregroundStyle(colour)
-            .frame(width: CaretStyle.width(glyph, font: CaretStyle.monoKey, tracking: 0.06) + CaretStyle.u(10),
+            .frame(width: CaretStyle.width(reserving ?? glyph, font: CaretStyle.monoKey, tracking: 0.06) + CaretStyle.u(10),
                    height: CaretStyle.u(15))
             .background(
                 RoundedRectangle(cornerRadius: CaretStyle.u(3), style: .continuous)

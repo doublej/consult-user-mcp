@@ -22,12 +22,16 @@ struct CaretSkin: DialogSkin {
 
     var preferredTheme: ThemeProtocol? { CaretTheme(palette: palette) }
 
-    /// The width a surface of this kind lays itself out at. `DialogManager`
-    /// floors the window at `metrics.minWidth` and hands the content that
-    /// minus its own inset, so the surface has to agree with the same number
-    /// or it will sit in a window slightly wider than itself.
+    /// The width a surface of this kind lays itself out at.
+    ///
+    /// The window is `max(minWidth, measured) + 16` wide and the content is
+    /// inset 8 on every side, so the box the surface is handed is exactly
+    /// `max(minWidth, measured)`. Flooring the surface at the same `minWidth`
+    /// makes the two equal for every surface, wide or narrow — a surface that
+    /// floored lower would be handed a box wider than itself and would sit
+    /// somewhere inside it rather than filling it.
     static func surfaceWidth(for kind: DialogKind) -> CGFloat {
-        CaretSkin().metrics(for: kind).minWidth - 16
+        CaretSkin().metrics(for: kind).minWidth
     }
 
     func metrics(for kind: DialogKind) -> SkinWindowMetrics {

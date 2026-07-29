@@ -61,7 +61,11 @@ if let theme = ProcessInfo.processInfo.environment["DIALOG_THEME"] {
 }
 
 let manifestURL = URL(fileURLWithPath: manifestPath)
-let root = manifestURL.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+// Normally the repo root is three levels above the manifest. A throwaway
+// manifest kept outside the repo — a frame ladder, a one-off probe — says where
+// the fixtures are instead.
+let root = ProcessInfo.processInfo.environment["RENDER_ROOT"].map { URL(fileURLWithPath: $0) }
+    ?? manifestURL.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
 let sharedCases = root.appendingPathComponent("test-cases/cases")
 let localFixtures = manifestURL.deletingLastPathComponent().appendingPathComponent("fixtures")
 try? FileManager.default.createDirectory(atPath: outDir, withIntermediateDirectories: true)
@@ -126,6 +130,17 @@ func fixtureData(_ state: RenderState) -> Data? {
 // MARK: - Capture
 
 let parkedOrigin = NSPoint(x: -30_000, y: -30_000)
+
+// A note for whoever reaches for this next: `layer.render(in:)` draws a layer's
+// *model* geometry, so this harness cannot witness a frame mid-animation. It
+// draws the finished layout into a bitmap sized to the window as it is right
+// now, and the difference reads as content clipped off one edge — which looks
+// exactly like content genuinely sliding. Settled frames are trustworthy;
+// frames taken while a resize is travelling are not, in either direction.
+//
+// Reaching for the compositor instead does not work either: the app runs under
+// `.prohibited`, its windows do not come forward, and `screencapture` returns
+// whatever the person actually had on screen. Do not put that back.
 
 /// The window the current state is being rendered into, so `pump` knows where
 /// to hand a key the router did not take.

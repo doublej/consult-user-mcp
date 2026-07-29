@@ -40,6 +40,9 @@ struct CaretFrame<Content: View>: View {
     @State private var toolFocus: String?
     @State private var leadingFocused = false
     @State private var trailingFocused = false
+    /// The width of the box the window measured this surface into, once it is
+    /// known. See `surface`.
+    @State private var measuredWidth: CGFloat?
 
     /// One inset all round, so the mark's corners nest concentrically inside
     /// the window's own radius.
@@ -89,10 +92,20 @@ struct CaretFrame<Content: View>: View {
         .padding(.top, inset + CaretStyle.u(10))
         .padding(.bottom, inset + CaretStyle.u(18))
         .frame(minWidth: minSurfaceWidth, alignment: .top)
-        // Nothing ever attaches beside this surface, so its width is measured
-        // once and then never changes for any reason (§2.2). Only the height
-        // reflows, downward from a fixed top edge.
-        .fixedSize(horizontal: true, vertical: true)
+        // §2.2 measured once, and then held to it.
+        //
+        // Until the window exists the surface asks for its ideal width, which
+        // is what the two-pass measurement reads. From the moment the box is
+        // known the surface is pinned to it and stops asking. That is the whole
+        // point: the window's width is fixed for life, so a surface that went
+        // on recomputing an ideal would keep changing its mind inside a window
+        // that cannot follow — and, being fixed-size, would be *centred* on
+        // each new answer, which is the entire jitter. Every later change of
+        // mind is now ignored: the annotation key growing from a letter to a
+        // chord, the form's labels changing at each step, the note panel's own
+        // caption row. Only the height still reflows.
+        .frame(width: measuredWidth)
+        .fixedSize(horizontal: measuredWidth == nil, vertical: true)
         .coordinateSpace(name: CaretSpace.surface)
         .onPreferenceChange(CaretFocusKey.self) { rect in model.focusRect = rect }
         .overlay(
@@ -107,10 +120,32 @@ struct CaretFrame<Content: View>: View {
             )
         )
         .background(palette.window)
-        // Holds its measured width while the window is still travelling, so
-        // the pane grows into the space the window is opening rather than
-        // shoving the surface sideways and letting it settle back.
-        .layoutPriority(1)
+        // Pinned to the corner the window itself is pinned to.
+        //
+        // The box this sits in is animated to its new size over 0.2s while the
+        // surface, being fixed-size, already has its final one. A fixed-size
+        // view that refuses the size it is offered is *centred* in it by
+        // default, so for the whole of that 0.2s the surface would be offset by
+        // half the difference and would slide into place as the box caught up —
+        // which is the whole of the jitter: every arm, every line and the
+        // question itself travelling while the window travels. Anchored here it
+        // simply stands still and the window grows away from it, downward from
+        // a top edge that never moves.
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(
+            GeometryReader { box in
+                Color.clear
+                    .onAppear { adopt(box.size.width) }
+                    .onChange(of: box.size.width) { _, width in adopt(width) }
+            }
+        )
+    }
+
+    /// Takes the width of the box the window put this surface in. Runs after
+    /// layout, never during it.
+    private func adopt(_ width: CGFloat) {
+        guard width > 1, measuredWidth != width else { return }
+        measuredWidth = width
     }
 
     // MARK: - Top arms
@@ -165,6 +200,7 @@ struct CaretFrame<Content: View>: View {
             }
             CaretToolMark(
                 key: model.editing ? "⌘F" : "F", keyLive: model.editing ? model.chordLive : model.lettersLive,
+                reserving: "⌘F",
                 name: "NOTE", help: "Write a note for the agent",
                 open: model.openNote != nil, marked: model.anyNote,
                 focused: toolFocus == "F", focusLift: 2,
@@ -197,7 +233,9 @@ struct CaretFrame<Content: View>: View {
             guard let counter else { return 0 }
             return CaretStyle.width(counter, font: CaretStyle.mono, tracking: CaretStyle.railTracking)
         }
-        let marks: [(String?, String)] = [("S", "SNOOZE"), (model.editing ? "⌘F" : "F", "NOTE"), ("A", "RESHAPE"), (nil, "REPORT")]
+        // The chord, always — the row's width cannot depend on which name the
+        // annotation key currently goes by.
+        let marks: [(String?, String)] = [("S", "SNOOZE"), ("⌘F", "NOTE"), ("A", "RESHAPE"), (nil, "REPORT")]
         let widths = marks.map { CaretToolMark.width(key: $0.0, name: $0.1) }
         return widths.reduce(0, +) + CGFloat(marks.count - 1) * CaretStyle.u(14)
     }
@@ -236,7 +274,7 @@ struct CaretFrame<Content: View>: View {
                             keyAvailable: spec.keyAvailable && model.commitKeyLive,
                             enabled: spec.enabled && !model.inert,
                             damped: model.cooldown < 1,
-                            trailing: false, focusLift: 3,
+                            trailing: false, reserving: spec.reserving, reservingKey: spec.reservingKey, focusLift: 3,
                             onFocus: { leadingFocused = $0 }, action: spec.run)
             }
             Spacer(minLength: CaretStyle.u(20))
@@ -245,7 +283,7 @@ struct CaretFrame<Content: View>: View {
                             keyAvailable: spec.keyAvailable && model.commitKeyLive,
                             enabled: spec.enabled && !model.inert,
                             damped: model.cooldown < 1,
-                            trailing: true,
+                            trailing: true, reserving: spec.reserving, reservingKey: spec.reservingKey,
                             onFocus: { trailingFocused = $0 }, action: spec.run)
             }
         }
@@ -448,6 +486,9 @@ struct CaretFrame<Content: View>: View {
 struct CaretToolMark: View {
     let key: String?
     var keyLive: Bool = true
+    /// The widest name this key will ever have, when it has more than one. See
+    /// `CaretKeycap.reserving`.
+    var reserving: String? = nil
     let name: String
     let help: String
     var open: Bool = false
@@ -472,7 +513,7 @@ struct CaretToolMark: View {
 
     var body: some View {
         HStack(spacing: CaretStyle.u(6)) {
-            if let key { CaretKeycap(glyph: key, available: keyLive) }
+            if let key { CaretKeycap(glyph: key, available: keyLive, reserving: reserving) }
             Text(name)
                 .font(Font(CaretStyle.monoTiny))
                 .kerning(CaretStyle.monoTiny.pointSize * CaretStyle.railTracking)

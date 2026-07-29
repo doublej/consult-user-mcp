@@ -71,6 +71,10 @@ struct CaretActionSpec {
     var key: String?
     var keyAvailable: Bool = true
     var enabled: Bool = true
+    /// The widest label this way out will carry over the surface's life, when
+    /// the label changes. See `CaretAction.reserving`.
+    var reserving: String? = nil
+    var reservingKey: String? = nil
     var run: () -> Void
 }
 

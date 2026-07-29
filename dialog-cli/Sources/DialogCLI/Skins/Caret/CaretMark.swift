@@ -151,6 +151,14 @@ struct CaretAction: View {
     /// a damped state rather than an unavailable one.
     var damped: Bool = false
     var trailing: Bool = false
+    /// The widest label this way out will ever carry, when it carries more than
+    /// one — the form's do both, changing at every step. Same reason as
+    /// `CaretKeycap.reserving`: the width of this row feeds the width the whole
+    /// surface asks for, and §2.2 fixes that once.
+    var reserving: String? = nil
+    /// Likewise for the key beside it: the form's first step offers Escape and
+    /// every later one offers the left arrow.
+    var reservingKey: String? = nil
     /// Only the report flow uses this: its second step has no content
     /// element, so the commit action is where Return has to land.
     var autofocus: Bool = false
@@ -173,6 +181,11 @@ struct CaretAction: View {
         return ceil(w)
     }
 
+    /// The wider of two labels, for a way out that carries both in turn.
+    static func widest(_ a: String, _ b: String) -> String {
+        width(label: a, key: nil) >= width(label: b, key: nil) ? a : b
+    }
+
     /// §3.9: a label that does not fit is truncated. The action never grows
     /// and the surface is never widened to hold one.
     static func clip(_ label: String) -> String {
@@ -188,15 +201,15 @@ struct CaretAction: View {
 
     var body: some View {
         HStack(spacing: CaretStyle.u(8)) {
-            if trailing, let key { CaretKeycap(glyph: key, available: enabled && keyAvailable, strong: role == .commit) }
+            if trailing, let key { CaretKeycap(glyph: key, available: enabled && keyAvailable, strong: role == .commit, reserving: reservingKey) }
             Text(Self.clip(label))
                 .font(Font(CaretStyle.action))
                 .kerning(CaretStyle.action.pointSize * CaretStyle.displayTracking)
                 .foregroundStyle(labelColour)
                 .lineLimit(1)
-            if !trailing, let key { CaretKeycap(glyph: key, available: enabled && keyAvailable, strong: role == .commit) }
+            if !trailing, let key { CaretKeycap(glyph: key, available: enabled && keyAvailable, strong: role == .commit, reserving: reservingKey) }
         }
-        .frame(width: Self.width(label: label, key: key),
+        .frame(width: Self.width(label: reserving ?? label, key: reservingKey ?? key),
                height: CaretStyle.u(20),
                alignment: trailing ? .trailing : .leading)
         .padding(trailing ? .trailing : .leading, CaretStyle.u(9))

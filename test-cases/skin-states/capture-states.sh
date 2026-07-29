@@ -7,6 +7,7 @@
 # Env:
 #   SKIN               skin id to render (default: caret)
 #   OUTDIR             where shots land (default: ./shots)
+#   STATES             manifest to read (default: ./states.tsv)
 #   DIALOG_THEME       palette to render in (e.g. light)
 #   MCP_PROJECT_PATH   project identity shown on the surfaces
 #
@@ -25,6 +26,7 @@ HERE=${0:A:h}
 ROOT=${HERE:h:h}
 SKIN=${SKIN:-caret}
 OUTDIR=${OUTDIR:-$HERE/shots}
+STATES=${STATES:-$HERE/states.tsv}
 FILTER=${1:-}
 SRC="$ROOT/dialog-cli/Sources/DialogCLI"
 BIN="$HERE/.render"
@@ -65,14 +67,14 @@ MISSED=()
 while IFS=$'\t' read -r NAME REST; do
   [[ -z "${NAME:-}" || "$NAME" == \#* ]] && continue
   [[ -n "$FILTER" && "$NAME" != *"$FILTER"* ]] && continue
-  if "$BIN" "$HERE/states.tsv" "$OUTDIR" "$SKIN" "=$NAME" >/dev/null 2>&1; then
+  if "$BIN" "$STATES" "$OUTDIR" "$SKIN" "=$NAME" >/dev/null 2>&1; then
     NAMES+=("$NAME")
     echo "ok   $NAME"
   else
     MISSED+=("$NAME")
     echo "MISS $NAME"
   fi
-done < "$HERE/states.tsv"
+done < "$STATES"
 
 python3 - "$HERE/index.html" "$OUTDIR" "$SKIN" "${NAMES[@]}" <<'PY'
 import sys

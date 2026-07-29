@@ -9,12 +9,20 @@ struct CaretRowBracket: Shape {
     /// multi-select row shows before anything is chosen, so the person can see
     /// that each row is takeable on its own.
     var closed: Bool
+    /// The width it will be stroked at.
+    ///
+    /// A stroke straddles the line it is given, so a stem sitting on the edge of
+    /// its own frame loses its outer half to whatever clips that edge — and the
+    /// leading bracket sits at the leading edge of a scrolling region, which
+    /// clips. The two brackets then came out different weights. The stem is
+    /// moved half a stroke inward so the whole of it is inside the shape.
+    var weight: CGFloat
 
     func path(in rect: CGRect) -> Path {
         let r = CaretStyle.u(2.5)
         let arm = CaretStyle.u(6)
-        let x = trailing ? rect.maxX : rect.minX
         let sign: CGFloat = trailing ? -1 : 1
+        let x = (trailing ? rect.maxX : rect.minX) + sign * weight / 2
         var path = Path()
 
         if closed { path.move(to: CGPoint(x: x + sign * arm, y: rect.minY)) }
@@ -124,9 +132,10 @@ struct CaretRow<Trailing: View>: View {
     @ViewBuilder
     private func bracket(trailing: Bool) -> some View {
         let visible = chosen || (multi && !trailing)
-        CaretRowBracket(trailing: trailing, closed: chosen)
+        let weight = chosen ? CaretStyle.caretWidth : CaretStyle.hair
+        CaretRowBracket(trailing: trailing, closed: chosen, weight: weight)
             .stroke(chosen ? palette.caret : palette.rail,
-                    style: StrokeStyle(lineWidth: chosen ? CaretStyle.caretWidth : CaretStyle.hair, lineCap: .round))
+                    style: StrokeStyle(lineWidth: weight, lineCap: .round))
             .frame(width: CaretStyle.u(7))
             .opacity(visible ? 1 : 0)
             .padding(.vertical, CaretStyle.u(4))

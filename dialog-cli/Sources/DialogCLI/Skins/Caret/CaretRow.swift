@@ -4,20 +4,22 @@ import SwiftUI
 /// One option (§3.10).
 ///
 /// Chosen and focused ride separate channels and neither borrows the other's:
-/// **chosen** is the row's own ordinal going amber, and **focused** is the caret
-/// standing out on the surface's rail. All four combinations are therefore
-/// legible at once, which §3.10 requires and §10.26 says a style must define
-/// rather than inherit.
+/// **chosen** is the row's own leading hairline going amber, with the ordinal,
+/// and **focused** is the caret standing out on the surface's rail, a rail's
+/// width further out. All four combinations are therefore legible at once, which
+/// §3.10 requires and §10.26 says a style must define rather than inherit.
 ///
-/// The row draws nothing of its own for chosen — no enclosure, no rule, no
-/// fill. A set of options is already a list of small type on a wide surface;
-/// anything added per row competes with the frame the whole surface is drawn in,
-/// and reads as loud long before it reads as clear. So the two cues are the
-/// ordinal's colour and the label reaching full ink, and the amber does not
-/// appear anywhere else in the row.
+/// The mark for chosen is a hairline on the row's leading edge, at the same
+/// weight as the rail it sits on. Every row carries one, so choosing changes its
+/// colour and nothing else — nothing appears, nothing thickens, nothing moves.
+/// An enclosure that closes around the row reads as a box drawn round the
+/// option and competes with the frame the whole surface is already drawn in; a
+/// line that was already there does not.
 ///
-/// How many may be chosen is stated in words by `CaretSetHeader` rather than
-/// implied by a mark, which is where §10.12 wanted it anyway.
+/// The set of hairlines also does the work of showing that the options are a
+/// set, and that each one is takeable on its own, in both selection modes at
+/// once — so how many may be chosen is left to `CaretSetHeader` to say in
+/// words, which is where §10.12 wanted it anyway.
 struct CaretRow<Trailing: View>: View {
     let ordinal: Int
     let label: String
@@ -73,8 +75,9 @@ struct CaretRow<Trailing: View>: View {
             RoundedRectangle(cornerRadius: CaretStyle.u(3), style: .continuous)
                 .fill(pressed ? palette.railLive.opacity(0.35) : (hovered ? palette.channel : Color.clear))
         )
+        .overlay(alignment: .leading) { stem }
         .contentShape(Rectangle())
-        // The whole row is the target.
+        // The whole row is the target; the hairline is not a second one.
         .overlay(
             CaretTarget(
                 isContent: true,
@@ -90,6 +93,16 @@ struct CaretRow<Trailing: View>: View {
         .accessibilityValue(Text(chosen ? "chosen" : "not chosen"))
     }
 
+    /// The hairline every row carries. Filled rather than stroked, so none of it
+    /// can be lost to the clip of the region it sits at the edge of — a stroke
+    /// centred on the shape's own edge leaves half its width outside it.
+    private var stem: some View {
+        Capsule()
+            .fill(chosen ? palette.caret : palette.rail)
+            .frame(width: CaretStyle.hair)
+            .padding(.vertical, CaretStyle.u(4))
+            .allowsHitTesting(false)
+    }
 }
 
 extension CaretRow where Trailing == EmptyView {

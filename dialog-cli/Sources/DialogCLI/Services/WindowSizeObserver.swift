@@ -95,15 +95,23 @@ class WindowSizeObserver: NSObject {
             }
             let newFrame = NSRect(x: newX, y: newY, width: newWidth, height: newHeight)
 
-            // One animation. The subviews follow through their autoresizing
-            // masks, set in init, so they resize with the window rather than
-            // beside it.
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.2
-                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-                context.allowsImplicitAnimation = true
-                window.animator().setFrame(newFrame, display: true)
-            }
+            // No animation, deliberately.
+            //
+            // A SwiftUI layout change lands in a single frame; an animated
+            // window frame lands over many. There is no cheap way to keep the
+            // two in step — the content is at its final size from the first
+            // frame and the window spends the whole travel smaller than it,
+            // so everything the content cannot fit is pushed outside the clip
+            // and slides back in as the window catches up. Animating the
+            // content instead does not work either: this observer sizes the
+            // window from `fittingSize`, so a content height that is still
+            // travelling is the height the window would adopt.
+            //
+            // Changing the size in the same turn as the layout removes the
+            // gap rather than trying to hide it. The arrival is softened in
+            // the skin, by fading the new region in — opacity costs no layout
+            // and so cannot be caught mid-measurement.
+            window.setFrame(newFrame, display: true)
 
             if ProcessInfo.processInfo.environment["DIALOG_TEST_DEBUG_LAYOUT"] != nil {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {

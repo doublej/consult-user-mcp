@@ -167,22 +167,18 @@ final class CaretSurfaceModel: ObservableObject {
 
     /// Asks the window to take its new height.
     ///
-    /// Twice: once now, and once after the resize has finished travelling.
-    ///
-    /// The observer measures the hosting view the moment it hears, and a region
-    /// that has only just been added to the tree can still be settling then,
-    /// which leaves the window short of its own content and clips whatever sits
-    /// at the bottom. The second pass catches that. It has to land *after* the
-    /// travel, not during it: the hosting view is resized by the window's own
-    /// animation now, so a measurement taken halfway through reads the halfway
-    /// size and the window would settle at it. The second pass costs nothing
-    /// when the first was already right — the observer ignores a delta under a
-    /// point.
+    /// Twice, a beat apart: the size observer measures the hosting view the
+    /// moment it hears, and a region that has only just been added to the tree
+    /// can still be settling then — which leaves the window a little short of
+    /// its own content and clips whatever sits at the bottom. The second pass
+    /// costs nothing when the first was already right, because the observer
+    /// ignores a delta under a point. The resize itself is not animated, so
+    /// there is no travel for either pass to land in the middle of.
     func reflow() {
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) {
             NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
         }
     }

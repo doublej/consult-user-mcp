@@ -37,14 +37,16 @@ enum CaretStyle {
     /// Read once. Motion is a person-level preference.
     static let animates: Bool = UserSettings.load().animationsEnabled
 
-    /// The curve the window's own resize runs on. Anything this layer animates
-    /// alongside a resize has to match it or the two read as two events.
-    static let resizeDuration: Double = 0.2
-    /// How long after the content changes the window's own resize actually
-    /// starts. The size observer measures first and animates a turn later;
-    /// measured at roughly this, and the compensation has to wait it out
-    /// rather than easing through it.
-    static let resizeLag: Double = 0.06
+    /// How long a newly revealed region takes to arrive.
+    ///
+    /// The window's own resize is not animated — it lands in the same turn as
+    /// the layout, which is the only way the two stay in step. So the softness
+    /// is here instead, and it is opacity only: a fade costs no layout, so it
+    /// cannot be caught halfway by a measurement.
+    static let resizeDuration: Double = 0.16
+    /// A beat, so the region arrives just after the window has made room for
+    /// it rather than at the same instant.
+    static let resizeLag: Double = 0.04
 
     static func u(_ value: CGFloat) -> CGFloat { value * unit }
 

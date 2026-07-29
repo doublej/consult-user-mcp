@@ -1,59 +1,24 @@
 import AppKit
 import SwiftUI
 
-/// The enclosure that marks a chosen option: the brand mark again, at row
-/// scale. Choosing something puts it in brackets.
-struct CaretRowBracket: Shape {
-    var trailing: Bool
-    /// A closed bracket has both arms. An open one is the bare stem — what a
-    /// multi-select row shows before anything is chosen, so the person can see
-    /// that each row is takeable on its own.
-    var closed: Bool
-    /// The width it will be stroked at.
-    ///
-    /// A stroke straddles the line it is given, so a stem sitting on the edge of
-    /// its own frame loses its outer half to whatever clips that edge — and the
-    /// leading bracket sits at the leading edge of a scrolling region, which
-    /// clips. The two brackets then came out different weights. The stem is
-    /// moved half a stroke inward so the whole of it is inside the shape.
-    var weight: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        let r = CaretStyle.u(2.5)
-        let arm = CaretStyle.u(6)
-        let sign: CGFloat = trailing ? -1 : 1
-        let x = (trailing ? rect.maxX : rect.minX) + sign * weight / 2
-        var path = Path()
-
-        if closed { path.move(to: CGPoint(x: x + sign * arm, y: rect.minY)) }
-        path.move(to: CGPoint(x: x + sign * (closed ? arm : 0), y: rect.minY))
-        if closed {
-            path.addLine(to: CGPoint(x: x + sign * r, y: rect.minY))
-            path.addQuadCurve(to: CGPoint(x: x, y: rect.minY + r), control: CGPoint(x: x, y: rect.minY))
-        } else {
-            path.move(to: CGPoint(x: x, y: rect.minY + r))
-        }
-        path.addLine(to: CGPoint(x: x, y: rect.maxY - r))
-        if closed {
-            path.addQuadCurve(to: CGPoint(x: x + sign * r, y: rect.maxY), control: CGPoint(x: x, y: rect.maxY))
-            path.addLine(to: CGPoint(x: x + sign * arm, y: rect.maxY))
-        }
-        return path
-    }
-}
-
 /// One option (§3.10).
 ///
 /// Chosen and focused ride separate channels and neither borrows the other's:
-/// **chosen** is the enclosure — brackets close around the row — and **focused**
-/// is the caret standing beside it out on the surface's own rail. All four
-/// combinations are therefore legible at once, which §3.10 requires and §10.26
-/// says a style must define rather than inherit.
+/// **chosen** is the row's own leading hairline going amber, and **focused** is
+/// the caret standing out on the surface's rail, a rail's width further out.
+/// All four combinations are therefore legible at once, which §3.10 requires
+/// and §10.26 says a style must define rather than inherit.
 ///
-/// The indicator's *form* also differs between the two modes: a single-select
-/// row is bare until it is chosen, a multi-select row carries an open bracket
-/// from the first frame. That is the difference the person reads before they
-/// touch anything.
+/// The mark for chosen is deliberately the same weight as the rail it replaces
+/// rather than an enclosure around the row. An enclosure at this scale reads as
+/// a box drawn round the option, and it competes with the frame the whole
+/// surface is already drawn in. Three quiet cues move together instead — the
+/// hairline, the ordinal, and the label reaching full ink.
+///
+/// The mark's *presence* still differs between the two modes: a single-select
+/// row has no hairline until it is chosen, a multi-select row carries a grey one
+/// from the first frame, so the person can see each row is takeable on its own
+/// before touching anything.
 struct CaretRow<Trailing: View>: View {
     let ordinal: Int
     let label: String
@@ -110,8 +75,7 @@ struct CaretRow<Trailing: View>: View {
             RoundedRectangle(cornerRadius: CaretStyle.u(3), style: .continuous)
                 .fill(pressed ? palette.railLive.opacity(0.35) : (hovered ? palette.channel : Color.clear))
         )
-        .overlay(alignment: .leading) { bracket(trailing: false) }
-        .overlay(alignment: .trailing) { bracket(trailing: true) }
+        .overlay(alignment: .leading) { stem }
         .contentShape(Rectangle())
         // The whole row is the target; the enclosure is not a second one.
         .overlay(
@@ -129,17 +93,14 @@ struct CaretRow<Trailing: View>: View {
         .accessibilityValue(Text(chosen ? "chosen" : "not chosen"))
     }
 
-    @ViewBuilder
-    private func bracket(trailing: Bool) -> some View {
-        let visible = chosen || (multi && !trailing)
-        let weight = chosen ? CaretStyle.caretWidth : CaretStyle.hair
-        CaretRowBracket(trailing: trailing, closed: chosen, weight: weight)
-            .stroke(chosen ? palette.caret : palette.rail,
-                    style: StrokeStyle(lineWidth: weight, lineCap: .round))
-            .frame(width: CaretStyle.u(7))
-            .opacity(visible ? 1 : 0)
+    /// The one mark for chosen. A hairline, filled rather than stroked, so none
+    /// of it can be lost to the clip of the region it sits at the edge of.
+    private var stem: some View {
+        Capsule()
+            .fill(chosen ? palette.caret : palette.rail)
+            .frame(width: CaretStyle.hair)
             .padding(.vertical, CaretStyle.u(4))
-            .caretMirrored(direction)
+            .opacity(chosen || multi ? 1 : 0)
             .allowsHitTesting(false)
     }
 }

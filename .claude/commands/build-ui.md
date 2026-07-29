@@ -76,11 +76,15 @@ If you catch yourself reasoning from "how it probably looks today", stop.
 This is the requirement the previous attempt failed, and it failed it while following every other instruction
 correctly. Read it twice.
 
-**The behaviour contract's ordering rules do not add up to a layout — but they feel like they do.** Follow
-§2.3's "header, tool strip and footer never scroll", §3.11's "secondary first, primary last", §3.10's hint
-strip, §3.5's three tools, and you will derive: kind label, title, body, divider, tool chips, buttons at the
-bottom right, hints beneath. That is the conventional dialog. It is what already exists. Deriving it from the
-contract feels like rigour and produces a recolour.
+**The behaviour contract's ordering rules do not add up to a layout — but they feel like they do.** Read
+§2.3's "identify the question, reach the tools, reach the actions", §3.9's "decline and retreat before commit",
+§3.8's keyboard discovery, §3.5–§3.7's three exits, and you will derive: kind label, title, body, divider, tool
+chips, buttons at the bottom right, hints beneath. That is the conventional dialog. It is what already exists.
+Deriving it from the contract feels like rigour and produces a recolour.
+
+The contract now says this against itself — §0.2 lists arrangement, decomposition, grouping and idiom as
+deliberately unspecified, and §0.3 gives you the scramble test and the residue test. Run both. But the pull is
+strong enough that the contract disclaiming it is not sufficient; the thesis below is.
 
 So: **commit to a structural thesis before you write a line of view code, and write it down.**
 
@@ -104,12 +108,17 @@ State the thesis to the user and get agreement **before** building surface two.
 `UI-BEHAVIOUR-SPECIFICATION.md` is the complete behavioural contract for eight surfaces and it is deliberately
 free of visual design.
 
-- Everything it states is **binding**. Behaviour, states, sequence, keyboard model, outcome model and copy are
-  invariant; §7 is explicit about what a style may and may not change.
+- **Read the tier before the requirement** (§0.1). **LAW** is invariant — keyboard model, outcome model, what
+  the agent receives. **CAPABILITY** means the person must be able to do a thing and the form is yours.
+  **DEFAULT** is one workable answer you may replace outright, including on-screen copy (§8.1). §7.2 is the
+  boundary.
+- §3 is capabilities, not components. Two entries may be one element; one may be three; some need no persistent
+  representation at all.
 - Everywhere it says a thing MUST be *distinguishable*, *distinct*, or *not read as* something else, it is
   handing you a design problem. Collect those first.
-- §7.2 lists what a style **may** add that the default has not: a type label naming the surface kind, an ordinal
-  beside each option, a selection status line, a progress form, placeholders. Free identity — use it.
+- §7.5 lists what a style **may** add that the default has not: a label naming the surface kind, an ordinal
+  beside each option, a count of what is chosen, a text-surface placeholder — and then "anything else". Free
+  identity; use it.
 - §10 lists defects. You inherit the behaviour, not the defects. **Fix every visual one** — 10.2, 10.3, 10.4,
   10.9, 10.10, 10.12, 10.13, 10.14, 10.15, 10.26 are all reachable now that you own the whole layer, where a
   skin could only reach some of them. Say which you fixed and how.
@@ -117,7 +126,7 @@ free of visual design.
 
 **Build a decision list before you build anything:** every "MUST be distinguishable" in the contract, and the
 distinct channel you will use to answer it. Two requirements answered by the same channel is a bug — the
-contract calls this out for focus versus selection (§3.13) and it generalises. Put the list in your report.
+contract calls this out for focus versus selection (§3.10) and it generalises. Put the list in your report.
 </the_contract>
 
 <what_you_are_building>
@@ -136,7 +145,7 @@ A complete rendering layer, registered at the skin seam and owning everything be
 
 **Every protocol member defaults to falling through to the shipped style.** That is a good scaffold while
 building and a trap at the end: a member left falling through renders the old layout. `tweak` is the one
-legitimate exception — leaving it falling through is explicitly supported by §7.1, and it is expensive. Decide
+legitimate exception — leaving it falling through is explicitly supported by §7.3, and it is expensive. Decide
 it deliberately, say which you chose, and do not drift into it by accident.
 </what_you_are_building>
 

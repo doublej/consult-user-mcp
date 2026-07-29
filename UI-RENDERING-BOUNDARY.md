@@ -32,7 +32,7 @@ pixel or it owns none of them.
 `DialogManager` calls `createSkinnedWindow(kind, position:) { skin in skin.confirmView(spec) }`. The view that
 comes back **is the whole window content.** Nothing above it draws. That is enough room to own everything —
 including the container — while leaving the lifecycle, the response shape and the history untouched, which is
-what §7.1 of the behaviour spec requires of any presentation style.
+what §7.2 of the behaviour spec requires of any presentation style.
 
 Three consequences:
 
@@ -84,7 +84,7 @@ symbols.
 | Internal scroll region | `AutoSizingScrollView` | Yours |
 | Agent prose renderer | `MarkdownText` | Yours — §4.6 below |
 | Selectable plain text | `SelectableText` | Yours |
-| Note pane | inside the container | Yours — §3.8 of the behaviour spec, in full |
+| Note pane | inside the container | Yours — §3.6 of the behaviour spec, in full |
 | Report control + two-step flow | inside the container | Yours — §3.12, in full |
 | Project badge | inside the container | Yours — §3.2 |
 | Concrete dialog views | `Dialogs/`, `Skins/Classic/`, `Skins/Alt/` | Yours, all seven kinds |
@@ -99,7 +99,7 @@ For anyone comparing against the old skin brief, these four statements in it are
 |---|---|
 | "Report control — drawn by container — **No**, palette only" | Yours. §3.1 and §3.12 |
 | "Project badge — drawn by container — **No**, palette only" | Yours. §3.2 |
-| "Note pane — drawn by container — **No**, palette only" | Yours. §3.8 |
+| "Note pane — drawn by container — **No**, palette only" | Yours. §3.6 |
 | "Use `MarkdownText` for every agent-supplied body — rolling your own breaks selectability and marker consumption" | Write your own that *does not* break them. §4.6 below is the contract it has to meet |
 
 The old brief was right about one thing and it still holds: **the shared controls are most of the pixels.** It
@@ -129,12 +129,12 @@ version looks better.
 
 ### 4.2 The option row
 
-- `acceptsFirstResponder` and `canBecomeKeyView` return true; **false when disabled**, so Tab skips it (§3.11).
+- `acceptsFirstResponder` and `canBecomeKeyView` return true; **false when disabled**, so Tab skips it (§3.9).
 - Registers with `FocusManager.registerContent` on `viewDidMoveToWindow`, unregisters when the window goes.
 - Handles `Space` in `keyDown`. **Never installs its own `NSEvent` monitor** — arrows and Tab are routed.
 - Draws its own focus indicator on `becomeFirstResponder` / `resignFirstResponder`. §10.26 makes defining this
   explicitly a requirement, not a nicety.
-- Selection and focus on **separate channels** (§3.13). All four combinations legible.
+- Selection and focus on **separate channels** (§3.10). All four combinations legible.
 - Indicator **form** differs between single and multi select — it is the only thing besides the surface's own
   identity cue telling the person whether they may pick more than one.
 - The whole row is the target; the indicator is not a separate one.
@@ -142,7 +142,7 @@ version looks better.
 
 ### 4.3 The action control
 
-- Four variants, mutually distinguishable: primary, secondary, destructive, disabled (§3.11).
+- Four variants, mutually distinguishable: primary, secondary, destructive, disabled (§3.9).
 - The primary indicates that Return activates it — **and drops that indication when disabled**.
 - Disabled is not focusable and is skipped by Tab.
 - Press *and* release on the same control; dragging off cancels.
@@ -152,7 +152,7 @@ version looks better.
 
 ### 4.4 The text field
 
-- States: rest, focused, masked, overflowing (§3.14).
+- States: rest, focused, masked, overflowing (§3.11).
 - Clicking anywhere in the field places the caret, not only on the glyphs.
 - A prefilled value opens **with its text selected**. Required behaviour, not a platform accident.
 - Long content scrolls inside; the field never grows and the surface never widens.
@@ -195,7 +195,7 @@ Now yours end to end, except the URL construction.
 - Step 1 `Report Issue` / `Describe the problem below.` / field `What happened?` / placeholder `Briefly describe
   the issue...` / `Cancel` and `Next →` / hint `⏎ next`. `Next →` disabled while the description is empty or
   whitespace-only, and Return does nothing. The description is trimmed before use.
-- Step 2 `Save Screenshot?` / the consent body verbatim from §8.2 / `Skip` and `Yes, Copy Screenshot` / hint
+- Step 2 `Save Screenshot?` / the consent body verbatim from §8.1 / `Skip` and `Yes, Copy Screenshot` / hint
   `⏎ copy & open`. Both always enabled.
 - Escape closes the flow and only the flow.
 - If the picture cannot be captured the flow still completes; only the clipboard copy is skipped.

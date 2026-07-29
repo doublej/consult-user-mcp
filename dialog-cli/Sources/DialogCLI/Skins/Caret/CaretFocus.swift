@@ -173,3 +173,30 @@ extension View {
         )
     }
 }
+
+// MARK: - Window probe
+
+/// Hands back the `NSWindow` the surface ended up in. Draws nothing and takes
+/// no size — it exists so the layer can watch the window's real frame while
+/// the size observer animates it.
+struct CaretWindowProbe: NSViewRepresentable {
+    var onWindow: (NSWindow) -> Void
+
+    final class ProbeView: NSView {
+        var onWindow: ((NSWindow) -> Void)?
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let window { onWindow?(window) }
+        }
+    }
+
+    func makeNSView(context: Context) -> ProbeView {
+        let view = ProbeView()
+        view.onWindow = onWindow
+        return view
+    }
+
+    func updateNSView(_ view: ProbeView, context: Context) {
+        view.onWindow = onWindow
+    }
+}

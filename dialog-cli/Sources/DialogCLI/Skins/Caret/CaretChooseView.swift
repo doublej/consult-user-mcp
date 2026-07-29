@@ -38,6 +38,7 @@ struct CaretChooseView: View {
             title: spec.title,
             position: spec.position,
             model: model,
+            minSurfaceWidth: CaretSkin.surfaceWidth(for: .choose),
             leadingAction: CaretActionSpec(label: "Cancel", role: .decline, key: "esc", run: decline),
             trailingAction: CaretActionSpec(label: "Done", role: .commit, key: "⏎",
                                             keyAvailable: answered, enabled: answered, run: commit),

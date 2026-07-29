@@ -56,6 +56,7 @@ struct CaretQuestionsView: View {
             title: spec.title,
             position: spec.position,
             model: model,
+            minSurfaceWidth: CaretSkin.surfaceWidth(for: .questions),
             leadingAction: CaretActionSpec(
                 label: step == 0 ? "Cancel" : "Back",
                 role: .decline,
@@ -129,7 +130,7 @@ struct CaretQuestionsView: View {
         let has = model.hasNote(question.id)
         return Button {
             model.openNote = question.id
-            model.reflow(resizingWidth: true)
+            model.reflow()
         } label: {
             HStack(spacing: CaretStyle.u(6)) {
                 Rectangle()

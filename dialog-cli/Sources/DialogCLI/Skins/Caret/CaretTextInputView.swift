@@ -21,6 +21,7 @@ struct CaretTextInputView: View {
             title: spec.title,
             position: spec.position,
             model: model,
+            minSurfaceWidth: CaretSkin.surfaceWidth(for: .textInput),
             leadingAction: CaretActionSpec(label: "Cancel", role: .decline, key: "esc", run: decline),
             // The field is always in a submittable state; an empty submit
             // returns an empty string.

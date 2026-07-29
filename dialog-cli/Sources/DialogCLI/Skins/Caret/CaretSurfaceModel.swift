@@ -161,13 +161,20 @@ final class CaretSurfaceModel: ObservableObject {
     var chordLive: Bool { cooldown >= 1 && openNote == nil && !inert }
     var commitKeyLive: Bool { cooldown >= 1 && !inert }
 
-    func reflow(resizingWidth: Bool = false) {
+    /// Asks the window to take its new height.
+    ///
+    /// Twice, a beat apart: the size observer measures the hosting view the
+    /// moment it hears, and a region that has only just been added to the tree
+    /// can still be settling then — which leaves the window a little short of
+    /// its own content and clips whatever sits at the bottom. The second pass
+    /// costs nothing when the first was already right, because the observer
+    /// ignores a delta under a point.
+    func reflow() {
         DispatchQueue.main.async {
-            NotificationCenter.default.post(
-                name: .dialogContentSizeChanged,
-                object: nil,
-                userInfo: resizingWidth ? ["resizeWidth": true] : nil
-            )
+            NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            NotificationCenter.default.post(name: .dialogContentSizeChanged, object: nil)
         }
     }
 }

@@ -21,6 +21,9 @@ struct CaretFrame<Content: View>: View {
     let title: String?
     let position: DialogPosition
     @ObservedObject var model: CaretSurfaceModel
+    /// The floor this kind's window is sized to. The surface adopts it as its
+    /// own ideal width so the two never disagree.
+    var minSurfaceWidth: CGFloat = 440
     var leadingAction: CaretActionSpec?
     var trailingAction: CaretActionSpec?
     var counter: String?
@@ -34,7 +37,6 @@ struct CaretFrame<Content: View>: View {
     @Environment(\.caretPalette) private var palette
     @State private var monitor: KeyboardNavigationMonitor?
     @State private var shapeKeys: CaretShapeKeyMonitor?
-    @State private var paneLeading = false
     @State private var toolFocus: String?
     @State private var leadingFocused = false
     @State private var trailingFocused = false
@@ -45,18 +47,14 @@ struct CaretFrame<Content: View>: View {
     private var armInset: CGFloat { CaretStyle.u(9) }
 
     var body: some View {
-        HStack(spacing: 0) {
-            if model.openNote != nil && paneLeading { pane }
-            surface
-            if model.openNote != nil && !paneLeading { pane }
-        }
-        .background(palette.window)
-        .clipShape(RoundedRectangle(cornerRadius: CaretStyle.windowRadius, style: .continuous))
-        .environment(\.caretPalette, palette)
-        .overlay(reportFlow)
-        .onAppear(perform: appear)
-        .onDisappear { monitor = nil; shapeKeys = nil; model.stopClock() }
-        .onReceive(NotificationCenter.default.publisher(for: .cooldownDidChange)) { _ in model.startClock() }
+        surface
+            .background(palette.window)
+            .clipShape(RoundedRectangle(cornerRadius: CaretStyle.windowRadius, style: .continuous))
+            .environment(\.caretPalette, palette)
+            .overlay(reportFlow)
+            .onAppear(perform: appear)
+            .onDisappear { monitor = nil; shapeKeys = nil; model.stopClock() }
+            .onReceive(NotificationCenter.default.publisher(for: .cooldownDidChange)) { _ in model.startClock() }
     }
 
     // MARK: - The surface itself
@@ -78,13 +76,23 @@ struct CaretFrame<Content: View>: View {
             // the content; a gap that can give way absorbs that, where a
             // floored one would push the lower arms outside the clip and let
             // them slide back in.
+            if model.openNote != nil { notePanel.caretReveal() }
+
             Spacer(minLength: 0)
 
-            if leadingAction != nil || trailingAction != nil { actionBar }
+            if leadingAction != nil || trailingAction != nil {
+                // Stated, so it is counted. A row whose height the measurement
+                // misses ends up drawn below the window's own bottom edge.
+                actionBar.frame(height: CaretStyle.u(22))
+            }
         }
         .padding(.top, inset + CaretStyle.u(10))
-        .padding(.bottom, inset + CaretStyle.u(8))
-        .frame(minWidth: CaretStyle.u(360), alignment: .top)
+        .padding(.bottom, inset + CaretStyle.u(18))
+        .frame(minWidth: minSurfaceWidth, alignment: .top)
+        // Nothing ever attaches beside this surface, so its width is measured
+        // once and then never changes for any reason (§2.2). Only the height
+        // reflows, downward from a fixed top edge.
+        .fixedSize(horizontal: true, vertical: true)
         .coordinateSpace(name: CaretSpace.surface)
         .onPreferenceChange(CaretFocusKey.self) { rect in model.focusRect = rect }
         .overlay(
@@ -163,7 +171,7 @@ struct CaretFrame<Content: View>: View {
                 onFocus: { toolFocus = $0 ? "F" : nil }
             ) {
                 model.openNote = ""
-                model.reflow(resizingWidth: true)
+                model.reflow()
             }
             CaretToolMark(
                 key: "A", keyLive: model.lettersLive, name: "RESHAPE",
@@ -291,18 +299,36 @@ struct CaretFrame<Content: View>: View {
         .environment(\.caretInert, false)
     }
 
-    // MARK: - Attached pane
+    // MARK: - Annotation
 
-    private var pane: some View {
-        CaretNotePane(
+    /// The annotation editor (§3.6), opened *inside* the surface rather than
+    /// attached beside it.
+    ///
+    /// §3.6 leaves the form open — panel, overlay, sheet, expansion, mode or
+    /// second window — and says that only something attached beside the
+    /// surface brings §2.2's width rule and §2.4's anchor rule with it. Nothing
+    /// here attaches, so the width of this surface never changes for any
+    /// reason at all: the note opens downward from a fixed top edge, which is
+    /// the one direction the window is already free to move in. That removes
+    /// the entire class of problem where the layout lands a frame before the
+    /// window does and the question walks across the screen while it catches
+    /// up.
+    private var notePanel: some View {
+        CaretNotePanel(
             model: model,
             caption: noteCaption(model.openNote ?? ""),
-            subject: noteSubject(model.openNote ?? ""),
-            onLeading: paneLeading
+            subject: noteSubject(model.openNote ?? "")
         )
-        .frame(width: CaretStyle.paneWidth)
+        // Stated rather than inferred. The editor is an `NSScrollView` behind a
+        // representable, which reports no intrinsic height of its own, and a
+        // region whose height the measurement under-reads leaves the window
+        // short of its own content and clips the ways out.
+        // Stated rather than inferred: the editor is an `NSScrollView` behind
+        // a representable and reports no intrinsic height of its own.
+        .frame(height: CaretStyle.u(104))
+        .padding(.horizontal, CaretStyle.caretRail + CaretStyle.gutter)
+        .padding(.top, CaretStyle.u(16))
         .environment(\.caretInert, false)
-        .caretReveal()
     }
 
     // MARK: - Report
@@ -336,7 +362,6 @@ struct CaretFrame<Content: View>: View {
     // MARK: - Lifecycle
 
     private func appear() {
-        paneLeading = resolvePaneSide()
         model.startClock()
 
         guard kind.interactive else { return }
@@ -373,7 +398,7 @@ struct CaretFrame<Content: View>: View {
             },
             openFeedback: {
                 model.openNote = ""
-                model.reflow(resizingWidth: true)
+                model.reflow()
             },
             closePane: {
                 if model.shapesOpen {
@@ -385,7 +410,7 @@ struct CaretFrame<Content: View>: View {
                     model.openNote = nil
                     model.editing = false
                 }
-                model.reflow(resizingWidth: true)
+                model.reflow()
             },
             dismissOverlay: {
                 model.reportStep = 0
@@ -408,26 +433,11 @@ struct CaretFrame<Content: View>: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.30) {
                 if demo == "snooze" { model.trayOpen = true }
                 if demo == "feedback" { model.openNote = "" }
-                model.reflow(resizingWidth: demo == "feedback")
+                model.reflow()
             }
         }
     }
 
-    /// §2.4: whatever attaches beside the surface opens away from the wall the
-    /// surface is against. That is a fact about the screen, so it is not
-    /// mirrored with the reading direction.
-    private func resolvePaneSide() -> Bool {
-        switch position {
-        case .left: return false
-        case .right: return true
-        case .center:
-            guard let window = NSApp.keyWindow ?? NSApp.windows.first,
-                  let screen = NSScreen.main else { return false }
-            let roomLeft = window.frame.minX - screen.visibleFrame.minX
-            let roomRight = screen.visibleFrame.maxX - window.frame.maxX
-            return roomLeft > roomRight
-        }
-    }
 }
 
 // MARK: - Tool mark

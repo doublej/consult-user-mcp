@@ -15,6 +15,7 @@ struct CaretConfirmView: View {
             title: spec.title,
             position: spec.position,
             model: model,
+            minSurfaceWidth: CaretSkin.surfaceWidth(for: .confirm),
             leadingAction: CaretActionSpec(label: spec.cancelLabel, role: .decline, key: "esc", run: decline),
             trailingAction: CaretActionSpec(label: spec.confirmLabel, role: .commit, key: "⏎", run: commit),
             bindings: CaretBindings(canSubmit: { true }, onSubmit: commit, onCancel: decline),

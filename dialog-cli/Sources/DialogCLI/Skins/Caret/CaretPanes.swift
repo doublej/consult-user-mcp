@@ -3,14 +3,16 @@ import SwiftUI
 
 // MARK: - Annotation
 
-/// The note pane (§3.6). It attaches beside the surface with a fixed extent,
-/// which is the one thing allowed to change the surface's width (§2.2), and it
-/// opens away from the wall the surface is anchored against (§2.4).
-struct CaretNotePane: View {
+/// The annotation editor (§3.6), drawn inside the surface.
+///
+/// It is an expansion rather than a panel beside the surface, which §3.6
+/// permits explicitly and which means §2.2's width rule and §2.4's anchor rule
+/// do not apply to it: the surface's width never changes, and the note opens
+/// downward from the fixed top edge.
+struct CaretNotePanel: View {
     @ObservedObject var model: CaretSurfaceModel
     let caption: String
     let subject: String?
-    let onLeading: Bool
 
     @State private var clearFocused = false
     @State private var closeFocused = false
@@ -20,11 +22,22 @@ struct CaretNotePane: View {
     private var empty: Bool { !model.hasNote(key) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: CaretStyle.u(10)) {
-            Text(caption)
-                .font(Font(CaretStyle.monoTiny))
-                .kerning(CaretStyle.monoTiny.pointSize * CaretStyle.railTracking)
-                .foregroundStyle(palette.caret)
+        VStack(alignment: .leading, spacing: CaretStyle.u(8)) {
+            HStack(alignment: .firstTextBaseline, spacing: CaretStyle.u(12)) {
+                Text(caption)
+                    .font(Font(CaretStyle.monoTiny))
+                    .kerning(CaretStyle.monoTiny.pointSize * CaretStyle.railTracking)
+                    .foregroundStyle(palette.caret)
+                Spacer(minLength: CaretStyle.u(12))
+                paneAction("Clear", enabled: !empty, focused: $clearFocused) {
+                    model.noteDrafts[key] = ""
+                }
+                paneAction("Close", enabled: true, focused: $closeFocused) {
+                    model.openNote = nil
+                    model.editing = false
+                    model.reflow()
+                }
+            }
 
             if let subject, !subject.isEmpty {
                 CaretProseText(
@@ -32,56 +45,38 @@ struct CaretNotePane: View {
                     font: CaretStyle.label,
                     emphasis: NSFont.systemFont(ofSize: CaretStyle.u(10.5), weight: .bold),
                     colour: palette.context,
-                    measure: CaretStyle.paneWidth - CaretStyle.u(36),
                     selectable: false
                 )
             }
 
             CaretNoteEditor(text: model.binding(key), onFocus: { model.editing = $0 })
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                // Kept small on purpose: a pane taller than the surface makes
-                // the window grow downward as well as sideways, so one gesture
-                // becomes two movements.
-                .frame(minHeight: CaretStyle.u(58))
-
-            HStack(spacing: CaretStyle.u(16)) {
-                paneAction("Clear", enabled: !empty, focused: $clearFocused) {
-                    model.noteDrafts[key] = ""
-                }
-                Spacer(minLength: 0)
-                paneAction("Close", enabled: true, focused: $closeFocused) {
-                    model.openNote = nil
-                    model.editing = false
-                    model.reflow(resizingWidth: true)
-                }
-            }
-        }
-        .padding(.horizontal, CaretStyle.u(18))
-        .padding(.vertical, CaretStyle.u(16))
-        .frame(maxHeight: .infinity, alignment: .top)
-        .background(palette.channel)
-        .overlay(alignment: onLeading ? .trailing : .leading) {
-            Rectangle().fill(palette.rail).frame(width: CaretStyle.hair)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .frame(height: CaretStyle.u(62))
+            Rectangle()
+                .fill(palette.caret)
+                .frame(height: CaretStyle.caretWidth)
         }
         .accessibilityLabel(Text(caption))
     }
 
     private func paneAction(_ label: String, enabled: Bool, focused: Binding<Bool>, run: @escaping () -> Void) -> some View {
-        VStack(alignment: .leading, spacing: CaretStyle.u(5)) {
-            Text(label)
-                .font(Font(CaretStyle.label))
-                .foregroundStyle(enabled ? (focused.wrappedValue ? palette.ink : palette.inkSecond) : palette.inkMuted.opacity(0.5))
-            Rectangle()
-                .fill(enabled ? (focused.wrappedValue ? palette.caret : palette.rail) : palette.rail.opacity(0.5))
-                .frame(height: focused.wrappedValue ? CaretStyle.caretWidth : CaretStyle.hair)
-        }
-        .frame(width: CaretStyle.width(label, font: CaretStyle.label) + CaretStyle.u(6))
-        .contentShape(Rectangle())
-        .overlay(
-            CaretTarget(isContent: false, isEnabled: enabled, takesReturn: true, onActivate: run,
-                        onFocusChange: { focused.wrappedValue = $0 })
-        )
-        .help(label == "Close" ? "Close pane (note is preserved)" : "Clear this note")
+        Text(label)
+            .font(Font(CaretStyle.monoTiny))
+            .kerning(CaretStyle.monoTiny.pointSize * CaretStyle.railTracking)
+            .foregroundStyle(enabled ? (focused.wrappedValue ? palette.ink : palette.inkMuted) : palette.inkMuted.opacity(0.45))
+            .frame(width: CaretStyle.width(label.uppercased(), font: CaretStyle.monoTiny, tracking: CaretStyle.railTracking) + CaretStyle.u(10),
+                   height: CaretStyle.u(15))
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(focused.wrappedValue ? palette.caret : Color.clear)
+                    .frame(height: CaretStyle.hair)
+            }
+            .contentShape(Rectangle())
+            .overlay(
+                CaretTarget(isContent: false, isEnabled: enabled, takesReturn: true, onActivate: run,
+                            onFocusChange: { focused.wrappedValue = $0 })
+            )
+            .help(label == "Close" ? "Close (note is preserved)" : "Clear this note")
     }
 }
 

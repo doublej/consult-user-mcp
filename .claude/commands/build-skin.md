@@ -65,13 +65,18 @@ skimming one.
 
 How to read it:
 
-- Everything it states is **binding**. Behaviour, states, sequence, keyboard model, outcome model and copy are
-  invariant across skins — §7 is explicit about what a skin may and may not change.
+- **Read the tier before the requirement** (§0.1). **LAW** is invariant — keyboard model, outcome model, what
+  the agent receives. **CAPABILITY** means the person must be able to do a thing and *the form is yours*.
+  **DEFAULT** is one workable answer you may replace outright. §0.2 lists what the contract deliberately does
+  not specify — arrangement, decomposition, grouping, idiom — and that list is the size of your freedom.
+- §3 is a list of **capabilities, not components**. Two entries may be one element; one entry may be three.
+  Assembling it top to bottom in the order written is the failure mode §0.3 exists to prevent — run both
+  checks there before you commit to a design.
 - Everywhere it says a thing MUST be *distinguishable*, *distinct*, or *not read as* something else, it is
   handing you a design problem. Those are the requirements you are being paid to answer. Collect them first.
-- §7.2 lists the things a style **may** add that the default has not: a type label naming the surface kind, an
-  ordinal beside each option, a selection status line, a progress form, placeholders. These are free identity —
-  use them.
+- §7.5 lists things a style **may** add that the default has not: a label naming the surface kind, an ordinal
+  beside each option, a count of what is chosen, a placeholder on the text surface. It ends with "anything
+  else" — the list is examples, not permission.
 - §10 lists behavioural defects in the current build. You inherit the behaviour, not the defects — where a
   defect is a *visual* failure (10.4, 10.9, 10.12, 10.14, 10.26 especially), fix it in your skin rather than
   reproducing it.
@@ -79,7 +84,7 @@ How to read it:
 
 Build a decision list before you build anything: every "MUST be distinguishable" in the contract, and the
 channel you will use to answer it. Two requirements answered by the same channel is a bug — the contract calls
-this out for focus vs selection (§3.13) and it generalises. Put the list in your report.
+this out for focus vs selection (§3.10) and it generalises. Put the list in your report.
 </the_contract>
 
 <what_you_are_building>
@@ -217,9 +222,11 @@ DialogToolbar(
 ```
 
 It also owns the expanded snooze tray and the ask-differently menu. **You may replace it with your own view
-that calls the identical callbacks.** Appearance is not behaviour. If you do, you must reproduce §3.5 (state
-rules and the has-note indicator), §3.6 (`Ask me again in:` and the five durations) and §3.7 (six entries, the
-current one marked and disabled) exactly, and put the durations in the keyboard ring per §10.7.
+that calls the identical callbacks.** Appearance is not behaviour, and the contract does not require these
+three capabilities to be grouped, or to be persistent, at all. If you do replace it, you must still satisfy
+§3.5 (a small fixed set of durations, every one keyboard-reachable per §10.7), §3.6 (including the
+has-annotation signal, which is the only warning that unsent work exists) and §3.7 (six shapes, the current
+one marked and unavailable).
 
 ### The three focusable controls
 
@@ -261,7 +268,7 @@ Your `NSView` must return `true` from `acceptsFirstResponder` and `canBecomeKeyV
 `viewDidMoveToWindow`, unregister when the window goes away, draw its own focus indicator in
 `becomeFirstResponder` / `resignFirstResponder`, and handle `keyDown` for Space. Arrow and Tab keys are routed
 by the chassis; do not add your own `NSEvent` monitors. Disabled controls must return `false` from
-`canBecomeKeyView` so Tab skips them (§3.11).
+`canBecomeKeyView` so Tab skips them (§3.9).
 
 ### Other shared pieces you will want
 
@@ -319,8 +326,11 @@ Hard-won; each one costs a rebuild cycle to rediscover.
 - Touch only `Skins/<YourName>/`, the single `SkinRegistry.entries` line, and `test-cases/skin-states/` for the
   capture harness. Do not modify the chassis, the existing skins, the models, the services, the server, or the
   Windows tree.
-- Do not change any behaviour, keyboard binding, outcome shape, or copy string. §7 and §8 of the contract are
-  the boundary. If your direction seems to require breaking one, it does not — find another expression.
+- Do not change any behaviour, keyboard binding, or outcome shape. §7.2 of the contract is the boundary, and
+  §8.2 and §8.3 are exact. If your direction seems to require breaking one, it does not — find another
+  expression.
+- On-screen copy (§8.1) is **DEFAULT, not law** — you may replace it where the meaning survives. Caller-supplied
+  strings — titles, bodies, questions, option text, confirm's action labels — are never yours.
 - **`tweak` is the expensive one.** It is legitimate to leave it falling through, and the contract expects
   skins to do exactly that. Decide explicitly and say which you chose; do not drift into it by accident.
 - No new dependencies, no new SPM resources.

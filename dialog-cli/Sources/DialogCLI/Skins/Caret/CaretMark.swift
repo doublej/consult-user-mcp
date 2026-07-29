@@ -1,45 +1,66 @@
 import AppKit
 import SwiftUI
 
-/// The mark at surface scale.
+/// One arm of the mark: how far it reaches from its stem, and — for the two
+/// lower ones, which are the ways out — what state it is carrying.
+struct CaretArmStyle {
+    var length: CGFloat
+    var tone: Color? = nil
+    var thick: Bool = false
+}
+
+/// The mark at surface scale, minus its lower corners.
 ///
-/// Two bracket stems run the full height of the surface, one at each edge,
-/// each returning inward at the top and the bottom — the `[` and `]` of the
-/// brand mark, drawn as the window's own structure rather than as an icon.
-/// Every arm is exactly as long as the label it bounds, so the frame is a
-/// pure function of what the surface is carrying.
+/// Two bracket stems run the height of the surface, one at each edge, each
+/// returning inward at the top. The stems stop at the start of the lower
+/// fillets, because those corners belong to the actions and are drawn by
+/// `CaretCornerShape` in whatever colour the action is currently in — so the
+/// line is continuous and is only ever drawn once.
 struct CaretFrameShape: Shape {
-    /// Arm lengths measured from the stem, in order: top-leading,
-    /// top-trailing, bottom-leading, bottom-trailing.
-    var arms: (CGFloat, CGFloat, CGFloat, CGFloat)
-    var stemInset: CGFloat
-    var verticalInset: CGFloat
+    var topLeading: CGFloat
+    var topTrailing: CGFloat
+    var inset: CGFloat
 
     func path(in rect: CGRect) -> Path {
         let r = CaretStyle.fillet
-        let top = rect.minY + verticalInset
-        let bottom = rect.maxY - verticalInset
-        let left = rect.minX + stemInset
-        let right = rect.maxX - stemInset
+        let top = rect.minY + inset
+        let bottom = rect.maxY - inset
+        let left = rect.minX + inset
+        let right = rect.maxX - inset
 
         var path = Path()
 
-        // Opening bracket.
-        path.move(to: CGPoint(x: left + max(arms.0, r), y: top))
+        path.move(to: CGPoint(x: left + max(topLeading, r), y: top))
         path.addLine(to: CGPoint(x: left + r, y: top))
         path.addQuadCurve(to: CGPoint(x: left, y: top + r), control: CGPoint(x: left, y: top))
         path.addLine(to: CGPoint(x: left, y: bottom - r))
-        path.addQuadCurve(to: CGPoint(x: left + r, y: bottom), control: CGPoint(x: left, y: bottom))
-        path.addLine(to: CGPoint(x: left + max(arms.2, r), y: bottom))
 
-        // Closing bracket.
-        path.move(to: CGPoint(x: right - max(arms.1, r), y: top))
+        path.move(to: CGPoint(x: right - max(topTrailing, r), y: top))
         path.addLine(to: CGPoint(x: right - r, y: top))
         path.addQuadCurve(to: CGPoint(x: right, y: top + r), control: CGPoint(x: right, y: top))
         path.addLine(to: CGPoint(x: right, y: bottom - r))
-        path.addQuadCurve(to: CGPoint(x: right - r, y: bottom), control: CGPoint(x: right, y: bottom))
-        path.addLine(to: CGPoint(x: right - max(arms.3, r), y: bottom))
 
+        return path
+    }
+}
+
+/// One lower corner: the fillet that finishes the stem, then the arm that runs
+/// inward under the action it bounds. It starts exactly where the stem stops.
+struct CaretCornerShape: Shape {
+    var length: CGFloat
+    var trailing: Bool
+    var inset: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let r = CaretStyle.fillet
+        let bottom = rect.maxY - inset
+        let x = trailing ? rect.maxX - inset : rect.minX + inset
+        let sign: CGFloat = trailing ? -1 : 1
+
+        var path = Path()
+        path.move(to: CGPoint(x: x, y: bottom - r))
+        path.addQuadCurve(to: CGPoint(x: x + sign * r, y: bottom), control: CGPoint(x: x, y: bottom))
+        path.addLine(to: CGPoint(x: x + sign * max(length, r), y: bottom))
         return path
     }
 }
@@ -51,42 +72,54 @@ struct CaretFrameShape: Shape {
 /// indication for the opening cooldown (§4.6): it starts as a full-height bar
 /// and retracts towards its resting position as the block expires.
 struct CaretRails: View {
-    let arms: (CGFloat, CGFloat, CGFloat, CGFloat)
+    let topLeading: CGFloat
+    let topTrailing: CGFloat
+    let bottomLeading: CaretArmStyle
+    let bottomTrailing: CaretArmStyle
     let focusRect: CGRect?
     /// 1 when the surface is live; below 1 while the cooldown runs.
     let cooldown: Double
     var dimmed: Bool = false
     @Environment(\.caretPalette) private var palette
 
-    private var stemInset: CGFloat { CaretStyle.caretRail / 2 }
-    private var vInset: CGFloat { CaretStyle.u(6) }
+    private var inset: CGFloat { CaretStyle.caretRail / 2 }
 
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .topLeading) {
-                CaretFrameShape(arms: arms, stemInset: stemInset, verticalInset: vInset)
+                CaretFrameShape(topLeading: topLeading, topTrailing: topTrailing, inset: inset)
                     .stroke(palette.rail, style: StrokeStyle(lineWidth: CaretStyle.hair, lineCap: .round))
                     .opacity(dimmed ? 0.4 : 1)
 
+                corner(bottomLeading, trailing: false)
+                corner(bottomTrailing, trailing: true)
+
                 if cooldown < 1 {
-                    let full = geo.size.height - vInset * 2
-                    let length = full * (1 - cooldown)
+                    let full = geo.size.height - inset * 2
                     Capsule()
                         .fill(palette.caret)
                         .opacity(0.5)
-                        .frame(width: CaretStyle.caretWidth, height: max(0, length))
-                        .position(x: stemInset, y: geo.size.height / 2)
+                        .frame(width: CaretStyle.caretWidth, height: max(0, full * (1 - cooldown)))
+                        .position(x: inset, y: geo.size.height / 2)
                 } else if let rect = focusRect {
                     // 3 units of cursor against 5 of stem, 18 of 30 tall.
-                    let height = max(CaretStyle.u(12), rect.height * 0.6)
                     Capsule()
                         .fill(palette.caret)
-                        .frame(width: CaretStyle.caretWidth, height: height)
-                        .position(x: stemInset, y: rect.midY)
+                        .frame(width: CaretStyle.caretWidth, height: max(CaretStyle.u(12), rect.height * 0.6))
+                        .position(x: inset, y: rect.midY)
                 }
             }
         }
         .allowsHitTesting(false)
+    }
+
+    private func corner(_ arm: CaretArmStyle, trailing: Bool) -> some View {
+        CaretCornerShape(length: arm.length, trailing: trailing, inset: inset)
+            .stroke(
+                arm.tone ?? palette.rail,
+                style: StrokeStyle(lineWidth: arm.thick ? CaretStyle.caretWidth : CaretStyle.hair, lineCap: .round)
+            )
+            .opacity(dimmed ? 0.4 : 1)
     }
 }
 
@@ -98,11 +131,10 @@ enum CaretActionRole {
     case destructive
 }
 
-/// One way out, drawn on the arm that bounds it.
-///
-/// There is no button row: the surface's two lower arms are the ways out, one
-/// at each corner, so decline sits before commit in reading order and Tab
-/// reaches them in the order §3.9 requires without any special pleading.
+/// One way out. Its label only — the line beneath it is the surface's own
+/// lower corner, drawn by `CaretRails`, because there is no button row here:
+/// the frame's two lower arms *are* the ways out, one at each corner, so
+/// decline sits before commit in reading order without any special pleading.
 struct CaretAction: View {
     let label: String
     let role: CaretActionRole
@@ -121,6 +153,7 @@ struct CaretAction: View {
     /// Points the focus target is extended upward by, so two controls sharing
     /// a row still sort into reading order. Invisible.
     var focusLift: CGFloat = 0
+    var onFocus: (Bool) -> Void = { _ in }
     let action: () -> Void
 
     @State private var focused = false
@@ -144,49 +177,44 @@ struct CaretAction: View {
         return String(label.prefix(limit - 1)) + "…"
     }
 
-    /// The arm this action is drawn on: label above, arm beneath, the arm
-    /// running back to the stem it belongs to.
-    var body: some View {
-        let text = Self.clip(label)
-        VStack(alignment: trailing ? .trailing : .leading, spacing: CaretStyle.u(6)) {
-            HStack(spacing: CaretStyle.u(8)) {
-                if trailing, let key { CaretKeycap(glyph: key, available: enabled && keyAvailable, strong: role == .commit) }
-                Text(text)
-                    .font(Font(CaretStyle.action))
-                    .kerning(CaretStyle.action.pointSize * CaretStyle.displayTracking)
-                    .foregroundStyle(labelColour)
-                    .lineLimit(1)
-                if !trailing, let key { CaretKeycap(glyph: key, available: enabled && keyAvailable, strong: role == .commit) }
-            }
-            .frame(width: Self.width(label: label, key: key),
-                   height: CaretStyle.u(20),
-                   alignment: trailing ? .trailing : .leading)
-            .padding(trailing ? .trailing : .leading, CaretStyle.u(9))
-            .contentShape(Rectangle())
-            .overlay(
-                CaretTarget(
-                    isContent: false,
-                    isEnabled: enabled,
-                    takesReturn: true,
-                    onActivate: action,
-                    onFocusChange: { focused = $0 },
-                    onPressChange: { pressed = $0 },
-                    onHoverChange: { hovered = $0 },
-                    register: autofocus ? { view in
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
-                            view.window?.makeFirstResponder(view)
-                        }
-                    } : nil
-                )
-                .padding(.top, -focusLift)
-            )
-            .caretStop(focused)
+    /// How far the arm beneath this action has to reach to bound it.
+    static func armLength(label: String, key: String?) -> CGFloat {
+        CaretStyle.u(9) + width(label: label, key: key) + CaretStyle.u(10)
+    }
 
-            Rectangle()
-                .fill(armColour)
-                .frame(width: Self.width(label: label, key: key) + CaretStyle.u(9),
-                       height: focused ? CaretStyle.caretWidth : CaretStyle.hair)
+    var body: some View {
+        HStack(spacing: CaretStyle.u(8)) {
+            if trailing, let key { CaretKeycap(glyph: key, available: enabled && keyAvailable, strong: role == .commit) }
+            Text(Self.clip(label))
+                .font(Font(CaretStyle.action))
+                .kerning(CaretStyle.action.pointSize * CaretStyle.displayTracking)
+                .foregroundStyle(labelColour)
+                .lineLimit(1)
+            if !trailing, let key { CaretKeycap(glyph: key, available: enabled && keyAvailable, strong: role == .commit) }
         }
+        .frame(width: Self.width(label: label, key: key),
+               height: CaretStyle.u(20),
+               alignment: trailing ? .trailing : .leading)
+        .padding(trailing ? .trailing : .leading, CaretStyle.u(9))
+        .contentShape(Rectangle())
+        .overlay(
+            CaretTarget(
+                isContent: false,
+                isEnabled: enabled,
+                takesReturn: true,
+                onActivate: action,
+                onFocusChange: { focused = $0; onFocus($0) },
+                onPressChange: { pressed = $0 },
+                onHoverChange: { hovered = $0 },
+                register: autofocus ? { view in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                        view.window?.makeFirstResponder(view)
+                    }
+                } : nil
+            )
+            .padding(.top, -focusLift)
+        )
+        .caretStop(focused)
         .accessibilityLabel(Text(label))
     }
 
@@ -201,16 +229,15 @@ struct CaretAction: View {
         }
     }
 
-    /// The four variants of §3.9 live here: an available commit arm is amber,
-    /// a decline arm is a live rail, destructive is danger, and unavailable
-    /// falls back to a dead rail — which is also how the commit arm drops its
-    /// promise that Return will work.
-    private var armColour: Color {
+    /// The four variants of §3.9 live on the arm: an available commit arm is
+    /// amber, a decline arm is a live rail, destructive is danger, and
+    /// unavailable falls back to a dead rail — which is also how the commit
+    /// arm drops its promise that Return will work.
+    static func armTone(role: CaretActionRole, enabled: Bool, damped: Bool, focused: Bool, palette: CaretPalette) -> Color {
         guard enabled, !damped else { return palette.rail }
-        if pressed { return palette.caret }
         switch role {
         case .commit: return palette.caret
-        case .decline: return hovered || focused ? palette.railLive : palette.rail
+        case .decline: return focused ? palette.railLive : palette.rail
         case .destructive: return palette.danger
         }
     }

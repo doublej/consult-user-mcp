@@ -36,12 +36,15 @@ struct CaretFrame<Content: View>: View {
     @State private var shapeKeys: CaretShapeKeyMonitor?
     @State private var paneLeading = false
     @State private var toolFocus: String?
+    @State private var leadingFocused = false
+    @State private var trailingFocused = false
 
     private let clock = Timer.publish(every: 1.0 / 30.0, on: .main, in: .common).autoconnect()
 
-    private var stemX: CGFloat { CaretStyle.caretRail / 2 }
+    /// One inset all round, so the mark's corners nest concentrically inside
+    /// the window's own radius.
+    private var inset: CGFloat { CaretStyle.caretRail / 2 }
     private var armInset: CGFloat { CaretStyle.u(9) }
-    private var vInset: CGFloat { CaretStyle.u(6) }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -76,14 +79,17 @@ struct CaretFrame<Content: View>: View {
 
             if leadingAction != nil || trailingAction != nil { actionBar }
         }
-        .padding(.top, vInset + CaretStyle.u(9))
-        .padding(.bottom, vInset)
+        .padding(.top, inset + CaretStyle.u(10))
+        .padding(.bottom, inset + CaretStyle.u(8))
         .frame(minWidth: CaretStyle.u(360), alignment: .top)
         .coordinateSpace(name: CaretSpace.surface)
         .onPreferenceChange(CaretFocusKey.self) { rect in model.focusRect = rect }
         .overlay(
             CaretRails(
-                arms: (topLeadingArm, topTrailingArm, bottomArm(leadingAction), bottomArm(trailingAction)),
+                topLeading: topLeadingArm,
+                topTrailing: topTrailingArm,
+                bottomLeading: arm(leadingAction, focused: leadingFocused),
+                bottomTrailing: arm(trailingAction, focused: trailingFocused),
                 focusRect: model.focusRect,
                 cooldown: model.cooldown,
                 dimmed: model.inert
@@ -126,7 +132,7 @@ struct CaretFrame<Content: View>: View {
                     .padding(.trailing, armInset)
             }
         }
-        .padding(.horizontal, stemX)
+        .padding(.horizontal, inset)
         .frame(height: CaretStyle.u(16))
     }
 
@@ -189,10 +195,21 @@ struct CaretFrame<Content: View>: View {
         armInset + toolsWidth + CaretStyle.u(10)
     }
 
-    private func bottomArm(_ spec: CaretActionSpec?) -> CGFloat {
-        // The lower arms are drawn by the actions themselves, so the frame
-        // only closes the corner where there is no action to close it.
-        spec == nil ? CaretStyle.u(26) : 0
+    /// The lower corners carry the ways out, so their length is the action's
+    /// own measured width and their colour is the action's state.
+    private func arm(_ spec: CaretActionSpec?, focused: Bool) -> CaretArmStyle {
+        guard let spec else { return CaretArmStyle(length: CaretStyle.u(26)) }
+        return CaretArmStyle(
+            length: CaretAction.armLength(label: spec.label, key: spec.key),
+            tone: CaretAction.armTone(
+                role: spec.role,
+                enabled: spec.enabled && !model.inert,
+                damped: model.cooldown < 1,
+                focused: focused,
+                palette: palette
+            ),
+            thick: focused
+        )
     }
 
     // MARK: - Lower arms
@@ -204,7 +221,8 @@ struct CaretFrame<Content: View>: View {
                             keyAvailable: spec.keyAvailable && model.commitKeyLive,
                             enabled: spec.enabled && !model.inert,
                             damped: model.cooldown < 1,
-                            trailing: false, focusLift: 3, action: spec.run)
+                            trailing: false, focusLift: 3,
+                            onFocus: { leadingFocused = $0 }, action: spec.run)
             }
             Spacer(minLength: CaretStyle.u(20))
             if let spec = trailingAction {
@@ -212,10 +230,11 @@ struct CaretFrame<Content: View>: View {
                             keyAvailable: spec.keyAvailable && model.commitKeyLive,
                             enabled: spec.enabled && !model.inert,
                             damped: model.cooldown < 1,
-                            trailing: true, action: spec.run)
+                            trailing: true,
+                            onFocus: { trailingFocused = $0 }, action: spec.run)
             }
         }
-        .padding(.horizontal, stemX)
+        .padding(.horizontal, inset)
         .environment(\.caretInert, model.inert)
     }
 
@@ -235,7 +254,7 @@ struct CaretFrame<Content: View>: View {
                 CaretDuration(minutes: minutes) { onSnooze(minutes) }
             }
         }
-        .padding(.horizontal, stemX + armInset)
+        .padding(.horizontal, inset + armInset)
         .padding(.top, CaretStyle.u(14))
     }
 
@@ -260,7 +279,7 @@ struct CaretFrame<Content: View>: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
-        .padding(.horizontal, stemX + armInset)
+        .padding(.horizontal, inset + armInset)
         .padding(.top, CaretStyle.u(14))
         .environment(\.caretInert, false)
     }

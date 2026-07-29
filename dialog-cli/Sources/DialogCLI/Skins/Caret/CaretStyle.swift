@@ -60,15 +60,17 @@ enum CaretStyle {
     static var caretWidth: CGFloat { max(2, u(3)) }
     /// Arm length as a fraction of the surface width — 11/40 of the mark.
     static let armFraction: CGFloat = 0.275
-    /// Fillet radius: 1.5 of 40 units.
-    static var fillet: CGFloat { u(4) }
+    /// Fillet radius. The mark sits one `caretRail/2` inside the window on
+    /// every edge, so a concentric nest wants exactly that much less radius
+    /// than the window's own.
+    static var fillet: CGFloat { windowRadius - caretRail / 2 }
 
     static var gutter: CGFloat { u(16) }
     static var lineGap: CGFloat { u(9) }
     static var blockGap: CGFloat { u(16) }
     static var rowHeight: CGFloat { u(34) }
     static var paneWidth: CGFloat { u(252) }
-    static var windowRadius: CGFloat { u(12) }
+    static var windowRadius: CGFloat { u(14) }
 
     /// The measure the agent's words are set to. Bounded so a passage never
     /// runs the full width of a wide surface.

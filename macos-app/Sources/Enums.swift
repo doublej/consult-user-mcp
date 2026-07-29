@@ -21,6 +21,28 @@ enum DialogPosition: String, CaseIterable, Codable {
     }
 }
 
+// MARK: - Dialog Skin
+
+/// Which visual layer the Dialog CLI renders a dialog with.
+///
+/// The raw values are the ids in the CLI's own `SkinRegistry`, which matches on
+/// them verbatim — so they cannot be renamed here alone. The CLI carries more
+/// skins than these two; only the pair the toggle switches between is listed,
+/// and `DIALOG_SKIN` still reaches any of them.
+enum DialogSkin: String, CaseIterable, Codable {
+    /// The interface the product shipped with.
+    case classic
+    /// The redesign.
+    case caret
+
+    var label: String {
+        switch self {
+        case .classic: return "Classic"
+        case .caret: return "Caret"
+        }
+    }
+}
+
 // MARK: - Dialog Size
 
 enum DialogSize: String, CaseIterable, Codable {

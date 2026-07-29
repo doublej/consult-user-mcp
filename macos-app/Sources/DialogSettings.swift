@@ -13,6 +13,7 @@ final class DialogSettings: ObservableObject {
 
     @AppStorage("dialogPosition") var position: DialogPosition = .left
     @AppStorage("dialogSize") var size: DialogSize = .regular
+    @AppStorage("dialogSkin") var skin: DialogSkin = .classic
     @AppStorage("soundOnShow") var soundOnShow: SoundEffect = .subtle
     @AppStorage("animationsEnabled") var animationsEnabled: Bool = true
     @AppStorage("alwaysOnTop") var alwaysOnTop: Bool = true
@@ -167,6 +168,11 @@ final class DialogSettings: ObservableObject {
         var autoAfkOnIdle: Bool?
         var autoAfkIdleMinutes: Double?
         var afkAutoEnabled: Bool?
+        /// A plain string rather than `DialogSkin`, on purpose. The CLI carries
+        /// more skins than the toggle offers and `DIALOG_SKIN` can put any of
+        /// them in this file; decoding into the enum would fail on one it does
+        /// not know and take every other setting in the file down with it.
+        var skin: String?
     }
 
     func saveToFile() {
@@ -195,7 +201,8 @@ final class DialogSettings: ObservableObject {
             autoAfkOnSleep: autoAfkOnSleep,
             autoAfkOnIdle: autoAfkOnIdle,
             autoAfkIdleMinutes: autoAfkIdleMinutes,
-            afkAutoEnabled: afkAutoEnabled
+            afkAutoEnabled: afkAutoEnabled,
+            skin: skin.rawValue
         )
 
         let encoder = JSONEncoder()
@@ -275,6 +282,12 @@ final class DialogSettings: ObservableObject {
         }
         if let auto = settings.afkAutoEnabled {
             afkAutoEnabled = auto
+        }
+        // A skin the toggle does not offer — one put there by `DIALOG_SKIN` or
+        // by hand — is left alone rather than snapped back to Classic, so the
+        // toggle reads as off and switching it on is still the way out.
+        if let raw = settings.skin, let known = DialogSkin(rawValue: raw) {
+            skin = known
         }
     }
 

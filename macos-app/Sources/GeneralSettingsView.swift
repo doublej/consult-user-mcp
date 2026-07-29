@@ -218,6 +218,18 @@ private struct AppearanceSettingsSection: View {
     var body: some View {
         SettingsSectionContainer(title: "Appearance") {
             VStack(spacing: 0) {
+                SettingsToggleRow(
+                    icon: "paintbrush",
+                    title: "New Interface",
+                    subtitle: "Redesigned dialogs — off uses the original",
+                    isOn: Binding(
+                        get: { settings.skin == .caret },
+                        set: { settings.skin = $0 ? .caret : .classic }
+                    )
+                )
+
+                Divider().padding(.leading, 40)
+
                 SettingsRowWithControl(
                     icon: "bell",
                     title: "Sound",
@@ -266,6 +278,9 @@ private struct AppearanceSettingsSection: View {
             }
             .padding(.vertical, 4)
         }
+        // The next dialog is a fresh process that reads this file on launch, so
+        // writing it is the whole of applying it.
+        .onChange(of: settings.skin) { _, _ in settings.saveToFile() }
         .onChange(of: settings.soundOnShow) { _, _ in settings.saveToFile() }
         .onChange(of: settings.animationsEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.alwaysOnTop) { _, _ in settings.saveToFile() }

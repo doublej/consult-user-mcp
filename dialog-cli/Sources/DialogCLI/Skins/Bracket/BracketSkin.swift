@@ -54,4 +54,24 @@ struct BracketSkin: DialogSkin {
     func confirmView(_ spec: ConfirmSpec) -> AnyView {
         AnyView(BracketConfirmView(spec: spec))
     }
+
+    func chooseView(_ spec: ChooseSpec) -> AnyView {
+        AnyView(BracketChooseView(spec: spec))
+    }
+
+    func textInputView(_ spec: TextInputSpec) -> AnyView {
+        AnyView(BracketTextInputView(spec: spec))
+    }
+
+    func questionsView(_ spec: QuestionsSpec) -> AnyView {
+        AnyView(BracketQuestionsView(spec: spec))
+    }
+
+    func notifyView(_ spec: NotifySpec) -> AnyView {
+        AnyView(BracketNotifyView(spec: spec))
+    }
+
+    func previewView(_ spec: PreviewSpec) -> AnyView {
+        AnyView(BracketPreviewView(spec: spec))
+    }
 }

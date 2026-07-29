@@ -1,0 +1,1 @@
+{"body":"answer: [\"mcp-server/src\",\"dialog-cli/Sources\",\"macos-app/Sources\",\"windows-app/Services\",\"docs/src/lib\"]\nfeedbackText: \"skip the windows tree this pass, it needs its own review and I do not want the diff mixed in with everything else\"\ncancelled: false\ncompletedCount: 5"}

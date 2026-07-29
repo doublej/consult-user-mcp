@@ -1,0 +1,12 @@
+# Capture output. Regenerated on every run and specific to whichever layer was
+# rendered, so it is never meaningful history — and under the authoring blindfold
+# the agent cannot read images inside the repo anyway. Point the harness outside
+# the tree instead:  OUTDIR=<scratchpad>/shots ./capture-states.sh
+shots/
+index.html
+
+# Compiled window-id helper, built on demand from test-cases/capture-dialog.swift.
+.findwin
+
+# Parked snooze state, restored by the harness on exit. Present only mid-run.
+.settings.backup.json

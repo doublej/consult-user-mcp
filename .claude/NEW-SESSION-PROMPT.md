@@ -87,7 +87,7 @@ BEFORE YOU BUILD SURFACE TWO
 
 ## If you would rather start clean
 
-`Skins/Bracket/` is committed at `55c6df2`. To remove it and its registry line:
+`Skins/Bracket/` is committed on `main`. To remove it and its registry line:
 
 ```bash
 git rm -r dialog-cli/Sources/DialogCLI/Skins/Bracket
@@ -95,5 +95,20 @@ git rm -r dialog-cli/Sources/DialogCLI/Skins/Bracket
 ```
 
 The blindfold makes this unnecessary — a fresh agent cannot read it either way — but
-deleting it also removes it from the acceptance grep in `UI-RENDERING-BOUNDARY.md` §6
-and from anyone's `DIALOG_SKIN` autocomplete.
+deleting it also removes it from anyone's `DIALOG_SKIN` autocomplete.
+
+## Pre-flight, verified
+
+State of the tree as of the last commit on `main`:
+
+- `swift build` from `dialog-cli/` succeeds.
+- Working tree clean, so `/build-ui`'s preflight will not stall.
+- `test-cases/skin-states/` tracks only its manifest, its script and its preview
+  fixtures. Capture output, the compiled window-id helper and the parked snooze
+  state are gitignored — an earlier run had committed 45 screenshots of the
+  rejected design and a Mach-O binary.
+- `Skins/Bracket/` is present, compiles, and is blocked by `ui-blind.settings.json`.
+
+One consequence worth knowing: because captures are gitignored *and* the blindfold
+blocks reading images inside the repo, there is no way to leave screenshots in the
+tree for review. Send them with `SendUserFile` from the scratchpad instead.

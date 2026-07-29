@@ -65,7 +65,6 @@ struct CaretChooseView: View {
                                 label: choice,
                                 description: spec.descriptions?[safe: index],
                                 chosen: selected.contains(index),
-                                multi: multi,
                                 onActivate: { choose(index) },
                                 onFocus: { if $0 { focusedRow = index } },
                                 register: { view in rowViews[index] = view }
@@ -102,7 +101,6 @@ struct CaretChooseView: View {
             label: "Other",
             description: nil,
             chosen: otherSelected,
-            multi: multi,
             onActivate: { chooseOther(focusField: true) },
             onFocus: { if $0 { focusedRow = otherOrdinal } },
             trailingContent: {

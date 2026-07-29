@@ -4,27 +4,25 @@ import SwiftUI
 /// One option (§3.10).
 ///
 /// Chosen and focused ride separate channels and neither borrows the other's:
-/// **chosen** is the row's own leading hairline going amber, and **focused** is
-/// the caret standing out on the surface's rail, a rail's width further out.
-/// All four combinations are therefore legible at once, which §3.10 requires
-/// and §10.26 says a style must define rather than inherit.
+/// **chosen** is the row's own ordinal going amber, and **focused** is the caret
+/// standing out on the surface's rail. All four combinations are therefore
+/// legible at once, which §3.10 requires and §10.26 says a style must define
+/// rather than inherit.
 ///
-/// The mark for chosen is deliberately the same weight as the rail it replaces
-/// rather than an enclosure around the row. An enclosure at this scale reads as
-/// a box drawn round the option, and it competes with the frame the whole
-/// surface is already drawn in. Three quiet cues move together instead — the
-/// hairline, the ordinal, and the label reaching full ink.
+/// The row draws nothing of its own for chosen — no enclosure, no rule, no
+/// fill. A set of options is already a list of small type on a wide surface;
+/// anything added per row competes with the frame the whole surface is drawn in,
+/// and reads as loud long before it reads as clear. So the two cues are the
+/// ordinal's colour and the label reaching full ink, and the amber does not
+/// appear anywhere else in the row.
 ///
-/// The mark's *presence* still differs between the two modes: a single-select
-/// row has no hairline until it is chosen, a multi-select row carries a grey one
-/// from the first frame, so the person can see each row is takeable on its own
-/// before touching anything.
+/// How many may be chosen is stated in words by `CaretSetHeader` rather than
+/// implied by a mark, which is where §10.12 wanted it anyway.
 struct CaretRow<Trailing: View>: View {
     let ordinal: Int
     let label: String
     let description: String?
     let chosen: Bool
-    let multi: Bool
     let onActivate: () -> Void
     var onFocus: (Bool) -> Void = { _ in }
     var register: ((NSView) -> Void)? = nil
@@ -75,9 +73,8 @@ struct CaretRow<Trailing: View>: View {
             RoundedRectangle(cornerRadius: CaretStyle.u(3), style: .continuous)
                 .fill(pressed ? palette.railLive.opacity(0.35) : (hovered ? palette.channel : Color.clear))
         )
-        .overlay(alignment: .leading) { stem }
         .contentShape(Rectangle())
-        // The whole row is the target; the enclosure is not a second one.
+        // The whole row is the target.
         .overlay(
             CaretTarget(
                 isContent: true,
@@ -93,24 +90,14 @@ struct CaretRow<Trailing: View>: View {
         .accessibilityValue(Text(chosen ? "chosen" : "not chosen"))
     }
 
-    /// The one mark for chosen. A hairline, filled rather than stroked, so none
-    /// of it can be lost to the clip of the region it sits at the edge of.
-    private var stem: some View {
-        Capsule()
-            .fill(chosen ? palette.caret : palette.rail)
-            .frame(width: CaretStyle.hair)
-            .padding(.vertical, CaretStyle.u(4))
-            .opacity(chosen || multi ? 1 : 0)
-            .allowsHitTesting(false)
-    }
 }
 
 extension CaretRow where Trailing == EmptyView {
-    init(ordinal: Int, label: String, description: String?, chosen: Bool, multi: Bool,
+    init(ordinal: Int, label: String, description: String?, chosen: Bool,
          onActivate: @escaping () -> Void, onFocus: @escaping (Bool) -> Void = { _ in },
          register: ((NSView) -> Void)? = nil) {
         self.init(ordinal: ordinal, label: label, description: description, chosen: chosen,
-                  multi: multi, onActivate: onActivate, onFocus: onFocus, register: register,
+                  onActivate: onActivate, onFocus: onFocus, register: register,
                   trailingContent: { EmptyView() })
     }
 }

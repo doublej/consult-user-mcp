@@ -179,7 +179,6 @@ struct CaretQuestionsView: View {
                         label: option.label,
                         description: option.description,
                         chosen: chosen(index),
-                        multi: question.multiSelect,
                         onActivate: { choose(index) },
                         onFocus: { if $0 { focusedRow = index } }
                     )
@@ -201,7 +200,6 @@ struct CaretQuestionsView: View {
             label: "Other",
             description: nil,
             chosen: form.otherSelections[question.id] ?? false,
-            multi: question.multiSelect,
             onActivate: { chooseOther() },
             onFocus: { if $0 { focusedRow = ordinal } },
             trailingContent: {

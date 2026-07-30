@@ -96,6 +96,11 @@ DIALOG_TEST_KEYS="d1.5;p0;t:fsorry use safari;d1.0;esc;d0.4;return" \
 # expect: {"feedbackText":"sorry use safari", ...}
 ```
 
+`keyboard-tests.sh` runs the whole typing-vs-hotkey contract as an
+asserting suite (burst typing, feedback-pane race, expired-dialog
+inertness, Caret skin): `bash test-cases/keyboard-tests.sh`. The VM
+harness runs it after the visual suite.
+
 ## Known Issues
 
 See `visual-bugs/` for documented regressions (e.g., choice cutoff with 6+ options).

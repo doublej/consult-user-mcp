@@ -1,0 +1,13 @@
+{
+  "questions": [
+    {
+      "id": "note",
+      "question": "Leave a short note for the agent.",
+      "type": "text",
+      "multiSelect": false,
+      "placeholder": "Type here..."
+    }
+  ],
+  "mode": "wizard",
+  "position": "center"
+}

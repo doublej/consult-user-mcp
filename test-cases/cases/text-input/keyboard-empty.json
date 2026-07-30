@@ -1,0 +1,7 @@
+{
+  "body": "Type the browser you want to use.",
+  "title": "Keyboard Test",
+  "defaultValue": "",
+  "hidden": false,
+  "position": "center"
+}

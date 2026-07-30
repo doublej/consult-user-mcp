@@ -31,6 +31,18 @@ enum DialogKeyRouter {
         dismissOverlay: @escaping () -> Void
     ) -> KeyboardNavigationMonitor {
         KeyboardNavigationMonitor { keyCode, modifiers in
+            // 0. An expired dialog is inert: the agent already continued, so
+            //    no key may answer, snooze, or annotate it. Escape / Return
+            //    close the window; everything else is swallowed. Gates on
+            //    `DialogExpiry.isExpired`, which flips synchronously on the
+            //    main queue — not on first-responder state, which races.
+            if DialogExpiry.shared.isExpired {
+                if keyCode == KeyCode.escape || keyCode == KeyCode.returnKey {
+                    DialogExpiry.shared.closeExpiredDialog()
+                }
+                return true
+            }
+
             // 1. Cooldown swallows everything it cares about.
             if CooldownManager.shared.shouldBlockKey(keyCode) {
                 return true

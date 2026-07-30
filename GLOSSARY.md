@@ -83,6 +83,10 @@ One numeric value bound to a location in a file, adjustable by a slider, written
 The brief interval after a [[Dialog]] appears during which buttons and keys are inert, so a keystroke meant for the editor cannot accidentally answer it.
 - **Rejected synonyms:** debounce, grace period, lockout
 
+### Expired
+The state a [[Dialog]] enters when the MCP server's timeout elapses before the user answers: the agent has already continued with its best guess, the window stays on screen behind an overlay saying so, and every control is inert until the user closes it. Armed via the `MCP_DIALOG_TIMEOUT_MS` env var; owned by `DialogExpiry`.
+- **Rejected synonyms:** timed out, abandoned, stale, orphaned
+
 ### Test Case
 A JSON fixture under `test-cases/cases/<type>/`. Feeds both the visual test runner and the tray app's debug menu.
 - **Rejected synonyms:** fixture, sample, scenario, test file

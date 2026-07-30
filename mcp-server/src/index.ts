@@ -17,8 +17,8 @@ import { humanize } from "./humanize.js";
 import { readSettings } from "./settings.js";
 import { checkForUpdate } from "./update-check.js";
 import { validateNoAllOfAbove } from "./validate-choices.js";
+import { DIALOG_TIMEOUT_MS } from "./constants.js";
 
-const DIALOG_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 const HEARTBEAT_INTERVAL_MS = 15_000;
 
 const AFK_MESSAGE =
@@ -39,12 +39,21 @@ function unescLiterals(s: string): string {
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Dialog timed out after ${ms / 1000}s`)), ms)
-    ),
-  ]);
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      // The abandoned dialog's promise must stop blocking the next one —
+      // the CLI process stays alive showing its expired state, and its
+      // eventual answer is discarded.
+      provider.abandonActive?.();
+      reject(new Error(
+        `Dialog timed out after ${ms / 1000}s with no user response. ` +
+        `The dialog stays on the user's screen marked as expired; any answer it still produces is discarded. ` +
+        `Continue with your best guess and note the open question in your final response.`
+      ));
+    }, ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 function withHeartbeat<T>(

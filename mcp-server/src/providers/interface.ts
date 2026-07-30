@@ -74,4 +74,11 @@ export interface DialogProvider {
    * Blocks until the user accepts or cancels.
    */
   proposeLayout(opts: ProposeLayoutOptions, signal?: AbortSignal): Promise<ProposeLayoutResult>;
+
+  /**
+   * Stop tracking the in-flight dialog after the server-side timeout.
+   * The dialog process stays alive showing its expired state, but its
+   * promise must no longer block the next dialog.
+   */
+  abandonActive?(): void;
 }

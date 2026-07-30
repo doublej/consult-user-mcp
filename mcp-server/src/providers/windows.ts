@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { existsSync } from "fs";
 import type { DialogProvider } from "./interface.js";
+import { DIALOG_TIMEOUT_MS } from "../constants.js";
 import type {
   ConfirmOptions,
   ConfirmResult,
@@ -79,6 +80,7 @@ export class WindowsDialogProvider implements DialogProvider {
         env: {
           ...process.env,
           MCP_CLIENT_NAME: this.clientName,
+          MCP_DIALOG_TIMEOUT_MS: String(DIALOG_TIMEOUT_MS),
           ...(projectPath ? { MCP_PROJECT_PATH: projectPath } : {}),
         },
       });

@@ -132,6 +132,10 @@ static func run() {
         manager.testPane = testPane
     }
 
+    // Mirror the MCP server's dialog timeout so the dialog can flip into its
+    // expired state once the agent has moved on.
+    DialogExpiry.shared.armFromEnvironment()
+
     // Automated keystroke injection (for automated testing)
     TestKeyDriver.installIfRequested()
 

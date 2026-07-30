@@ -478,6 +478,7 @@ struct DialogContainer<Content: View>: View {
     @State private var expandedTool: DialogToolbar.ToolbarTool?
     @State private var showReportOverlay = false
     @State private var reportScreenshot: Data?
+    @ObservedObject private var expiry = DialogExpiry.shared
 
     @Environment(\.accessibilityReduceMotion) var reduceMotion
 
@@ -617,8 +618,15 @@ struct DialogContainer<Content: View>: View {
                 .transition(reduceMotion ? .identity : .opacity)
             }
         }
+        .overlay {
+            if expiry.isExpired {
+                ExpiredOverlay(onClose: { expiry.closeExpiredDialog() })
+                    .transition(reduceMotion ? .identity : .opacity)
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: Theme.cornerRadius))
         .animation(reduceMotion ? nil : .easeOut(duration: Theme.Animation.overlay), value: showReportOverlay)
+        .animation(reduceMotion ? nil : .easeOut(duration: Theme.Animation.overlay), value: expiry.isExpired)
         .onAppear {
             FocusManager.shared.reset()
             DialogManager.shared.globalFeedbackBinding = Binding(

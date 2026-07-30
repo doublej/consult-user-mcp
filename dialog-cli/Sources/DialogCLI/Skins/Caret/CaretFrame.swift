@@ -35,6 +35,7 @@ struct CaretFrame<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     @Environment(\.caretPalette) private var palette
+    @ObservedObject private var expiry = DialogExpiry.shared
     @State private var monitor: KeyboardNavigationMonitor?
     @State private var shapeKeys: CaretShapeKeyMonitor?
     @State private var toolFocus: String?
@@ -55,6 +56,11 @@ struct CaretFrame<Content: View>: View {
             .clipShape(RoundedRectangle(cornerRadius: CaretStyle.windowRadius, style: .continuous))
             .environment(\.caretPalette, palette)
             .overlay(reportFlow)
+            .overlay {
+                if expiry.isExpired {
+                    ExpiredOverlay(onClose: { expiry.closeExpiredDialog() })
+                }
+            }
             .onAppear(perform: appear)
             .onDisappear { monitor = nil; shapeKeys = nil; model.stopClock() }
             .onReceive(NotificationCenter.default.publisher(for: .cooldownDidChange)) { _ in model.startClock() }

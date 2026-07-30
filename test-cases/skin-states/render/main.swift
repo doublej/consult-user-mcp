@@ -101,6 +101,8 @@ struct RenderState {
     var pane: String?
     var keys: String?
     var project: String?
+    /// Column 8: how many images to seed into the attachment strip.
+    var attachments: String?
 }
 
 func loadManifest() -> [RenderState] {
@@ -116,7 +118,7 @@ func loadManifest() -> [RenderState] {
             return (v.isEmpty || v == "-") ? nil : v
         }
         return RenderState(name: cols[0], dir: cols[1], fixture: cols[2], settle: settle,
-                     pane: opt(4), keys: opt(5), project: opt(6))
+                     pane: opt(4), keys: opt(5), project: opt(6), attachments: opt(7))
     }
 }
 
@@ -351,6 +353,13 @@ for state in states {
 
     DialogManager.shared.setProjectPath(state.project == "none" ? nil : (state.project ?? defaultProject))
     DialogManager.shared.testPane = state.pane
+
+    // The strip is shared process-wide, so it has to be emptied between states
+    // or one state's images turn up in the next one's shot.
+    AttachmentStore.shared.clear()
+    if let attachments = state.attachments {
+        AttachmentStore.shared.seedForTesting(attachments)
+    }
 
     guard let window = makeWindow(state, data: data) else {
         missed.append("\(state.name) (unknown kind \(state.dir))")

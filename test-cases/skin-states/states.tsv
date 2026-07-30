@@ -5,6 +5,7 @@
 # the shortcuts they are everywhere else.
 # Column 7 is the project path: omit for the default, `none` to shoot the
 # surface with no project identity at all.
+# Column 8 is how many images to seed into the attachment strip.
 confirm-statement	confirm	tiny-body	1.3	-	-
 confirm-prose	confirm	basic	1.3	-	-
 confirm-long-body	confirm	long-text	1.3	-	-
@@ -93,3 +94,14 @@ form-long-descriptions	questions	long-option-descriptions	1.6	-	-
 form-long-desc-pane	questions	long-option-descriptions	2.0	feedback	-
 form-long-subject-pane	questions	long-subject-pane	2.0	feedback	-
 notify-wall-of-text	notify	wall-of-text	1.2	-	-
+# Attachment strip (column 8 = how many images to seed). The strip is a new
+# region between the content and the footer, which is exactly the shape of
+# change that has broken layout before — so it is measured from the start.
+confirm-one-image	confirm	basic	1.4	-	-	-	1
+confirm-three-images	confirm	basic	1.4	-	-	-	3
+confirm-max-images	confirm	basic	1.4	-	-	-	8
+choose-with-images	choose	single-select	1.6	-	-	-	2
+choose-images-and-pane	choose	pane-feedback	1.8	feedback	-	-	2
+text-with-images	text-input	basic	1.6	-	-	-	2
+form-with-images	questions	wizard-basic	1.8	-	-	-	2
+confirm-long-body-images	confirm	wall-of-text	1.6	-	-	-	3

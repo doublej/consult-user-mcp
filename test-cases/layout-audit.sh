@@ -40,6 +40,15 @@ for skin in $SKINS; do
     render_log="$OUTROOT/$skin.render.log"
     SKIN="$skin" OUTDIR="$outdir" "$STATES_DIR/capture-states.sh" "$FILTER" > "$render_log" 2>&1
 
+    # A build failure otherwise reaches the operator as the checker's usage
+    # string, because the run produced no reports for it to read.
+    if grep -q 'renderer build failed' "$render_log"; then
+        echo "The renderer did not build. Compiler output:"
+        grep -E '^(error|fatal error):' "$render_log" | sed 's/^/  /' | head -20
+        FAILED_SKINS+=("$skin (build)")
+        continue
+    fi
+
     # A state that never rendered is not a state that passed. The usual cause
     # is a fixture the request model refuses to decode — a missing non-optional
     # field — which otherwise just quietly removes a case from the suite.

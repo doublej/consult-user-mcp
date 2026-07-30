@@ -12,6 +12,10 @@ EXPECTED_MARKER="<!-- consult-user-mcp-baseprompt: /Applications/Consult User MC
 echo "🔍 Validating baseprompt marker in $GLOBAL_CLAUDE_MD..."
 
 if [ ! -f "$GLOBAL_CLAUDE_MD" ]; then
+    if [ -n "$CI" ]; then
+        echo "⏭️  Skipping: $GLOBAL_CLAUDE_MD not found in CI (this file is developer-machine-only)"
+        exit 0
+    fi
     echo "❌ Error: $GLOBAL_CLAUDE_MD not found"
     exit 1
 fi

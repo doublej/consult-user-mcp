@@ -1,0 +1,47 @@
+{
+  "body": "Three decisions before the cutover.",
+  "title": "Cutover plan",
+  "questions": [
+    {
+      "id": "strategy",
+      "question": "How should the cutover be sequenced?",
+      "type": "choice",
+      "options": [
+        {
+          "label": "Blue-green",
+          "description": "Stand up a complete second environment, replay production traffic against it until the error budget holds for a full business day, then flip the load balancer in one move and keep the old fleet warm for the length of the rollback window"
+        },
+        {
+          "label": "Rolling",
+          "description": "Replace nodes a few at a time behind the existing load balancer, draining connections on each one before it goes, which keeps capacity roughly flat but means both schema versions are live against the same database for the whole window"
+        },
+        {
+          "label": "Shadow first",
+          "description": "Mirror a copy of live traffic to the new stack without serving any of its responses, compare them offline, and only start the real cutover once the diff rate has been under the threshold for several consecutive days"
+        }
+      ],
+      "multiSelect": false
+    },
+    {
+      "id": "window",
+      "question": "Which maintenance window?",
+      "type": "choice",
+      "options": [
+        {"label": "Saturday 02:00", "description": "Lowest traffic, no on-call overlap with the EU team"},
+        {"label": "Tuesday 23:00", "description": "Full staffing, but overlaps the nightly billing run"}
+      ],
+      "multiSelect": false
+    },
+    {
+      "id": "rollback",
+      "question": "Describe the rollback trigger:",
+      "type": "text",
+      "options": [],
+      "multiSelect": false,
+      "placeholder": "e.g. error rate above 2% for five minutes"
+    }
+  ],
+  "mode": "wizard",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

@@ -1,0 +1,9 @@
+{
+  "body": "The release job failed on the notarisation step after the build and signing stages both succeeded. Retrying uploads the same artefact to Apple again; the previous submission stays queued and will be rejected as a duplicate once this one clears, which is expected and safe to ignore.",
+  "title": "Retry notarisation",
+  "confirmLabel": "Retry",
+  "cancelLabel": "Stop here",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "feedback"
+}

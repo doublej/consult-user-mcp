@@ -1,0 +1,8 @@
+{
+  "body": "This migration rewrites every row in the `events` table to the new partitioning scheme.\n\nThe rewrite runs in batches of fifty thousand rows with a short lock on each batch, so reads stay available throughout but writes to a batch in flight will queue for up to two seconds. On the current table size the whole pass is expected to take between forty minutes and two hours depending on replica lag.\n\nThere is no online rollback once the first batch commits: the old partition layout is dropped as each batch lands, and recovering it means restoring from the pre-migration snapshot and replaying the write-ahead log, which has its own multi-hour window and loses anything written after the snapshot.\n\nRun this only inside an announced maintenance window, with a fresh snapshot confirmed complete and a second operator watching replica lag.",
+  "title": "Rewrite the events table",
+  "confirmLabel": "Start the migration",
+  "cancelLabel": "Not now",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

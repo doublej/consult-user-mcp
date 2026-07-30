@@ -1,0 +1,8 @@
+{
+  "body": "Edit the release note before it goes out:",
+  "title": "Release note",
+  "hidden": false,
+  "defaultValue": "Fixes a focus race where a character typed into the note pane could be read as the snooze shortcut and swallowed.\n\nAlso keeps an expired dialog on screen instead of closing it silently, so it is clear the agent moved on rather than that the dialog failed.\n\nKnown issue: a note pane opened over a form with long option descriptions can still overlap the footer.",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

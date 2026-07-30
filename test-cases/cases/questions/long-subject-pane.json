@@ -1,0 +1,21 @@
+{
+  "body": "The note pane carries the question text as its subject, so a long question is the thing that grows the pane.",
+  "title": "Long pane subject",
+  "questions": [
+    {
+      "id": "approach",
+      "question": "Given that the backfill has already written roughly forty percent of the rows and the compatibility view is still in place, which approach should the team take for the remainder of the migration window?",
+      "type": "choice",
+      "options": [
+        {"label": "Finish the backfill", "description": "Keep going at the current batch size"},
+        {"label": "Pause and reassess", "description": "Stop after the current batch"},
+        {"label": "Roll back", "description": "Restore from the pre-migration snapshot"}
+      ],
+      "multiSelect": false
+    }
+  ],
+  "mode": "wizard",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "feedback"
+}

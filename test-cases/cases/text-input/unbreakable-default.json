@@ -1,0 +1,8 @@
+{
+  "body": "Confirm the digest to deploy:",
+  "title": "Image digest",
+  "hidden": false,
+  "defaultValue": "registry.internal.example.com/platform/consult-user-mcp/dialog-cli@sha256:9f2c1ba7de40318bb5a0cc7e1d4f8a6b2e93c05d7fa18e6c4b2d90a1f7e35c88",
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

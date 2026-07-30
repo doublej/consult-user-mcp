@@ -1,0 +1,6 @@
+{
+  "body": "The release job finished with warnings. Notarisation succeeded on the second attempt after the first submission timed out waiting on Apple, the changelog was regenerated from releases.json, and the tag was pushed. Two things still need a human: the Windows installer was not rebuilt because no Windows runner was available, and the docs site deploy is queued behind an unrelated build.",
+  "title": "Release finished with warnings",
+  "sound": false,
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

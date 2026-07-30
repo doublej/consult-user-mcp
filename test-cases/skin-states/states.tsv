@@ -75,3 +75,21 @@ notify-tiny	notify	tiny	1.2	-	-
 preview-basic	preview	basic	1.2	-	-
 preview-humanised	preview	humanised	1.2	-	-
 preview-long	preview	long	1.2	-	-
+# Adversarial shapes. These exist to break layout, not to look good: long
+# prose against a fixed-height pane, labels with no wrap opportunity, glyphs
+# twice the width of Latin, and enough options to reach the height cap.
+choose-long-desc-pane	choose	long-descriptions-pane-feedback	1.8	feedback	-
+choose-unbreakable	choose	unbreakable-tokens	1.4	-	-
+choose-sentence-labels	choose	sentence-labels	1.4	-	-
+choose-wide-glyphs	choose	wide-glyphs	1.4	-	-
+choose-forty-options	choose	forty-options	1.6	-	-
+choose-forty-pane	choose	forty-options	1.8	feedback	-
+confirm-wall-of-text	confirm	wall-of-text	1.3	-	-
+confirm-deep-project	confirm	deep-project-path	1.3	-	-
+confirm-long-body-pane	confirm	long-body-pane-feedback	1.6	feedback	-
+text-long-multiline	text-input	long-multiline-default	1.4	-	-
+text-unbreakable	text-input	unbreakable-default	1.4	-	-
+form-long-descriptions	questions	long-option-descriptions	1.6	-	-
+form-long-desc-pane	questions	long-option-descriptions	2.0	feedback	-
+form-long-subject-pane	questions	long-subject-pane	2.0	feedback	-
+notify-wall-of-text	notify	wall-of-text	1.2	-	-

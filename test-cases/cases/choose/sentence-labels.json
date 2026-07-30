@@ -1,0 +1,16 @@
+{
+  "body": "The migration touches three subsystems. How should it be sequenced?",
+  "choices": [
+    "Migrate the schema first and leave both application versions reading through the compatibility view until the backfill finishes",
+    "Ship the application change first behind a flag, then migrate the schema once every instance is reporting the new version",
+    "Do both in one window and accept the downtime, which is the only option that never has two schema versions live at once"
+  ],
+  "descriptions": [
+    "Longest total window, no downtime",
+    "Shortest schema window, needs a flag",
+    "Simplest to reason about, needs downtime"
+  ],
+  "allowMultiple": false,
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

@@ -1,0 +1,8 @@
+{
+  "body": "Reset the working tree?",
+  "title": "Reset",
+  "confirmLabel": "Reset",
+  "cancelLabel": "Keep changes",
+  "position": "center",
+  "projectPath": "/Users/example/Documents/development/multi-stack/project-atlas/services/atlas-api/packages/shared-internal-tooling/consult-user-mcp-integration"
+}

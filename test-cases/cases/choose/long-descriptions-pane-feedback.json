@@ -1,0 +1,18 @@
+{
+  "body": "Choose the migration strategy for the production cluster:",
+  "choices": [
+    "Blue-green cutover",
+    "Rolling upgrade",
+    "Shadow traffic first"
+  ],
+  "descriptions": [
+    "Stand up a complete second environment, replay production traffic against it until the error budget holds for a full business day, then flip the load balancer in one move and keep the old fleet warm for the length of the rollback window",
+    "Replace nodes a few at a time behind the existing load balancer, draining connections on each one before it goes, which keeps capacity roughly flat but means both schema versions are live against the same database for the whole window",
+    "Mirror a copy of live traffic to the new stack without serving any of its responses, compare them offline, and only start the real cutover once the diff rate has been under the threshold for several consecutive days"
+  ],
+  "allowMultiple": false,
+  "position": "center",
+  "defaultSelection": "Blue-green cutover",
+  "projectPath": "/Users/example/projects/consult-user-mcp",
+  "testPane": "feedback"
+}

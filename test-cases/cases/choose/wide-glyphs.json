@@ -1,0 +1,16 @@
+{
+  "body": "デプロイ先の環境を選んでください — which environment should this deploy target?",
+  "choices": [
+    "本番環境 (production)",
+    "ステージング環境 (staging)",
+    "開発環境 🚧 (development)"
+  ],
+  "descriptions": [
+    "実際のユーザートラフィックを処理する環境です。変更を適用する前に、ロールバック手順を確認してください 🔴",
+    "本番と同じ構成で、リリース前の検証に使用します ⚠️",
+    "自由に壊して構いません ✅"
+  ],
+  "allowMultiple": false,
+  "position": "center",
+  "projectPath": "/Users/example/projects/consult-user-mcp"
+}

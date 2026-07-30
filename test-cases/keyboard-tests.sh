@@ -13,8 +13,10 @@
 # cd78201, b1594f5, 30c5773).
 #
 # Usage:  bash test-cases/keyboard-tests.sh
-# Env:    DIALOG_CLI  path to the binary (default: dialog-cli/.build/release/DialogCLI,
-#                     falling back to debug)
+# Env:    DIALOG_CLI    path to the binary (default: dialog-cli/.build/release/DialogCLI,
+#                       falling back to debug)
+#         KEYBOARD_SKIN skin the suite runs under (default: caret — the New
+#                       Interface; the classic sanity block runs regardless)
 #
 # Runs in ~1 min. Needs an Aqua session (windows must actually map) and jq.
 set -uo pipefail
@@ -36,6 +38,10 @@ fi
 
 command -v jq >/dev/null || { echo "ERROR: jq required" >&2; exit 1; }
 
+# The suite targets the New Interface (Caret) by default; every dialog in
+# the main sections is spawned with this skin.
+SKIN="${KEYBOARD_SKIN:-caret}"
+
 MAX_WAIT=30   # seconds per dialog before the watchdog kills it
 PASS=0
 FAIL=0
@@ -48,7 +54,7 @@ run_dialog() {
     shift 3
     local outfile pid waited
     outfile="$(mktemp)"
-    env "$@" DIALOG_TEST_KEYS="$keys" "$CLI" "$cmd" "$(cat "$fixture")" \
+    env DIALOG_SKIN="$SKIN" "$@" DIALOG_TEST_KEYS="$keys" "$CLI" "$cmd" "$(cat "$fixture")" \
         >"$outfile" 2>/dev/null &
     pid=$!
     waited=0
@@ -82,6 +88,7 @@ assert() {
 }
 
 echo "==> Dialog CLI: $CLI"
+echo "==> Skin: $SKIN"
 echo ""
 
 # ── 1. Burst-typing into a text field must not trigger hotkeys ─────────
@@ -149,16 +156,16 @@ resp="$(run_dialog textInput "$CASES/text-input/keyboard-empty.json" \
 assert "expired textInput swallows typed answer" "$resp" \
     '(.answer // null) == null'
 
-# ── 5. Same contract under the Caret skin (its own chassis + router) ───
-echo "== caret skin =="
+# ── 5. Classic sanity — the old chassis must not regress either ────────
+echo "== classic sanity =="
 resp="$(run_dialog textInput "$CASES/text-input/keyboard-empty.json" \
-    "d2.5;p0;t:${TYPED};d0.5;return" DIALOG_SKIN=caret)"
-assert "caret: burst typing arrives complete" "$resp" \
+    "d2.5;p0;t:${TYPED};d0.5;return" DIALOG_SKIN=classic)"
+assert "classic: burst typing arrives complete" "$resp" \
     ".answer == \"$TYPED\""
 
 resp="$(run_dialog confirm "$CASES/confirm/basic.json" \
-    "d3.0;t:sfa;d0.3;return" DIALOG_SKIN=caret MCP_DIALOG_TIMEOUT_MS=1000)"
-assert "caret: expired dialog returns no answer" "$resp" \
+    "d3.0;t:sfa;d0.3;return" DIALOG_SKIN=classic MCP_DIALOG_TIMEOUT_MS=1000)"
+assert "classic: expired dialog returns no answer" "$resp" \
     '(.confirmed // false) == false and (.answer // null) == null'
 
 echo ""

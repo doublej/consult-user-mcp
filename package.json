@@ -20,6 +20,8 @@
     "release:windows": "powershell -ExecutionPolicy Bypass -File scripts/release-windows.ps1",
     "test": "cd mcp-server && bun test",
     "test:visual": "bash test-cases/test-runner.sh",
+    "test:layout": "bash test-cases/layout-audit.sh",
+    "test:keyboard": "bash test-cases/keyboard-tests.sh",
     "test:screenshots": "cd docs && bun run screenshots"
   },
   "workspaces": [

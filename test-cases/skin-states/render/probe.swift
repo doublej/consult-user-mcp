@@ -79,15 +79,32 @@ func textSize(of view: NSView, width: CGFloat) -> CGSize? {
 /// and the text views inside them — but those are exactly the ones that can
 /// report an intrinsic size, so they are the ones that can prove a label was
 /// truncated rather than merely look like it.
-func walkViews(_ view: NSView, root: NSView, depth: Int = 0, clipped: Bool = false, into out: inout [[String: Any]]) {
+func walkViews(_ view: NSView, root: NSView, depth: Int = 0, scrolled: Bool = false, into out: inout [[String: Any]]) {
     let frame = view.convert(view.bounds, to: root)
     let name = String(describing: type(of: view))
 
-    // Anything below a scroll view is positioned by the scroll offset, not by
-    // the layout. Its rows are *supposed* to sit outside the window and to
-    // share coordinates with whatever is scrolled past them, so neither the
-    // escape rule nor the overlap rule can say anything true about it.
-    let insideScroller = clipped || view is NSScrollView || view is NSClipView
+    // A row scrolled out of a list is *supposed* to sit outside the window and
+    // to share coordinates with whatever is scrolled past it, so neither the
+    // escape rule nor the overlap rule can say anything true about it. A
+    // control the layout put outside the window is the opposite — exactly the
+    // bug worth reporting. Telling them apart is the whole difficulty.
+    //
+    // "Has a scroll view somewhere above it" is too blunt: an `NSTextView` is
+    // normally built inside one, so that test silently excused the note editor
+    // and with it the pane-over-footer collision this harness exists to catch.
+    // Asking the `NSClipView` for its visible rect does not work either —
+    // SwiftUI clips at the layer and leaves the clip view as tall as its
+    // content, so it reports everything as visible.
+    //
+    // What does separate them is the scroll view's own frame. A list SwiftUI
+    // cannot fit is laid out at full content height and hangs outside the
+    // surface; a scroller that fits sits entirely inside it. So a subtree is
+    // treated as scrolled away only when its scroll view is itself outside.
+    var inScrolledRegion = scrolled
+    if !scrolled, view is NSScrollView {
+        inScrolledRegion = !root.bounds.insetBy(dx: -0.5, dy: -0.5).contains(frame)
+    }
+    let scrolledAway = scrolled
 
     // The hosting view itself and the plain container views carry no signal;
     // recording them buries the widgets that do.
@@ -134,13 +151,13 @@ func walkViews(_ view: NSView, root: NSView, depth: Int = 0, clipped: Bool = fal
         // A half-point of overhang is layout rounding, not a bug.
         let bounds = root.bounds.insetBy(dx: -0.5, dy: -0.5)
         if !bounds.contains(frame) { entry["escapes"] = true }
-        if insideScroller { entry["clipped"] = true }
+        if scrolledAway { entry["clipped"] = true }
 
         out.append(entry)
     }
 
     for sub in view.subviews {
-        walkViews(sub, root: root, depth: depth + 1, clipped: insideScroller, into: &out)
+        walkViews(sub, root: root, depth: depth + 1, scrolled: inScrolledRegion, into: &out)
     }
 }
 

@@ -2,12 +2,19 @@
 
 Use this checklist when reviewing screenshots from `test-runner.sh`.
 
+**Run `bun run test:layout` first.** The first two items below are now measured
+rather than eyeballed — clipping, overflow, overlapping controls and text that
+does not fit its box all fail the audit with a state name and a number. Reading
+eighty screenshots for them is slower and less reliable than reading its output.
+What is left for a human here is everything the audit cannot judge: whether the
+result is *legible*, *correctly styled*, and *says the right thing*.
+
 ---
 
 ## General (All Dialogs)
 
-- [ ] Dialog renders without clipping or overflow
-- [ ] Text is readable and properly wrapped
+- [ ] Dialog renders without clipping or overflow — *measured by `test:layout`*
+- [ ] Text is readable and properly wrapped — *fit is measured; readability is not*
 - [ ] Dialog is positioned correctly (left by default)
 - [ ] Window shadow and border render properly
 - [ ] Theme colors are consistent (if testing themed)

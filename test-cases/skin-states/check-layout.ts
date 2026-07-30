@@ -160,9 +160,16 @@ function inspect(report: Report): Violation[] {
   const out: Violation[] = [];
   const round = (n: number) => Math.round(n * 10) / 10;
 
+  // A window pinned at the height cap with a scroll view inside it is meant to
+  // hold more content than it can show — that is what the scroll view is for.
+  // Overflow only means "clipped" when the window still had room to grow, or
+  // when there is nothing there to scroll.
+  const scrolls = (report.views ?? []).some((v) => v.clipped);
+  const absorbed = (report.atHeightCap ?? false) && scrolls;
+
   const overflowH = report.overflowHeight ?? 0;
   const overflowW = report.overflowWidth ?? 0;
-  if (overflowH > OVERFLOW_TOLERANCE) {
+  if (overflowH > OVERFLOW_TOLERANCE && !absorbed) {
     out.push({
       rule: "overflow",
       detail: `content is ${round(overflowH)}pt taller than its window${
@@ -212,7 +219,10 @@ function inspect(report: Report): Violation[] {
   // a different surface — they paint a backdrop flush to the window edge on
   // purpose — so measuring their margins says nothing about whether they fit.
   // Their clipping is caught by the escape rule instead.
-  const pixels = PADDED_KINDS.has(report.kind) ? report.pixels : undefined;
+  //
+  // A window at the height cap is also exempt: its panel legitimately fills
+  // the window top to bottom, which is not the same thing as being clipped.
+  const pixels = PADDED_KINDS.has(report.kind) && !absorbed ? report.pixels : undefined;
   if (pixels && !pixels.error) {
     for (const side of SIDES) {
       const count = pixels.edgeInk?.[side] ?? 0;
@@ -245,6 +255,10 @@ interface Waiver {
   rules: Rule[];
   reason: string;
   issue?: string;
+  // A bug is usually one skin's bug. A waiver with no skin applies to all of
+  // them; one that names a skin is invisible to every other, so a caret bug
+  // does not read as a stale waiver the moment the suite runs against classic.
+  skin?: string;
 }
 
 function loadWaivers(dir: string): Waiver[] {
@@ -276,7 +290,8 @@ if (reports.length === 0) {
   process.exit(2);
 }
 
-const waivers = loadWaivers(dir);
+const skin = reports[0]?.skin ?? "";
+const waivers = loadWaivers(dir).filter((w) => !w.skin || w.skin === skin);
 const byState = new Map(waivers.map((w) => [w.state, w]));
 
 interface Outcome {
@@ -308,6 +323,7 @@ if (updateWaivers) {
     state: o.report.name,
     rules: [...new Set(o.violations.map((v) => v.rule))],
     reason: o.violations.map((v) => v.detail).join("; "),
+    skin,
   }));
   const path = join(dirname(new URL(import.meta.url).pathname), "waivers.json");
   writeFileSync(path, JSON.stringify(generated, null, 2) + "\n");
@@ -330,8 +346,7 @@ if (asJson) {
     ),
   );
 } else {
-  const skin = reports[0]?.skin ?? "?";
-  console.log(`\n=== Layout audit — ${skin} — ${reports.length} states ===\n`);
+  console.log(`\n=== Layout audit — ${skin || "?"} — ${reports.length} states ===\n`);
   for (const outcome of failed) {
     console.log(`FAIL  ${outcome.report.name}`);
     for (const v of outcome.violations) console.log(`        ${v.rule.padEnd(12)} ${v.detail}`);

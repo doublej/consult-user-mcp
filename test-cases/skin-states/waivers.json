@@ -1,0 +1,125 @@
+[
+  {
+    "state": "notify-long-message",
+    "rules": [
+      "escapes"
+    ],
+    "reason": "notify body is drawn past the window: title clipped at top, body cut mid-sentence",
+    "issue": "cum-rmr",
+    "skin": "caret"
+  },
+  {
+    "state": "notify-technical",
+    "rules": [
+      "escapes"
+    ],
+    "reason": "notify body is drawn past the window",
+    "issue": "cum-rmr",
+    "skin": "caret"
+  },
+  {
+    "state": "notify-url-body",
+    "rules": [
+      "escapes"
+    ],
+    "reason": "notify body is drawn past the window",
+    "issue": "cum-rmr",
+    "skin": "caret"
+  },
+  {
+    "state": "notify-wall-of-text",
+    "rules": [
+      "escapes"
+    ],
+    "reason": "notify body is drawn past the window; title overdraws the body",
+    "issue": "cum-rmr",
+    "skin": "caret"
+  },
+  {
+    "state": "preview-long",
+    "rules": [
+      "escapes"
+    ],
+    "reason": "preview body is drawn past the window, same surface as notify",
+    "issue": "cum-rmr",
+    "skin": "caret"
+  },
+  {
+    "state": "choose-helper-line",
+    "rules": [
+      "overflow",
+      "panel-inset"
+    ],
+    "reason": "helper line grows the content by 24pt after first layout and the window does not follow",
+    "issue": "cum-c28",
+    "skin": "caret"
+  },
+  {
+    "state": "choose-other-typed",
+    "rules": [
+      "overflow",
+      "panel-inset"
+    ],
+    "reason": "typing into Other grows the content and the window does not follow",
+    "issue": "cum-c28",
+    "skin": "caret"
+  },
+  {
+    "state": "form-pane-per-question",
+    "rules": [
+      "overlap"
+    ],
+    "reason": "note editor is pinned to a fixed height and lands on the footer buttons",
+    "issue": "cum-bys",
+    "skin": "caret"
+  },
+  {
+    "state": "form-long-subject-pane",
+    "rules": [
+      "overlap"
+    ],
+    "reason": "long question text grows the pane subject and pushes the editor into the footer",
+    "issue": "cum-bys",
+    "skin": "caret"
+  },
+  {
+    "state": "text-long-default",
+    "rules": [
+      "escapes",
+      "text-fit"
+    ],
+    "reason": "default value longer than the field is cut mid-word with no ellipsis",
+    "issue": "cum-z6b",
+    "skin": "caret"
+  },
+  {
+    "state": "text-unbreakable",
+    "rules": [
+      "escapes",
+      "text-fit"
+    ],
+    "reason": "unbreakable digest runs out of the panel, same shape as text-long-default",
+    "issue": "cum-z6b",
+    "skin": "caret"
+  },
+  {
+    "state": "text-long-multiline",
+    "rules": [
+      "escapes",
+      "text-fit",
+      "overlap"
+    ],
+    "reason": "multiline value is laid out on one unwrapped line and drawn over the question",
+    "issue": "cum-syh",
+    "skin": "caret"
+  },
+  {
+    "state": "choose-forty-pane",
+    "rules": [
+      "escapes"
+    ],
+    "reason": "list at the height cap with the pane open puts the toolbar and footer outside the window",
+    "issue": "cum-982",
+    "skin": "caret"
+  }
+]

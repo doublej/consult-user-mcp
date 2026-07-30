@@ -7,6 +7,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.0] (macOS) - 2026-07-30
+
+### Added
+- A completely redesigned dialog interface is available — switch it on with the New Interface toggle in Settings → General
+- When the agent stops waiting for an answer (after 10 minutes), the dialog now stays on screen and clearly says the agent continued with its best guess — instead of silently collecting an answer that would never be read
+- Dialogs can be reskinned — the visual layer is now swappable, with two extra experimental looks selectable via the DIALOG_SKIN environment variable
+
+### Fixed
+- A question asked after an earlier one timed out no longer gets stuck behind the abandoned dialog
+
+### Removed
+- The pre-release versions toggle is gone from Updates settings — beta builds can still be enabled directly in settings.json
+
 ## [2.5.1] (macOS) - 2026-07-21
 
 ### Fixed

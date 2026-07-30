@@ -25,13 +25,16 @@ When you add a dialog type, or change the request/response shape of an existing 
 | `dialog-cli/Sources/DialogCLI/Skins/DialogSkin.swift` | `DialogKind` case, spec struct, protocol method |
 | `dialog-cli/Sources/DialogCLI/Skins/Classic/ClassicSkin.swift` | Implementation + window metrics |
 | `dialog-cli-windows/Services/DialogManager.*.cs` | Windows equivalent |
-| `test-cases/cases/<type>/` | At least one fixture |
+| `test-cases/cases/<type>/` | At least one fixture, including an ugly one |
 | `test-cases/test-runner.sh` | Directory → CLI command mapping (~line 88) |
+| `test-cases/skin-states/states.tsv` | A row per state, or the layout audit never measures it |
+| `test-cases/skin-states/render/main.swift` | A `makeWindow` case, or the audit reports `unknown kind` |
 | `macos-app/Sources/AppDelegate.swift` | Debug menu entry, loading from `test-cases/cases/` |
 
-Two hard rules:
+Three hard rules:
 
 - **The debug menu loads dialog JSON from `test-cases/cases/`.** Never hardcode dialog JSON in `AppDelegate.swift`.
+- **A fixture without a `states.tsv` row is untested.** It reaches the debug menu and the screenshot runner, and the layout audit never sees it. Both halves or neither.
 - **`tweak` and `propose_layout` are macOS-only.** `WindowsDialogProvider` throws for both. Keep the throw explicit rather than letting it fail somewhere further down.
 
 Every response shape must survive `compact.ts`: null fields stripped, `confirmed` mapped to `answer`, `dismissed` merged into `cancelled`. Compact priority is snoozed > askDifferently > feedbackText > cancelled > answer.

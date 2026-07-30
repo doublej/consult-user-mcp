@@ -72,9 +72,17 @@ bun run dev            # build all + install to /Applications — the dev workfl
 bun run build          # mcp-server + dialog-cli only, no install
 bun run build:bundle   # full release bundle from scratch
 bun test               # mcp-server tests
+bun run test:layout    # assert layout: overflow, overlap, text-fit, every skin
 bun run test:visual    # screenshot every test case
+bun run test:keyboard  # typing-vs-hotkey contract
 bun run changelog      # regenerate CHANGELOG.md from releases.json
 ```
+
+`test:layout` is the one that fails a build. It renders every state off-screen —
+no window appears, nothing takes the keyboard — measures the real view tree and
+the captured bitmap, and reports clipping, overlapping controls and text that
+does not fit its box. `test:visual` photographs dialogs on screen for a human to
+read; it does not assert layout.
 
 `just` also has recipes — `just --list`. Release procedures are in the `release-app` skill; Windows builds in `windows-build`.
 

@@ -21,6 +21,12 @@ fi
 # Theme from environment (default: none, uses system default)
 THEME="${DIALOG_THEME:-}"
 
+# Skin under test. Defaults to the New Interface rather than to whatever the
+# settings file happens to say: until this was pinned, a visual run only ever
+# photographed the classic chassis, so every layout bug in the skin people
+# actually turned on went unseen by the harness that exists to find them.
+SKIN="${DIALOG_SKIN:-caret}"
+
 # Debug mode
 DEBUG="${DEBUG:-}"
 
@@ -34,6 +40,7 @@ VERIFY_MARGIN_FAILS=0
 
 echo "=== Dialog Visual Test Runner ==="
 echo "Timestamp: $TIMESTAMP"
+echo "Skin: $SKIN"
 [ -n "$THEME" ] && echo "Theme: $THEME"
 [ -n "$FAST" ] && echo "Mode: fast (render delay: ${RENDER_DELAY}s)"
 echo ""
@@ -266,6 +273,7 @@ run_test_case() {
 
     # Build environment
     local env_vars=()
+    env_vars+=("DIALOG_SKIN=$SKIN")
     [ -n "$THEME" ] && env_vars+=("DIALOG_THEME=$THEME")
     [ -n "$project_path" ] && env_vars+=("MCP_PROJECT_PATH=$project_path")
     [ -n "$test_pane" ] && env_vars+=("DIALOG_TEST_PANE=$test_pane")
@@ -359,9 +367,13 @@ main() {
     echo "  open \"$SCREENSHOT_DIR\""
     echo "  See: $SCRIPT_DIR/verify-checklist.md"
     echo ""
+    echo "Skins:  DIALOG_SKIN=classic|alt|bracket|caret $0"
     echo "Themes: DIALOG_THEME=sunset|midnight $0"
     echo "Fast:   FAST=1 $0"
     echo "Debug:  DEBUG=1 $0"
+    echo ""
+    echo "This runner captures and OCRs; it does not measure layout."
+    echo "For clipping, overlap and text-fit assertions: bun run test:layout"
 }
 
 main "$@"

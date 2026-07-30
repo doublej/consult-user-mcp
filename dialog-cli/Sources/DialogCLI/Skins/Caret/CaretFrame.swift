@@ -80,6 +80,10 @@ struct CaretFrame<Content: View>: View {
                 .padding(.bottom, CaretStyle.u(22))
                 .environment(\.caretInert, model.inert)
 
+            // Above the note panel and below the question: an attached image
+            // is part of the answer, where a note is an aside about it.
+            CaretAttachmentStrip()
+
             // Collapsible to nothing on purpose. While the window is still
             // travelling to its new height the frame is briefly shorter than
             // the content; a gap that can give way absorbs that, where a

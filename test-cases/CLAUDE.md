@@ -66,6 +66,8 @@ Worth knowing before trusting a green run, and before writing a rule:
 - **SwiftUI `Text` is invisible to the view walk.** It is drawn into the hosting view's layer, not into a child `NSView`. Only the `NSViewRepresentable` widgets — `CaretTarget`, `CaretNoteEditor`, the `Focusable*` family — can be measured. A clipped SwiftUI label is caught by its *consequences* (an overlap, a box that stopped fitting), not directly.
 - **Overlap between interactive views is the highest-signal rule.** It is what catches a note pane opening across the footer: nothing is clipped, the geometry stays self-consistent, and two things a person can click simply land on the same pixels.
 - **The pixel probe derives the background from the image**, so it works on any skin and theme without being told the palette. It cannot see a collision — pixels do not record what drew them.
+- **The rules are calibrated for caret and only caret.** Telling a row scrolled out of a list from a control the layout pushed outside the window has no general answer. Caret lays an oversized list out at full height and hangs the scroll view outside the surface, which is what the probe keys on; classic keeps it inside and clips at the layer with a translucent footer over the top. Run the audit against classic or bracket and every long-list state fails while looking perfectly correct in the screenshot — 14 and 8 respectively. That is why `SKINS` defaults to caret. Tracked in cum-6ql.
+- **There is no `edge-ink` rule**, though the probe still measures it. It produced zero true positives across two skins and a wall of false ones. A rule nobody can trust is worse than no rule.
 
 ## Common change patterns
 
@@ -78,8 +80,8 @@ Worth knowing before trusting a green run, and before writing a rule:
 ## Verification
 
 ```bash
-bun run test:layout                    # assert: every skin, every state
-SKINS=caret bun run test:layout        # one skin
+bun run test:layout                        # assert: caret, every state
+SKINS="caret classic" bun run test:layout  # more than one — expect noise, see below
 bun run test:visual                    # capture + OCR, on screen, caret by default
 bun run test:keyboard                  # typing-vs-hotkey contract
 ```

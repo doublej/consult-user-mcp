@@ -4,12 +4,22 @@
 # spawns real dialogs and photographs them for a human, this one measures them
 # and fails.
 #
-#   ./layout-audit.sh                 # every skin in the registry
-#   SKINS=caret ./layout-audit.sh     # one skin
-#   ./layout-audit.sh choose-         # only states whose name matches
+#   ./layout-audit.sh                          # caret, the New Interface
+#   SKINS="caret classic" ./layout-audit.sh    # more than one
+#   ./layout-audit.sh choose-                  # only states whose name matches
+#
+# Only caret by default, and that is a statement about the rules rather than
+# about the other skins. Telling a row scrolled out of a list from a control
+# the layout pushed outside the window has no general answer: caret lays an
+# oversized list out at full height and hangs it outside the surface, classic
+# keeps it inside and clips at the layer with a translucent footer over the
+# top. The rules read the first correctly and call the second broken — every
+# classic and bracket state with a long list comes back as a false positive.
+# Running them by default would make the suite cry wolf, which is how the
+# harness lost its value the first time. Calibration is tracked in cum-6ql.
 #
 # Env:
-#   SKINS    space-separated skin ids (default: all four)
+#   SKINS    space-separated skin ids (default: caret)
 #   OUTROOT  where shots and reports land (default: skin-states/audit)
 #   KEEP     set to keep previous output instead of clearing it
 #
@@ -21,7 +31,7 @@ set -uo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STATES_DIR="$HERE/skin-states"
-SKINS="${SKINS:-caret classic bracket alt}"
+SKINS="${SKINS:-caret}"
 OUTROOT="${OUTROOT:-$STATES_DIR/audit}"
 FILTER="${1:-}"
 

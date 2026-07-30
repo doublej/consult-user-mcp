@@ -35,11 +35,12 @@ NEWEST=$(find "$SRC" "$HERE/render" -name '*.swift' -newer "$BIN" -print -quit 2
 if [[ ! -x "$BIN" || -n "$NEWEST" ]]; then
   echo "compiling renderer…"
   FILES=("${(@f)$(find $SRC -name '*.swift' ! -name 'Main.swift')}")
+  RENDER=("${(@f)$(find $HERE/render -name '*.swift')}")
   # Same module name and language mode SwiftPM uses for this target, so the
   # sources see exactly the declarations they see in the real build.
   if ! swiftc -Onone -swift-version 5 -module-name DialogCLI \
        -target arm64-apple-macos14.0 -o "$BIN" \
-       "$HERE/render/main.swift" "${FILES[@]}" 2>"$HERE/.render.log"; then
+       "${RENDER[@]}" "${FILES[@]}" 2>"$HERE/.render.log"; then
     # Error headlines only. The compiler echoes source context, and the sources
     # it echoes include the styles this work is deliberately blind to.
     python3 - "$HERE/.render.log" <<'PY'

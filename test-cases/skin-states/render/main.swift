@@ -243,10 +243,12 @@ func pump(_ seconds: TimeInterval, script: [KeyStep] = []) {
     }
 }
 
-func capture(_ window: NSWindow, to path: String) -> Bool {
-    guard let content = window.contentView else { return false }
+/// Returns the bitmap it wrote, so the layout probe can read the pixels that
+/// were actually drawn rather than decoding the PNG again.
+func capture(_ window: NSWindow, to path: String) -> NSBitmapImageRep? {
+    guard let content = window.contentView else { return nil }
     let bounds = content.bounds
-    guard bounds.width > 1, bounds.height > 1 else { return false }
+    guard bounds.width > 1, bounds.height > 1 else { return nil }
     let scale: CGFloat = 2
     guard let rep = NSBitmapImageRep(
         bitmapDataPlanes: nil,
@@ -259,13 +261,13 @@ func capture(_ window: NSWindow, to path: String) -> Bool {
         colorSpaceName: .deviceRGB,
         bytesPerRow: 0,
         bitsPerPixel: 0
-    ) else { return false }
+    ) else { return nil }
     rep.size = bounds.size
 
     NSGraphicsContext.saveGraphicsState()
     guard let ctx = NSGraphicsContext(bitmapImageRep: rep) else {
         NSGraphicsContext.restoreGraphicsState()
-        return false
+        return nil
     }
     NSGraphicsContext.current = ctx
     content.displayIfNeeded()
@@ -273,8 +275,9 @@ func capture(_ window: NSWindow, to path: String) -> Bool {
     ctx.flushGraphics()
     NSGraphicsContext.restoreGraphicsState()
 
-    guard let png = rep.representation(using: .png, properties: [:]) else { return false }
-    return (try? png.write(to: URL(fileURLWithPath: path))) != nil
+    guard let png = rep.representation(using: .png, properties: [:]),
+          (try? png.write(to: URL(fileURLWithPath: path))) != nil else { return nil }
+    return rep
 }
 
 // MARK: - Surfaces
@@ -373,7 +376,18 @@ for state in states {
         let responder = window.firstResponder.map { String(describing: type(of: $0)) } ?? "nil"
         print("   firstResponder=\(responder) cooling=\(CooldownManager.shared.isCoolingDown) frame=\(Int(window.frame.origin.x)),\(Int(window.frame.origin.y)) \(Int(window.frame.width))x\(Int(window.frame.height))")
     }
-    if capture(window, to: "\(outDir)/\(state.name).png") {
+    // Probe before the teardown below: `fittingSize` and the view tree are only
+    // meaningful while the surface is still mounted in its window.
+    if let rep = capture(window, to: "\(outDir)/\(state.name).png") {
+        var report = probeGeometry(window)
+        report["name"] = state.name
+        report["skin"] = skinID
+        report["fixture"] = "\(state.dir)/\(state.fixture)"
+        report["kind"] = state.dir
+        report["pane"] = state.pane ?? ""
+        report["keys"] = state.keys ?? ""
+        report["pixels"] = probePixels(rep, scale: 2)
+        writeReport(report, to: "\(outDir)/\(state.name).layout.json")
         shot.append(state.name)
         print("ok   \(state.name)")
     } else {

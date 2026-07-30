@@ -5,6 +5,16 @@
 shots/
 index.html
 
+# Layout-audit output: one <state>.png beside one <state>.layout.json per skin.
+# The reports are measurements of a specific build on a specific display, so
+# they are worth reading and never worth committing. `waivers.json` is the part
+# that belongs in history.
+audit/
+
+# Compiled renderer and its build log.
+.render
+.render.log
+
 # Compiled window-id helper, built on demand from test-cases/capture-dialog.swift.
 .findwin
 

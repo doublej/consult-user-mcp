@@ -12,7 +12,8 @@
 //   overflow      did the content ask for more room than the window gave it?
 //   escapes       is a widget's frame outside the surface that owns it?
 //   truncated     is a label wider than the box it was laid into?
-//   edge-ink      is anything drawn hard against the panel border?
+//   text-fit      does a text widget's content need more room than its box?
+//   overlap       do two things a person can click sit on top of each other?
 //   panel-inset   did the panel eat the padding the window reserves for it?
 //
 // Known-bad states live in `waivers.json` with a reason and an issue id, so a
@@ -23,7 +24,7 @@
 import { readdirSync, readFileSync, existsSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 
-type Rule = "overflow" | "escapes" | "truncated" | "text-fit" | "overlap" | "edge-ink" | "panel-inset";
+type Rule = "overflow" | "escapes" | "truncated" | "text-fit" | "overlap" | "panel-inset";
 
 interface Violation {
   rule: Rule;
@@ -72,12 +73,16 @@ interface Report {
 // rounding, not a bug.
 const OVERFLOW_TOLERANCE = 1.0;
 
-// Device pixels of non-background colour allowed in the outermost 2pt band of
-// the panel, per side. A rounded panel corner antialiases into that band and
-// costs ~15 per side on its own; a cut frame arm or a clipped glyph costs
-// hundreds. The gap between those two numbers is wide, so the threshold does
-// not need to be precise.
-const EDGE_INK_LIMIT = 120;
+// There is no edge-ink rule, deliberately, though the probe still measures it.
+// The idea was that content drawn hard against the panel border means a cut
+// glyph or a frame arm pushed into the edge. In practice the measurement is
+// dominated by whatever the skin itself draws there: on caret it came back a
+// flat ~14 per side for every state, bug or not, and on classic it fires on
+// all eighteen confirm states because that skin paints its border into the
+// band. Zero true positives across two skins and a wall of false ones — a rule
+// nobody can trust is worse than no rule, because it teaches people to skim
+// past the output. The measurement is kept in the reports in case a future
+// rule can use it.
 
 // The window reserves 8pt of padding around the hosting view for its shadow.
 // A panel that reaches the capture edge has grown into it.
@@ -225,10 +230,6 @@ function inspect(report: Report): Violation[] {
   const pixels = PADDED_KINDS.has(report.kind) && !absorbed ? report.pixels : undefined;
   if (pixels && !pixels.error) {
     for (const side of SIDES) {
-      const count = pixels.edgeInk?.[side] ?? 0;
-      if (count > EDGE_INK_LIMIT) {
-        out.push({ rule: "edge-ink", detail: `${count}px of content jammed against the ${side} border` });
-      }
       const inset = pixels.panelInset?.[side] ?? MIN_PANEL_INSET;
       if (inset < MIN_PANEL_INSET) {
         out.push({ rule: "panel-inset", detail: `panel reaches the ${side} edge of the window` });

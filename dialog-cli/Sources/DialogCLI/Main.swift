@@ -132,6 +132,12 @@ static func run() {
         manager.testPane = testPane
     }
 
+    // Seed the attachment strip so the layout harness can render it — nothing
+    // headless can paste or drop.
+    if let attachments = ProcessInfo.processInfo.environment["DIALOG_TEST_ATTACHMENTS"] {
+        AttachmentStore.shared.seedForTesting(attachments)
+    }
+
     // Mirror the MCP server's dialog timeout so the dialog can flip into its
     // expired state once the agent has moved on.
     DialogExpiry.shared.armFromEnvironment()
@@ -211,11 +217,30 @@ static func run() {
         exit(1)
     }
 
-    if let data = outputData, let output = String(data: data, encoding: .utf8) {
+    if let data = outputData, let output = String(data: spliceAttachments(into: data), encoding: .utf8) {
         print(output)
     } else {
         fputs("Failed to encode response\n", stderr)
         exit(1)
     }
+}
+
+/// Merges any attached images into the encoded response.
+///
+/// Done here rather than as a field on each response type: there are seven of
+/// them and they are built through positional initialisers at a couple of
+/// dozen call sites, so carrying the list through all of that would be a much
+/// larger change than the feature. This is the one point where a response
+/// becomes JSON, and attachments are orthogonal to what any dialog answered.
+private static func spliceAttachments(into data: Data) -> Data {
+    let payloads = AttachmentStore.shared.payloads()
+    guard !payloads.isEmpty,
+          var object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
+          let encoded = try? JSONEncoder().encode(payloads),
+          let list = try? JSONSerialization.jsonObject(with: encoded)
+    else { return data }
+
+    object["attachments"] = list
+    return (try? JSONSerialization.data(withJSONObject: object)) ?? data
 }
 }

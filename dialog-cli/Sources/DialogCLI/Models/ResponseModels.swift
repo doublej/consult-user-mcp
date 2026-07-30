@@ -24,6 +24,19 @@ enum StringOrStrings: Codable {
     }
 }
 
+/// An image the person attached, on its way to the agent.
+///
+/// `data` is base64 because the response is JSON on a pipe. The MCP server
+/// turns each one into an image content block rather than leaving it in the
+/// structured payload — an agent should see the picture, not a wall of base64.
+struct AttachmentPayload: Codable {
+    let mimeType: String
+    let data: String
+    let width: Int
+    let height: Int
+    let name: String
+}
+
 struct ConfirmResponse: Codable {
     let dialogType: String
     let confirmed: Bool

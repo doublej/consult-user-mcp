@@ -13,6 +13,7 @@ import { WindowsDialogProvider } from "./providers/windows.js";
 import type { DialogProvider } from "./providers/interface.js";
 import type { DialogPosition, QuestionsMode, TweakParameter, SketchBlock, SketchLayoutNode } from "./types.js";
 import { compactResponse } from "./compact.js";
+import { takeAttachments, attachmentBlocks } from "./attachments.js";
 import { humanize } from "./humanize.js";
 import { readSettings } from "./settings.js";
 import { checkForUpdate } from "./update-check.js";
@@ -283,6 +284,10 @@ server.registerTool("ask", {
     }
   }
 
+  // Taken before compaction: the base64 must not reach `structuredContent`,
+  // which is echoed into the transcript as JSON.
+  const attachments = takeAttachments(raw);
+
   const compact = compactResponse(p.type, raw);
   const { humanizeResponses, reviewBeforeSend } = readSettings();
   const result = humanizeResponses ? humanize(compact) : compact;
@@ -292,7 +297,10 @@ server.registerTool("ask", {
     await provider.preview({ body: text }).catch(() => {});
   }
 
-  return { content: [{ type: "text", text }], structuredContent: compact };
+  return {
+    content: [{ type: "text" as const, text }, ...attachmentBlocks(attachments)],
+    structuredContent: compact,
+  };
 });
 
 /** Convert label to kebab-case id: "Font Size" → "font-size", "Line Height (px)" → "line-height-px" */

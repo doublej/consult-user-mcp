@@ -84,6 +84,24 @@ enum DialogKeyRouter {
                 return true
             }
 
+            // 3b. ⌘V attaches an image from the clipboard, so a screenshot can
+            //     go back with the answer.
+            //
+            //     A clipboard carrying text belongs to the field whenever one
+            //     is being edited — pasting a path into a text dialog is far
+            //     more common than attaching a picture, and a copied file puts
+            //     both a URL and a string on the pasteboard. When nothing is
+            //     being edited, or the clipboard holds only an image, the
+            //     attachment wins. Anything not taken falls through to AppKit's
+            //     own paste.
+            if keyCode == KeyCode.v && modifiers.contains(.command) {
+                let hasText = NSPasteboard.general.string(forType: .string)?.isEmpty == false
+                if !(editingText && hasText) && AttachmentStore.shared.addFromPasteboard() > 0 {
+                    return true
+                }
+                return false
+            }
+
             // 3. While editing text only Return / Tab and ⌘-shortcuts reach
             //    the rest of the pipeline; plain character hotkeys must go
             //    to the field.

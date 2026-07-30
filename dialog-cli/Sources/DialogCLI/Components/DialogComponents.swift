@@ -595,6 +595,12 @@ struct DialogContainer<Content: View>: View {
                 .padding(.top, 12)
 
                 contentBuilder(controller)
+
+                // Below the dialog's own content and above nothing: the strip
+                // takes no room until something is attached, so a call that
+                // never uses the feature is laid out exactly as before.
+                AttachmentStrip()
+                    .padding(.horizontal, 12)
             }
             .frame(minWidth: contentMinWidth)
 

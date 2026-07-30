@@ -37,4 +37,6 @@ Three hard rules:
 - **A fixture without a `states.tsv` row is untested.** It reaches the debug menu and the screenshot runner, and the layout audit never sees it. Both halves or neither.
 - **`tweak` and `propose_layout` are macOS-only.** `WindowsDialogProvider` throws for both. Keep the throw explicit rather than letting it fail somewhere further down.
 
+Image attachments are the one place parity is a *soft* gap rather than a throw. The macOS CLI splices an `attachments` array into its response; the Windows CLI does not emit the key at all, and `takeAttachments()` reads an absent key as "no images". A Windows user simply cannot attach one yet — nothing errors. Tracked as cum-n7f.
+
 Every response shape must survive `compact.ts`: null fields stripped, `confirmed` mapped to `answer`, `dismissed` merged into `cancelled`. Compact priority is snoozed > askDifferently > feedbackText > cancelled > answer.

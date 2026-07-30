@@ -1,4 +1,4 @@
-<!-- version: 2.15.0 -->
+<!-- version: 2.16.0 -->
 # Consult User MCP — Required Usage
 
 <critical_rules>
@@ -22,6 +22,8 @@ Every interactive dialog returns structured JSON. Special states (at most one pe
 Feedback is an annotation, not a redirect: `feedbackText` (any dialog) and `feedbackByQuestion` (forms, keyed by question id) arrive **alongside** the answer. Accept the answer, incorporate the note, do not re-ask. If the user cancelled but left a note, the response carries the note without `cancelled: true` — treat as "user redirected: read the note, adjust, continue."
 
 Normal answers: boolean (confirm), string (pick/text — a custom "Other" answer arrives as typed), string[] (pick with `multi`), question-id → answer map plus `completedCount` (form), parameter-id → number map plus `action` (tweak).
+
+Images: the user can paste or drag pictures onto any dialog. They arrive as image blocks alongside the answer, named and numbered in a preceding line. Treat them as part of the reply — look at them before acting, and do not ask for a file path.
 </response_handling>
 
 <anti_patterns>

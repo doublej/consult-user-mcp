@@ -24,6 +24,7 @@ Three layers, and most bugs come from confusing them.
 - **Feedback is an annotation, not an answer.** `feedbackText` arrives *alongside* the answer. The draft lives in `DialogContainer` and is read on submit via `DialogManager.globalFeedbackBinding`.
 - **Snooze is checked before any window is created,** at the top of each `DialogManager+*` method. A snoozed call must never flash a window.
 - **All AppKit widgets read the global `Theme`.** That is how a skin's `preferredTheme` restyles them for free — and why hardcoding a colour in a widget breaks every theme at once.
+- **Attachments are spliced into the response, not carried by it.** `AttachmentStore` collects pasted and dropped images; `Main.spliceAttachments` merges them in at the one point where a response becomes JSON. No response struct has the field, deliberately — there are seven of them, built positionally at two dozen call sites.
 
 ## Common change patterns
 
@@ -43,7 +44,7 @@ DIALOG_SKIN=alt .build/debug/DialogCLI confirm "$(cat ../test-cases/cases/confir
 DIALOG_TEST_KEYS="d3.0;esc" .build/debug/DialogCLI confirm '...'   # scripted keys
 ```
 
-`DIALOG_TEST_KEYS` injects keystrokes — format documented at the top of `Services/TestKeyDriver.swift`. Use a delay past the cooldown (`d3.0`) or the keys are swallowed. `DIALOG_TEST_PANE=snooze|feedback` opens a pane on appear.
+`DIALOG_TEST_KEYS` injects keystrokes — format documented at the top of `Services/TestKeyDriver.swift`. Use a delay past the cooldown (`d3.0`) or the keys are swallowed. `DIALOG_TEST_PANE=snooze|feedback` opens a pane on appear. `DIALOG_TEST_ATTACHMENTS=<n>` fills the attachment strip, which is otherwise unreachable without a pasteboard or a mouse.
 
 A local build does **not** change the installed app. Use `bun run dev` from the repo root for that.
 

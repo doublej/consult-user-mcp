@@ -29,6 +29,7 @@ The MCP server itself: the tool surface an agent sees, and the routing that turn
 - **The [[Baseprompt]] ships through the protocol, not through a file.** `loadBasePrompt()` reads the bundled `base-prompt.md` and returns it in the `instructions` field. It is never inlined into a `CLAUDE.md`. See `.claude/rules/baseprompt.md`.
 - **`propose_layout` is single-flight.** A module-level `proposeLayoutActive` guard rejects a second concurrent call.
 - **Every response shape must survive `compact.ts`.** A new field that should reach the agent has to be handled there or it is silently dropped.
+- **Attachments bypass compaction on purpose.** `takeAttachments()` strips the image list off the raw response *before* `compactResponse`, and `attachmentBlocks()` turns it into MCP image content blocks. The base64 must never reach `structuredContent`, which is echoed into the transcript as JSON. macOS only for now — the Windows CLI emits no `attachments`, and the absent key degrades to no images rather than an error.
 - **Choices are validated.** `validate-choices.ts` rejects meta-options like "all of the above" — the dialog is for real choices.
 
 ## Common change patterns

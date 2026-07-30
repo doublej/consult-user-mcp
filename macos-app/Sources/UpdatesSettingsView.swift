@@ -117,21 +117,12 @@ struct UpdatesSettingsView: View {
                     .frame(width: 90)
                 }
 
-                Divider().padding(.leading, 40)
-
-                SettingsToggleRow(
-                    icon: "flask",
-                    title: "Include pre-release versions",
-                    subtitle: "Show beta and preview builds",
-                    isOn: $settings.includePrereleaseUpdates
-                )
             }
             .padding(.vertical, 4)
         }
         .onChange(of: settings.autoCheckForUpdatesEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.updateCheckCadence) { _, _ in settings.saveToFile() }
         .onChange(of: settings.updateReminderInterval) { _, _ in settings.saveToFile() }
-        .onChange(of: settings.includePrereleaseUpdates) { _, _ in settings.saveToFile() }
     }
 
     private var updateStatusSection: some View {

@@ -38,16 +38,11 @@
         <TextBlock Text="Reminder interval" Foreground="#A0A0A0"
                    FontSize="12" FontFamily="Segoe UI" Margin="0,0,0,4" />
         <ComboBox x:Name="ReminderCombo" SelectionChanged="OnReminderChanged"
-                  Width="200" HorizontalAlignment="Left" Margin="0,0,0,12">
+                  Width="200" HorizontalAlignment="Left" Margin="0,0,0,24">
             <ComboBoxItem Content="1 day" />
             <ComboBoxItem Content="3 days" />
             <ComboBoxItem Content="7 days" />
         </ComboBox>
-
-        <CheckBox x:Name="PrereleaseCheck" Content="Include prerelease updates"
-                  Foreground="#E6E6E6" FontFamily="Segoe UI" FontSize="13"
-                  Checked="OnPrereleaseToggled" Unchecked="OnPrereleaseToggled"
-                  Margin="0,0,0,24" />
 
         <!-- Manual check -->
         <Button x:Name="CheckNowButton" Content="Check Now" Click="OnCheckNow"

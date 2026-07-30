@@ -31,7 +31,6 @@ public partial class UpdatesSettingsView : UserControl
         AutoCheckBox.IsChecked = s.AutoCheckForUpdatesEnabled;
         CadenceCombo.SelectedIndex = (int)s.UpdateCheckCadence;
         ReminderCombo.SelectedIndex = (int)s.UpdateReminderInterval;
-        PrereleaseCheck.IsChecked = s.IncludePrereleaseUpdates;
 
         _loading = false;
     }
@@ -64,13 +63,6 @@ public partial class UpdatesSettingsView : UserControl
     {
         if (_loading) return;
         SettingsManager.Shared.Settings.UpdateReminderInterval = (UpdateReminderInterval)ReminderCombo.SelectedIndex;
-        SettingsManager.Shared.Save();
-    }
-
-    private void OnPrereleaseToggled(object sender, RoutedEventArgs e)
-    {
-        if (_loading) return;
-        SettingsManager.Shared.Settings.IncludePrereleaseUpdates = PrereleaseCheck.IsChecked == true;
         SettingsManager.Shared.Save();
     }
 

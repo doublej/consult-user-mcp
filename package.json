@@ -19,6 +19,8 @@
     "build:windows": "powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1",
     "release:windows": "powershell -ExecutionPolicy Bypass -File scripts/release-windows.ps1",
     "test": "cd mcp-server && bun test",
+    "test:container": "bash container/launch.sh run",
+    "container": "bash container/launch.sh",
     "test:visual": "bash test-cases/test-runner.sh",
     "test:layout": "bash test-cases/layout-audit.sh",
     "test:keyboard": "bash test-cases/keyboard-tests.sh",

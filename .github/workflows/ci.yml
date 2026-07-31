@@ -40,3 +40,16 @@ jobs:
       - name: Build Swift CLI
         run: swift build -c release
         working-directory: dialog-cli
+
+      # The one suite that can assert on what a dialog looks like, and the
+      # only one that runs unattended: it parks every window off-display and
+      # measures the view tree and the bitmap, so it needs no screen, no
+      # keyboard and no Screen Recording grant. Until this step existed, a
+      # clipped dialog, an overlapping control or text that did not fit its
+      # box reached main with a green check.
+      #
+      # The suites that spawn real dialogs — test:visual, test:keyboard —
+      # cannot run on a hosted runner and are not attempted here. They run in
+      # the container: see container/README.md.
+      - name: Layout audit
+        run: bun run test:layout

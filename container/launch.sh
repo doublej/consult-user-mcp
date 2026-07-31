@@ -74,6 +74,19 @@ preflight() {
     mkdir -p "$OUT_DIR"
 }
 
+# One run at a time. Two of them share a VM, a shared folder and a screen:
+# they stop each other's boots, overwrite each other's request.env, and read
+# each other's verdict. What that looks like from the outside is a suite that
+# fails for no reason — the expensive kind of flake to chase.
+# macOS has no flock(1); shlock is the BSD equivalent and does the one thing
+# that matters here — it clears the lock when the pid inside it is gone, so a
+# killed run does not wedge every later one.
+take_lock() {
+    shlock -f "$OUT_DIR/.lock" -p $$ \
+        || die "another container run is in progress (pid $(cat "$OUT_DIR/.lock" 2>/dev/null))"
+    trap 'rm -f "$OUT_DIR/.lock"' EXIT
+}
+
 vm_exists()  { tart list 2>/dev/null | awk '{print $2}' | grep -qx "$VM_NAME"; }
 vm_running() { tart list 2>/dev/null | awk -v n="$VM_NAME" '$2==n && $NF=="running"{print}' | grep -q .; }
 tart_exec()  { tart exec "$VM_NAME" "$@"; }
@@ -110,6 +123,10 @@ boot_headless() {
         tart stop "$VM_NAME" || true
         sleep 2
     fi
+    # `tart stop` shuts the guest down but can leave the host-side process
+    # behind, still holding the shares it was booted with — so the next boot
+    # inherits the previous run's mounts. Reap it before booting.
+    pkill -f "tart run $VM_NAME" 2>/dev/null && sleep 2 || true
     # VIEWER=1 boots with tart's own window so the run can be watched. It is
     # a real display either way — the headless path attaches a virtual
     # framebuffer, which is the whole reason it is --vnc-experimental and not
@@ -204,6 +221,7 @@ cmd_init() { preflight; ensure_vm; echo "==> $VM_NAME ready — next: $0 prep"; 
 
 cmd_prep() {
     preflight
+    take_lock
     boot_headless
     echo "==> Provisioning guest"
     tart_exec bash -lc "$(cat "$HERE/prep.sh")"
@@ -211,6 +229,7 @@ cmd_prep() {
 
 cmd_run() {
     preflight
+    take_lock
     local fp; fp="$(fingerprint)"
     echo "==> Suites: $SUITES"
     echo "==> Fingerprint: $fp"

@@ -66,6 +66,38 @@ if [ -n "${EXPECT_FINGERPRINT:-}" ]; then
     echo "==> fingerprint ok ($GOT)"
 fi
 
+# ── the screen the audit is calibrated against ────────────────────────
+# `tart set --display` only advertises the mode; the guest keeps whatever
+# resolution it booted with, and --display-refit reconfigures to fit a viewer
+# window that a headless boot does not have. So the mode is selected here.
+#
+# This is not cosmetic. The dialog height cap comes from the screen, so on
+# tart's 768pt-tall default six states clamp that do not clamp on any machine
+# a customer owns — and the container disagreed with the host about whether
+# the surface was sound.
+if [ -n "${DISPLAY_SIZE:-}" ]; then
+    /usr/bin/swift -e "
+import Cocoa
+let want = \"$DISPLAY_SIZE\".split(separator: \"x\").compactMap { Int(\$0) }
+guard want.count == 2, let screen = NSScreen.main else { exit(0) }
+let id = (screen.deviceDescription[NSDeviceDescriptionKey(\"NSScreenNumber\")] as! NSNumber).uint32Value
+if Int(screen.frame.width) == want[0] && Int(screen.frame.height) == want[1] {
+    print(\"screen already \\(want[0])x\\(want[1])\"); exit(0)
+}
+guard let modes = CGDisplayCopyAllDisplayModes(id, nil) as? [CGDisplayMode],
+      let mode = modes.first(where: { \$0.width == want[0] && \$0.height == want[1] }) else {
+    print(\"no \\(want[0])x\\(want[1]) mode offered; staying at \\(Int(screen.frame.width))x\\(Int(screen.frame.height))\")
+    exit(0)
+}
+var config: CGDisplayConfigRef?
+CGBeginDisplayConfiguration(&config)
+CGConfigureDisplayWithDisplayMode(config, id, mode, nil)
+CGCompleteDisplayConfiguration(config, .permanently)
+print(\"screen set to \\(want[0])x\\(want[1])\")
+" 2>&1 | tail -1
+    sleep 2
+fi
+
 # ── build ─────────────────────────────────────────────────────────────
 echo ""
 echo "==> bun install"

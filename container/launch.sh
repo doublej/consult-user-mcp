@@ -105,14 +105,18 @@ ensure_vm() {
     echo "==> Cloning $BASE_VM → $VM_NAME"
     tart clone "$BASE_VM" "$VM_NAME"
     echo "==> Sizing: $CPU cores / $MEM MiB / $DISPLAY_SIZE"
-    tart set "$VM_NAME" --cpu "$CPU" --memory "$MEM" --display "$DISPLAY_SIZE"
+    tart set "$VM_NAME" --cpu "$CPU" --memory "$MEM" --display "$DISPLAY_SIZE" --display-refit
 }
 
 # Applied on every run, not just at clone time: the display decides which
 # dialogs clamp, so a VM created before this existed must not keep answering
 # a different question from the one a fresh clone answers.
+# --display-refit is the half that matters: without it the size is only a
+# ceiling and the guest keeps whatever resolution it already had, so the
+# setting appeared to apply while the screen stayed 1024x768 and six states
+# kept failing at the height cap. Only takes while the VM is stopped.
 ensure_display() {
-    tart set "$VM_NAME" --display "$DISPLAY_SIZE" 2>/dev/null || true
+    tart set "$VM_NAME" --display "$DISPLAY_SIZE" --display-refit 2>/dev/null || true
 }
 
 # The repo goes in read-only and the guest works on an rsync copy; `out` is
@@ -270,6 +274,7 @@ cmd_run() {
         echo "SUITES='$SUITES'"
         echo "EXPECT_FINGERPRINT='$fp'"
         echo "DIALOG_SKIN='${DIALOG_SKIN:-caret}'"
+        echo "DISPLAY_SIZE='$DISPLAY_SIZE'"
         echo "SKINS='${SKINS:-caret}'"
     } > "$OUT_DIR/request.env"
 

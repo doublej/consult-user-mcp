@@ -79,6 +79,23 @@ fi
 FAILED=()
 ran() { echo ""; echo "── $1 ──"; }
 
+# Each suite's full output goes to its own file in the shared folder, and only
+# the tail reaches the console. Tailing alone threw away exactly what a
+# failure needs — which of 78 cases bled into the margin, which of 24
+# assertions broke — and left a summary saying it happened 14 times.
+suite() {
+    local name="$1"; shift
+    local log="$SHARE_OUT/$name.log"
+    ran "$name"
+    if "$@" > "$log" 2>&1; then
+        tail -"${TAIL_LINES:-25}" "$log"
+    else
+        tail -"${TAIL_LINES:-25}" "$log"
+        FAILED+=("$name")
+    fi
+    echo "   full output: out/$name.log ($(wc -l < "$log" | tr -d ' ') lines)"
+}
+
 # Any dialog still on screen from an earlier run holds focus, and the next
 # suite's keystrokes go to it instead of to the dialog under test — which
 # presents as a watchdog timeout on a test that is perfectly fine.
@@ -88,8 +105,7 @@ sleep 0.5
 
 # ── unit: the MCP server's own tests ──────────────────────────────────
 if [[ " $SUITES " == *" unit "* ]]; then
-    ran "unit"
-    bun test 2>&1 | tail -20 || FAILED+=("unit")
+    suite unit bun test
 fi
 
 # ── layout: the suite that fails a build ──────────────────────────────
@@ -97,8 +113,7 @@ fi
 # and asserts. This is the one whose green actually means something, and
 # the one the container never used to run.
 if [[ " $SUITES " == *" layout "* ]]; then
-    ran "layout"
-    bash test-cases/layout-audit.sh 2>&1 | tail -40 || FAILED+=("layout")
+    TAIL_LINES=40 suite layout bash test-cases/layout-audit.sh
     if [ -d test-cases/skin-states/audit ]; then
         rm -rf "$SHARE_OUT/audit"
         cp -R test-cases/skin-states/audit "$SHARE_OUT/audit" 2>/dev/null || true
@@ -109,17 +124,15 @@ fi
 # Spawns real dialogs and injects keys. Cannot run on a desktop somebody is
 # using — it takes the keyboard for the length of the suite.
 if [[ " $SUITES " == *" keyboard "* ]]; then
-    ran "keyboard"
-    bash test-cases/keyboard-tests.sh 2>&1 | tail -30 || FAILED+=("keyboard")
+    TAIL_LINES=30 suite keyboard bash test-cases/keyboard-tests.sh
 fi
 
 # ── visual: screenshots for a human, plus OCR ─────────────────────────
 if [[ " $SUITES " == *" visual "* ]]; then
-    ran "visual"
     # The guest's compositor maps a new window more slowly than bare metal;
     # 0.4s misses the capture, 1.5s settles reliably.
-    FAST="${FAST:-1}" RENDER_DELAY="${RENDER_DELAY:-1.5}" \
-        bash test-cases/test-runner.sh 2>&1 | tail -30 || FAILED+=("visual")
+    export FAST="${FAST:-1}" RENDER_DELAY="${RENDER_DELAY:-1.5}"
+    suite visual bash test-cases/test-runner.sh
 
     LATEST="$(ls -td "$WORK"/test-cases/screenshots/*/ 2>/dev/null | head -1)"
     if [ -n "$LATEST" ]; then

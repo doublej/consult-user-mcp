@@ -41,30 +41,30 @@ Inside the guest, against a fresh copy of your working tree:
 | `keyboard` | the typing-vs-hotkey contract, arrows, Space, the Escape ladder |
 | `visual` | a screenshot per fixture, OCR'd against the words that should be on it |
 
-`unit` and `layout` are the default. Ask for the other two by name —
-`SUITES="unit layout keyboard visual"` — and read the limitation below first.
-Artifacts come back in `container/out/`: `run.log`, `screenshots/`, `audit/`,
-and `done` carrying the verdict.
+Pick a subset with `SUITES="unit layout"`. Artifacts come back in
+`container/out/`: `run.log` with the summary, a full `<suite>.log` per suite,
+`screenshots/`, `audit/`, and `done` carrying the verdict.
 
-## Known limitation: the guest does not map dialog windows
+## Known limitation: no app can take key focus here
 
-The two on-screen suites do not work in the VM today. A dialog process starts
-and exits normally, but no window appears: a visual run on a fresh boot
-captured **7 of 78**, and every keyboard assertion that needs a real
-interaction times out because there is no key window for the injected events
-to reach.
+One class of test still cannot pass in the VM: anything that types into a
+focused text field. The guest's session will not let an application become
+active — verified with a minimal AppKit app, not just this one — so no window
+becomes key, nothing takes first responder, and the key router reads every
+letter as the shortcut it is when you are not editing. Typing
+`safari for fast assets` into a field comes back as `answer: "fri "` with
+`feedbackText: "or fast assets"`, identically at 0ms, 20ms and 40ms between
+keystrokes, so it is not a timing problem.
 
-This was invisible until recently. The capture helper matched any window owned
-by a process called DialogCLI, so a single leftover dialog was photographed 78
-times and the run reported OK; the OCR check said `0/5 words` on every one of
-them and the runner exited 0 regardless. Both of those are fixed, which is why
-the failure is now loud instead of absent.
+That is 9 of 24 keyboard assertions. Everything else works: arrows, Space,
+Escape, the hotkeys, the ⌘F chord, expiry, and all 78 screenshots.
 
-So: `unit` and `layout` are trustworthy here — neither needs a mapped window,
-and `layout` is the suite that fails a build. `keyboard` and `visual` are not,
-yet. Tracked as cum-3z4.b. Until it is fixed there is nowhere good to run them:
-the host works but seizes the screen and the keyboard, and one stray focus
-change corrupts the result.
+Worth knowing what this used to look like. Until the audit, dialogs did not
+appear in the VM **at all** — the chime was played synchronously on the main
+thread just before the window was built, and the guest's audio device never
+answers, so the process sat in the audio HAL forever. The visual suite hid it
+by photographing one leftover window 78 times and reporting OK. Fixing the
+sound took captures from 7/78 to 77/78 and keyboard assertions from 0 to 15.
 
 ## Commands
 
@@ -82,7 +82,7 @@ change corrupts the result.
 
 | Env | Default |
 |---|---|
-| `SUITES` | `unit layout` — add `keyboard visual` explicitly; see the limitation above |
+| `SUITES` | `unit layout keyboard visual` |
 | `CUM_VM_NAME` | `tahoe-consult` |
 | `CUM_REPO` | the repo this file is in |
 | `CUM_CPU` / `CUM_MEM` | `6` / `12288` MiB |

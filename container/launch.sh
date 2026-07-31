@@ -43,10 +43,7 @@ MEM="${CUM_MEM:-12288}"
 # 1512x982 is the 13" MacBook Air's logical size: small enough to be a fair
 # floor, large enough to be real.
 DISPLAY_SIZE="${CUM_DISPLAY:-1512x982}"
-# Only the two that currently work in the VM. The on-screen pair is opt-in
-# until the guest reliably maps a dialog window — see "Known limitation" in
-# README.md. Asking for them by name gets you them.
-SUITES="${SUITES:-unit layout}"
+SUITES="${SUITES:-unit layout keyboard visual}"
 TIMEOUT="${TIMEOUT:-1800}"
 
 # ── preflight ─────────────────────────────────────────────────────────

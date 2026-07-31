@@ -29,16 +29,12 @@ host interrupts whoever is at the keyboard. Use `container/launch.sh shell`.
 | `bun run test:keyboard` | **container** — but see below | spawns dialogs and types into them |
 | `container/vnc-matrix.sh` | **container** | drives real keystrokes over VNC |
 
-**The two on-screen suites do not currently work in the container.** The guest
-starts a dialog but maps no window: a visual run captures about 7 of 78, and
-every keyboard assertion needing a real interaction times out. Tracked as
-cum-3z4.b, and `container/README.md` has the detail. `SUITES` therefore
-defaults to `unit layout`.
-
-That leaves nowhere good to run them, which is worth saying plainly rather than
-working around: the host works but takes the screen and the keyboard, and a
-stray focus change corrupts the result silently. Do not quietly move them back
-to the host as though that were fine.
+**One gap remains in the container**: no app can take key focus in the guest
+session, so anything that types into a focused text field fails — 9 of 24
+keyboard assertions. Arrows, Space, Escape, the hotkeys, the ⌘F chord, expiry
+and all 78 screenshots work. Detail in `container/README.md`; do not "fix" it
+by moving those tests back to the host, where they take the keyboard from
+whoever is using it and corrupt on any focus change.
 
 ## What a green run does and does not mean
 

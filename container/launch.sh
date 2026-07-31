@@ -153,7 +153,9 @@ open_viewer() {
         # `|| true`: the log is empty for the first second or so, and under
         # `set -o pipefail` a grep that matches nothing fails the assignment
         # and takes the whole script with it.
-        url=$(grep -oE "vnc://[^ ]+" "/tmp/tart-$VM_NAME.log" 2>/dev/null | head -1 || true)
+        # Anchored on the port so the trailing "..." tart writes after the
+        # URL does not come along and make the address unopenable.
+        url=$(grep -oE "vnc://[^ ]*:[0-9]+" "/tmp/tart-$VM_NAME.log" 2>/dev/null | head -1 || true)
         if [ -n "$url" ]; then
             echo "==> Viewer: $url  (⌃⌘F in the window for its own Space)"
             open "$url" 2>/dev/null || echo "    could not open Screen Sharing — connect by hand"

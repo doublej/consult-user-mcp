@@ -40,11 +40,21 @@ Three layers, and most bugs come from confusing them.
 
 ```bash
 swift build                                   # from dialog-cli/
+bun run test:layout                           # off-screen, measured, safe anywhere
+SUITES=keyboard bun run test:container        # real dialogs, real keys, in the VM
+```
+
+**Spawn dialogs in the container, not on the developer's screen.** Every
+command below opens a real window that takes the keyboard from whoever is at
+it, and a stray focus change silently corrupts the result. `container/launch.sh
+shell` gives you a machine to do it on — see `../container/CLAUDE.md`.
+
+```bash
 DIALOG_SKIN=alt .build/debug/DialogCLI confirm "$(cat ../test-cases/cases/confirm/basic.json)"
 DIALOG_TEST_KEYS="d3.0;esc" .build/debug/DialogCLI confirm '...'   # scripted keys
 ```
 
-`DIALOG_TEST_KEYS` injects keystrokes — format documented at the top of `Services/TestKeyDriver.swift`. Use a delay past the cooldown (`d3.0`) or the keys are swallowed. `DIALOG_TEST_PANE=snooze|feedback` opens a pane on appear. `DIALOG_TEST_ATTACHMENTS=<n>` fills the attachment strip, which is otherwise unreachable without a pasteboard or a mouse.
+`DIALOG_TEST_KEYS` injects keystrokes — format documented at the top of `Services/TestKeyDriver.swift`. Use a delay past the cooldown (`d3.0`) or the keys are swallowed. `space` and the shift form `+tab` are tokens too; without them nothing could press the key that toggles a choice or walk tab order backwards. `DIALOG_TEST_PANE=snooze|feedback` opens a pane on appear. `DIALOG_TEST_ATTACHMENTS=<n>` fills the attachment strip, which is otherwise unreachable without a pasteboard or a mouse.
 
 A local build does **not** change the installed app. Use `bun run dev` from the repo root for that.
 

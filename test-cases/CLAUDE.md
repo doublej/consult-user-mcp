@@ -35,6 +35,13 @@ A **state** is a fixture plus how to drive it: which pane is open, what keys to
 type, how long to settle. That is why `states.tsv` has more rows than `cases/`
 has files — one fixture shot four ways is four states.
 
+States with no pane and no key script are rendered in parallel; the rest run
+one at a time. Their settle delays were measured on an idle machine, and under
+load the probe catches a surface mid-transition — every state that went red the
+first time the audit ran wide was a pane or a key script, and every one of them
+was actually correct. Parallelism is not allowed to change the verdict, so the
+split is by whether a state has anything to settle, not by a tuning knob.
+
 A fixture is not a wrapper format — it is the literal JSON argument passed to the [[Dialog CLI]]. That is why the same file works for both the runner and the debug menu.
 
 Directory names are the *test-case* names, not CLI commands. `test-runner.sh` maps between them around line 88:
@@ -79,16 +86,34 @@ Worth knowing before trusting a green run, and before writing a rule:
 
 ## Verification
 
+**Run these in the container.** `bun run test:container` — or a subset with
+`SUITES="unit layout" bun run test:container`. See `../container/README.md`.
+
 ```bash
+bun run test:container                     # everything, in the VM — the verdict
 bun run test:layout                        # assert: caret, every state
 SKINS="caret classic" bun run test:layout  # more than one — expect noise, see below
-bun run test:visual                    # capture + OCR, on screen, caret by default
-bun run test:keyboard                  # typing-vs-hotkey contract
+bun run test:visual                    # capture + OCR   ⚠ takes the screen
+bun run test:keyboard                  # keyboard contract ⚠ takes the keyboard
 ```
 
-From here: `./layout-audit.sh [name-filter]`, `./test-runner.sh`, `bash keyboard-tests.sh`.
+`test:layout` is the exception that is safe on the host: it renders off-screen,
+so nothing appears and nothing takes focus. The other two spawn real dialogs.
+On a machine somebody is using they seize the screen for minutes, and a stray
+focus change silently corrupts the run — the visual suite spent months
+photographing one stuck window because of exactly that.
 
-The audit prints a `FAIL`/`WAIVED`/`STALE` line per state and exits non-zero. The screenshot runner captures; read `verify-checklist.md` against its output.
+From here: `./layout-audit.sh [name-filter]`, `../container/launch.sh run`.
+
+The audit prints a `FAIL`/`WAIVED`/`STALE` line per state and exits non-zero.
+The screenshot runner captures, OCRs each shot against the words that should be
+on it, and now fails when it cannot read them — a shot of the wrong window is a
+red run rather than a green one. Read `verify-checklist.md` against its output.
+
+**A pass is not a clean surface.** The audit waives every state with a known
+open bug and prints the list each run. `bun run test:layout` currently comes
+back green with a dozen states waived across six open issues. Read that list
+before treating a pass as a release signal.
 
 ## Related context
 

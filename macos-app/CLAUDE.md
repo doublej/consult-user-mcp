@@ -46,6 +46,12 @@ bun run dev     # from repo root — builds and installs, then restart the tray 
 
 There are no automated tests here. Verify by hand: open the debug menu, fire each dialog type, confirm settings changes reach a live dialog.
 
+**Do that in the container.** `container/launch.sh shell` boots a clean Tahoe
+account with no prior install — which is the state the install wizard, the
+update flow and first-run actually have to work in, and the one a developer
+machine can never get back to. It also means firing every dialog type does not
+take over your own screen. See `../container/README.md`.
+
 `bash scripts/validate-baseprompt-version.sh` gates baseprompt edits.
 
 ## Related context

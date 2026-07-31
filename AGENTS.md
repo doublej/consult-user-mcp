@@ -23,6 +23,33 @@ bd close <id>         # Complete work
 bd dolt push          # Push beads data to remote
 ```
 
+## Verification
+
+**Run the suites in the macOS container.** `bun run test:container`, or a
+subset with `SUITES="unit layout" bun run test:container`. Setup, knobs and
+gotchas: `container/README.md`.
+
+```bash
+bun run test:container   # everything, in the VM — the verdict
+bun test                 # mcp-server tests            (anywhere)
+bun run test:layout      # clipping, overlap, text-fit (anywhere — off-screen)
+bun run test:visual      # screenshot + OCR per fixture ⚠ container
+bun run test:keyboard    # the keyboard contract        ⚠ container
+```
+
+The two marked ⚠ spawn a real dialog per case. On a machine somebody is using
+they take the screen and the keyboard for minutes, and any focus change
+corrupts the result silently — the visual suite spent months photographing one
+stuck window and reporting OK. `test:layout` is the exception: it renders
+off-display, so it is safe anywhere and it is the one that fails a build.
+
+A green layout run is not a clean surface. It waives every state with a known
+open bug and prints a `NOT VOUCHED FOR` line naming them. Read it.
+
+Changing a dialog type touches more places than it looks — the checklist is in
+`.claude/rules/dialog-parity.md`. A fixture without a row in
+`test-cases/skin-states/states.tsv` is never measured.
+
 ## Non-Interactive Shell Commands
 
 **ALWAYS use non-interactive flags** with file operations to avoid hanging on confirmation prompts.

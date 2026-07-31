@@ -22,6 +22,7 @@ One MCP server, two platform implementations behind a single `DialogProvider` in
 | `windows-app/` | Windows Tray App. Mirrors `macos-app/`. .NET/WPF. |
 | `sketch-cli/` | Grid layout editor behind `propose_layout`. Separate Swift CLI, macOS only. |
 | `test-cases/` | JSON fixtures + screenshot runner. Feeds both the test runner and the debug menu. |
+| `container/` | Headless macOS VM the suites run inside, so they stop taking your screen. |
 | `docs/` | SvelteKit docs site. Owns `releases.json`, the release source of truth. |
 | `scripts/` | Build, install, release, and validation shell scripts. |
 
@@ -36,10 +37,12 @@ Read the folder's `CLAUDE.md` before editing inside it. Each one carries invaria
 - `mcp-server/CLAUDE.md` — before touching the tool surface or providers
 - `dialog-cli-windows/CLAUDE.md`, `windows-app/CLAUDE.md` — before any Windows work
 - `test-cases/CLAUDE.md` — before adding a dialog type or changing a fixture
+- `container/CLAUDE.md` — before changing how or where the suites run
 - `docs/CLAUDE.md`, `sketch-cli/CLAUDE.md`
 
 ## Global invariants
 
+- **Dialogs are spawned in the container, not on the developer's screen.** Anything that opens a real window — `test:visual`, `test:keyboard`, driving the CLI by hand to see a change — belongs in `container/`. A dialog on the host takes the keyboard from whoever is using it and makes the run unreliable for everyone.
 - **Development builds must go through `bun run dev`.** The installed app at `/Applications/Consult User MCP.app` runs its own bundled binaries. A bare `swift build` compiles locally and changes nothing about what actually runs. Restart the tray app afterwards.
 - **All dialog types must be considered together.** Adding or changing one touches the MCP server, both CLIs, the test fixtures, the test runner, and the debug menu. The full checklist is in `.claude/rules/dialog-parity.md`.
 - **Nothing Windows can be built or verified from macOS.** See the `windows-build` skill.
@@ -71,18 +74,31 @@ Shared inputs: `position` (`left`/`center`/`right`), `project_path`, and the env
 bun run dev            # build all + install to /Applications — the dev workflow
 bun run build          # mcp-server + dialog-cli only, no install
 bun run build:bundle   # full release bundle from scratch
+bun run test:container # the whole suite, in the macOS container — the verdict
 bun test               # mcp-server tests
-bun run test:layout    # assert layout: overflow, overlap, text-fit, every skin
-bun run test:visual    # screenshot every test case
-bun run test:keyboard  # typing-vs-hotkey contract
+bun run test:layout    # assert layout: overflow, overlap, text-fit
+bun run test:visual    # screenshot every test case          ⚠ spawns dialogs
+bun run test:keyboard  # typing-vs-hotkey contract           ⚠ spawns dialogs
 bun run changelog      # regenerate CHANGELOG.md from releases.json
 ```
 
-`test:layout` is the one that fails a build. It renders every state off-screen —
-no window appears, nothing takes the keyboard — measures the real view tree and
-the captured bitmap, and reports clipping, overlapping controls and text that
-does not fit its box. `test:visual` photographs dialogs on screen for a human to
-read; it does not assert layout.
+**Run the suites in the container, not on your desktop.** `container/launch.sh
+run` — see `container/README.md`. The two marked ⚠ spawn real dialogs: on a
+machine somebody is using they seize the screen and the keyboard for minutes,
+and anything that steals focus mid-run corrupts the result. That is not
+theoretical — it is how the visual suite spent months photographing one stuck
+window and reporting OK.
+
+`test:layout` is the one that fails a build, and the one you can safely run
+anywhere: it renders every state off-screen, so no window appears and nothing
+takes the keyboard. It measures the real view tree and the captured bitmap and
+reports clipping, overlapping controls and text that does not fit its box.
+`test:visual` photographs dialogs for a human to read; it does not measure
+layout.
+
+A green run is not the same as a clean surface: the audit **waives** states
+with known open bugs and says so on every run. Read the waiver list before
+treating a pass as a release signal.
 
 `just` also has recipes — `just --list`. Release procedures are in the `release-app` skill; Windows builds in `windows-build`.
 

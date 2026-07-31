@@ -358,17 +358,23 @@ is exactly the kind of thing they will spot instantly and you cannot.
 Note: the shell here restricts pipes and some filters. Write multi-step shell into a script file in your
 scratchpad and run it with `zsh <path>` rather than fighting one-liners.
 
-### The state harness — required, not optional
+### The state harness — already built, do not rewrite it
 
-You must be able to screenshot **every** state, not just the default one, and re-shoot them all after a change.
-Build it at `test-cases/skin-states/` before the second surface:
+You must be able to render **every** state, not just the default one, and re-render them all after a change.
+That harness exists at `test-cases/skin-states/`. Use it; do not build a second one.
 
-- `states.tsv` — one row per state: `name ⇥ fixtureDir ⇥ fixtureCase ⇥ settleDelay ⇥ DIALOG_TEST_PANE ⇥ DIALOG_TEST_KEYS`
-- `capture-states.sh [name-filter]` — iterates the manifest, shoots each, writes `shots/<name>.png` and an
-  `index.html` contact sheet.
+- `states.tsv` — one row per state: `name ⇥ fixtureDir ⇥ fixtureCase ⇥ settleDelay ⇥ DIALOG_TEST_PANE ⇥ DIALOG_TEST_KEYS ⇥ projectPath ⇥ imageCount`
+- `capture-states.sh [name-filter]` — renders each row, writes `shots/<name>.png`, a `<name>.layout.json`
+  report beside it, and an `index.html` contact sheet.
+- `bun run test:layout` — the same render plus the rules that fail a build.
 
-Per state the recipe is: launch the CLI backgrounded with `DIALOG_SKIN` set → `sleep <settleDelay>` →
-`swift test-cases/capture-dialog.swift` to get the window id → `screencapture -o -x -l<id>` → kill the process.
+**Add rows. Do not touch the driver.** It renders each state off-display and reads the view tree directly —
+nothing appears on screen and nothing takes the keyboard, so a run can happen underneath whatever you are
+doing. A `screencapture`-based rewrite regresses that: it takes the display hostage for the whole session and
+photographs whatever window happens to be frontmost, which is a bug this project has already shipped once.
+
+Your new skin is not done until `bun run test:layout` passes with `SKINS=<your-skin>`, and you have read the
+`NOT VOUCHED FOR` line for what it is waiving.
 
 The two hooks that drive states:
 

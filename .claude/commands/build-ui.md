@@ -177,22 +177,25 @@ it.** A wrong direction is cheapest to correct at surface one. Then stop and wai
   and say plainly which you substituted.
 - The shell restricts pipes and some filters. Write multi-step shell into a script file and run it with `zsh`.
 
-### The state harness — required, not optional
+### The state harness — already built, do not rewrite it
 
-Build it at `test-cases/skin-states/` before the second surface:
+It lives at `test-cases/skin-states/`. Add rows to it; leave the driver alone.
 
-- `states.tsv` — `name ⇥ fixtureDir ⇥ fixtureCase ⇥ settleDelay ⇥ DIALOG_TEST_PANE ⇥ DIALOG_TEST_KEYS`
-- `capture-states.sh [name-filter]` — iterates the manifest, writes `shots/<name>.png` and an `index.html`
-  contact sheet.
+- `states.tsv` — `name ⇥ fixtureDir ⇥ fixtureCase ⇥ settleDelay ⇥ DIALOG_TEST_PANE ⇥ DIALOG_TEST_KEYS ⇥ projectPath ⇥ imageCount`
+- `capture-states.sh [name-filter]` — renders each row off-display, writes `shots/<name>.png`, a
+  `<name>.layout.json` report, and an `index.html` contact sheet.
+- `bun run test:layout` — the same render plus the rules that fail a build. Your work is not done until this
+  passes for your skin.
 
-Per state: launch the CLI backgrounded with `DIALOG_SKIN` set → `sleep <settleDelay>` → resolve the window id →
-`screencapture -o -x -l<id>` → kill the process.
+It renders each state off-display and reads the view tree directly, so nothing appears and nothing takes the
+keyboard. Replacing it with a `screencapture` loop takes the display hostage and photographs whatever window
+is frontmost — this project has already shipped that bug once and spent months looking at the wrong dialog.
 
 - `DIALOG_TEST_PANE=snooze|feedback` opens a pane on appear — §8.4 demonstration state, a real presentation
   state, not just a test hook.
 - `DIALOG_TEST_KEYS` — semicolon-separated, documented at the top of `Services/TestKeyDriver.swift`:
   `d<seconds>` wait · `p<millis>` typing pause · `t:<text>` type · `c:<char>` ⌘-chord ·
-  `left`/`right`/`up`/`down`/`esc`/`return`/`tab`.
+  `left`/`right`/`up`/`down`/`esc`/`return`/`tab`/`space` · `+<key>` shift form.
 
 Fixture directory → CLI command: `confirm`→`confirm`, `choose`→`choose`, `text-input`→`textInput`,
 `questions`→`questions`, `notify`→`notify`. `preview` accepts `{"body":"…"}` but has no shared fixture

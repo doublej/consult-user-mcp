@@ -51,7 +51,14 @@ struct CaretNotePanel: View {
 
             CaretNoteEditor(text: model.binding(key), onFocus: { model.editing = $0 })
                 .frame(maxWidth: .infinity, alignment: .topLeading)
-                .frame(height: CaretStyle.u(62))
+                // A range, not a pin. Pinned, the editor could not give way
+                // when the question above it grew, so the surface ran out of
+                // room at the bottom and the pane was drawn straight through
+                // Cancel and Next — the two controls a person needs most when
+                // a surface has gone wrong. It scrolls, so a shorter editor
+                // costs a line of visible draft; a covered footer costs the
+                // way out.
+                .frame(minHeight: CaretStyle.u(40), maxHeight: CaretStyle.u(62))
             Rectangle()
                 .fill(palette.caret)
                 .frame(height: CaretStyle.caretWidth)

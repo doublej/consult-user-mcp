@@ -1,23 +1,5 @@
 [
   {
-    "state": "form-pane-per-question",
-    "rules": [
-      "overlap"
-    ],
-    "reason": "note editor is pinned to a fixed height and lands on the footer buttons",
-    "issue": "cum-bys",
-    "skin": "caret"
-  },
-  {
-    "state": "form-long-subject-pane",
-    "rules": [
-      "overlap"
-    ],
-    "reason": "long question text grows the pane subject and pushes the editor into the footer",
-    "issue": "cum-bys",
-    "skin": "caret"
-  },
-  {
     "state": "choose-forty-pane",
     "rules": [
       "escapes"

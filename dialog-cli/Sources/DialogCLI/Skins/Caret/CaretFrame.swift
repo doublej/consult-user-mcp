@@ -96,7 +96,14 @@ struct CaretFrame<Content: View>: View {
             if leadingAction != nil || trailingAction != nil {
                 // Stated, so it is counted. A row whose height the measurement
                 // misses ends up drawn below the window's own bottom edge.
-                actionBar.frame(height: CaretStyle.u(22))
+                //
+                // And claimed before anything else. The note pane above pins
+                // its editor to a fixed height, so when the pane and the
+                // question together want more room than there is, the row that
+                // gives way is this one — the pane was drawn straight through
+                // Cancel and Next, which are the two controls a person needs
+                // most when a surface has gone wrong.
+                actionBar.frame(height: CaretStyle.u(22)).layoutPriority(1)
             }
         }
         .padding(.top, inset + CaretStyle.u(10))

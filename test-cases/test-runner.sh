@@ -58,14 +58,15 @@ build_cli() {
 # Capture DialogCLI window using CoreGraphics window ID
 capture_frontmost_window() {
     local output_path="$1"
+    local owner_pid="${2:-}"
 
-    # Get DialogCLI window ID using Swift
+    # Get the window ID of the dialog owned by $owner_pid
     local window_id
     if [ -n "$DEBUG" ]; then
-        window_id=$(swift "$SCRIPT_DIR/capture-dialog.swift" 2>&1)
+        window_id=$(swift "$SCRIPT_DIR/capture-dialog.swift" $owner_pid 2>&1)
         echo "    [debug] window lookup: $window_id" >&2
     else
-        window_id=$(swift "$SCRIPT_DIR/capture-dialog.swift" 2>/dev/null)
+        window_id=$(swift "$SCRIPT_DIR/capture-dialog.swift" $owner_pid 2>/dev/null)
     fi
 
     # Extract just the number (first line that's a number)
@@ -294,10 +295,13 @@ run_test_case() {
         sleep "$RENDER_DELAY"
     fi
 
-    # Capture frontmost window (retry once if first attempt fails)
-    if ! capture_frontmost_window "$output_path"; then
+    # Capture this dialog's window — identified by pid, never by name. The
+    # name-only lookup returned whatever DialogCLI window happened to be on
+    # screen, so one hung dialog turned the whole run into repeat portraits
+    # of itself, each filed under a fixture it was not showing.
+    if ! capture_frontmost_window "$output_path" "$pid"; then
         sleep 0.5
-        capture_frontmost_window "$output_path" || true
+        capture_frontmost_window "$output_path" "$pid" || true
     fi
 
     # Dismiss dialog by killing the process directly
@@ -316,6 +320,11 @@ run_test_case() {
 # Main execution
 main() {
     build_cli
+
+    # A dialog left over from an interrupted run stays on screen and steals
+    # focus from every dialog after it. Start from an empty screen.
+    pkill -f "DialogCLI" 2>/dev/null || true
+    sleep 0.3
 
     mkdir -p "$SCREENSHOT_DIR"
     echo "Output: $SCREENSHOT_DIR"
@@ -374,6 +383,20 @@ main() {
     echo ""
     echo "This runner captures and OCRs; it does not measure layout."
     echo "For clipping, overlap and text-fit assertions: bun run test:layout"
+
+    # A run that photographed the wrong window, or nothing, used to exit 0
+    # with the evidence sitting in its own summary. The content check is the
+    # only thing standing between "eighty screenshots" and "eighty
+    # screenshots of the right dialogs", so it has to be able to fail.
+    local problems=()
+    [ "$captured" -lt "$total" ] && problems+=("captured $captured of $total") || true
+    [ "${VERIFY_CONTENT_FAILS:-0}" -gt 0 ] && problems+=("$VERIFY_CONTENT_FAILS content") || true
+    [ "${VERIFY_MARGIN_FAILS:-0}" -gt 0 ] && problems+=("$VERIFY_MARGIN_FAILS margin") || true
+    if [ ${#problems[@]} -gt 0 ]; then
+        echo ""
+        echo "FAILED: ${problems[*]}"
+        return 1
+    fi
 }
 
 main "$@"

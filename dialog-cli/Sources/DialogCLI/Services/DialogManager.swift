@@ -109,10 +109,36 @@ class DialogManager {
         let fittingSize = hostingView.fittingSize
         let width = max(minWidth, fittingSize.width) + 16
 
-        // Set width so NSTextView containers wrap correctly, then re-layout
+        // Set width so NSTextView containers wrap correctly, then re-layout.
+        //
+        // Once is not enough. A pass can report a height that leaves out rows
+        // whose text has not resolved yet — the notify surface came back 116pt
+        // when it went on to draw 185, so the window was built 69pt too short
+        // and SwiftUI centred the overflow: the header row and the last line
+        // of the body were drawn outside the window, top and bottom.
+        //
+        // So measure until it stops growing. It settles on the second pass in
+        // practice; the cap is there because a layout that never converges
+        // must not hang the dialog, and the largest measurement seen is the
+        // safe one to build from either way.
         hostingView.frame = NSRect(x: 0, y: 0, width: width - 16, height: 10000)
         hostingView.layout()
-        let constrainedSize = hostingView.fittingSize
+        var constrainedSize = hostingView.fittingSize
+
+        // `fittingSize` is what SwiftUI *says* it needs; the layer it draws
+        // into is what it actually took. On the notify surface those differed
+        // by 69pt — it reported 116 and laid out at 185 — so the window was
+        // built too short and SwiftUI centred the overflow, putting the header
+        // row above the top edge and cutting the last line of the body off the
+        // bottom. Neither is visible to `fittingSize`, which is why the audit
+        // could see the escape while the geometry looked self-consistent.
+        //
+        // Given a 10000pt-tall frame nothing is compressed, so the root's own
+        // laid-out height is the honest answer whenever it is the larger one.
+        let laidOut = hostingView.subviews.map { $0.frame.height }.max() ?? 0
+        if laidOut > constrainedSize.height {
+            constrainedSize.height = laidOut
+        }
 
         let height: CGFloat
         if let initial = initialHeight {

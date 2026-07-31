@@ -1,6 +1,12 @@
 import Foundation
 import AppKit
 
+/// The chime is played here rather than on the main thread, and the sound is
+/// held alive while it plays — an `NSSound` that goes out of scope stops.
+/// Serial, so two dialogs opening together cannot race for the device.
+private let soundQueue = DispatchQueue(label: "dev.consult-mcp.sound", qos: .utility)
+private nonisolated(unsafe) var liveSound: NSSound?
+
 // MARK: - Settings Reader
 
 struct UserSettings {
@@ -31,7 +37,25 @@ struct UserSettings {
         default: soundName = nil
         }
         guard let name = soundName else { return }
-        NSSound(named: NSSound.Name(name))?.play()
+        guard let sound = NSSound(named: NSSound.Name(name)) else { return }
+
+        // `play()` goes all the way to the audio HAL, and when no usable
+        // output device answers it does not fail — it blocks its caller. This
+        // is called on the main thread from `playShowSound`, immediately
+        // before the window is built, so a machine whose audio device never
+        // answers showed no dialog at all: the process sat in
+        // AudioQueuePrime until something killed it, and the agent waited for
+        // an answer to a question nobody had been shown.
+        //
+        // That is the whole reason the container could not run a dialog. It
+        // is not VM-only, though: an exclusive-mode device, a disconnected
+        // interface or a wedged coreaudiod does the same on real hardware.
+        //
+        // A chime is decoration. It must never be on the path to the window.
+        soundQueue.async {
+            liveSound = sound
+            sound.play()
+        }
     }
 
     func shouldPlaySound(for context: SoundContext) -> Bool {

@@ -146,8 +146,15 @@ boot_headless() {
     pkill -f "tart run $VM_NAME" 2>/dev/null && sleep 2 || true
     ensure_display
     echo "==> Booting $VM_NAME ($DISPLAY_SIZE)"
+    # --no-audio: the guest's emulated output never finishes initialising, and
+    # anything that reaches the audio HAL blocks its caller there forever.
+    # That is what stopped dialogs appearing here at all — the chime played
+    # just before the window was built and never returned. The CLI no longer
+    # plays it on that thread, but there is nothing to gain from carrying a
+    # device that cannot work.
     nohup tart run "$VM_NAME" \
         --vnc-experimental \
+        --no-audio \
         --dir="repo:$REPO:ro" \
         --dir="out:$OUT_DIR" \
         >"/tmp/tart-$VM_NAME.log" 2>&1 &

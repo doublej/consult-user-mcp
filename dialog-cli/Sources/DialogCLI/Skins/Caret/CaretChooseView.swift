@@ -13,6 +13,9 @@ struct CaretChooseView: View {
     @State private var selected: Set<Int> = []
     @State private var otherSelected = false
     @State private var otherText = ""
+    /// Set when Other is chosen, so the caret lands in the field the choice
+    /// exists to fill rather than leaving the next keystroke to the router.
+    @State private var focusOtherField = false
     @State private var focusedRow: Int?
     @State private var touched = false
     @State private var rowViews: [Int: NSView] = [:]
@@ -122,6 +125,7 @@ struct CaretChooseView: View {
                     CaretField(
                         text: $otherText,
                         placeholder: "Type your answer...",
+                        autofocus: focusOtherField,
                         onFocus: { focused in
                             model.editing = focused
                             if focused { focusedRow = otherOrdinal }
@@ -172,6 +176,12 @@ struct CaretChooseView: View {
             otherSelected = true
             selected.removeAll()
         }
+        // The caller has been asking for this since the row was written; the
+        // parameter was simply never read. Choosing Other left the caret
+        // nowhere, so the next thing typed went to the surface as shortcuts:
+        // a custom answer beginning with "s" opened the snooze tray and the
+        // characters never reached the field.
+        if focusField && otherSelected { focusOtherField = true }
     }
 
     // MARK: - Landing

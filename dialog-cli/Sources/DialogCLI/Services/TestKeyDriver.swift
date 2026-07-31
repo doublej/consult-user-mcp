@@ -90,7 +90,11 @@ enum TestKeyDriver {
 
     private static func post(keyCode: UInt16, characters: String,
                              modifiers: NSEvent.ModifierFlags = []) {
-        let windowNumber = (NSApp.keyWindow ?? NSApp.windows.first)?.windowNumber ?? 0
+        // `keyWindow` is nil whenever the app is not active, and `windows.first`
+        // is then whichever window AppKit happens to list first — so injected
+        // keys were stamped with the wrong window and went nowhere. The modal
+        // window is the dialog under test.
+        let windowNumber = (NSApp.keyWindow ?? NSApp.modalWindow ?? NSApp.windows.first)?.windowNumber ?? 0
         for type in [NSEvent.EventType.keyDown, .keyUp] {
             if let event = NSEvent.keyEvent(
                 with: type,

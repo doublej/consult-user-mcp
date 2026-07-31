@@ -127,46 +127,38 @@ boot_headless() {
     # behind, still holding the shares it was booted with — so the next boot
     # inherits the previous run's mounts. Reap it before booting.
     pkill -f "tart run $VM_NAME" 2>/dev/null && sleep 2 || true
-    # VIEWER=1 boots with tart's own window so the run can be watched. It is
-    # a real display either way — the headless path attaches a virtual
-    # framebuffer, which is the whole reason it is --vnc-experimental and not
-    # --no-graphics — so what you see is what the suite sees.
-    local display=(--vnc-experimental)
-    [ -n "${VIEWER:-}" ] && display=()
-
-    echo "==> Booting $VM_NAME${VIEWER:+ (viewer)}"
+    echo "==> Booting $VM_NAME"
     nohup tart run "$VM_NAME" \
-        "${display[@]}" \
+        --vnc-experimental \
         --dir="repo:$REPO:ro" \
         --dir="out:$OUT_DIR" \
         >"/tmp/tart-$VM_NAME.log" 2>&1 &
     echo "    pid=$! log=/tmp/tart-$VM_NAME.log"
-    [ -n "${VIEWER:-}" ] && fullscreen_viewer
+    [ -n "${VIEWER:-}" ] && open_viewer
     wait_for_agent
 }
 
-# Put the VM window full screen, which macOS gives its own Space — so a run
-# is watchable without covering whatever is on the current desktop.
-fullscreen_viewer() {
-    local i
+# --vnc-experimental already runs a VNC server and prints its URL; VIEWER=1
+# just points Screen Sharing at it. Nothing about the run changes — the guest
+# has the same virtual framebuffer either way, so what you watch is exactly
+# what the suite sees.
+#
+# `open` and nothing else. Driving the window through System Events needs an
+# Automation grant, and without one osascript sits on a permission prompt
+# forever rather than failing — which wedged the boot instead of skipping a
+# nicety. Press ⌃⌘F in the window for a full-screen Space of its own.
+open_viewer() {
+    local url i
     for i in $(seq 1 30); do
-        if osascript -e 'tell application "System Events" to exists (process "tart")' 2>/dev/null | grep -q true; then
-            sleep 1.5
-            osascript >/dev/null 2>&1 <<'AS' || true
-tell application "System Events"
-    tell process "tart"
-        set frontmost to true
-        delay 0.4
-        try
-            keystroke "f" using {control down, command down}
-        end try
-    end tell
-end tell
-AS
+        url=$(grep -oE "vnc://[^ ]+" "/tmp/tart-$VM_NAME.log" 2>/dev/null | head -1)
+        if [ -n "$url" ]; then
+            echo "==> Viewer: $url  (⌃⌘F in the window for its own Space)"
+            open "$url" 2>/dev/null || echo "    could not open Screen Sharing — connect by hand"
             return 0
         fi
         sleep 1
     done
+    echo "==> Viewer: no VNC URL appeared; continuing headless"
 }
 
 wait_for_agent() {

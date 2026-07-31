@@ -55,7 +55,15 @@ final class ThemeManager {
         case "sunset", "warm":
             current = SunsetTheme()
         default:
-            current = MidnightTheme()
+            // A name this bridge does not know is not necessarily a name
+            // nobody knows: caret resolves light, paper and day into its own
+            // palette and has already installed the matching theme by the
+            // time this runs. Overwriting it with Midnight painted the dark
+            // AppKit widgets — the expired overlay, the window chrome — onto
+            // a light surface. Leaving the skin's choice alone is also the
+            // right answer for a genuinely unknown name: the default already
+            // sits in `current`.
+            break
         }
     }
 }

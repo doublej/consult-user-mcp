@@ -142,10 +142,18 @@ launchctl enable "gui/$UID_NUM/dev.consult-mcp.runner"
 # live under ~/Library so they survive a reboot — /tmp does not.
 # ──────────────────────────────────────────────────────────────────────
 
+#
+# Its plist deliberately does NOT live in ~/Library/LaunchAgents: launchd
+# auto-loads everything there at login, and with RunAtLoad set that opened a
+# dialog on every boot. It then sat on screen holding focus, and the next
+# suite's keystrokes went to it instead — seven keyboard tests timing out
+# against a window nobody asked for. Kept out of the auto-load directory, it
+# runs only when the matrix bootstraps it by path.
 SPAWN_DIR="$HOME/.consult-mcp-spawn"
-SPAWN_PLIST="$HOME/Library/LaunchAgents/dev.consult-mcp.spawn.plist"
+SPAWN_PLIST="$SPAWN_DIR/dev.consult-mcp.spawn.plist"
 SPAWN_SH="$SPAWN_DIR/spawn.sh"
 mkdir -p "$SPAWN_DIR"
+rm -f "$HOME/Library/LaunchAgents/dev.consult-mcp.spawn.plist"
 
 cat > "$SPAWN_SH" <<'SPAWN'
 #!/bin/bash

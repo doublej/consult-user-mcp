@@ -13,8 +13,9 @@ and nothing else competing for focus.
 ## Use it
 
 ```bash
-container/launch.sh check   # preflight: tart, disk, VM, guest
-container/launch.sh run     # the full suite; artifacts land in container/out/
+container/launch.sh check          # preflight: tart, disk, VM, guest
+container/launch.sh run            # the full suite; artifacts in container/out/
+VIEWER=1 container/launch.sh run   # same, but watch it on its own full-screen Space
 ```
 
 or `bun run test:container`.
@@ -65,6 +66,7 @@ the verdict.
 | `CUM_REPO` | the repo this file is in |
 | `CUM_CPU` / `CUM_MEM` | `6` / `12288` MiB |
 | `DIALOG_SKIN` / `SKINS` | `caret` |
+| `VIEWER=1` | boot with a window and put it full screen on its own Space, to watch |
 | `REUSE=1` | reuse a running VM instead of rebooting it |
 | `TIMEOUT` | `1800` seconds |
 

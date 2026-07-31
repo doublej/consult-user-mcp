@@ -75,6 +75,13 @@ fi
 FAILED=()
 ran() { echo ""; echo "── $1 ──"; }
 
+# Any dialog still on screen from an earlier run holds focus, and the next
+# suite's keystrokes go to it instead of to the dialog under test — which
+# presents as a watchdog timeout on a test that is perfectly fine.
+pkill -f DialogCLI 2>/dev/null || true
+launchctl bootout gui/"$(id -u)"/dev.consult-mcp.spawn 2>/dev/null || true
+sleep 0.5
+
 # ── unit: the MCP server's own tests ──────────────────────────────────
 if [[ " $SUITES " == *" unit "* ]]; then
     ran "unit"

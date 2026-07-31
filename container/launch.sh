@@ -110,14 +110,46 @@ boot_headless() {
         tart stop "$VM_NAME" || true
         sleep 2
     fi
-    echo "==> Booting $VM_NAME"
+    # VIEWER=1 boots with tart's own window so the run can be watched. It is
+    # a real display either way — the headless path attaches a virtual
+    # framebuffer, which is the whole reason it is --vnc-experimental and not
+    # --no-graphics — so what you see is what the suite sees.
+    local display=(--vnc-experimental)
+    [ -n "${VIEWER:-}" ] && display=()
+
+    echo "==> Booting $VM_NAME${VIEWER:+ (viewer)}"
     nohup tart run "$VM_NAME" \
-        --vnc-experimental \
+        "${display[@]}" \
         --dir="repo:$REPO:ro" \
         --dir="out:$OUT_DIR" \
         >"/tmp/tart-$VM_NAME.log" 2>&1 &
     echo "    pid=$! log=/tmp/tart-$VM_NAME.log"
+    [ -n "${VIEWER:-}" ] && fullscreen_viewer
     wait_for_agent
+}
+
+# Put the VM window full screen, which macOS gives its own Space — so a run
+# is watchable without covering whatever is on the current desktop.
+fullscreen_viewer() {
+    local i
+    for i in $(seq 1 30); do
+        if osascript -e 'tell application "System Events" to exists (process "tart")' 2>/dev/null | grep -q true; then
+            sleep 1.5
+            osascript >/dev/null 2>&1 <<'AS' || true
+tell application "System Events"
+    tell process "tart"
+        set frontmost to true
+        delay 0.4
+        try
+            keystroke "f" using {control down, command down}
+        end try
+    end tell
+end tell
+AS
+            return 0
+        fi
+        sleep 1
+    done
 }
 
 wait_for_agent() {

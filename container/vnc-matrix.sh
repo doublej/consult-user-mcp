@@ -57,7 +57,7 @@ spawn() {
         pkill -9 'Script Editor' 2>/dev/null
         sleep 0.4
         echo $SCENARIO_IDX > /Users/admin/.consult-mcp-spawn/spawn.idx
-        launchctl bootstrap gui/501 /Users/admin/Library/LaunchAgents/dev.consult-mcp.spawn.plist
+        launchctl bootstrap gui/501 /Users/admin/.consult-mcp-spawn/dev.consult-mcp.spawn.plist
     " >/dev/null 2>&1
     local i
     for i in $(seq 1 25); do

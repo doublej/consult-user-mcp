@@ -68,6 +68,16 @@ func textSize(of view: NSView, width: CGFloat) -> CGSize? {
 
     if let field = view as? NSTextField, let cell = field.cell {
         let size = cell.cellSize(forBounds: CGRect(x: 0, y: 0, width: width, height: .greatestFiniteMagnitude))
+
+        // A single-line field draws one line whatever its value contains, and
+        // scrolls the rest past the edge. The cell does not know that: hand it
+        // a value carrying newlines and it measures every one of them, so the
+        // field reads as needing three lines' height in a box built for one —
+        // a shortfall that is never drawn and cannot be seen.
+        if field.usesSingleLineMode || field.maximumNumberOfLines == 1 {
+            let line = ceil(field.font?.boundingRectForFont.height ?? size.height)
+            return CGSize(width: ceil(size.width), height: min(ceil(size.height), line))
+        }
         return CGSize(width: ceil(size.width), height: ceil(size.height))
     }
 
@@ -106,10 +116,20 @@ func walkViews(_ view: NSView, root: NSView, depth: Int = 0, scrolled: Bool = fa
     }
     let scrolledAway = scrolled
 
+    // A field editor is the scroll geometry of the control it is editing, not
+    // its layout. AppKit gives the shared editor the width of the whole string
+    // and lets the control clip it — that is how a single-line field scrolls a
+    // value longer than its box, and it is what the user sees working. Walking
+    // it reports every long value as an escape and as an overlap with whatever
+    // it is scrolled underneath, while the control's own frame — walked here
+    // too, and bounded — is the visible truth.
+    let isFieldEditor = (view as? NSTextView)?.isFieldEditor == true
+
     // The hosting view itself and the plain container views carry no signal;
     // recording them buries the widgets that do.
     let interesting = !name.hasPrefix("NSHostingView")
         && !name.hasPrefix("_NSHostingView")
+        && !isFieldEditor
         && frame.width > 0 && frame.height > 0
 
     if interesting {

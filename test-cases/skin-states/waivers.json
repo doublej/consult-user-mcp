@@ -18,37 +18,6 @@
     "skin": "caret"
   },
   {
-    "state": "text-long-default",
-    "rules": [
-      "escapes",
-      "text-fit"
-    ],
-    "reason": "default value longer than the field is cut mid-word with no ellipsis",
-    "issue": "cum-z6b",
-    "skin": "caret"
-  },
-  {
-    "state": "text-unbreakable",
-    "rules": [
-      "escapes",
-      "text-fit"
-    ],
-    "reason": "unbreakable digest runs out of the panel, same shape as text-long-default",
-    "issue": "cum-z6b",
-    "skin": "caret"
-  },
-  {
-    "state": "text-long-multiline",
-    "rules": [
-      "escapes",
-      "text-fit",
-      "overlap"
-    ],
-    "reason": "multiline value is laid out on one unwrapped line and drawn over the question",
-    "issue": "cum-syh",
-    "skin": "caret"
-  },
-  {
     "state": "choose-forty-pane",
     "rules": [
       "escapes"

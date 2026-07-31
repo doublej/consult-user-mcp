@@ -10,6 +10,16 @@ final class CaretFieldView: NSTextField {
     var onFocus: ((Bool) -> Void)?
     var onSubmitKey: (() -> Bool)?
 
+    /// A field is one line tall, and every surface that places one says how
+    /// tall. Reporting an intrinsic height as well only creates a second
+    /// opinion, and for a value carrying newlines the cell's opinion is the
+    /// height of every line it contains — 75pt where the layout allowed 21.
+    /// That is how a prefilled release note came to be drawn up through the
+    /// question above it and down over the buttons below.
+    override var intrinsicContentSize: NSSize {
+        NSSize(width: super.intrinsicContentSize.width, height: NSView.noIntrinsicMetric)
+    }
+
     override var acceptsFirstResponder: Bool { isEnabled }
     override var canBecomeKeyView: Bool { isEnabled }
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
@@ -30,6 +40,16 @@ final class CaretFieldView: NSTextField {
             // A prefilled value opens with its text selected, so the first
             // keystroke replaces it. Required behaviour, not a platform gift.
             DispatchQueue.main.async { [weak self] in
+                // The field editor does not inherit the field's single-line
+                // setting. A default value carrying newlines — a release note,
+                // a commit message — was therefore laid out over as many lines
+                // as it had, inside a box built for one: drawn up through the
+                // question above and down across the buttons below, with the
+                // field's own underline running through the middle of it.
+                if let editor = self?.currentEditor() as? NSTextView {
+                    editor.textContainer?.maximumNumberOfLines = 1
+                    editor.textContainer?.lineBreakMode = .byClipping
+                }
                 self?.currentEditor()?.selectAll(nil)
             }
         }
@@ -119,6 +139,13 @@ struct CaretField: NSViewRepresentable {
         field.cell?.wraps = false
         field.cell?.isScrollable = true
         field.lineBreakMode = .byClipping
+        // A default value can contain newlines — an agent pre-filling a
+        // release note, a commit message, a diff. Without this the field lays
+        // that out as three lines inside a box built for one: the text was
+        // drawn up through the question above it and down over the buttons
+        // below, with the field's own underline crossing the middle of it.
+        // The value is untouched; only the number of lines drawn is.
+        field.maximumNumberOfLines = 1
         field.delegate = context.coordinator
         field.stringValue = text
         apply(field, context: context)

@@ -45,27 +45,21 @@ Pick a subset with `SUITES="unit layout"`. Artifacts come back in
 `container/out/`: `run.log` with the summary, a full `<suite>.log` per suite,
 `screenshots/`, `audit/`, and `done` carrying the verdict.
 
-## Known limitation: no app can take key focus here
+## What a green run means
 
-One class of test cannot pass in the VM: anything that types into a focused
-text field — 9 of 24 keyboard assertions. The guest's session will not let an
-application become active, verified with a minimal AppKit app rather than just
-this one, so no window becomes key, nothing takes first responder, and the key
-router reads every letter as the shortcut it is when you are not editing.
-Typing `safari for fast assets` comes back as `answer: "fri "` with
-`feedbackText: "or fast assets"`, identically at 0, 20 and 40ms between
-keystrokes, and unchanged by clearing every foreground app. Tracked as
-cum-3z4.12.
+All four suites pass here: 152 unit tests, 93 layout states with nothing
+waived, 24 keyboard assertions, and 78 screenshots read back by OCR.
 
-Everything else works: arrows, Space, Escape and its ladder, the hotkeys, the
-⌘F chord, expiry, all 93 layout states and all 78 screenshots.
+It was not always like this, and the history is worth keeping. Dialogs did not
+appear in the VM at all until recently — the chime was played on the main
+thread just before the window was built, and the guest's audio device never
+answers, so the process sat in the audio HAL forever. The visual suite hid
+that by photographing one leftover window 78 times and reporting OK. Fixing
+the sound took captures from 7 of 78 to 78 of 78; fixing "am I editing text?"
+so it does not depend on the app being frontmost took keyboard from 0 to 24.
 
-Worth knowing what this used to look like. Until recently dialogs did not
-appear in the VM **at all** — the chime was played on the main thread just
-before the window was built, and the guest's audio device never answers, so
-the process sat in the audio HAL forever. The visual suite hid it by
-photographing one leftover window 78 times and reporting OK. Fixing the sound
-took captures from 7 of 78 to 78 of 78 and keyboard assertions from 0 to 15.
+Both were real product bugs that only this environment made obvious, which is
+the argument for having it.
 
 ## Commands
 

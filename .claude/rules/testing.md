@@ -25,22 +25,16 @@ host interrupts whoever is at the keyboard. Use `container/launch.sh shell`.
 |---|---|---|
 | `bun test` | anywhere | no UI |
 | `bun run test:layout` | anywhere, and in the container | renders off-display; nothing appears, nothing takes focus |
-| `bun run test:visual` | **container** — but see below | spawns a dialog per fixture |
-| `bun run test:keyboard` | **container** — but see below | spawns dialogs and types into them |
+| `bun run test:visual` | **container** | spawns a dialog per fixture |
+| `bun run test:keyboard` | **container** | spawns dialogs and types into them |
 | `container/vnc-matrix.sh` | **container** | drives real keystrokes over VNC |
-
-**One gap remains in the container**: no app can take key focus in the guest
-session, so anything that types into a focused text field fails — 9 of 24
-keyboard assertions. Arrows, Space, Escape, the hotkeys, the ⌘F chord, expiry
-and all 78 screenshots work. Detail in `container/README.md`; do not "fix" it
-by moving those tests back to the host, where they take the keyboard from
-whoever is using it and corrupt on any focus change.
 
 ## What a green run does and does not mean
 
-- The layout audit **waives** every state with a known open bug and prints the
-  list, plus a `NOT VOUCHED FOR` line naming the issues. A pass covers the
-  unwaived states only. Read the list before calling something releasable.
+- The waiver list is currently empty, and the audit prints a `NOT VOUCHED FOR`
+  line naming the issues the moment it is not. A pass that mentions waivers
+  covers the unwaived states only — read that line before calling something
+  releasable.
 - The audit is structurally blind to SwiftUI `Text`: only the
   `NSViewRepresentable` widgets can be measured. A clipped label is caught by
   its consequences — an overlap, a box that stopped fitting — not directly.

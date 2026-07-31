@@ -65,17 +65,64 @@ mkdir -p "$OUTDIR"
 NAMES=()
 MISSED=()
 
-while IFS=$'\t' read -r NAME REST; do
+# Each state runs in its own process — deliberately, so one state's leftover
+# key monitor cannot eat the next one's script — and writes only to its own
+# two files. So they can run at once. But only some of them.
+#
+# A state that opens a pane or types a key script is waiting on an animation
+# to settle, and its delay in states.tsv was measured on a machine doing one
+# thing at a time. Run those under load and the probe measures a surface
+# mid-transition: content taller than its window, controls still outside it.
+# Every one of the eleven states that went red the first time this ran in
+# parallel was a pane or a key script, and all of them were correct.
+#
+# So the split is not a tuning knob, it is the rule: parallelism must not be
+# able to change the verdict. States with nothing to settle go wide; states
+# that are timing-sensitive stay serial and keep their calibration.
+JOBS=${JOBS:-$(( $(sysctl -n hw.ncpu) - 2 ))}
+(( JOBS < 1 )) && JOBS=1
+STATUS=$(mktemp -d)
+
+PENDING=()   # manifest order, for reporting
+FAST=()      # nothing to settle — safe to run alongside anything
+SLOW=()      # pane or key script — must have the machine to itself
+while IFS=$'\t' read -r NAME DIR CASE SETTLE PANE KEYS REST; do
   [[ -z "${NAME:-}" || "$NAME" == \#* ]] && continue
   [[ -n "$FILTER" && "$NAME" != *"$FILTER"* ]] && continue
-  if "$BIN" "$STATES" "$OUTDIR" "$SKIN" "=$NAME" >/dev/null 2>&1; then
+  PENDING+=("$NAME")
+  if [[ "${PANE:--}" == "-" && "${KEYS:--}" == "-" ]]; then
+    FAST+=("$NAME")
+  else
+    SLOW+=("$NAME")
+  fi
+done < "$STATES"
+
+render() { "$BIN" "$STATES" "$OUTDIR" "$SKIN" "=$1" >/dev/null 2>&1; }
+
+for NAME in "${FAST[@]}"; do
+  # Wait for a slot. zsh has no `wait -n`, so poll — states take seconds
+  # each and the poll costs nothing next to that.
+  while (( $(jobs -rp | wc -l) >= JOBS )); do sleep 0.05; done
+  { render "$NAME" && echo ok > "$STATUS/$NAME" || echo miss > "$STATUS/$NAME" } &
+done
+wait
+
+for NAME in "${SLOW[@]}"; do
+  render "$NAME" && echo ok > "$STATUS/$NAME" || echo miss > "$STATUS/$NAME"
+done
+
+# Reported in manifest order regardless of the order they finished, so the
+# log stays diffable between runs.
+for NAME in "${PENDING[@]}"; do
+  if [[ "$(cat "$STATUS/$NAME" 2>/dev/null)" == ok ]]; then
     NAMES+=("$NAME")
     echo "ok   $NAME"
   else
     MISSED+=("$NAME")
     echo "MISS $NAME"
   fi
-done < "$STATES"
+done
+rm -rf "$STATUS"
 
 python3 - "$HERE/index.html" "$OUTDIR" "$SKIN" "${NAMES[@]}" <<'PY'
 import sys

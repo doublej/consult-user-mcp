@@ -57,7 +57,14 @@ struct CaretChooseView: View {
                 CaretSetHeader(multi: multi, count: chosenCount)
                     .padding(.bottom, CaretStyle.u(7))
 
-                CaretChannel(centre: focusedRow) {
+                // The list gives way to the pane, not the other way round: it
+                // is the one region that scrolls, so a shorter list costs a
+                // visible row where a taller one costs the header and the
+                // footer entirely.
+                CaretChannel(
+                    cap: CaretStyle.channelCap(reserving: model.openNote != nil ? CaretStyle.u(170) : 0),
+                    centre: focusedRow
+                ) {
                     VStack(alignment: .leading, spacing: CaretStyle.u(2)) {
                         ForEach(Array(spec.choices.enumerated()), id: \.offset) { index, choice in
                             CaretRow(

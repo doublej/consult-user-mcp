@@ -1,11 +1,1 @@
-[
-  {
-    "state": "choose-forty-pane",
-    "rules": [
-      "escapes"
-    ],
-    "reason": "list at the height cap with the pane open puts the toolbar and footer outside the window",
-    "issue": "cum-982",
-    "skin": "caret"
-  }
-]
+[]

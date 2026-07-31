@@ -67,7 +67,13 @@ struct CaretTransient<Content: View>: View {
                 .truncationMode(.tail)
                 .padding(.top, CaretStyle.u(14))
 
-            CaretChannel(cap: CaretStyle.u(150)) { content() }
+            // A notification closes itself after four seconds and cannot
+            // really be read by scrolling, so the cap is what most people
+            // will ever see of it. 150 units cut a typical release summary
+            // off mid-sentence; the surface may still only grow to 42% of
+            // the screen, so this trades a taller notification for one that
+            // says what it came to say.
+            CaretChannel(cap: CaretStyle.u(260)) { content() }
                 .padding(.top, CaretStyle.u(6))
         }
         .padding(.horizontal, CaretStyle.caretRail + CaretStyle.gutter)

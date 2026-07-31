@@ -107,9 +107,19 @@ enum CaretStyle {
     /// How tall the one scrolling region may grow before it starts scrolling
     /// (§2.3). Everything outside it — the arms, the tools, the ways out —
     /// stays put.
-    static var channelCap: CGFloat {
+    static var channelCap: CGFloat { channelCap(reserving: 0) }
+
+    /// `reserving` is room the caller knows will be taken by something the
+    /// 190-unit allowance does not cover — in practice, an open note pane.
+    ///
+    /// Without it a long list and a pane could ask for more than the window
+    /// is allowed to be. The list is laid out at full height by design, so
+    /// what went outside the surface was everything else: the toolbar above
+    /// it and the footer below, both drawn past the window's own edges, with
+    /// the title landing over option six.
+    static func channelCap(reserving extra: CGFloat) -> CGFloat {
         let screen = NSScreen.main?.visibleFrame.height ?? 900
-        return max(u(180), screen * 0.85 - u(190))
+        return max(u(180), screen * 0.85 - u(190) - extra)
     }
 
     // MARK: - Measurement

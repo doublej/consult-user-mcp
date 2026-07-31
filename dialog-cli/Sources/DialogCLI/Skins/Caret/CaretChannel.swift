@@ -25,7 +25,18 @@ struct CaretChannel<Content: View>: View {
             }
         }
         .fixedSize(horizontal: false, vertical: true)
-        .frame(maxHeight: cap)
+        // `.top`, not the default centre. `fixedSize` settles the region at
+        // its full content height, so once that passes the cap the box holds
+        // a child taller than itself — centred, it hung equally out of both
+        // ends, drawing the first lines up through the title above and the
+        // last ones out through the bottom edge. Anchored to the top it
+        // starts where the box starts, which is also where a scroll region
+        // is supposed to begin.
+        .frame(maxHeight: cap, alignment: .top)
+        // And the part past the cap is still drawn without this — a
+        // forty-option list with the note pane open painted option 06 through
+        // the question and option 38 through Cancel and Done.
+        .clipped()
     }
 }
 

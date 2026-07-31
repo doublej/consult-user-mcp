@@ -150,7 +150,10 @@ boot_headless() {
 open_viewer() {
     local url i
     for i in $(seq 1 30); do
-        url=$(grep -oE "vnc://[^ ]+" "/tmp/tart-$VM_NAME.log" 2>/dev/null | head -1)
+        # `|| true`: the log is empty for the first second or so, and under
+        # `set -o pipefail` a grep that matches nothing fails the assignment
+        # and takes the whole script with it.
+        url=$(grep -oE "vnc://[^ ]+" "/tmp/tart-$VM_NAME.log" 2>/dev/null | head -1 || true)
         if [ -n "$url" ]; then
             echo "==> Viewer: $url  (⌃⌘F in the window for its own Space)"
             open "$url" 2>/dev/null || echo "    could not open Screen Sharing — connect by hand"

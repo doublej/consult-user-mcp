@@ -133,11 +133,18 @@ class DialogManager {
         // bottom. Neither is visible to `fittingSize`, which is why the audit
         // could see the escape while the geometry looked self-consistent.
         //
-        // Given a 10000pt-tall frame nothing is compressed, so the root's own
-        // laid-out height is the honest answer whenever it is the larger one.
-        let laidOut = hostingView.subviews.map { $0.frame.height }.max() ?? 0
-        if laidOut > constrainedSize.height {
-            constrainedSize.height = laidOut
+        // So: give it exactly the height it asked for and look at what it
+        // does with it. Anything that grows past that box is overflow by
+        // definition, and its own height is the honest number.
+        //
+        // Measured at the box it asked for, not at the 10000pt one used
+        // above — a view that stretches to fill would report 10000 there and
+        // every dialog would open at the height cap.
+        hostingView.frame = NSRect(x: 0, y: 0, width: width - 16, height: constrainedSize.height)
+        hostingView.layout()
+        let drawn = hostingView.subviews.map { $0.frame.height }.max() ?? 0
+        if drawn > constrainedSize.height {
+            constrainedSize.height = drawn
         }
 
         let height: CGFloat

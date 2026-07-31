@@ -7,6 +7,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.3] (macOS) - 2026-07-31
+
+### Fixed
+- A notification longer than a couple of lines is no longer drawn over its own title and cut off at the bottom — the whole message is shown, and a long one shows far more of itself than before
+- Opening the note pane no longer draws it through the Cancel and Next buttons underneath
+- A long list of options with the note pane open no longer paints its rows over the question, the header and the buttons
+- A prefilled answer containing line breaks — a release note, a commit message — stays inside its field instead of being drawn across the question above it and the buttons below
+- Picking an option that does not yet answer the question now grows the dialog to fit the hint that appears, instead of drawing it outside the window
+
 ## [2.6.2] (macOS) - 2026-07-31
 
 ### Fixed

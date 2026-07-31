@@ -3,6 +3,47 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.3",
+      "platform": "macos",
+      "date": "2026-07-31",
+      "highlight": "Every dialog now stays inside its own window — notifications, long lists, prefilled values and the note pane",
+      "changes": [
+        {
+          "text": "A notification longer than a couple of lines is no longer drawn over its own title and cut off at the bottom — the whole message is shown, and a long one shows far more of itself than before",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Opening the note pane no longer draws it through the Cancel and Next buttons underneath",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "A long list of options with the note pane open no longer paints its rows over the question, the header and the buttons",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        },
+        {
+          "text": "A prefilled answer containing line breaks — a release note, a commit message — stays inside its field instead of being drawn across the question above it and the buttons below",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        },
+        {
+          "text": "Picking an option that does not yet answer the question now grows the dialog to fit the hint that appears, instead of drawing it outside the window",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        }
+      ]
+    },
+    {
       "version": "2.6.2",
       "platform": "macos",
       "date": "2026-07-31",

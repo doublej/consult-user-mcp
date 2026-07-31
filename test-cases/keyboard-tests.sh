@@ -73,8 +73,21 @@ run_dialog() {
 }
 
 # assert <name> <response-json> <jq-predicate>
+#
+# A dialog the watchdog had to kill answered nothing, so it cannot satisfy
+# anything — but plenty of these predicates are of the form "no snooze
+# happened", and an empty response satisfies those by accident. That is not a
+# hypothetical: a container run where not one keystroke reached a dialog
+# reported ten passes. A timeout fails here before the predicate is consulted.
 assert() {
     local name="$1" json="$2" predicate="$3"
+    if echo "$json" | jq -e 'has("harness")' >/dev/null 2>&1; then
+        echo "  FAIL  $name"
+        echo "        the dialog never answered: $(echo "$json" | head -c 120)"
+        FAIL=$((FAIL + 1))
+        FAILED_NAMES+=("$name")
+        return
+    fi
     if echo "$json" | jq -e "$predicate" >/dev/null 2>&1; then
         echo "  PASS  $name"
         PASS=$((PASS + 1))
@@ -156,7 +169,73 @@ resp="$(run_dialog textInput "$CASES/text-input/keyboard-empty.json" \
 assert "expired textInput swallows typed answer" "$resp" \
     '(.answer // null) == null'
 
-# ── 5. Classic sanity — the old chassis must not regress either ────────
+# ── 5. Arrows belong to the caret while text is being edited ───────────
+# On caret this was a data-loss bug rather than a nuisance: the wizard bound
+# the left arrow straight to retreat(), which cancels on the first step, so
+# pressing left to fix a typo threw the answer and the dialog away. Nothing
+# could see it — before this block the suite pressed no arrow key at all.
+echo "== arrows while typing =="
+resp="$(run_dialog questions "$CASES/questions/wizard-single-text.json" \
+    "d2.5;p0;t:staging;d0.4;left;left;d0.4;return")"
+assert "wizard: left arrow while typing does not cancel" "$resp" \
+    '(.cancelled // false) == false'
+assert "wizard: left arrow while typing keeps the answer" "$resp" \
+    'tostring | contains("staging")'
+
+resp="$(run_dialog textInput "$CASES/text-input/keyboard-empty.json" \
+    "d2.5;p0;t:release;d0.4;left;left;left;d0.4;return")"
+assert "textInput: arrows while typing do not disturb the answer" "$resp" \
+    '.answer == "release"'
+
+# ── 6. Space — the key a pick surface is answered with ─────────────────
+# Untestable until the driver learned to press it, so all three of the
+# skins' independent Space implementations were unguarded by anything.
+echo "== space activates =="
+resp="$(run_dialog choose "$CASES/choose/single-select.json" \
+    "d2.6;down;d0.3;space;d0.5;return")"
+assert "choose single: down then space selects the second option" "$resp" \
+    '.answer == "Option Beta"'
+
+resp="$(run_dialog choose "$CASES/choose/multi-select.json" \
+    "d2.6;space;d0.3;down;d0.2;down;d0.3;space;d0.5;return")"
+assert "choose multi: space toggles two options" "$resp" \
+    '(.answer | type) == "array" and (.answer | length) == 2'
+
+# ── 7. The Other field is a text field inside the option ring ──────────
+# Exactly the typing-vs-hotkey shape the suite exists for, on the one
+# surface the suite never used to spawn.
+echo "== choose Other field =="
+resp="$(run_dialog choose "$CASES/choose/single-select-other.json" \
+    "d2.6;down;down;down;d0.3;space;d0.6;p0;t:fast safe store;d0.5;return")"
+assert "choose Other: burst typing arrives complete" "$resp" \
+    '.answer == "fast safe store"'
+assert "choose Other: burst typing triggers no snooze" "$resp" \
+    '(.snoozed // false) == false'
+
+# ── 8. The Escape ladder peels one layer per press ─────────────────────
+echo "== escape ladder =="
+resp="$(run_dialog confirm "$CASES/confirm/basic.json" "d2.5;esc")"
+assert "esc on a live dialog cancels it" "$resp" \
+    '.cancelled == true'
+
+resp="$(run_dialog confirm "$CASES/confirm/basic.json" \
+    "d2.5;esc;d0.5;return" DIALOG_TEST_PANE=snooze)"
+assert "esc closes the snooze tray without cancelling" "$resp" \
+    '(.cancelled // false) == false and (.snoozed // false) == false'
+
+# ── 9. The hotkeys must also fire when they are supposed to ────────────
+# The suite proved s and a stay quiet while typing and never once proved
+# they work at all, so "the hotkey stopped working" was a green run.
+echo "== hotkeys fire when idle =="
+resp="$(run_dialog confirm "$CASES/confirm/basic.json" "d2.5;t:s;d0.8;esc;d0.4;return")"
+assert "s opens the snooze tray when idle" "$resp" \
+    '(.cancelled // false) == false'
+
+resp="$(run_dialog confirm "$CASES/confirm/basic.json" "d2.5;c:f;d0.8;p0;t:chord;d0.5;esc;d0.4;return")"
+assert "cmd-f opens the feedback pane" "$resp" \
+    '.feedbackText == "chord"'
+
+# ── 10. Classic sanity — the old chassis must not regress either ───────
 echo "== classic sanity =="
 resp="$(run_dialog textInput "$CASES/text-input/keyboard-empty.json" \
     "d2.5;p0;t:${TYPED};d0.5;return" DIALOG_SKIN=classic)"

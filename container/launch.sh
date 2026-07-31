@@ -36,6 +36,13 @@ BASE_VM="${CUM_BASE_VM:-tahoe-base}"
 OUT_DIR="$HERE/out"
 CPU="${CUM_CPU:-6}"
 MEM="${CUM_MEM:-12288}"
+# The dialog height cap is derived from the screen, so the display is not a
+# cosmetic setting — it decides which states clamp. tart's default gives a
+# 768pt-tall screen, shorter than any machine a customer owns, and the
+# container reported six states overflowing that are fine on a real display.
+# 1512x982 is the 13" MacBook Air's logical size: small enough to be a fair
+# floor, large enough to be real.
+DISPLAY_SIZE="${CUM_DISPLAY:-1512x982}"
 SUITES="${SUITES:-unit layout keyboard visual}"
 TIMEOUT="${TIMEOUT:-1800}"
 
@@ -97,8 +104,15 @@ ensure_vm() {
     vm_exists_base || die "base image '$BASE_VM' not found — tart pull ghcr.io/cirruslabs/macos-tahoe-base:latest && tart clone …"
     echo "==> Cloning $BASE_VM → $VM_NAME"
     tart clone "$BASE_VM" "$VM_NAME"
-    echo "==> Sizing: $CPU cores / $MEM MiB"
-    tart set "$VM_NAME" --cpu "$CPU" --memory "$MEM"
+    echo "==> Sizing: $CPU cores / $MEM MiB / $DISPLAY_SIZE"
+    tart set "$VM_NAME" --cpu "$CPU" --memory "$MEM" --display "$DISPLAY_SIZE"
+}
+
+# Applied on every run, not just at clone time: the display decides which
+# dialogs clamp, so a VM created before this existed must not keep answering
+# a different question from the one a fresh clone answers.
+ensure_display() {
+    tart set "$VM_NAME" --display "$DISPLAY_SIZE" 2>/dev/null || true
 }
 
 # The repo goes in read-only and the guest works on an rsync copy; `out` is
@@ -127,7 +141,8 @@ boot_headless() {
     # behind, still holding the shares it was booted with — so the next boot
     # inherits the previous run's mounts. Reap it before booting.
     pkill -f "tart run $VM_NAME" 2>/dev/null && sleep 2 || true
-    echo "==> Booting $VM_NAME"
+    ensure_display
+    echo "==> Booting $VM_NAME ($DISPLAY_SIZE)"
     nohup tart run "$VM_NAME" \
         --vnc-experimental \
         --dir="repo:$REPO:ro" \

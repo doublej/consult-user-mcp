@@ -65,6 +65,7 @@ the verdict.
 | `CUM_VM_NAME` | `tahoe-consult` |
 | `CUM_REPO` | the repo this file is in |
 | `CUM_CPU` / `CUM_MEM` | `6` / `12288` MiB |
+| `CUM_DISPLAY` | `1512x982` — changes which dialogs clamp; see Gotchas |
 | `DIALOG_SKIN` / `SKINS` | `caret` |
 | `VIEWER=1` | boot with a window and put it full screen on its own Space, to watch |
 | `REUSE=1` | reuse a running VM instead of rebooting it |
@@ -105,9 +106,13 @@ rather than testing yesterday's code and calling it today's.
 - **`TART_HOME` is on an external disk.** `check` mounts it if it has been
   ejected. An unmounted `TART_HOME` does not error; `tart` just reports no
   VMs, which looks like the VM was deleted.
-- **The guest display is small** (1024×768 logical). Dialogs clamp at the
-  height cap here that would not clamp on a customer's screen. Tracked in
-  cum-3z4.
+- **The display is part of the test, not a setting.** The dialog height cap is
+  derived from the screen, so screen size decides which states clamp. tart's
+  default is 768pt tall — shorter than any machine a customer owns — and on it
+  the container reported six states overflowing that are fine on a real
+  display. It is pinned to `1512x982`, the 13" MacBook Air's logical size:
+  a fair floor that is still real. Override with `CUM_DISPLAY`, and expect the
+  verdict to move when you do.
 
 ## Files
 

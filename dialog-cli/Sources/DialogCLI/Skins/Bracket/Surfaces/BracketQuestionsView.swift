@@ -30,8 +30,8 @@ struct BracketQuestionsView: View {
                 canSubmit: { isValid(current) },
                 onSubmit: { advance() },
                 onCancel: { cancel() },
-                onArrowLeft: { goBack() },
-                onArrowRight: { advance() }
+                onArrowLeft: { KeyboardContext.isEditingText ? false : goBack() },
+                onArrowRight: { KeyboardContext.isEditingText ? false : advance() }
             ),
             currentDialogType: "questions",
             dialogPosition: spec.position,

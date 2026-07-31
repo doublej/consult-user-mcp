@@ -78,8 +78,21 @@ struct CaretQuestionsView: View {
                 canSubmit: { answered },
                 onSubmit: advance,
                 onCancel: cancel,
-                onArrowLeft: { retreat(); return true },
-                onArrowRight: { if answered { advance() }; return true }
+                // A caret in a text answer owns the horizontal arrows: they
+                // move through what is being typed. Without this the router
+                // hands them straight to the wizard, and on the first step
+                // retreat() cancels — so pressing left to fix a typo threw
+                // the answer, the drafted note and the dialog away.
+                onArrowLeft: {
+                    if KeyboardContext.isEditingText { return false }
+                    retreat()
+                    return true
+                },
+                onArrowRight: {
+                    if KeyboardContext.isEditingText { return false }
+                    if answered { advance() }
+                    return true
+                }
             ),
             noteCaption: { key in key.isEmpty ? "NOTE ON THIS FORM" : "NOTE ON THIS QUESTION" },
             noteSubject: { key in

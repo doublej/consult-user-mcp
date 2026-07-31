@@ -3,6 +3,28 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.2",
+      "platform": "macos",
+      "date": "2026-07-31",
+      "highlight": "Dialogs no longer fail to appear when the machine's audio is busy or unavailable",
+      "changes": [
+        {
+          "text": "A dialog could fail to appear at all on a machine whose audio device was unavailable, exclusive to another app, or wedged — the notification sound was played before the window was built and could block it indefinitely, leaving the agent waiting for an answer to a question that was never shown. The sound now plays out of the way of the dialog",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "A dialog now appears even when it cannot bring itself to the front, instead of staying invisible",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        }
+      ]
+    },
+    {
       "version": "2.6.1",
       "platform": "macos",
       "date": "2026-07-31",

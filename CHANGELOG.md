@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.2] (macOS) - 2026-07-31
+
+### Fixed
+- A dialog could fail to appear at all on a machine whose audio device was unavailable, exclusive to another app, or wedged — the notification sound was played before the window was built and could block it indefinitely, leaving the agent waiting for an answer to a question that was never shown. The sound now plays out of the way of the dialog
+- A dialog now appears even when it cannot bring itself to the front, instead of staying invisible
+
 ## [2.6.1] (macOS) - 2026-07-31
 
 ### Fixed

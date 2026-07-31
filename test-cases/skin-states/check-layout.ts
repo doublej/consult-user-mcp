@@ -362,6 +362,24 @@ if (asJson) {
   console.log(
     `\n${reports.length} states · ${failed.length} failed · ${waivedStates.length} waived · ${stale.length} stale\n`,
   );
+
+  // A pass with waivers is not a clean surface, and "passed" on its own
+  // reads like one. Name what the run is declining to vouch for, and the
+  // issues it is parked behind, every time — otherwise the waiver list is
+  // a place bugs go to stop being mentioned.
+  if (failed.length === 0 && waivedStates.length > 0) {
+    const issues = [...new Set(
+      waivedStates.map((o) => byState.get(o.report.name)?.issue ?? "no issue"),
+    )].sort();
+    console.log(
+      `NOT VOUCHED FOR: ${waivedStates.length} of ${reports.length} states are waived, ` +
+        `against ${issues.length} open ${issues.length === 1 ? "issue" : "issues"} — ${issues.join(", ")}.`,
+    );
+    console.log(
+      `This run says the other ${reports.length - waivedStates.length} states are sound. ` +
+        `It does not say the surface is.\n`,
+    );
+  }
 }
 
 process.exit(failed.length > 0 || stale.length > 0 ? 1 : 0);

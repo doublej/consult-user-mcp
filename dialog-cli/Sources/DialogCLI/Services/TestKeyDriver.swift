@@ -11,7 +11,8 @@ import AppKit
 ///   p<millis>    pause between the following typed characters (default 0)
 ///   t:<text>     type text, one key event pair per character
 ///   c:<char>     ⌘-chord (e.g. `c:f` for ⌘F)
-///   left / right / up / down / esc / return / tab   special keys
+///   left / right / up / down / esc / return / tab / space   special keys
+///   +<special>   shift form of a special key (e.g. `+tab` for ⇧⇥)
 ///
 /// Example: `DIALOG_TEST_KEYS="d1.0;t:f;t:some note;esc;return"`
 enum TestKeyDriver {
@@ -54,8 +55,15 @@ enum TestKeyDriver {
             proceed(after: 0.05)
             return
         }
+        // `+name` is the shift form. Tab order can only be proved by walking
+        // it in both directions, and shift-tab was previously unreachable.
+        if token.hasPrefix("+"), let special = specialKeys[String(token.dropFirst())] {
+            post(keyCode: special.code, characters: special.characters, modifiers: .shift)
+            proceed(after: 0.05)
+            return
+        }
         if let special = specialKeys[token] {
-            post(keyCode: special, characters: "")
+            post(keyCode: special.code, characters: special.characters)
             proceed(after: 0.05)
             return
         }
@@ -101,9 +109,14 @@ enum TestKeyDriver {
         }
     }
 
-    private static let specialKeys: [String: UInt16] = [
-        "left": 123, "right": 124, "down": 125, "up": 126,
-        "esc": 53, "return": 36, "tab": 48,
+    /// `space` carries its character because the surfaces that care read
+    /// `characters` rather than the key code, and an empty string there is
+    /// not the space bar. Its absence is why nothing could test the one key
+    /// that toggles a choice.
+    private static let specialKeys: [String: (code: UInt16, characters: String)] = [
+        "left": (123, ""), "right": (124, ""), "down": (125, ""), "up": (126, ""),
+        "esc": (53, ""), "return": (36, ""), "tab": (48, ""),
+        "space": (49, " "),
     ]
 
     private static let usQwertyKeyCodes: [Character: UInt16] = [

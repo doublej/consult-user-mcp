@@ -24,10 +24,21 @@ host interrupts whoever is at the keyboard. Use `container/launch.sh shell`.
 | Suite | Where | Why |
 |---|---|---|
 | `bun test` | anywhere | no UI |
-| `bun run test:layout` | anywhere | renders off-display; nothing appears, nothing takes focus |
-| `bun run test:visual` | **container** | spawns a dialog per fixture |
-| `bun run test:keyboard` | **container** | spawns dialogs and types into them |
+| `bun run test:layout` | anywhere, and in the container | renders off-display; nothing appears, nothing takes focus |
+| `bun run test:visual` | **container** — but see below | spawns a dialog per fixture |
+| `bun run test:keyboard` | **container** — but see below | spawns dialogs and types into them |
 | `container/vnc-matrix.sh` | **container** | drives real keystrokes over VNC |
+
+**The two on-screen suites do not currently work in the container.** The guest
+starts a dialog but maps no window: a visual run captures about 7 of 78, and
+every keyboard assertion needing a real interaction times out. Tracked as
+cum-3z4.b, and `container/README.md` has the detail. `SUITES` therefore
+defaults to `unit layout`.
+
+That leaves nowhere good to run them, which is worth saying plainly rather than
+working around: the host works but takes the screen and the keyboard, and a
+stray focus change corrupts the result silently. Do not quietly move them back
+to the host as though that were fine.
 
 ## What a green run does and does not mean
 

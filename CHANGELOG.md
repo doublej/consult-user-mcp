@@ -7,6 +7,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.1] (macOS) - 2026-07-31
+
+### Fixed
+- Pressing the left arrow to fix a typo while answering a form no longer throws the whole dialog away — the arrows now move through what you are typing, as they should
+- In the Bracket interface, the arrow keys no longer jump between form steps while you are typing an answer
+- The light theme no longer draws dark panels over a light dialog — setting a theme the interface does not recognise leaves its own colours alone instead of replacing them
+
 ## [2.6.0] (macOS) - 2026-07-30
 
 ### Added

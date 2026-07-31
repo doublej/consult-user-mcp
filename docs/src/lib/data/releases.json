@@ -3,6 +3,34 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.1",
+      "platform": "macos",
+      "date": "2026-07-31",
+      "highlight": "Arrow keys stay where you put them, and the light theme is light all the way through",
+      "changes": [
+        {
+          "text": "Pressing the left arrow to fix a typo while answering a form no longer throws the whole dialog away — the arrows now move through what you are typing, as they should",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "In the Bracket interface, the arrow keys no longer jump between form steps while you are typing an answer",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        },
+        {
+          "text": "The light theme no longer draws dark panels over a light dialog — setting a theme the interface does not recognise leaves its own colours alone instead of replacing them",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "appearance"
+        }
+      ]
+    },
+    {
       "version": "2.6.0",
       "platform": "macos",
       "date": "2026-07-30",

@@ -86,6 +86,13 @@ struct CaretChooseView: View {
                 }
             }
             .onAppear(perform: land)
+            // The helper line arrives after the surface has been measured and
+            // adds 24pt to the content. Without telling the window, it simply
+            // grew past it: the line, and whatever the layout pushed down to
+            // make room, were drawn outside the surface. Same for the row that
+            // appears when Other is chosen and typed into.
+            .onChange(of: touched && !answered) { _, _ in model.reflow() }
+            .onChange(of: helper) { _, _ in model.reflow() }
         }
     }
 

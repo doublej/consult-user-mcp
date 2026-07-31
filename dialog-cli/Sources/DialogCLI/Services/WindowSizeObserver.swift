@@ -77,7 +77,21 @@ class WindowSizeObserver: NSObject {
             let maxWidth = max(self.minWidth + 16, screenWidth - 80)
             let fittedWidth = min(max(fittingSize.width + 16, self.minWidth + 16), maxWidth)
             let newWidth = resizeWidth ? fittedWidth : currentFrame.width
-            let newHeight = min(max(fittingSize.height + 16, self.minHeight), self.maxHeight)
+            // `fittingSize` can report less than the layer actually drew — the
+            // same disagreement `createAutoSizedWindow` has to work around. It
+            // is what let a helper line appear, grow the content by 24pt, and
+            // leave the window where it was: the content asked for nothing, so
+            // nothing moved, and the extra 24pt was drawn outside the surface.
+            //
+            // Only trusted when the content is genuinely outside its box.
+            // Subviews stretch to fill, so their height equals the hosting
+            // view's whenever everything fits — reading it unconditionally
+            // would pin the window to its current height and stop a closing
+            // pane ever shrinking it.
+            let drawn = hostingView.subviews.map { $0.frame.height }.max() ?? 0
+            let overflow = drawn > hostingView.frame.height + 0.5 ? drawn : 0
+            let contentHeight = max(fittingSize.height, overflow)
+            let newHeight = min(max(contentHeight + 16, self.minHeight), self.maxHeight)
 
             let widthDelta = abs(currentFrame.width - newWidth)
             let heightDelta = abs(currentFrame.height - newHeight)

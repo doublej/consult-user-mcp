@@ -47,24 +47,25 @@ Pick a subset with `SUITES="unit layout"`. Artifacts come back in
 
 ## Known limitation: no app can take key focus here
 
-One class of test still cannot pass in the VM: anything that types into a
-focused text field. The guest's session will not let an application become
-active — verified with a minimal AppKit app, not just this one — so no window
-becomes key, nothing takes first responder, and the key router reads every
-letter as the shortcut it is when you are not editing. Typing
-`safari for fast assets` into a field comes back as `answer: "fri "` with
-`feedbackText: "or fast assets"`, identically at 0ms, 20ms and 40ms between
-keystrokes, so it is not a timing problem.
+One class of test cannot pass in the VM: anything that types into a focused
+text field — 9 of 24 keyboard assertions. The guest's session will not let an
+application become active, verified with a minimal AppKit app rather than just
+this one, so no window becomes key, nothing takes first responder, and the key
+router reads every letter as the shortcut it is when you are not editing.
+Typing `safari for fast assets` comes back as `answer: "fri "` with
+`feedbackText: "or fast assets"`, identically at 0, 20 and 40ms between
+keystrokes, and unchanged by clearing every foreground app. Tracked as
+cum-3z4.12.
 
-That is 9 of 24 keyboard assertions. Everything else works: arrows, Space,
-Escape, the hotkeys, the ⌘F chord, expiry, and all 78 screenshots.
+Everything else works: arrows, Space, Escape and its ladder, the hotkeys, the
+⌘F chord, expiry, all 93 layout states and all 78 screenshots.
 
-Worth knowing what this used to look like. Until the audit, dialogs did not
-appear in the VM **at all** — the chime was played synchronously on the main
-thread just before the window was built, and the guest's audio device never
-answers, so the process sat in the audio HAL forever. The visual suite hid it
-by photographing one leftover window 78 times and reporting OK. Fixing the
-sound took captures from 7/78 to 77/78 and keyboard assertions from 0 to 15.
+Worth knowing what this used to look like. Until recently dialogs did not
+appear in the VM **at all** — the chime was played on the main thread just
+before the window was built, and the guest's audio device never answers, so
+the process sat in the audio HAL forever. The visual suite hid it by
+photographing one leftover window 78 times and reporting OK. Fixing the sound
+took captures from 7 of 78 to 78 of 78 and keyboard assertions from 0 to 15.
 
 ## Commands
 

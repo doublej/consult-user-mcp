@@ -156,6 +156,20 @@ fi
 # Spawns real dialogs and injects keys. Cannot run on a desktop somebody is
 # using — it takes the keyboard for the length of the suite.
 if [[ " $SUITES " == *" keyboard "* ]]; then
+    # Typing only works when the dialog can take key focus, and it cannot
+    # while another application holds the foreground. The guest accumulates
+    # them — a Phone window from the base image, a Terminal, and a
+    # UserNotificationCenter alert that relaunches itself — and the suite
+    # swings between 22 of 24 and 15 of 24 depending on what happens to be
+    # in front. Clearing them first is what makes the run repeatable.
+    /usr/bin/swift -e '
+import Cocoa
+for a in NSWorkspace.shared.runningApplications where a.activationPolicy == .regular {
+    if a.bundleIdentifier == "com.apple.finder" { continue }
+    a.forceTerminate()
+}' 2>/dev/null || true
+    killall UserNotificationCenter 2>/dev/null || true
+    sleep 1
     TAIL_LINES=30 suite keyboard bash test-cases/keyboard-tests.sh
 fi
 

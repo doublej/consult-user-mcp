@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.4] (macOS) - 2026-07-31
+
+### Fixed
+- Characters typed into a text field are no longer treated as keyboard shortcuts when the dialog cannot bring itself to the front — behind a full-screen app, during a Space switch, or while a system alert holds the foreground. An answer beginning with 's' opened the snooze tray instead of being typed
+- Choosing the 'Other' option now puts the cursor in its text box, so you can just start typing your custom answer
+
 ## [2.6.3] (macOS) - 2026-07-31
 
 ### Fixed

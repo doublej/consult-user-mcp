@@ -3,6 +3,29 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.4",
+      "platform": "macos",
+      "date": "2026-07-31",
+      "highlight": "Typing into a dialog now always types, even when the dialog is not the frontmost window",
+      "changes": [
+        {
+          "text": "Characters typed into a text field are no longer treated as keyboard shortcuts when the dialog cannot bring itself to the front — behind a full-screen app, during a Space switch, or while a system alert holds the foreground. An answer beginning with 's' opened the snooze tray instead of being typed",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Choosing the 'Other' option now puts the cursor in its text box, so you can just start typing your custom answer",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general",
+          "featured": true
+        }
+      ]
+    },
+    {
       "version": "2.6.3",
       "platform": "macos",
       "date": "2026-07-31",

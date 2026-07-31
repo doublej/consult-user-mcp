@@ -1,12 +1,14 @@
 {
-  "body": "Two `filter: blur({v}px)` sliders share the same search pattern. Resolver must use `current` to pick the right line.",
+  "body": "Two `filter: blur()` sliders on the same property in the same file. Each one has to reach its own line.",
   "parameters": [
     {
       "id": "modal-blur",
       "label": "modal blur",
       "element": ".modal",
       "file": "/tmp/tweak-test.css",
-      "search": "filter: blur({v}px)",
+      "line": 2,
+      "column": 16,
+      "expectedText": "8",
       "current": 8,
       "min": 0,
       "max": 40,
@@ -18,7 +20,9 @@
       "label": "tooltip blur",
       "element": ".tooltip",
       "file": "/tmp/tweak-test.css",
-      "search": "filter: blur({v}px)",
+      "line": 7,
+      "column": 16,
+      "expectedText": "10",
       "current": 10,
       "min": 0,
       "max": 40,

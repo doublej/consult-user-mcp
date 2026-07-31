@@ -54,7 +54,11 @@ cd "$WORK" || finish "FAIL: repo not synced to $WORK" 1
 if [ -n "${EXPECT_FINGERPRINT:-}" ]; then
     GOT="$(find "$WORK/dialog-cli/Sources" "$WORK/test-cases" "$WORK/mcp-server/src" \
         -type f \( -name '*.swift' -o -name '*.ts' -o -name '*.sh' -o -name '*.json' -o -name '*.tsv' \) \
-        2>/dev/null | LC_ALL=C sort | xargs shasum 2>/dev/null | shasum | cut -c1-16)"
+        -not -path '*/audit/*' -not -path '*/screenshots/*' \
+        -not -path '*/.build/*' -not -path '*/node_modules/*' \
+        2>/dev/null | sed "s|^$WORK/||" | LC_ALL=C sort \
+        | while read -r f; do shasum "$WORK/$f" 2>/dev/null | cut -d' ' -f1; done \
+        | shasum | cut -c1-16)"
     if [ "$GOT" != "$EXPECT_FINGERPRINT" ]; then
         echo "expected $EXPECT_FINGERPRINT, guest has $GOT"
         finish "FAIL: stale share — the guest is not running the host's sources. Fix: launch.sh stop && launch.sh run" 1

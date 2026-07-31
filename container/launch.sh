@@ -168,10 +168,17 @@ wait_for_agent() {
 # sides. The guest recomputes it after its rsync; a mismatch means the share
 # handed over stale content, which used to surface as a confusing test
 # failure rather than as the infrastructure problem it is.
+# The exclusions have to match the rsync's, or the two sides are hashing
+# different file sets and the check fails every run on its own output —
+# audit/ alone contributes ninety .layout.json files the guest never receives.
 fingerprint() {
     find "$REPO/dialog-cli/Sources" "$REPO/test-cases" "$REPO/mcp-server/src" \
         -type f \( -name '*.swift' -o -name '*.ts' -o -name '*.sh' -o -name '*.json' -o -name '*.tsv' \) \
-        2>/dev/null | LC_ALL=C sort | xargs shasum 2>/dev/null | shasum | cut -c1-16
+        -not -path '*/audit/*' -not -path '*/screenshots/*' \
+        -not -path '*/.build/*' -not -path '*/node_modules/*' \
+        2>/dev/null | sed "s|^$REPO/||" | LC_ALL=C sort \
+        | while read -r f; do shasum "$REPO/$f" 2>/dev/null | cut -d' ' -f1; done \
+        | shasum | cut -c1-16
 }
 
 cmd_check() {
@@ -219,11 +226,13 @@ cmd_run() {
     # started by a LaunchAgent in gui/501 that watches a trigger file, and
     # its settings arrive through the shared folder rather than the
     # environment, which a LaunchAgent does not inherit.
+    # Quoted: SUITES holds spaces, and an unquoted value makes the guest's
+    # `source` read the rest of the line as a command.
     {
-        echo "SUITES=$SUITES"
-        echo "EXPECT_FINGERPRINT=$fp"
-        echo "DIALOG_SKIN=${DIALOG_SKIN:-caret}"
-        echo "SKINS=${SKINS:-caret}"
+        echo "SUITES='$SUITES'"
+        echo "EXPECT_FINGERPRINT='$fp'"
+        echo "DIALOG_SKIN='${DIALOG_SKIN:-caret}'"
+        echo "SKINS='${SKINS:-caret}'"
     } > "$OUT_DIR/request.env"
 
     echo "==> Running in guest (up to ${TIMEOUT}s)"

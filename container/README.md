@@ -1,0 +1,118 @@
+# The container
+
+A headless macOS VM that runs this project's tests, so they stop running on
+your desktop.
+
+Two of the suites spawn real dialogs. On your own machine they take the
+screen and the keyboard for several minutes, and anything that steals focus
+mid-run corrupts the result — which is how the visual suite came to spend
+months photographing one stuck window and reporting OK. The container gives
+them a machine of their own: a fixed OS build, a fixed display, fixed fonts,
+and nothing else competing for focus.
+
+## Use it
+
+```bash
+container/launch.sh check   # preflight: tart, disk, VM, guest
+container/launch.sh run     # the full suite; artifacts land in container/out/
+```
+
+or `bun run test:container`.
+
+First time on a machine:
+
+```bash
+container/launch.sh init    # clone the base image
+container/launch.sh prep    # toolchain, agents, screen-recording grant
+```
+
+`prep` is idempotent and only needs re-running when `prep.sh` itself
+changes — not when the suite changes. See "Why the guest can't go stale".
+
+## What a run does
+
+Inside the guest, against a fresh copy of your working tree:
+
+| Suite | What it proves |
+|---|---|
+| `unit` | the MCP server's own tests |
+| `layout` | every state measured — clipping, overlap, text that does not fit |
+| `keyboard` | the typing-vs-hotkey contract, arrows, Space, the Escape ladder |
+| `visual` | a screenshot per fixture, OCR'd against the words that should be on it |
+
+Pick a subset with `SUITES="unit layout"`. Artifacts come back in
+`container/out/`: `run.log`, `screenshots/`, `audit/`, and `done` carrying
+the verdict.
+
+## Commands
+
+| | |
+|---|---|
+| `check` | preflight only — safe to run any time |
+| `init` | clone the base image into `tahoe-consult` and size it |
+| `prep` | provision the guest |
+| `run` | sync the repo in, run the suites, copy artifacts out |
+| `shell` | boot with a viewer, for looking at something by hand |
+| `stop` | shut it down |
+| `clean` | delete the clone; the base image is left alone |
+
+## Knobs
+
+| Env | Default |
+|---|---|
+| `SUITES` | `unit layout keyboard visual` |
+| `CUM_VM_NAME` | `tahoe-consult` |
+| `CUM_REPO` | the repo this file is in |
+| `CUM_CPU` / `CUM_MEM` | `6` / `12288` MiB |
+| `DIALOG_SKIN` / `SKINS` | `caret` |
+| `REUSE=1` | reuse a running VM instead of rebooting it |
+| `TIMEOUT` | `1800` seconds |
+
+## Why the guest can't go stale
+
+`prep` bakes exactly one thing into the VM: a five-line shim that rsyncs the
+repo and hands over to `container/guest-run.sh`. Everything else lives in
+this directory, in the repo, and arrives with the code it tests.
+
+That is not tidiness. The old arrangement wrote the whole runner into the VM
+at prep time, so the guest kept executing whatever the harness looked like
+the last time somebody remembered to re-prep — and the symptom was output
+missing lines the current script obviously printed.
+
+The other half of the same problem is VirtioFS: a VM that has been up a
+while serves stale bytes for files the host has since changed. So `run`
+reboots by default (`REUSE=1` opts out), and both sides compute a
+fingerprint over the sources. If they disagree the run stops and says so,
+rather than testing yesterday's code and calling it today's.
+
+## Gotchas
+
+- **`--vnc-experimental`, never `--no-graphics`.** Without an attached
+  framebuffer the WindowServer never maps a window: `makeKeyAndOrderFront`
+  quietly does nothing and every capture comes back empty. The experimental
+  VNC path attaches a real virtual framebuffer and opens no viewer on the
+  host, which is what makes a run invisible rather than absent.
+- **The work happens in a LaunchAgent, not over `tart exec`.** `tart exec`
+  lands in `user/501`, which has no GUI. A `gui/501` LaunchAgent watches a
+  trigger file; the host touches it. Settings travel through
+  `out/request.env` because a LaunchAgent inherits no environment.
+- **Screen Recording is pre-granted** by writing TCC.db directly (SIP is off
+  in the cirruslabs base images). Without it `screencapture -l <wid>` fails
+  with "could not create image from window" while the window is plainly on
+  screen — which reads as a layout bug rather than a permissions one.
+- **`TART_HOME` is on an external disk.** `check` mounts it if it has been
+  ejected. An unmounted `TART_HOME` does not error; `tart` just reports no
+  VMs, which looks like the VM was deleted.
+- **The guest display is small** (1024×768 logical). Dialogs clamp at the
+  height cap here that would not clamp on a customer's screen. Tracked in
+  cum-3z4.
+
+## Files
+
+| | |
+|---|---|
+| `launch.sh` | the host driver — everything above |
+| `prep.sh` | guest provisioning; the only thing baked into the VM |
+| `guest-run.sh` | what the guest actually runs, from the repo |
+| `vnc-matrix.sh` | end-to-end scenarios driven over VNC with real keystrokes |
+| `out/` | artifacts (gitignored) |

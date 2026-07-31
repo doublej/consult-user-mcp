@@ -126,7 +126,11 @@ Internally the dialog-type string for a [[Form]] is `"form-wizard"` — that is 
 - **Dev install** — `bun run dev`. Builds debug binaries and copies them into the installed app bundle. The only build that changes what the installed app runs.
 - **Bundle build** — `bun run build:bundle`. Builds a release app bundle from scratch.
 - **Baseprompt bump** — editing `base-prompt.md` *and* its version comment together. One without the other fails validation.
-- **Visual test run** — `bun run test:visual`. Screenshots every [[Test Case]].
+- **Visual test run** — `bun run test:visual`. Screenshots every [[Test Case]] and OCRs it against the words that should be on it.
+- **Layout audit** — `bun run test:layout`. Renders every [[State]] off-display and asserts on the measurements. The suite that fails a build.
+- **Container** — the headless macOS VM under `container/`, where the suites run so they stop taking the developer's screen. `bun run test:container`.
+- **State** — a [[Test Case]] plus how to drive it: which [[Pane]] is open, what keys are typed, how long to settle. One fixture shot four ways is four states. Lives in `states.tsv`; a fixture without a row is never measured.
+- **Waiver** — a state the [[Layout Audit]] knows is broken, recorded with its reason and issue id. A waived state still fails if it stops matching, and a passing run names what it is not vouching for.
 - **Release** — version files, `releases.json`, generated changelog, tag, GitHub release with assets attached.
 
 ## Known Inconsistencies

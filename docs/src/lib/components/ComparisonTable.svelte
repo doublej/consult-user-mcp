@@ -18,33 +18,35 @@
 
 	const servers: Server[] = [
 		{ name: 'consult-user-mcp', author: 'doublej', url: 'https://github.com/doublej/consult-user-mcp', stars: 0, stack: 'Swift + C# + TS', platform: 'macOS / Windows', install: "curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/install.sh | bash", active: true },
-		{ name: 'interactive-mcp', author: 'ttommyth', url: 'https://github.com/ttommyth/interactive-mcp', stars: 332, stack: 'TypeScript', platform: 'macOS / Linux / Windows', install: 'npx -y interactive-mcp', active: true },
-		{ name: 'ask-user-questions', author: 'paulp-o', url: 'https://github.com/paulp-o/ask-user-questions-mcp', stars: 37, stack: 'TypeScript', platform: 'macOS / Linux', install: 'npx auq-mcp-server server', active: true },
-		{ name: 'HITL GUI', author: 'GongRzhe', url: 'https://github.com/GongRzhe/Human-In-the-Loop-MCP-Server', stars: 130, stack: 'Python', platform: 'macOS / Linux / Windows', install: 'uvx hitl-mcp-server', active: false },
-		{ name: 'HITL Discord', author: 'KOBA789', url: 'https://github.com/KOBA789/human-in-the-loop', stars: 215, stack: 'Rust', platform: 'Cross-platform (Discord)', install: 'cargo install --git https://github.com/KOBA789/human-in-the-loop.git', active: false },
-		{ name: 'mcp-interactive', author: 'ivan-mezentsev', url: 'https://github.com/ivan-mezentsev/mcp-interactive', stars: 2, stack: 'JS / HTML', platform: 'Cross-platform', install: 'npx mcp-interactive', active: false },
+		{ name: 'interactive-mcp', author: 'ttommyth', url: 'https://github.com/ttommyth/interactive-mcp', stars: 352, stack: 'TypeScript', platform: 'macOS / Linux / Windows', install: 'npx -y interactive-mcp', active: false },
+		{ name: 'ask-user-questions', author: 'paulp-o', url: 'https://github.com/paulp-o/ask-user-questions-mcp', stars: 138, stack: 'TypeScript', platform: 'macOS / Linux', install: 'npx auq-mcp-server server', active: true },
+		{ name: 'HITL GUI', author: 'GongRzhe', url: 'https://github.com/GongRzhe/Human-In-the-Loop-MCP-Server', stars: 162, stack: 'Python', platform: 'macOS / Linux / Windows', install: 'uvx hitl-mcp-server', active: false },
+		{ name: 'HITL Discord', author: 'KOBA789', url: 'https://github.com/KOBA789/human-in-the-loop', stars: 229, stack: 'Rust', platform: 'Cross-platform (Discord)', install: 'cargo install --git https://github.com/KOBA789/human-in-the-loop.git', active: false },
+		{ name: 'mcp-interactive', author: 'ivan-mezentsev', url: 'https://github.com/ivan-mezentsev/mcp-interactive', stars: 5, stack: 'JS / HTML', platform: 'Cross-platform', install: 'npx mcp-interactive', active: false },
+		{ name: 'AskUserQuestionPlus', author: 'JoJoJotarou', url: 'https://github.com/JoJoJotarou/AskUserQuestionPlus', stars: 37, stack: 'TypeScript / Node.js', platform: 'Web UI (HTTP)', install: 'npx ask-user-question-plus', active: false },
+		{ name: 'mcp-communicator-telegram', author: 'qpd-v', url: 'https://github.com/qpd-v/mcp-communicator-telegram', stars: 46, stack: 'JavaScript', platform: 'Telegram', install: 'npm install', active: false },
 	];
 
 	const features: Feature[] = [
 		// Dialog types
 		{ name: 'Yes / No confirmation', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'yes', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
-		{ name: 'Single choice', category: 'Dialog types', values: { 'consult-user-mcp': 'Up to 20 options', 'interactive-mcp': 'Predefined options', 'ask-user-questions': '2\u201310 options', 'HITL GUI': 'Radio buttons', 'HITL Discord': 'no', 'mcp-interactive': 'Predefined options' } },
-		{ name: 'Multi-select', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'yes', 'HITL GUI': 'Checkboxes', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
-		{ name: 'Free text input', category: 'Dialog types', values: { 'consult-user-mcp': 'Dedicated tool', 'interactive-mcp': 'yes', 'ask-user-questions': 'Via "Other" option', 'HITL GUI': 'yes', 'HITL Discord': 'Discord message', 'mcp-interactive': 'yes' } },
+		{ name: 'Single choice', category: 'Dialog types', values: { 'consult-user-mcp': 'Up to 20 options', 'interactive-mcp': 'Predefined options', 'ask-user-questions': '2\u201310 options', 'HITL GUI': 'Radio buttons', 'HITL Discord': 'no', 'mcp-interactive': 'Predefined options', 'AskUserQuestionPlus': 'yes' } },
+		{ name: 'Multi-select', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'yes', 'HITL GUI': 'Checkboxes', 'HITL Discord': 'no', 'mcp-interactive': 'no', 'AskUserQuestionPlus': 'yes' } },
+		{ name: 'Free text input', category: 'Dialog types', values: { 'consult-user-mcp': 'Dedicated tool', 'interactive-mcp': 'yes', 'ask-user-questions': 'Via "Other" option', 'HITL GUI': 'yes', 'HITL Discord': 'Discord message', 'mcp-interactive': 'yes', 'AskUserQuestionPlus': 'yes', 'mcp-communicator-telegram': 'yes' } },
 		{ name: 'Multi-line text', category: 'Dialog types', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'Dedicated tool', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Hidden / password input', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
-		{ name: 'Multi-question wizard', category: 'Dialog types', values: { 'consult-user-mcp': 'Wizard', 'interactive-mcp': 'no', 'ask-user-questions': 'Question sets', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
+		{ name: 'Multi-question wizard', category: 'Dialog types', values: { 'consult-user-mcp': 'Wizard', 'interactive-mcp': 'no', 'ask-user-questions': 'Question sets', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no', 'AskUserQuestionPlus': 'yes' } },
 		{ name: 'Typed input (int / float)', category: 'Dialog types', values: { 'consult-user-mcp': 'Tweak sliders', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'yes', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Markdown in prompts', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'Discord native', 'mcp-interactive': 'yes' } },
 		{ name: 'Real-time value tweak', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
-		{ name: 'System notification', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'yes', 'ask-user-questions': 'no', 'HITL GUI': 'Info message tool', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
+		{ name: 'System notification', category: 'Dialog types', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'yes', 'ask-user-questions': 'no', 'HITL GUI': 'Info message tool', 'HITL Discord': 'no', 'mcp-interactive': 'no', 'mcp-communicator-telegram': 'yes' } },
 
 		// UX & interaction
-		{ name: 'UI approach', category: 'UX', values: { 'consult-user-mcp': 'Native SwiftUI / WPF', 'interactive-mcp': 'AppleScript / zenity / PowerShell', 'ask-user-questions': 'Terminal CLI', 'HITL GUI': 'Tkinter GUI', 'HITL Discord': 'Discord threads', 'mcp-interactive': 'Electron popup' } },
+		{ name: 'UI approach', category: 'UX', values: { 'consult-user-mcp': 'Native SwiftUI / WPF', 'interactive-mcp': 'AppleScript / zenity / PowerShell', 'ask-user-questions': 'Terminal CLI', 'HITL GUI': 'Tkinter GUI', 'HITL Discord': 'Discord threads', 'mcp-interactive': 'Electron popup', 'AskUserQuestionPlus': 'Web interface (dark/light theme)', 'mcp-communicator-telegram': 'Telegram bot' } },
 		{ name: 'Snooze / defer', category: 'UX', values: { 'consult-user-mcp': '1 min \u2013 1 hr', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Feedback to redirect agent', category: 'UX', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'Rejection + reason', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Persistent chat mode', category: 'UX', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'Intensive chat', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
-		{ name: 'Remote answering', category: 'UX', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'no', 'ask-user-questions': 'SSH', 'HITL GUI': 'no', 'HITL Discord': 'Phone / Discord', 'mcp-interactive': 'no' } },
+		{ name: 'Remote answering', category: 'UX', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'no', 'ask-user-questions': 'SSH', 'HITL GUI': 'no', 'HITL Discord': 'Phone / Discord', 'mcp-interactive': 'no', 'AskUserQuestionPlus': 'yes', 'mcp-communicator-telegram': 'yes' } },
 		{ name: 'Question queueing', category: 'UX', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'no', 'ask-user-questions': 'yes', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Multi-agent support', category: 'UX', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'no', 'ask-user-questions': 'yes', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 
@@ -53,7 +55,7 @@
 		{ name: 'Settings GUI', category: 'Config', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Baseprompt injection', category: 'Config', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'Recommended rules' } },
 		{ name: 'Dialog position config', category: 'Config', values: { 'consult-user-mcp': 'Left / right / center', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
-		{ name: 'Configurable timeout', category: 'Config', values: { 'consult-user-mcp': '10 min', 'interactive-mcp': 'CLI flag (30s default)', 'ask-user-questions': 'no', 'HITL GUI': '5 min', 'HITL Discord': 'no', 'mcp-interactive': 'CLI flag (60s default)' } },
+		{ name: 'Configurable timeout', category: 'Config', values: { 'consult-user-mcp': '10 min', 'interactive-mcp': 'CLI flag (30s default)', 'ask-user-questions': 'no', 'HITL GUI': '5 min', 'HITL Discord': 'no', 'mcp-interactive': 'CLI flag (60s default)', 'AskUserQuestionPlus': '10 min (default)' } },
 		{ name: 'Disable specific tools', category: 'Config', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'CLI flag', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
 		{ name: 'Dialog history', category: 'Config', values: { 'consult-user-mcp': 'yes', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'no', 'HITL Discord': 'Discord thread', 'mcp-interactive': 'no' } },
 		{ name: 'Health check tool', category: 'Config', values: { 'consult-user-mcp': 'no', 'interactive-mcp': 'no', 'ask-user-questions': 'no', 'HITL GUI': 'yes', 'HITL Discord': 'no', 'mcp-interactive': 'no' } },
@@ -152,7 +154,7 @@
 	</div>
 
 	<p class="table-note">
-		Star counts as of March 2026. Active = committed to in last 3 months.
+		Star counts as of August 2026. Active = committed to in last 3 months.
 	</p>
 </div>
 
@@ -168,7 +170,7 @@
 
 	table {
 		width: 100%;
-		min-width: 900px;
+		min-width: 1140px;
 		border-collapse: collapse;
 		font-size: 0.85rem;
 		background: #fff;
@@ -226,7 +228,7 @@
 	}
 
 	.col-server {
-		width: calc((100% - 180px) / 6);
+		width: calc((100% - 180px) / 8);
 	}
 
 	/* Highlight own column */

@@ -3,6 +3,43 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.5",
+      "platform": "macos",
+      "date": "2026-08-17",
+      "highlight": "Signed and notarized by Apple, delivered as a disk image — no more quarantine warning",
+      "changes": [
+        {
+          "text": "The app is now signed with a Developer ID and notarized by Apple. It opens without a security warning, and you no longer have to clear the quarantine flag by hand after installing.",
+          "type": "changed",
+          "scope": "app",
+          "pane": "general",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "macOS downloads are now a disk image: open it and drag the app to Applications. Existing installs keep updating in place as before.",
+          "type": "changed",
+          "scope": "app",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "Settings now offers all four dialog styles — Classic, Alt, Bracket and Caret — in a dropdown, with a screenshot of the one you have selected. Alt and Bracket were previously only reachable by editing a settings file.",
+          "type": "changed",
+          "scope": "app",
+          "pane": "general",
+          "featured": true
+        },
+        {
+          "text": "In a multi-question form, choosing 'Other' now puts the cursor in that question's own text box. On the following question the cursor no longer jumped into a text box nobody had asked for, which swallowed the key that picks an option.",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "form",
+          "featured": true
+        }
+      ]
+    },
+    {
       "version": "2.6.4",
       "platform": "macos",
       "date": "2026-07-31",

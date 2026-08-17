@@ -7,6 +7,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.5] (macOS) - 2026-08-17
+
+### Changed
+- The app is now signed with a Developer ID and notarized by Apple. It opens without a security warning, and you no longer have to clear the quarantine flag by hand after installing.
+- macOS downloads are now a disk image: open it and drag the app to Applications. Existing installs keep updating in place as before.
+- Settings now offers all four dialog styles — Classic, Alt, Bracket and Caret — in a dropdown, with a screenshot of the one you have selected. Alt and Bracket were previously only reachable by editing a settings file.
+
+### Fixed
+- In a multi-question form, choosing 'Other' now puts the cursor in that question's own text box. On the following question the cursor no longer jumped into a text box nobody had asked for, which swallowed the key that picks an option.
+
 ## [2.6.4] (macOS) - 2026-07-31
 
 ### Fixed

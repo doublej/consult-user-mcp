@@ -148,7 +148,10 @@ if [[ "$PLATFORM" == "macos" ]]; then
   # Notarize. Needs a stored keychain profile — see the release-app skill.
   # One submission covers both assets: the ticket issued for the dmg also
   # covers the app nested inside it, so the app staples from the same run.
-  if codesign -dv "$APP_PATH" 2>&1 | grep -q "Authority=Developer ID Application"; then
+  # -dvv, not -dv: the Authority lines only appear at verbose level 2. At level
+  # 1 this test never matched, so a correctly signed app was reported unsigned
+  # and notarization was skipped without failing anything.
+  if codesign -dvv "$APP_PATH" 2>&1 | grep -q "Authority=Developer ID Application"; then
     echo "notarizing (this takes a few minutes)..."
     xcrun notarytool submit "$DMG_PATH" --keychain-profile "${NOTARY_PROFILE:-consult-user-mcp}" --wait
     xcrun stapler staple "$DMG_PATH"

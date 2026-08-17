@@ -19,6 +19,7 @@ struct BracketTextField: View {
     var isSecure: Bool = false
     @Binding var text: String
     var selectAllOnFocus: Bool = false
+    var autofocus: Bool = false
     var onFocusChange: (Bool) -> Void = { _ in }
 
     @State private var isFocused = false
@@ -34,6 +35,7 @@ struct BracketTextField: View {
                 placeholder: placeholder,
                 isSecure: isSecure,
                 selectAllOnFocus: selectAllOnFocus,
+                autofocus: autofocus,
                 onFocusChange: { focused in
                     isFocused = focused
                     onFocusChange(focused)
@@ -62,6 +64,7 @@ struct BracketFieldRepresentable: NSViewRepresentable {
     var placeholder: String
     var isSecure: Bool
     var selectAllOnFocus: Bool
+    var autofocus: Bool = false
     var onFocusChange: (Bool) -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
@@ -95,6 +98,12 @@ struct BracketFieldRepresentable: NSViewRepresentable {
         if field.stringValue != text {
             field.stringValue = text
         }
+        if autofocus, !context.coordinator.didAutofocus, field.window != nil {
+            context.coordinator.didAutofocus = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
+                field.window?.makeFirstResponder(field)
+            }
+        }
     }
 
     static func dismantleNSView(_ field: NSTextField, coordinator: Coordinator) {
@@ -104,6 +113,7 @@ struct BracketFieldRepresentable: NSViewRepresentable {
     final class Coordinator: NSObject, NSTextFieldDelegate {
         var parent: BracketFieldRepresentable
         private var hasSelectedOnce = false
+        var didAutofocus = false
 
         init(_ parent: BracketFieldRepresentable) {
             self.parent = parent

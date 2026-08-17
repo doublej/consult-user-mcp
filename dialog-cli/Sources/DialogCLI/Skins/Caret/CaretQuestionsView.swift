@@ -43,6 +43,11 @@ struct CaretQuestionsView: View {
     @State private var touched: Set<String> = []
     @State private var fieldFocused = false
     @State private var landed: Int?
+    /// The question whose Other field should take the caret. Named rather than
+    /// a flag: `.id(step)` rebuilds the field on every step, and a flag set on
+    /// one step is still set when the next one's field appears — it took the
+    /// caret before anything had been chosen, and fought `land()` for it.
+    @State private var focusOtherIn: String?
     @Environment(\.caretPalette) private var palette
 
     private var total: Int { max(1, spec.questions.count) }
@@ -213,13 +218,14 @@ struct CaretQuestionsView: View {
             label: "Other",
             description: nil,
             chosen: form.otherSelections[question.id] ?? false,
-            onActivate: { chooseOther() },
+            onActivate: { chooseOther(focusField: true) },
             onFocus: { if $0 { focusedRow = ordinal } },
             trailingContent: {
                 VStack(alignment: .leading, spacing: CaretStyle.u(5)) {
                     CaretField(
                         text: form.bindingForOtherText(question.id),
                         placeholder: "Type your answer...",
+                        autofocus: focusOtherIn == question.id,
                         onFocus: { model.editing = $0 }
                     )
                     .frame(height: CaretStyle.u(19))
@@ -228,7 +234,7 @@ struct CaretQuestionsView: View {
                 .padding(.top, CaretStyle.u(4))
                 .onChange(of: form.otherTexts[question.id] ?? "") { _, value in
                     touched.insert(question.id)
-                    if !value.isEmpty && !(form.otherSelections[question.id] ?? false) { chooseOther() }
+                    if !value.isEmpty && !(form.otherSelections[question.id] ?? false) { chooseOther(focusField: false) }
                 }
             }
         )
@@ -261,7 +267,7 @@ struct CaretQuestionsView: View {
         form.otherSelections[question.id] = result.otherSelected
     }
 
-    private func chooseOther() {
+    private func chooseOther(focusField: Bool) {
         touched.insert(question.id)
         let result = QuestionAnswer.togglingOther(
             in: form.answer(for: question),
@@ -270,6 +276,7 @@ struct CaretQuestionsView: View {
         )
         form.answers[question.id] = result.answer
         form.otherSelections[question.id] = result.otherSelected
+        if focusField && result.otherSelected { focusOtherIn = question.id }
     }
 
     private var helper: String {

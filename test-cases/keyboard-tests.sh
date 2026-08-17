@@ -212,6 +212,20 @@ assert "choose Other: burst typing arrives complete" "$resp" \
 assert "choose Other: burst typing triggers no snooze" "$resp" \
     '(.snoozed // false) == false'
 
+# A form rebuilds its Other field on every step. When "give this field the
+# caret" was a plain flag rather than a question's name, the flag set on step 1
+# was still set when step 2's field appeared: it took the caret unasked, and
+# Space — the key that picks an option — was typed into it as a space.
+echo "== form Other field does not follow the step =="
+resp="$(run_dialog questions "$CASES/questions/wizard-with-other.json" \
+    "d2.6;down;down;down;d0.3;space;d0.6;p0;t:rust;d0.6;return;d1.0;space;d0.5;return;d0.8;p0;t:demo;d0.5;return")"
+assert "form Other: step 1 takes the typed answer" "$resp" \
+    '.answer.language == "rust"'
+assert "form Other: step 2 Space picks an option, not a space" "$resp" \
+    '.answer.features == ["Auth"]'
+assert "form Other: step 3 still takes text" "$resp" \
+    '.answer.name == "demo"'
+
 # ── 8. The Escape ladder peels one layer per press ─────────────────────
 echo "== escape ladder =="
 resp="$(run_dialog confirm "$CASES/confirm/basic.json" "d2.5;esc")"

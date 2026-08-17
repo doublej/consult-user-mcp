@@ -18,6 +18,10 @@ struct BracketQuestionsView: View {
     @State private var otherTexts: [String: String] = [:]
     @State private var notes: [String: String] = [:]
     @State private var touched: Set<String> = []
+    /// The question whose Other field should take the caret. Named rather than
+    /// a flag: a flag set on one step is still set on the next, whose field is
+    /// built fresh and grabs the caret before anything has been chosen.
+    @State private var focusOtherIn: String?
 
     private var total: Int { spec.questions.count }
     private var current: QuestionItem { spec.questions[min(step, total - 1)] }
@@ -170,7 +174,7 @@ struct BracketQuestionsView: View {
             detail: nil,
             isSelected: otherSelected[item.id] ?? false,
             isMultiSelect: item.multiSelect,
-            onTap: { selectOther(in: item) },
+            onTap: { selectOther(in: item, focusField: true) },
             accessory: {
                 BracketTextField(
                     placeholder: "Type your answer...",
@@ -180,10 +184,11 @@ struct BracketQuestionsView: View {
                             otherTexts[item.id] = value
                             touched.insert(item.id)
                             if !value.isEmpty && !(otherSelected[item.id] ?? false) {
-                                selectOther(in: item)
+                                selectOther(in: item, focusField: false)
                             }
                         }
                     ),
+                    autofocus: focusOtherIn == item.id,
                     onFocusChange: { caret.isEditing = $0 }
                 )
                 .padding(.top, 6)
@@ -205,7 +210,7 @@ struct BracketQuestionsView: View {
         choices[item.id] = set
     }
 
-    private func selectOther(in item: QuestionItem) {
+    private func selectOther(in item: QuestionItem, focusField: Bool) {
         touched.insert(item.id)
         if item.multiSelect {
             otherSelected[item.id] = !(otherSelected[item.id] ?? false)
@@ -213,6 +218,7 @@ struct BracketQuestionsView: View {
             otherSelected[item.id] = true
             choices[item.id] = []
         }
+        if focusField && (otherSelected[item.id] ?? false) { focusOtherIn = item.id }
     }
 
     private func hasNote(_ id: String) -> Bool {

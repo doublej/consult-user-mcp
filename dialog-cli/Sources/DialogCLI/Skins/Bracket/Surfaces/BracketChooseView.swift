@@ -15,6 +15,9 @@ struct BracketChooseView: View {
     @State private var otherSelected = false
     @State private var otherText = ""
     @State private var didInteract = false
+    /// Set when Other is chosen, so the caret lands in the field the choice
+    /// exists to fill rather than leaving the next keystroke to the router.
+    @State private var focusOtherField = false
 
     private var otherIndex: Int { spec.choices.count }
 
@@ -136,11 +139,12 @@ struct BracketChooseView: View {
             detail: nil,
             isSelected: otherSelected,
             isMultiSelect: spec.allowMultiple,
-            onTap: { toggleOther(force: true) },
+            onTap: { toggleOther(force: true, focusField: true) },
             accessory: {
                 BracketTextField(
                     placeholder: "Type your answer...",
                     text: $otherText,
+                    autofocus: focusOtherField,
                     onFocusChange: { caret.isEditing = $0 }
                 )
                 .padding(.top, 6)
@@ -169,7 +173,7 @@ struct BracketChooseView: View {
         }
     }
 
-    private func toggleOther(force: Bool) {
+    private func toggleOther(force: Bool, focusField: Bool = false) {
         didInteract = true
         if spec.allowMultiple {
             otherSelected = force ? true : !otherSelected
@@ -177,6 +181,7 @@ struct BracketChooseView: View {
             otherSelected = true
             selected = []
         }
+        if focusField && otherSelected { focusOtherField = true }
     }
 
     private func applyDefaultSelection() {

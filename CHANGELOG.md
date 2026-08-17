@@ -7,6 +7,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.7] (macOS) - 2026-08-17
+
+### Fixed
+- Automatic updates work again. In 2.6.5 and 2.6.6 the download could gain a stray file while being unpacked, which broke the app's signature and stopped macOS from launching it afterwards. The downloads for both of those versions have been replaced, so updating from any version now works.
+- If an update ever does fail to install, the app now restores the previous version instead of leaving nothing behind.
+- The list of changes shown before an update loads reliably again. It was read from a single address that rate-limits, and any refusal from it looked identical to a version with nothing to report. It now reads from the documentation site first, retries, and says plainly when it could not load rather than showing an empty list.
+
 ## [2.6.6] (macOS) - 2026-08-17
 
 ### Changed

@@ -77,11 +77,27 @@ struct ChangelogView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    /// Two different situations, and telling the user which is which is the
+    /// point: one is worth retrying, the other is the honest answer.
     private var emptyView: some View {
-        VStack {
+        VStack(spacing: 10) {
             Spacer()
-            Text("Could not load changelog")
+            Text(loadFailed ? "Could not load the change list" : "No changes listed for this version")
                 .foregroundColor(.secondary)
+            if loadFailed {
+                Text("Check your connection, or read it on the web.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                HStack(spacing: 12) {
+                    Button("Try Again") {
+                        loadFailed = false
+                        isLoading = true
+                        loadChangelog()
+                    }
+                    Link("Open Changelog", destination: AppURLs.changelog)
+                }
+                .font(.caption)
+            }
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -208,11 +224,11 @@ struct ChangelogView: View {
             currentVersion: currentVersion,
             targetVersion: targetVersion
         ) { result in
-            releases = result
-            loadFailed = result.isEmpty
+            releases = result ?? []
+            loadFailed = result == nil
             isLoading = false
 
-            if expandSections {
+            if expandSections, let result {
                 expandedSections = Set(result.map(\.id))
             }
         }

@@ -35,6 +35,18 @@ A macOS release ships a `.dmg` and a `.zip`, and neither is optional:
 `make-dmg.sh` builds and signs the dmg; dropping the zip breaks the auto-updater
 for everyone already installed.
 
+**The zip must contain no AppleDouble members.** `ditto -c -k` encodes any
+extended attribute as a `._name` entry, and `update.sh` extracting that adds an
+unsealed file to the bundle — the updated app then fails `codesign --verify` and
+will not launch. `build-app.sh` runs `xattr -cr` before signing and `release.sh`
+fails the release if any `._` entry survives. Both guards exist because one
+xattr, set just by having run the app, shipped a bricked updater in 2.6.5.
+
+`bash scripts/check-changelog-sources.sh` confirms the change list the update
+prompt shows is actually fetchable. It needs at least one of the two sources in
+`AppURLs.releasesJSONSources` — the Pages copy comes from the docs deploy, so it
+lags a fresh release by a few minutes and the raw GitHub fallback covers the gap.
+
 ### Signing and notarization
 
 `build-app.sh` signs the bundle whenever a **Developer ID Application** identity

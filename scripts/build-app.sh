@@ -118,7 +118,21 @@ cat > "$APP_PATH/Contents/Info.plist" << EOF
 </plist>
 EOF
 
-# 10. Code sign (no-op without a Developer ID identity)
+# 10. Strip extended attributes before signing.
+#
+# Not cosmetic. `ditto -c -k` encodes any xattr it finds as an AppleDouble
+# `._name` member of the zip, and `unzip` — which update.sh uses to install an
+# update — restores that member as a real file inside the bundle. That is a
+# resource the signature does not seal, so the updated app fails
+# `codesign --verify` and Gatekeeper refuses to launch it.
+#
+# One xattr was enough to do it: running the bundled MCP server puts
+# `com.apple.lastuseddate#PS` on dist/index.js, so simply having used the app
+# before building a release was the trigger.
+echo "  Stripping extended attributes..."
+xattr -cr "$APP_PATH"
+
+# 11. Code sign (no-op without a Developer ID identity)
 echo "  Code signing..."
 bash "$ROOT/scripts/codesign-app.sh" "$APP_PATH" ${RELEASE_BUILD:+--release}
 

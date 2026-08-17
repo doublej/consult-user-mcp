@@ -22,3 +22,6 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# copied from src/lib/data by prebuild — one copy in git
+static/releases.json

@@ -41,10 +41,31 @@ log "Backing up current app..."
 rm -rf "$BACKUP_PATH"
 cp -R "$APP_PATH" "$BACKUP_PATH"
 
+# From here on the app is being replaced, and `set -e` means any failure exits
+# on the spot — between the `rm -rf` and the `mv` below, that left the machine
+# with no app at all and no way back. The explicit failure paths restored the
+# backup; the implicit ones did not.
+restore_on_error() {
+    local rc=$?
+    [ "$rc" -eq 0 ] && return 0
+    log "ERROR: update failed (exit $rc)"
+    if [ -d "$BACKUP_PATH" ] && [ ! -d "$APP_PATH" ]; then
+        restore_backup
+        open "$APP_PATH" 2>/dev/null || true
+    fi
+    cleanup
+    exit "$rc"
+}
+trap restore_on_error EXIT
+
 # Extract and replace
 log "Extracting update from $ZIP_PATH..."
 TEMP_DIR=$(mktemp -d)
-unzip -q "$ZIP_PATH" -d "$TEMP_DIR"
+# ditto, not unzip: the asset is made with `ditto -c -k`, and only ditto puts
+# an AppleDouble member back as the extended attribute it came from. unzip
+# writes it out as a `._name` file inside the bundle instead — an unsealed
+# resource, which fails codesign and stops the updated app from launching.
+ditto -x -k "$ZIP_PATH" "$TEMP_DIR"
 
 # Find the .app in extracted contents
 EXTRACTED_APP=$(find "$TEMP_DIR" -maxdepth 2 -name "*.app" -type d | head -1)

@@ -118,4 +118,8 @@ cat > "$APP_PATH/Contents/Info.plist" << EOF
 </plist>
 EOF
 
+# 10. Code sign (no-op without a Developer ID identity)
+echo "  Code signing..."
+bash "$ROOT/scripts/codesign-app.sh" "$APP_PATH" ${RELEASE_BUILD:+--release}
+
 echo "Done! App installed at: $APP_PATH"

@@ -28,8 +28,15 @@ if [ -d "$APP_PATH" ]; then
     mkdir -p "$APP_PATH/Contents/Resources/sketch-cli"
     cp "$ROOT/sketch-cli/.build/debug/SketchCLI" "$APP_PATH/Contents/Resources/sketch-cli/sketch-cli"
     cp -r "$ROOT/mcp-server/dist/"* "$APP_PATH/Contents/Resources/mcp-server/dist/"
-    # Refresh base-prompt.md so the server emits current MCP `instructions` (single source of truth)
-    cp "$ROOT/macos-app/Sources/Resources/base-prompt.md" "$APP_PATH/Contents/Resources/base-prompt.md"
+    # Refresh loose resources (base-prompt.md, bundled images, ...) so a new or
+    # changed one added under Sources/Resources reaches the installed app
+    # without a full `build:bundle`. Assets.xcassets is a subdirectory the app
+    # does not read from at runtime, so it is left out on purpose.
+    find "$ROOT/macos-app/Sources/Resources" -maxdepth 1 -type f ! -name '.DS_Store' \
+        -exec cp {} "$APP_PATH/Contents/Resources/" \;
+    # Swapping binaries invalidates the bundle's signature — re-sign or a
+    # signed app refuses to launch at all.
+    bash "$ROOT/scripts/codesign-app.sh" "$APP_PATH"
     echo "Done. Restart the app to pick up changes."
 else
     echo "App not found at $APP_PATH — run 'bun run build:bundle' first to create it."

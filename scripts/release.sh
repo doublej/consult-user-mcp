@@ -29,6 +29,7 @@ case "$PLATFORM" in
     TAG_PREFIX="macos/v"
     APP_PATH="/Applications/Consult User MCP.app"
     ZIP_PATH="/tmp/Consult.User.MCP.app.zip"
+    DMG_PATH="/tmp/Consult.User.MCP.dmg"
     PLATFORM_LABEL="macOS"
     ;;
   windows)
@@ -128,7 +129,7 @@ fi
 if [[ "$PLATFORM" == "macos" ]]; then
   echo ""
   echo "building app bundle..."
-  bun run build:bundle
+  RELEASE_BUILD=1 bun run build:bundle
 
   if [[ ! -d "$APP_PATH" ]]; then
     echo "error: $APP_PATH not found after build" >&2
@@ -136,10 +137,34 @@ if [[ "$PLATFORM" == "macos" ]]; then
   fi
   echo "ok: app bundle exists"
 
-  # Create zip
-  rm -f "$ZIP_PATH"
-  (cd /Applications && zip -r "$ZIP_PATH" "Consult User MCP.app" -x "*.DS_Store")
+  # ditto, not zip: it preserves symlinks and extended attributes, which
+  # notarization and stapling both depend on.
+  makezip() { rm -f "$ZIP_PATH"; ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"; }
+
+  # The dmg is what a human downloads; the zip is what install.sh and the
+  # in-app updater consume. Both ship.
+  bash scripts/make-dmg.sh "$APP_PATH" "$DMG_PATH"
+
+  # Notarize. Needs a stored keychain profile — see the release-app skill.
+  # One submission covers both assets: the ticket issued for the dmg also
+  # covers the app nested inside it, so the app staples from the same run.
+  if codesign -dv "$APP_PATH" 2>&1 | grep -q "Authority=Developer ID Application"; then
+    echo "notarizing (this takes a few minutes)..."
+    xcrun notarytool submit "$DMG_PATH" --keychain-profile "${NOTARY_PROFILE:-consult-user-mcp}" --wait
+    xcrun stapler staple "$DMG_PATH"
+    xcrun stapler staple "$APP_PATH"
+    echo "ok: notarized and stapled"
+  else
+    echo "warning: app is not Developer ID signed — shipping unsigned, users will hit Gatekeeper" >&2
+  fi
+
+  makezip   # after stapling, so the zipped app carries the ticket
   echo "ok: zip created at $ZIP_PATH"
+
+  if [[ ! -f "$DMG_PATH" ]]; then
+    echo "error: dmg not found at $DMG_PATH" >&2
+    exit 1
+  fi
 fi
 
 # 7. Verify zip exists and is non-empty
@@ -180,10 +205,15 @@ for r in data['releases']:
         sys.exit(0)
 ")
 
-gh release create "$TAG" "$ZIP_PATH" \
+ASSETS=("$ZIP_PATH")
+if [[ "$PLATFORM" == "macos" ]]; then
+  ASSETS+=("$DMG_PATH")
+fi
+
+gh release create "$TAG" "${ASSETS[@]}" \
   --title "$PLATFORM_LABEL v$VERSION — $HIGHLIGHT" \
   --notes "## Changes
 $CHANGES"
 
 echo ""
-echo "release $TAG created with zip asset attached"
+echo "release $TAG created with assets attached: ${ASSETS[*]}"

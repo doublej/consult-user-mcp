@@ -19,9 +19,53 @@ Runs entirely on this machine.
 4. `bun run changelog` — regenerates `CHANGELOG.md`. Never hand-edit it.
 5. `bash scripts/validate-baseprompt-version.sh`.
 6. Commit everything.
-7. `bash scripts/release.sh --platform macos` — builds, zips, tags, creates the GitHub release.
+7. `bash scripts/release.sh --platform macos` — builds, packages, tags, creates the GitHub release.
 
 `--dry-run` validates preconditions without executing. Use it first when anything about the state is uncertain.
+
+### Two assets, both required
+
+A macOS release ships a `.dmg` and a `.zip`, and neither is optional:
+
+| Asset | Consumed by |
+|---|---|
+| `Consult.User.MCP.dmg` | a human downloading from the releases page — drag to `/Applications` |
+| `Consult.User.MCP.app.zip` | `install.sh` and the in-app updater, both of which pick the first `.zip` asset |
+
+`make-dmg.sh` builds and signs the dmg; dropping the zip breaks the auto-updater
+for everyone already installed.
+
+### Signing and notarization
+
+`build-app.sh` signs the bundle whenever a **Developer ID Application** identity
+is in the keychain, and skips silently when there is none — an unsigned build
+still works locally. `release.sh` then notarizes and staples, but only if the
+bundle actually came out Developer ID signed; otherwise it warns and ships
+unsigned rather than failing.
+
+Only the dmg is submitted. The ticket Apple issues covers the app nested inside
+it, so both the dmg and the app staple from that one submission — and the zip is
+made after stapling, so the zipped app carries the ticket too.
+
+One-time machine setup:
+
+```bash
+# 1. Certificate — Xcode ▸ Settings ▸ Accounts ▸ <paid team> ▸ Manage Certificates
+#    ▸ + ▸ Developer ID Application.  Verify:
+security find-identity -v -p codesigning
+
+# 2. Notarization credentials — app-specific password from appleid.apple.com
+xcrun notarytool store-credentials consult-user-mcp \
+  --apple-id <apple-id> --team-id <TEAM_ID> --password <app-specific-password>
+```
+
+Overrides: `CODESIGN_IDENTITY` picks a specific identity, `NOTARY_PROFILE`
+a different stored profile.
+
+Signing is deliberately part of `bun run dev` too — `dev-install.sh` swaps
+binaries into the installed bundle, which invalidates the signature, and a
+signed app with a broken seal will not launch at all. Dev builds sign without
+a secure timestamp so they stay fast.
 
 ## Windows
 

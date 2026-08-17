@@ -25,34 +25,12 @@ enum DialogPosition: String, CaseIterable, Codable {
 
 /// Which visual layer the Dialog CLI renders a dialog with.
 ///
-/// The raw values are the ids in the CLI's own `SkinRegistry`, which matches on
-/// them verbatim — so they cannot be renamed here alone. Every skin the CLI
-/// carries is listed; `DIALOG_SKIN` can still put an unlisted one in
-/// `settings.json` by hand, which `DialogSettings.loadFromFile` leaves alone
-/// rather than snapping back to Classic.
-enum DialogSkin: String, CaseIterable, Codable {
-    /// The interface the product shipped with.
-    case classic
-    /// An independent restyle of the classic layout.
-    case alt
-    /// A dense, keyboard-first restyle.
-    case bracket
-    /// The redesign.
+/// The raw value is the id in the CLI's own `SkinRegistry`, matched verbatim —
+/// so it cannot be renamed here alone. Only Caret is listed because only Caret
+/// is shipped: the CLI still carries Classic, Alt and Bracket and `DIALOG_SKIN`
+/// still reaches them, but nothing in the app chooses between them.
+enum DialogSkin: String, Codable {
     case caret
-
-    var label: String {
-        switch self {
-        case .classic: return "Classic"
-        case .alt: return "Alt"
-        case .bracket: return "Bracket"
-        case .caret: return "Caret"
-        }
-    }
-
-    /// Resource name of the bundled screenshot shown in the settings preview.
-    var previewImageName: String {
-        "skin-preview-\(rawValue)"
-    }
 }
 
 // MARK: - Dialog Size

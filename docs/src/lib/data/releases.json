@@ -3,6 +3,29 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.6",
+      "platform": "macos",
+      "date": "2026-08-17",
+      "highlight": "One interface, and it is the designed one — dialogs are always Caret now",
+      "changes": [
+        {
+          "text": "Dialogs now always use the Caret interface. The style option in Appearance is gone, and installs still set to the older Classic look are moved across on first launch. Caret is the one that gets designed, measured and tested, so it is the one everybody gets.",
+          "type": "changed",
+          "scope": "app",
+          "pane": "general",
+          "featured": true,
+          "starred": true
+        },
+        {
+          "text": "Removed the style previews added in 2.6.5. The screenshots were never included in the download, so the setting showed a placeholder instead of a preview.",
+          "type": "removed",
+          "scope": "app",
+          "pane": "general",
+          "featured": true
+        }
+      ]
+    },
+    {
       "version": "2.6.5",
       "platform": "macos",
       "date": "2026-08-17",
@@ -18,13 +41,6 @@
         },
         {
           "text": "macOS downloads are now a disk image: open it and drag the app to Applications. Existing installs keep updating in place as before.",
-          "type": "changed",
-          "scope": "app",
-          "pane": "general",
-          "featured": true
-        },
-        {
-          "text": "Settings now offers all four dialog styles — Classic, Alt, Bracket and Caret — in a dropdown, with a screenshot of the one you have selected. Alt and Bracket were previously only reachable by editing a settings file.",
           "type": "changed",
           "scope": "app",
           "pane": "general",

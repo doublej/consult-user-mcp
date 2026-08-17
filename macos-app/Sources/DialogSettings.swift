@@ -13,7 +13,11 @@ final class DialogSettings: ObservableObject {
 
     @AppStorage("dialogPosition") var position: DialogPosition = .left
     @AppStorage("dialogSize") var size: DialogSize = .regular
-    @AppStorage("dialogSkin") var skin: DialogSkin = .classic
+    /// Not a setting. Dialogs are Caret, and the Appearance section no longer
+    /// offers a choice — one interface is the one that gets designed, measured
+    /// and screenshotted, and the layout audit is calibrated against this one
+    /// only. `DIALOG_SKIN` still reaches the others for development.
+    let skin: DialogSkin = .caret
     @AppStorage("soundOnShow") var soundOnShow: SoundEffect = .subtle
     @AppStorage("animationsEnabled") var animationsEnabled: Bool = true
     @AppStorage("alwaysOnTop") var alwaysOnTop: Bool = true
@@ -132,6 +136,11 @@ final class DialogSettings: ObservableObject {
 
         lastModified = settingsModificationDate()
         loadFromFile()
+        // Rewrite once on launch. Otherwise an install upgrading from a version
+        // that still had the skin toggle keeps `"skin": "classic"` in the file
+        // until the user happens to change some other setting, and dialogs go
+        // on rendering the skin the app no longer offers.
+        saveToFile()
         startPolling()
 
         // Start countdown timer if snooze is already active from file
@@ -283,12 +292,9 @@ final class DialogSettings: ObservableObject {
         if let auto = settings.afkAutoEnabled {
             afkAutoEnabled = auto
         }
-        // A skin the toggle does not offer — one put there by `DIALOG_SKIN` or
-        // by hand — is left alone rather than snapped back to Classic, so the
-        // toggle reads as off and switching it on is still the way out.
-        if let raw = settings.skin, let known = DialogSkin(rawValue: raw) {
-            skin = known
-        }
+        // `skin` is deliberately not read back. It is a constant now, and the
+        // next save overwrites whatever an older version left in the file —
+        // which is how everyone still on Classic arrives at Caret.
     }
 
     // MARK: - AFK Mode

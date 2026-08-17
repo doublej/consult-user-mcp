@@ -219,26 +219,6 @@ private struct AppearanceSettingsSection: View {
         SettingsSectionContainer(title: "Appearance") {
             VStack(spacing: 0) {
                 SettingsRowWithControl(
-                    icon: "paintbrush",
-                    title: "Interface",
-                    subtitle: "Visual style for dialogs"
-                ) {
-                    Picker("", selection: $settings.skin) {
-                        ForEach(DialogSkin.allCases, id: \.self) { skin in
-                            Text(skin.label).tag(skin)
-                        }
-                    }
-                    .labelsHidden()
-                    .frame(width: 120)
-                }
-
-                SkinPreviewImage(skin: settings.skin)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 14)
-
-                Divider().padding(.leading, 40)
-
-                SettingsRowWithControl(
                     icon: "bell",
                     title: "Sound",
                     subtitle: "Play when dialog appears"
@@ -288,39 +268,9 @@ private struct AppearanceSettingsSection: View {
         }
         // The next dialog is a fresh process that reads this file on launch, so
         // writing it is the whole of applying it.
-        .onChange(of: settings.skin) { _, _ in settings.saveToFile() }
         .onChange(of: settings.soundOnShow) { _, _ in settings.saveToFile() }
         .onChange(of: settings.animationsEnabled) { _, _ in settings.saveToFile() }
         .onChange(of: settings.alwaysOnTop) { _, _ in settings.saveToFile() }
-    }
-}
-
-/// A screenshot of a multi-select dialog rendered in the given skin, so
-/// choosing one in the dropdown shows what it actually looks like rather
-/// than leaving it to a name.
-private struct SkinPreviewImage: View {
-    let skin: DialogSkin
-
-    var body: some View {
-        image
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(maxWidth: .infinity)
-            .frame(height: 220)
-            .background(RoundedRectangle(cornerRadius: 8).fill(Color.black.opacity(0.2)))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Color(.separatorColor), lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    private var image: Image {
-        if let url = Bundle.main.url(forResource: skin.previewImageName, withExtension: "png"),
-           let nsImage = NSImage(contentsOf: url) {
-            return Image(nsImage: nsImage)
-        }
-        return Image(systemName: "photo")
     }
 }
 

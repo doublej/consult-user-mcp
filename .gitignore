@@ -77,3 +77,6 @@ test-cases/skin-states/.render.log
 test-cases/skin-states/.findwin
 test-cases/skin-states/shots/
 test-cases/skin-states/index.html
+
+# beads coordination lock — machine-local
+.beads.gate.lock

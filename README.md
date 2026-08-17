@@ -40,14 +40,14 @@ curl -sSL https://raw.githubusercontent.com/doublej/consult-user-mcp/main/instal
 ```
 
 **Manual install:**
-1. Download **Consult User MCP.app.zip** from [Releases](../../releases) (look for `macos/vX.Y.Z`)
-2. Unzip and drag to `/Applications`
-3. Remove the quarantine flag (required for non-notarized apps):
-   ```bash
-   xattr -cr "/Applications/Consult User MCP.app"
-   ```
-4. Launch the app - a menu bar icon appears
-5. Click the menu bar icon and use **Install for Claude Code** to automatically configure the MCP server
+1. Download **Consult.User.MCP.dmg** from [Releases](../../releases) (look for `macos/vX.Y.Z`)
+2. Open it and drag the app to `/Applications`
+3. Launch the app - a menu bar icon appears
+4. Click the menu bar icon and use **Install for Claude Code** to automatically configure the MCP server
+
+The app is signed with a Developer ID and notarized by Apple, so there is no
+quarantine flag to clear. The `.zip` asset beside the dmg is what `install.sh`
+and the in-app updater consume.
 
 ### Windows
 

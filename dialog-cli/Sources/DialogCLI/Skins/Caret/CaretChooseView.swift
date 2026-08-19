@@ -13,9 +13,13 @@ struct CaretChooseView: View {
     @State private var selected: Set<Int> = []
     @State private var otherSelected = false
     @State private var otherText = ""
-    /// Set when Other is chosen, so the caret lands in the field the choice
-    /// exists to fill rather than leaving the next keystroke to the router.
-    @State private var focusOtherField = false
+    /// Bumped every time Other is chosen, so the caret lands in the field the
+    /// choice exists to fill. A counter rather than a flag: a flag is consumed
+    /// once and the second choice then leaves focus on the row.
+    @State private var focusOtherToken = 0
+    /// Whether the caret is in the Other field right now, which is the only
+    /// time the way back out is worth drawing.
+    @State private var otherFieldFocused = false
     @State private var focusedRow: Int?
     @State private var touched = false
     @State private var rowViews: [Int: NSView] = [:]
@@ -122,15 +126,19 @@ struct CaretChooseView: View {
             onFocus: { if $0 { focusedRow = otherOrdinal } },
             trailingContent: {
                 VStack(alignment: .leading, spacing: CaretStyle.u(5)) {
-                    CaretField(
-                        text: $otherText,
-                        placeholder: "Type your answer...",
-                        autofocus: focusOtherField,
-                        onFocus: { focused in
-                            model.editing = focused
-                            if focused { focusedRow = otherOrdinal }
-                        }
-                    )
+                    HStack(spacing: CaretStyle.u(8)) {
+                        CaretField(
+                            text: $otherText,
+                            placeholder: "Type your answer...",
+                            autofocusToken: focusOtherToken,
+                            onFocus: { focused in
+                                model.editing = focused
+                                otherFieldFocused = focused
+                                if focused { focusedRow = otherOrdinal }
+                            }
+                        )
+                        CaretFieldExit(showing: otherFieldFocused, commits: answered)
+                    }
                     .frame(height: CaretStyle.u(19))
                     CaretFieldRule(focused: otherSelected, tone: otherSelected ? nil : palette.rail)
                 }
@@ -181,7 +189,7 @@ struct CaretChooseView: View {
         // nowhere, so the next thing typed went to the surface as shortcuts:
         // a custom answer beginning with "s" opened the snooze tray and the
         // characters never reached the field.
-        if focusField && otherSelected { focusOtherField = true }
+        if focusField && otherSelected { focusOtherToken += 1 }
     }
 
     // MARK: - Landing

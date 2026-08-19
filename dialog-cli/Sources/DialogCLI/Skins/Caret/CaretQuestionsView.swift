@@ -43,11 +43,20 @@ struct CaretQuestionsView: View {
     @State private var touched: Set<String> = []
     @State private var fieldFocused = false
     @State private var landed: Int?
-    /// The question whose Other field should take the caret. Named rather than
-    /// a flag: `.id(step)` rebuilds the field on every step, and a flag set on
-    /// one step is still set when the next one's field appears — it took the
-    /// caret before anything had been chosen, and fought `land()` for it.
+    /// The Other field asking for the caret, and how many times it has asked.
+    ///
+    /// The question id is carried because `.id(step)` rebuilds the field on
+    /// every step, and a request left set from one step would be answered by
+    /// the next step's fresh field before anything had been chosen — taking
+    /// the caret unasked and racing `land()` for it.
+    ///
+    /// The counter is carried because one request per field is not enough:
+    /// choosing Other again after tabbing away has to ask again, and a plain
+    /// flag is already spent.
     @State private var focusOtherIn: String?
+    @State private var focusOtherToken = 0
+    /// Whether the caret is in this step's Other field right now.
+    @State private var otherFieldFocused = false
     @Environment(\.caretPalette) private var palette
 
     private var total: Int { max(1, spec.questions.count) }
@@ -222,12 +231,19 @@ struct CaretQuestionsView: View {
             onFocus: { if $0 { focusedRow = ordinal } },
             trailingContent: {
                 VStack(alignment: .leading, spacing: CaretStyle.u(5)) {
-                    CaretField(
-                        text: form.bindingForOtherText(question.id),
-                        placeholder: "Type your answer...",
-                        autofocus: focusOtherIn == question.id,
-                        onFocus: { model.editing = $0 }
-                    )
+                    HStack(spacing: CaretStyle.u(8)) {
+                        CaretField(
+                            text: form.bindingForOtherText(question.id),
+                            placeholder: "Type your answer...",
+                            autofocusToken: focusOtherIn == question.id ? focusOtherToken : 0,
+                            onFocus: { focused in
+                                model.editing = focused
+                                otherFieldFocused = focused
+                                if focused { focusedRow = ordinal }
+                            }
+                        )
+                        CaretFieldExit(showing: otherFieldFocused, commits: answered)
+                    }
                     .frame(height: CaretStyle.u(19))
                     CaretFieldRule(focused: form.otherSelections[question.id] ?? false)
                 }
@@ -276,7 +292,10 @@ struct CaretQuestionsView: View {
         )
         form.answers[question.id] = result.answer
         form.otherSelections[question.id] = result.otherSelected
-        if focusField && result.otherSelected { focusOtherIn = question.id }
+        if focusField && result.otherSelected {
+            focusOtherIn = question.id
+            focusOtherToken += 1
+        }
     }
 
     private var helper: String {

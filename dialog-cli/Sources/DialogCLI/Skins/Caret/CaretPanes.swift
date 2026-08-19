@@ -135,7 +135,7 @@ struct CaretReportFlow: View {
                     CaretField(
                         text: $model.reportText,
                         placeholder: "Briefly describe the issue...",
-                        autofocus: true,
+                        autofocusToken: 1,
                         onFocus: { model.editing = $0 },
                         onEnter: { if describable { advance() } }
                     )

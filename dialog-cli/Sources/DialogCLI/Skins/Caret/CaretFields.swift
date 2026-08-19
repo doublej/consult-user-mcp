@@ -99,7 +99,15 @@ struct CaretField: NSViewRepresentable {
     @Binding var text: String
     var placeholder: String = ""
     var masked: Bool = false
-    var autofocus: Bool = false
+    /// A request for this field to take the caret, not a state. Any change to
+    /// a non-zero value is one request and is honoured once; zero never asks.
+    ///
+    /// It was a `Bool` with a fire-once guard, which meant the caret could be
+    /// delivered to a given field exactly once for as long as it existed.
+    /// Choosing Other a second time — after tabbing away, or after clicking
+    /// the row again — left the row itself holding focus, because the row's
+    /// click handler takes first responder and nothing handed it on.
+    var autofocusToken: Int = 0
     var onFocus: (Bool) -> Void = { _ in }
     /// Return inside the field. The router hands the key to the first
     /// responder whenever the surface's own commit will not take it (§4.4).
@@ -107,7 +115,7 @@ struct CaretField: NSViewRepresentable {
 
     final class Coordinator: NSObject, NSTextFieldDelegate {
         var parent: CaretField
-        var didAutofocus = false
+        var consumedAutofocus = 0
         init(_ parent: CaretField) { self.parent = parent }
 
         func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
@@ -160,8 +168,9 @@ struct CaretField: NSViewRepresentable {
         apply(field, context: context)
         if let plain = field as? CaretFieldView { plain.onFocus = onFocus }
         if let secure = field as? CaretSecureFieldView { secure.onFocus = onFocus }
-        if autofocus, !context.coordinator.didAutofocus, field.window != nil {
-            context.coordinator.didAutofocus = true
+        if autofocusToken != 0, autofocusToken != context.coordinator.consumedAutofocus,
+           field.window != nil {
+            context.coordinator.consumedAutofocus = autofocusToken
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.10) {
                 field.window?.makeFirstResponder(field)
             }
@@ -176,6 +185,47 @@ struct CaretField: NSViewRepresentable {
             string: placeholder,
             attributes: [.font: CaretStyle.body, .foregroundColor: NSColor(palette.inkMuted)]
         )
+    }
+}
+
+// MARK: - Way out of a field
+
+/// The keys that get the caret back out, drawn at the trailing edge of the
+/// field while it holds one.
+///
+/// A field is the one place on a surface where every letter is text and none
+/// of it is a shortcut, so the ways out stop being discoverable exactly when
+/// the person is inside. Saying so where they are looking costs a line.
+///
+/// The space is reserved whether or not the hint is showing. §2.2 fixes the
+/// surface width when it opens, so a hint that appeared on focus would change
+/// the row's width under the caret — and the window, already sized, would not
+/// follow it.
+struct CaretFieldExit: View {
+    var showing: Bool
+    /// Return commits the surface from inside a field. Where it cannot — an
+    /// unanswered form step — saying so would be a lie, so only Tab is shown.
+    var commits: Bool = true
+    @Environment(\.caretPalette) private var palette
+
+    var body: some View {
+        HStack(spacing: CaretStyle.u(6)) {
+            key("⇥", "leave")
+            if commits { key("⏎", "done") }
+        }
+        .opacity(showing ? 1 : 0)
+        .animation(.easeOut(duration: 0.12), value: showing)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func key(_ glyph: String, _ label: String) -> some View {
+        HStack(spacing: CaretStyle.u(3)) {
+            CaretKeycap(glyph: glyph)
+            Text(label)
+                .font(Font(CaretStyle.monoTiny))
+                .foregroundStyle(palette.inkMuted)
+        }
     }
 }
 

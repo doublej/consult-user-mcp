@@ -161,10 +161,34 @@ final class FocusManager {
         return y1 > y2  // Higher y first (top of window)
     }
 
+    /// Which of `views` currently holds the caret, or -1.
+    ///
+    /// The subtlety is text fields. While one is being edited the window's
+    /// first responder is the shared *field editor*, not the `NSTextField`
+    /// that registered here — so a straight identity test answered "focus is
+    /// nowhere" for a caret plainly sitting in a field. Tab and the arrows
+    /// then fell to the -1 branch and jumped to the first or last control
+    /// instead of the neighbour, which is what left typing in an Other field
+    /// feeling like no man's land: every way out teleported.
+    ///
+    /// The field editor is installed inside the control it edits, so walking
+    /// up the view tree finds that control. Doing the walk for every responder
+    /// also covers any other focusable subview a registered view may contain.
     private func findCurrentIndex(in views: [NSView]) -> Int {
-        if let window = views.first?.window,
-           let firstResponder = window.firstResponder as? NSView,
-           let index = views.firstIndex(where: { $0 === firstResponder }) {
+        let window = views.first(where: { $0.window != nil })?.window
+        guard let responder = window?.firstResponder else { return -1 }
+
+        var node = responder as? NSView
+        while let current = node {
+            if let index = views.firstIndex(where: { $0 === current }) { return index }
+            node = current.superview
+        }
+
+        // Belt and braces: a field editor that is not in the field's subtree
+        // still names its client as its delegate.
+        if let editor = responder as? NSText,
+           let client = editor.delegate as? NSView,
+           let index = views.firstIndex(where: { $0 === client }) {
             return index
         }
         return -1

@@ -7,6 +7,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.8] (macOS) - 2026-08-19
+
+### Added
+- While you are typing in a box, the keys that get you back out — Tab to leave, Return to finish — are shown at the end of the line.
+
+### Fixed
+- Choosing "Other" now puts the cursor in its box every time. Previously it worked on the first try only — pick it again after moving away and the cursor stayed on the row, so what you typed went nowhere.
+- Tab and the arrow keys now move to the next control when you leave a text box, instead of jumping back to the top or bottom of the dialog. This affected every box you could type in, not just custom answers.
+
 ## [2.6.7] (macOS) - 2026-08-17
 
 ### Fixed

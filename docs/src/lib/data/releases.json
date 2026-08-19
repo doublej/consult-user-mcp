@@ -3,6 +3,35 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.8",
+      "platform": "macos",
+      "date": "2026-08-19",
+      "highlight": "Typing a custom answer finally behaves like typing anywhere else",
+      "changes": [
+        {
+          "text": "Choosing \"Other\" now puts the cursor in its box every time. Previously it worked on the first try only — pick it again after moving away and the cursor stayed on the row, so what you typed went nowhere.",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true,
+          "starred": true,
+          "pane": "pick"
+        },
+        {
+          "text": "Tab and the arrow keys now move to the next control when you leave a text box, instead of jumping back to the top or bottom of the dialog. This affected every box you could type in, not just custom answers.",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true,
+          "pane": "general"
+        },
+        {
+          "text": "While you are typing in a box, the keys that get you back out — Tab to leave, Return to finish — are shown at the end of the line.",
+          "type": "added",
+          "scope": "cli",
+          "pane": "general"
+        }
+      ]
+    },
+    {
       "version": "2.6.7",
       "platform": "macos",
       "date": "2026-08-17",

@@ -13,9 +13,13 @@ struct CaretNotePanel: View {
     @ObservedObject var model: CaretSurfaceModel
     let caption: String
     let subject: String?
+    /// The surface's own way out. With a note drafted it does not answer
+    /// `cancelled`: the note goes back to the agent as the reply.
+    var onSend: () -> Void = {}
 
     @State private var clearFocused = false
     @State private var closeFocused = false
+    @State private var sendFocused = false
     @Environment(\.caretPalette) private var palette
 
     private var key: String { model.openNote ?? "" }
@@ -29,10 +33,10 @@ struct CaretNotePanel: View {
                     .kerning(CaretStyle.monoTiny.pointSize * CaretStyle.railTracking)
                     .foregroundStyle(palette.caret)
                 Spacer(minLength: CaretStyle.u(12))
-                paneAction("Clear", enabled: !empty, focused: $clearFocused) {
+                paneAction("Clear", help: "Clear this note", enabled: !empty, focused: $clearFocused) {
                     model.noteDrafts[key] = ""
                 }
-                paneAction("Close", enabled: true, focused: $closeFocused) {
+                paneAction("Close", help: "Close (note is preserved)", enabled: true, focused: $closeFocused) {
                     model.openNote = nil
                     model.editing = false
                     model.reflow()
@@ -51,26 +55,45 @@ struct CaretNotePanel: View {
 
             CaretNoteEditor(text: model.binding(key), onFocus: { model.editing = $0 })
                 .frame(maxWidth: .infinity, alignment: .topLeading)
-                // A range, not a pin. Pinned, the editor could not give way
-                // when the question above it grew, so the surface ran out of
-                // room at the bottom and the pane was drawn straight through
-                // Cancel and Next — the two controls a person needs most when
-                // a surface has gone wrong. It scrolls, so a shorter editor
-                // costs a line of visible draft; a covered footer costs the
-                // way out.
-                .frame(minHeight: CaretStyle.u(40), maxHeight: CaretStyle.u(62))
+                // A pin, because a range is measured at its floor. The window
+                // is sized from `fittingSize`, which counts a flexible frame at
+                // its minimum: a 40–62 editor was budgeted 40, so the window
+                // came out short and the editor was crushed against Cancel.
+                // The pane itself is not pinned — its subject can run to any
+                // length, and the window grows with it.
+                .frame(height: CaretStyle.u(62))
             Rectangle()
                 .fill(palette.caret)
                 .frame(height: CaretStyle.caretWidth)
+
+            // Written a note and want no answer? This is the way out that
+            // says so — the same Cancel as the footer's, named for what it
+            // does once a note exists.
+            paneAction("Cancel & send note to agent",
+                       help: "Skip the answer; the agent gets your note instead",
+                       enabled: model.anyNote, accent: true, focused: $sendFocused, run: onSend)
+                .frame(maxWidth: .infinity, alignment: .trailing)
         }
+        // A box of its own. Set straight onto the surface, the pane read as
+        // more of the question — same ground, same type — and a person could
+        // not tell where the form stopped and their note began.
+        .padding(CaretStyle.u(12))
+        .background(
+            RoundedRectangle(cornerRadius: CaretStyle.u(4), style: .continuous)
+                .fill(palette.channel)
+                .stroke(palette.rail, lineWidth: CaretStyle.hair)
+        )
         .accessibilityLabel(Text(caption))
     }
 
-    private func paneAction(_ label: String, enabled: Bool, focused: Binding<Bool>, run: @escaping () -> Void) -> some View {
+    private func paneAction(_ label: String, help: String, enabled: Bool, accent: Bool = false,
+                            focused: Binding<Bool>, run: @escaping () -> Void) -> some View {
         Text(label)
             .font(Font(CaretStyle.monoTiny))
             .kerning(CaretStyle.monoTiny.pointSize * CaretStyle.railTracking)
-            .foregroundStyle(enabled ? (focused.wrappedValue ? palette.ink : palette.inkMuted) : palette.inkMuted.opacity(0.45))
+            .foregroundStyle(enabled
+                ? (focused.wrappedValue ? palette.ink : (accent ? palette.caret : palette.inkMuted))
+                : palette.inkMuted.opacity(0.45))
             .frame(width: CaretStyle.width(label.uppercased(), font: CaretStyle.monoTiny, tracking: CaretStyle.railTracking) + CaretStyle.u(10),
                    height: CaretStyle.u(15))
             .overlay(alignment: .bottom) {
@@ -83,7 +106,7 @@ struct CaretNotePanel: View {
                 CaretTarget(isContent: false, isEnabled: enabled, takesReturn: true, onActivate: run,
                             onFocusChange: { focused.wrappedValue = $0 })
             )
-            .help(label == "Close" ? "Close (note is preserved)" : "Clear this note")
+            .help(help)
     }
 }
 

@@ -272,8 +272,20 @@ struct CaretNoteEditor: NSViewRepresentable {
         scroll.autohidesScrollers = true
         scroll.borderType = .noBorder
 
-        let view = CaretEditorTextView()
+        // TextKit 1, on purpose. Under TextKit 2 this editor laid the note out
+        // — the caret travelled — and drew none of it: on a real screen, in
+        // the key window, the box stayed empty while every off-screen render
+        // showed the text. TextKit 1 draws in the view's own pass, which is
+        // also the path the layout probe has always measured (it reads
+        // `layoutManager`, which converts a TextKit 2 view on the spot).
+        let view = CaretEditorTextView(usingTextLayoutManager: false)
         view.delegate = context.coordinator
+        // The standard arrangement for a text view in a scroll view: as wide
+        // as the clip, as tall as its text.
+        view.isVerticallyResizable = true
+        view.isHorizontallyResizable = false
+        view.autoresizingMask = [.width]
+        view.textContainer?.widthTracksTextView = true
         view.isEditable = true
         view.isSelectable = true
         view.allowsUndo = true
@@ -304,6 +316,9 @@ struct CaretNoteEditor: NSViewRepresentable {
         view.font = CaretStyle.body
         view.textColor = NSColor(palette.ink)
         view.insertionPointColor = NSColor(palette.caret)
+        // `textColor` colours the text that is there. What is typed next takes
+        // the typing attributes, which an empty view does not reliably inherit.
+        view.typingAttributes = [.font: CaretStyle.body, .foregroundColor: NSColor(palette.ink)]
     }
 }
 

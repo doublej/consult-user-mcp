@@ -391,17 +391,20 @@ struct CaretFrame<Content: View>: View {
         CaretNotePanel(
             model: model,
             caption: noteCaption(model.openNote ?? ""),
-            subject: noteSubject(model.openNote ?? "")
+            subject: noteSubject(model.openNote ?? ""),
+            onSend: bindings.onCancel
         )
-        // Stated rather than inferred. The editor is an `NSScrollView` behind a
-        // representable, which reports no intrinsic height of its own, and a
-        // region whose height the measurement under-reads leaves the window
-        // short of its own content and clips the ways out.
-        // Stated rather than inferred: the editor is an `NSScrollView` behind
-        // a representable and reports no intrinsic height of its own.
-        .frame(height: CaretStyle.u(104))
+        // No height of its own. It was pinned to 104 so the editor would be
+        // counted, which held the caption and the editor and nothing else: a
+        // quoted subject past one line overflowed the pin, centred, so the pane
+        // drew up over the question and pushed the note itself under Cancel
+        // and out of the window. The editor now states its own ideal, so the
+        // pane is measured at what it actually draws.
         .padding(.horizontal, CaretStyle.caretRail + CaretStyle.gutter)
         .padding(.top, CaretStyle.u(16))
+        // Clear of the footer: the Cancel below reaches a point above its own
+        // row, and two ways out must not share a pixel.
+        .padding(.bottom, CaretStyle.u(10))
         .environment(\.caretInert, false)
     }
 

@@ -131,6 +131,14 @@ enum ClaudeMdInstaller {
             }
         }
 
+        // A marker line in place of the prompt: the MCP server delivers the
+        // prompt every session, so what is installed is always the bundled
+        // one. Without this the launch check read the marker as "no hints",
+        // offered to install them, and doubled the prompt in the file.
+        if content.contains("<!-- \(tagName): ") {
+            return BasePromptInfo(version: bundledVersion, content: basePromptContent() ?? "")
+        }
+
         // Fallback: check for legacy unversioned content (header-based detection)
         if content.contains("# Consult User MCP") {
             return BasePromptInfo(version: "0.0.0", content: "")

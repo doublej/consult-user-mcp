@@ -1,0 +1,25 @@
+{
+  "title": "Kitchen lamps (2/2)",
+  "body": "Same again for the kitchen, plus one leftover question about the living room spots.",
+  "mode": "wizard",
+  "questions": [
+    {
+      "id": "lr_spots_where",
+      "question": "Living room: where do the three Hue spots actually point — ceiling rail, over the couch, wall wash? And are they your main light or accent?",
+      "type": "text",
+      "options": [],
+      "multiSelect": false,
+      "hidden": false,
+      "placeholder": "e.g. ceiling track over the seating area, main ceiling light"
+    },
+    {
+      "id": "bowl",
+      "question": "Bowl (dimmable, no colour) — where is it, what does it light, how bright?",
+      "type": "text",
+      "options": [],
+      "multiSelect": false,
+      "hidden": false,
+      "placeholder": "e.g. bowl lamp on the counter, warm and soft"
+    }
+  ]
+}

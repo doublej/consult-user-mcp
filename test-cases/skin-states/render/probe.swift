@@ -110,8 +110,13 @@ func walkViews(_ view: NSView, root: NSView, depth: Int = 0, scrolled: Bool = fa
     // cannot fit is laid out at full content height and hangs outside the
     // surface; a scroller that fits sits entirely inside it. So a subtree is
     // treated as scrolled away only when its scroll view is itself outside.
+    //
+    // Except an editor. A scroll view whose document is a text view is the
+    // note editor's own box, never a list too long to fit — and when it hangs
+    // outside the surface it is the note pane shoved under the footer, the
+    // exact bug, which this test was excusing as a scrolled list.
     var inScrolledRegion = scrolled
-    if !scrolled, view is NSScrollView {
+    if !scrolled, let scroll = view as? NSScrollView, !(scroll.documentView is NSTextView) {
         inScrolledRegion = !root.bounds.insetBy(dx: -0.5, dy: -0.5).contains(frame)
     }
     let scrolledAway = scrolled

@@ -1,0 +1,19 @@
+{
+  "title": "Template update",
+  "body": "There are 29 changed files: 2 tooling, 1 mergeable, 13 seed and 13 net-new.\n\nThe biggest item is the i18n layer. It adds a new server hook, a root layout and a root page, and changes the build config and the package manifest. On top of that come a linter major version (schema migration), a test runner major version, a different deploy adapter, and a stricter directory limit.\n\nMy recommendation: defer this until the integration branch is merged. It collides with the same files.",
+  "mode": "wizard",
+  "questions": [
+    {
+      "id": "when",
+      "question": "When should the template update land, given that it touches the same files as the integration branch?",
+      "type": "choice",
+      "options": [
+        { "label": "Defer until the integration merges", "description": "Leave the template alone for now" },
+        { "label": "Tooling only", "description": "Overwrite tooling, write sidecars for the rest" },
+        { "label": "Force", "description": "Overwrite everything, including the seeds" }
+      ],
+      "multiSelect": false,
+      "allowOther": true
+    }
+  ]
+}

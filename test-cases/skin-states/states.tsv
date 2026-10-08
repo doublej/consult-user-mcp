@@ -3,6 +3,7 @@
 # Typed text avoids the letters s, f and a: the renderer holds no key window,
 # so the router cannot see that a caret is in a field and would read them as
 # the shortcuts they are everywhere else.
+# `m:<x>,<y>` clicks at a point, in points from the window's top-left.
 # Column 7 is the project path: omit for the default, `none` to shoot the
 # surface with no project identity at all.
 # Column 8 is how many images to seed into the attachment strip.
@@ -105,3 +106,6 @@ choose-images-and-pane	choose	pane-feedback	1.8	feedback	-	-	2
 text-with-images	text-input	basic	1.6	-	-	-	2
 form-with-images	questions	wizard-basic	1.8	-	-	-	2
 confirm-long-body-images	confirm	wall-of-text	1.6	-	-	-	3
+form-long-question-field	questions	long-question-field	2.0	-	-
+form-note-long-body	questions	long-body-note	4.8	-	d2.4;c:f;p30;t:wrong environment
+form-long-question-click	questions	long-question-field	3.8	-	d2.4;m:200,115;d0.4;m:200,183

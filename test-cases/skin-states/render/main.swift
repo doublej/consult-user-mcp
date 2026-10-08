@@ -158,6 +158,7 @@ var liveWindow: NSWindow?
 // deterministic rather than racing `asyncAfter` against the settle delay.
 //
 //   d<seconds>  wait · p<millis> typing pause · t:<text> type · c:<char> ⌘-chord
+//   m:<x>,<y>   click at a point, in points from the window's top-left corner
 //   space left right up down esc return tab
 
 struct KeyStep {
@@ -165,6 +166,8 @@ struct KeyStep {
     var keyCode: UInt16
     var characters: String
     var modifiers: NSEvent.ModifierFlags = []
+    /// Set for a click; the key fields are then unused.
+    var click: NSPoint?
 }
 
 let specialKeys: [String: (UInt16, String)] = [
@@ -201,6 +204,11 @@ func plan(_ script: String) -> [KeyStep] {
             let code = qwerty[Character(character.lowercased())] ?? 0
             steps.append(KeyStep(at: clock, keyCode: code, characters: String(character), modifiers: .command))
             clock += 0.05
+        } else if token.hasPrefix("m:") {
+            let point = token.dropFirst(2).split(separator: ",").compactMap { Double($0) }
+            guard point.count == 2 else { continue }
+            steps.append(KeyStep(at: clock, keyCode: 0, characters: "", click: NSPoint(x: point[0], y: point[1])))
+            clock += 0.05
         } else if let (code, characters) = specialKeys[token] {
             steps.append(KeyStep(at: clock, keyCode: code, characters: characters))
             clock += 0.05
@@ -213,6 +221,19 @@ func plan(_ script: String) -> [KeyStep] {
 
 func post(_ step: KeyStep) {
     let number = liveWindow?.windowNumber ?? 0
+    if let click = step.click {
+        // AppKit's window coordinates start bottom-left; the script's start top-left.
+        let location = NSPoint(x: click.x, y: (liveWindow?.frame.height ?? 0) - click.y)
+        for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
+            guard let event = NSEvent.mouseEvent(
+                with: type, location: location, modifierFlags: [],
+                timestamp: ProcessInfo.processInfo.systemUptime, windowNumber: number,
+                context: nil, eventNumber: 0, clickCount: 1, pressure: 1
+            ) else { continue }
+            NSApp.postEvent(event, atStart: false)
+        }
+        return
+    }
     for type in [NSEvent.EventType.keyDown, .keyUp] {
         guard let event = NSEvent.keyEvent(
             with: type, location: .zero, modifierFlags: step.modifiers,

@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "state": "form-note-long-body",
+    "rules": [
+      "overflow",
+      "escapes",
+      "panel-inset"
+    ],
+    "reason": "open note pane with a long body overflows the height cap on a 982pt screen; top-arm controls escape by ~5pt",
+    "issue": "cum-9v9",
+    "skin": "caret"
+  }
+]

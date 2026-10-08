@@ -32,6 +32,23 @@ let app = NSApplication.shared
 app.setActivationPolicy(.prohibited)
 app.finishLaunching()
 
+/// The dialog height cap is a share of the screen's visible height, so the
+/// screen decides which states clamp — and a hosted CI runner has a 1024x768
+/// one, shorter than any machine a customer owns. `RENDER_SCREEN=WxH` pins the
+/// visible frame every surface and the probe read, so the verdict stops
+/// depending on the machine that ran it. layout-audit.sh pins it.
+if let spec = ProcessInfo.processInfo.environment["RENDER_SCREEN"] {
+    let size = spec.split(separator: "x").compactMap { Double($0) }
+    guard size.count == 2,
+          let method = class_getInstanceMethod(NSScreen.self, #selector(getter: NSScreen.visibleFrame)) else {
+        FileHandle.standardError.write("RENDER_SCREEN must be WxH, got \(spec)\n".data(using: .utf8)!)
+        exit(2)
+    }
+    let pinned = NSRect(x: 0, y: 0, width: size[0], height: size[1])
+    let visibleFrame: @convention(block) (NSScreen) -> NSRect = { _ in pinned }
+    method_setImplementation(method, imp_implementationWithBlock(visibleFrame))
+}
+
 let args = CommandLine.arguments
 guard args.count >= 4 else {
     FileHandle.standardError.write("usage: render <states.tsv> <outdir> <skin> [filter]\n".data(using: .utf8)!)

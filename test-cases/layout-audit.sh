@@ -22,6 +22,11 @@
 #   SKINS    space-separated skin ids (default: caret)
 #   OUTROOT  where shots and reports land (default: skin-states/audit)
 #   KEEP     set to keep previous output instead of clearing it
+#   RENDER_SCREEN  visible frame the surfaces size against (default: 1512x873,
+#                  what the container's 1512x982 display measures — the floor
+#                  in container/README.md). The height cap comes from it, so
+#                  without a pin a 768pt CI runner clamps states no real
+#                  machine clamps.
 #
 # Nothing appears on screen and nothing takes the keyboard: the renderer parks
 # each window off-display and reads the view tree directly. A run can happen
@@ -34,6 +39,7 @@ STATES_DIR="$HERE/skin-states"
 SKINS="${SKINS:-caret}"
 OUTROOT="${OUTROOT:-$STATES_DIR/audit}"
 FILTER="${1:-}"
+export RENDER_SCREEN="${RENDER_SCREEN:-1512x873}"
 
 command -v bun >/dev/null || { echo "ERROR: bun required for the checker" >&2; exit 2; }
 

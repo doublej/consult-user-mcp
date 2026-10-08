@@ -111,7 +111,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func handleClick(_ sender: NSStatusBarButton) {
         guard let event = NSApp.currentEvent else { return }
 
-        let isOptionClick = event.modifierFlags.contains(.option)
+        // The keyboard as it is now, not the event's copy of it: from macOS 27
+        // the event a status button hands its action no longer carries Option,
+        // so an Alt-click arrived as a plain click and opened Settings.
+        let isOptionClick = NSEvent.modifierFlags.contains(.option)
 
         if isOptionClick {
             statusItem.menu = debugMenu

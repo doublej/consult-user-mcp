@@ -312,7 +312,7 @@ struct CaretQuestionsView: View {
         guard answered else { return }
         if isLast {
             spec.onComplete(form.answers, form.otherSelections, form.otherTexts,
-                            form.feedbackDrafts, model.surfaceNote)
+                            questionNotes, model.surfaceNote)
         } else {
             step += 1
             model.reflow()
@@ -324,7 +324,15 @@ struct CaretQuestionsView: View {
     }
 
     private func cancel() {
-        spec.onCancel(model.surfaceNote, form.feedbackDrafts)
+        spec.onCancel(model.surfaceNote, questionNotes)
+    }
+
+    /// The per-question notes, keyed by question id. They live in the
+    /// surface's drafts beside the form-level one (key ""), not in
+    /// `form.feedbackDrafts` — that is the default style's store, and reading
+    /// it here sent every per-question note nowhere.
+    private var questionNotes: [String: String] {
+        model.noteDrafts.filter { !$0.key.isEmpty }
     }
 
     /// Focus lands on the new step's first answer element shortly after it

@@ -93,7 +93,8 @@ struct CaretTitle: View {
                 .kerning(CaretStyle.mono.pointSize * CaretStyle.railTracking)
                 .foregroundStyle(palette.inkMuted)
                 .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: CaretStyle.proseMeasure, alignment: .leading)
+                // See `CaretBody`: the cap has to be declared as the ideal too.
+                .frame(idealWidth: CaretStyle.proseMeasure, maxWidth: CaretStyle.proseMeasure, alignment: .leading)
                 .textSelection(.enabled)
         }
     }

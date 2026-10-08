@@ -171,7 +171,15 @@ struct CaretBody: View {
             .tint(palette.caret)
             .lineSpacing(passage ? CaretStyle.u(4) : CaretStyle.u(2))
             .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: passage ? CaretStyle.proseMeasure : CaretStyle.proseMeasure * 0.86,
+            // `idealWidth` as well as `maxWidth`, or the measure is a lie.
+            // A cap alone clamps the box and leaves the ideal resolved against
+            // the Text's own unbounded single-line width: the view reports one
+            // line and draws three, and whatever is sizing the surface at that
+            // moment builds a one-line box round them. `CaretChannel` then
+            // clips, and the question the person is answering is cut to its
+            // first line the instant anything re-measures.
+            .frame(idealWidth: passage ? CaretStyle.proseMeasure : CaretStyle.proseMeasure * 0.86,
+                   maxWidth: passage ? CaretStyle.proseMeasure : CaretStyle.proseMeasure * 0.86,
                    alignment: .leading)
     }
 
@@ -219,6 +227,7 @@ struct CaretProseText: View {
         .tint(palette.caret)
         .lineSpacing(CaretStyle.u(3))
         .fixedSize(horizontal: false, vertical: true)
-        .frame(maxWidth: measure, alignment: .leading)
+        // See `CaretBody`: the cap has to be declared as the ideal too.
+        .frame(idealWidth: measure, maxWidth: measure, alignment: .leading)
     }
 }

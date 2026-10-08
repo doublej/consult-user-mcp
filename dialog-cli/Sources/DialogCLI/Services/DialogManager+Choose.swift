@@ -84,7 +84,7 @@ extension DialogManager {
                 NSApp.stopModal()
             },
             onSnooze: { minutes in
-                UserSettings.setSnooze(minutes: minutes)
+                self.applySnooze(minutes: minutes)
                 result = self.makeChoiceResponse(snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, instruction: self.snoozeInstruction(minutes: minutes))
                 NSApp.stopModal()
             },

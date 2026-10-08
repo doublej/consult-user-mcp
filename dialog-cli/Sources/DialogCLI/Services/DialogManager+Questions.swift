@@ -112,7 +112,7 @@ extension DialogManager {
         }
 
         let onSnooze: (Int) -> Void = { minutes in
-            UserSettings.setSnooze(minutes: minutes)
+            self.applySnooze(minutes: minutes)
             result = self.makeQuestionsResponse(snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, instruction: self.snoozeInstruction(minutes: minutes))
             NSApp.stopModal()
         }

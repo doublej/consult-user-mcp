@@ -153,6 +153,12 @@ struct BracketToolStrip: View {
                     )
                 }
             }
+
+            SnoozeScopeToggle(
+                font: BracketStyle.sansFont(BracketStyle.Size.context, .regular),
+                tint: BracketStyle.amber,
+                muted: BracketStyle.inkMuted
+            )
         }
         .padding(.leading, 2)
     }

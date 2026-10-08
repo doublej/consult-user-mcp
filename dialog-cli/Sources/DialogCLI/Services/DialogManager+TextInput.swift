@@ -29,7 +29,7 @@ extension DialogManager {
                 NSApp.stopModal()
             },
             onSnooze: { minutes in
-                UserSettings.setSnooze(minutes: minutes)
+                self.applySnooze(minutes: minutes)
                 result = TextInputResponse(dialogType: "textInput", answer: nil, cancelled: false, dismissed: false, comment: nil, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, askDifferently: nil, instruction: self.snoozeInstruction(minutes: minutes))
                 NSApp.stopModal()
             },

@@ -324,16 +324,24 @@ struct CaretFrame<Content: View>: View {
     /// §3.5 with §10.7 fixed: every duration is a focus stop, so arrows reach
     /// them and Space or Return chooses.
     private var snoozeTray: some View {
-        HStack(alignment: .center, spacing: CaretStyle.u(10)) {
-            Spacer(minLength: 0)
-            Text("ASK ME AGAIN IN")
-                .font(Font(CaretStyle.monoTiny))
-                .kerning(CaretStyle.monoTiny.pointSize * CaretStyle.railTracking)
-                .foregroundStyle(palette.inkMuted)
-                .fixedSize()
-            ForEach([1, 5, 15, 30, 60], id: \.self) { minutes in
-                CaretDuration(minutes: minutes) { onSnooze(minutes) }
+        VStack(alignment: .trailing, spacing: CaretStyle.u(8)) {
+            HStack(alignment: .center, spacing: CaretStyle.u(10)) {
+                Spacer(minLength: 0)
+                Text("ASK ME AGAIN IN")
+                    .font(Font(CaretStyle.monoTiny))
+                    .kerning(CaretStyle.monoTiny.pointSize * CaretStyle.railTracking)
+                    .foregroundStyle(palette.inkMuted)
+                    .fixedSize()
+                ForEach([1, 5, 15, 30, 60], id: \.self) { minutes in
+                    CaretDuration(minutes: minutes) { onSnooze(minutes) }
+                }
             }
+            SnoozeScopeToggle(
+                font: Font(CaretStyle.monoTiny),
+                tint: palette.caret,
+                muted: palette.inkMuted,
+                label: "ALSO HOLD OTHER CONSULTS"
+            )
         }
         .padding(.horizontal, inset + armInset)
         .padding(.top, CaretStyle.u(14))

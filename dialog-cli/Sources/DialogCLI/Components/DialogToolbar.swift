@@ -21,6 +21,61 @@ enum SnoozeDuration: Int, CaseIterable {
     }
 }
 
+// MARK: - Snooze Scope
+
+/// The one decision a snooze still has: whether it covers this consult only,
+/// or every agent waiting behind it.
+///
+/// Unticked — the default — snoozing answers *this* question later and leaves
+/// the shared snooze window untouched, so nothing else is silenced. Ticked, it
+/// writes the window the way a snooze always used to.
+///
+/// Every skin's snooze panel draws the same control with its own type and
+/// colour. The state lives on `DialogManager`, which is where the snooze
+/// callbacks read it; nothing else writes it, so a local mirror stays true.
+struct SnoozeScopeToggle: View {
+    var font: Font
+    var tint: Color
+    var muted: Color
+    /// Skins that set their labels in the mono rail face want the caption in
+    /// capitals; the default style wants it as written.
+    var label: String = "Also hold other consults"
+
+    @State private var on = DialogManager.shared.snoozeHoldsOthers
+
+    var body: some View {
+        Button {
+            on.toggle()
+            DialogManager.shared.snoozeHoldsOthers = on
+        } label: {
+            HStack(spacing: 7) {
+                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                    .stroke(on ? tint : muted, lineWidth: 1)
+                    .background(
+                        RoundedRectangle(cornerRadius: 3, style: .continuous)
+                            .fill(on ? tint : Color.clear)
+                    )
+                    .frame(width: 13, height: 13)
+                    .overlay {
+                        if on {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundColor(Theme.Colors.cardBackground)
+                        }
+                    }
+                Text(label)
+                    .font(font)
+                    .foregroundColor(on ? tint : muted)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(label))
+        .accessibilityValue(Text(on ? "on" : "off"))
+        .accessibilityHint(Text("When off, snoozing defers only this question."))
+    }
+}
+
 // MARK: - Dialog Toolbar
 
 struct DialogToolbar: View {
@@ -100,6 +155,12 @@ struct DialogToolbar: View {
                     }
                 }
             }
+
+            SnoozeScopeToggle(
+                font: .system(size: 11),
+                tint: Theme.Colors.accentBlue,
+                muted: Theme.Colors.textSecondary
+            )
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)

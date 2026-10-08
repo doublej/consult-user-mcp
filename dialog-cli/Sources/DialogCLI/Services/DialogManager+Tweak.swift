@@ -32,7 +32,7 @@ extension DialogManager {
         }
 
         let onSnooze: (Int) -> Void = { minutes in
-            UserSettings.setSnooze(minutes: minutes)
+            self.applySnooze(minutes: minutes)
             result = TweakResponse(dialogType: "tweak", answers: [:], action: nil, cancelled: false, dismissed: false, snoozed: true, snoozeMinutes: minutes, remainingSeconds: minutes * 60, feedbackText: nil, askDifferently: nil, instruction: self.snoozeInstruction(minutes: minutes), replayAnimations: nil)
             NSApp.stopModal()
         }

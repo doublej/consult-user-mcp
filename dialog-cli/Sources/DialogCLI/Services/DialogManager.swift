@@ -60,8 +60,24 @@ class DialogManager {
         clientName
     }
 
+    /// Whether a snooze taken here also holds every *other* consult.
+    ///
+    /// Off by default. A snooze defers the question in front of the person;
+    /// silencing every other agent as well is a second, larger decision, and
+    /// the snooze panel's checkbox is where it is made.
+    var snoozeHoldsOthers = false
+
+    /// The shared snooze window is only written when the person asked for it.
+    /// Either way the dialog answers `snoozed`, so this consult comes back.
+    func applySnooze(minutes: Int) {
+        guard snoozeHoldsOthers else { return }
+        UserSettings.setSnooze(minutes: minutes)
+    }
+
     func snoozeInstruction(minutes: Int) -> String {
-        "Set a timer for \(minutes) minute\(minutes == 1 ? "" : "s") and re-ask this question when it fires."
+        let plural = minutes == 1 ? "" : "s"
+        let held = snoozeHoldsOthers ? " Every other consult is held until then too." : ""
+        return "Set a timer for \(minutes) minute\(plural) and re-ask this question when it fires.\(held)"
     }
 
     func snoozeActiveInstruction(remaining: Int) -> String {

@@ -7,6 +7,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.9] (macOS) - 2026-10-08
+
+### Added
+- Written a note and don't want to answer? "Cancel & send note to agent" under the note skips the answer and sends the agent your note instead.
+
+### Changed
+- The note box now sits in its own panel, so it is clear where the question ends and your note begins.
+- Snoozing now defers only the question in front of you. Other agents can still ask. Tick "Also hold other consults" in the snooze options to pause all of them, as snoozing used to.
+
+### Fixed
+- Notes on individual questions in a form now reach the agent. Until now they were dropped when you finished or cancelled the form, so a note added with "Add a note for the agent" was never seen.
+- The note box no longer runs under Cancel and Next, or up over the question, when the question or the form's description is long. What you type stays in view the whole time.
+- Text you type into a note now shows up as you type it. On recent macOS versions the cursor moved but the words stayed invisible.
+- Dialogs can be dragged by their background again. Recent macOS versions stopped them from moving at all.
+- Clicking into a form's answer box no longer cuts a long question down to its first line.
+- Option-clicking the menu bar icon opens the test menu again on macOS 27, instead of opening Settings.
+
 ## [2.6.8] (macOS) - 2026-08-19
 
 ### Added
@@ -498,6 +515,17 @@ All notable changes to this project will be documented in this file.
 - Navigate through history entries with back button support
 - History rows now show hover states and navigation indicators
 
+## [1.3.2] (macOS) - 2026-01-25
+
+### Fixed
+- The History button responds to mouse clicks. Before, it only worked from the keyboard.
+- History opens at the same width as Settings.
+
+## [1.3.1] (macOS) - 2026-01-25
+
+### Fixed
+- The back button in History has a proper click area, so you can get back out of the history view.
+
 ## [1.3.0] (macOS) - 2026-01-20
 
 ### Added
@@ -510,6 +538,30 @@ All notable changes to this project will be documented in this file.
 - Snooze state now syncs properly between CLI and menu bar
 - Better error messages when Dialog CLI isn't found
 - Long-running dialogs no longer timeout unexpectedly
+
+## [1.2.4] (macOS) - 2026-01-24
+
+### Added
+- Downloading an update shows a progress bar with the percentage done.
+
+### Changed
+- The install guide shows the real Claude and OpenAI logos.
+
+## [1.2.3] (macOS) - 2026-01-24
+
+### Added
+- Settings has an Updates section showing your version, the update status and when it last checked.
+- The app checks for updates when it starts, at most every four hours, and shows a notification when a new version is out.
+
+## [1.2.2] (macOS) - 2026-01-22
+
+### Fixed
+- The menu bar app no longer drains energy in the background. It used to read its settings every second; now it only counts down while a snooze is running and otherwise waits for changes.
+
+## [1.2.1] (macOS) - 2026-01-20
+
+### Added
+- The menu bar app's footer shows the version of each part (dialogs, app and server), so a bug report can say exactly what you were running.
 
 ## [1.2.0] (macOS) - 2026-01-10
 

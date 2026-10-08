@@ -3,6 +3,74 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.9",
+      "platform": "macos",
+      "date": "2026-10-08",
+      "highlight": "Notes you write are now seen, kept and sent",
+      "changes": [
+        {
+          "text": "Notes on individual questions in a form now reach the agent. Until now they were dropped when you finished or cancelled the form, so a note added with \"Add a note for the agent\" was never seen.",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true,
+          "starred": true,
+          "pane": "form"
+        },
+        {
+          "text": "The note box no longer runs under Cancel and Next, or up over the question, when the question or the form's description is long. What you type stays in view the whole time.",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true,
+          "pane": "general"
+        },
+        {
+          "text": "Text you type into a note now shows up as you type it. On recent macOS versions the cursor moved but the words stayed invisible.",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        },
+        {
+          "text": "Written a note and don't want to answer? \"Cancel & send note to agent\" under the note skips the answer and sends the agent your note instead.",
+          "type": "added",
+          "scope": "cli",
+          "featured": true,
+          "starred": true,
+          "pane": "general"
+        },
+        {
+          "text": "The note box now sits in its own panel, so it is clear where the question ends and your note begins.",
+          "type": "changed",
+          "scope": "cli",
+          "pane": "general"
+        },
+        {
+          "text": "Snoozing now defers only the question in front of you. Other agents can still ask. Tick \"Also hold other consults\" in the snooze options to pause all of them, as snoozing used to.",
+          "type": "changed",
+          "scope": "cli",
+          "featured": true,
+          "pane": "general"
+        },
+        {
+          "text": "Dialogs can be dragged by their background again. Recent macOS versions stopped them from moving at all.",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        },
+        {
+          "text": "Clicking into a form's answer box no longer cuts a long question down to its first line.",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "form"
+        },
+        {
+          "text": "Option-clicking the menu bar icon opens the test menu again on macOS 27, instead of opening Settings.",
+          "type": "fixed",
+          "scope": "app",
+          "pane": "general"
+        }
+      ]
+    },
+    {
       "version": "2.6.8",
       "platform": "macos",
       "date": "2026-08-19",
@@ -223,7 +291,7 @@
           "text": "The light theme no longer draws dark panels over a light dialog — setting a theme the interface does not recognise leaves its own colours alone instead of replacing them",
           "type": "fixed",
           "scope": "cli",
-          "pane": "appearance"
+          "pane": "general"
         }
       ]
     },
@@ -773,7 +841,7 @@
         {
           "text": "Base prompt updated to v2.12.0 with positive framing and emphasis rebalancing",
           "type": "changed",
-          "scope": "prompt"
+          "scope": "server"
         }
       ]
     },
@@ -807,7 +875,7 @@
         {
           "text": "Base prompt updated to v2.11.0 with \"Other\" option documentation",
           "type": "changed",
-          "scope": "prompt"
+          "scope": "server"
         }
       ]
     },
@@ -916,7 +984,7 @@
         {
           "text": "Base prompt updated to v2.10.0 with mixed question type documentation and examples",
           "type": "changed",
-          "scope": "prompt"
+          "scope": "server"
         }
       ]
     },
@@ -991,7 +1059,7 @@
         {
           "text": "Base prompt updated with tweak animation replay instructions (v2.9.0)",
           "type": "changed",
-          "scope": "prompt"
+          "scope": "server"
         }
       ]
     },
@@ -1660,6 +1728,37 @@
       ]
     },
     {
+      "version": "1.3.2",
+      "platform": "macos",
+      "date": "2026-01-25",
+      "highlight": "History button fixes",
+      "changes": [
+        {
+          "text": "The History button responds to mouse clicks. Before, it only worked from the keyboard.",
+          "type": "fixed",
+          "scope": "app"
+        },
+        {
+          "text": "History opens at the same width as Settings.",
+          "type": "fixed",
+          "scope": "app"
+        }
+      ]
+    },
+    {
+      "version": "1.3.1",
+      "platform": "macos",
+      "date": "2026-01-25",
+      "highlight": "Easier way back from History",
+      "changes": [
+        {
+          "text": "The back button in History has a proper click area, so you can get back out of the history view.",
+          "type": "fixed",
+          "scope": "app"
+        }
+      ]
+    },
+    {
       "version": "1.3.0",
       "platform": "macos",
       "date": "2026-01-20",
@@ -1700,6 +1799,68 @@
         {
           "text": "Long-running dialogs no longer timeout unexpectedly",
           "type": "fixed",
+          "scope": "app"
+        }
+      ]
+    },
+    {
+      "version": "1.2.4",
+      "platform": "macos",
+      "date": "2026-01-24",
+      "highlight": "Download progress for updates",
+      "changes": [
+        {
+          "text": "Downloading an update shows a progress bar with the percentage done.",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "The install guide shows the real Claude and OpenAI logos.",
+          "type": "changed",
+          "scope": "app"
+        }
+      ]
+    },
+    {
+      "version": "1.2.3",
+      "platform": "macos",
+      "date": "2026-01-24",
+      "highlight": "Updates, checked for you",
+      "changes": [
+        {
+          "text": "Settings has an Updates section showing your version, the update status and when it last checked.",
+          "type": "added",
+          "scope": "app"
+        },
+        {
+          "text": "The app checks for updates when it starts, at most every four hours, and shows a notification when a new version is out.",
+          "type": "added",
+          "scope": "app"
+        }
+      ]
+    },
+    {
+      "version": "1.2.2",
+      "platform": "macos",
+      "date": "2026-01-22",
+      "highlight": "Much lower energy use",
+      "changes": [
+        {
+          "text": "The menu bar app no longer drains energy in the background. It used to read its settings every second; now it only counts down while a snooze is running and otherwise waits for changes.",
+          "type": "fixed",
+          "scope": "app"
+        }
+      ]
+    },
+    {
+      "version": "1.2.1",
+      "platform": "macos",
+      "date": "2026-01-20",
+      "highlight": "A version number for every part",
+      "changes": [
+        {
+          "text": "The menu bar app's footer shows the version of each part (dialogs, app and server), so a bug report can say exactly what you were running.",
+          "type": "added",
           "scope": "app"
         }
       ]

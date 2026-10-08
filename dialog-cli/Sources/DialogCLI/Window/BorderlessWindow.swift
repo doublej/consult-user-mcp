@@ -35,12 +35,56 @@ class BorderlessWindow: NSWindow {
         if !isKeyWindow { makeKey() }
     }
 
+    /// Where a press that is allowed to move the window started, in window
+    /// coordinates. Cleared the moment the drag begins or the button goes up.
+    private var dragAnchor: NSPoint?
+
+    /// The window moves itself, rather than asking AppKit to move it.
+    ///
+    /// `isMovableByWindowBackground` is set and every view under the pointer
+    /// still answers `mouseDownCanMoveWindow` with true — measured across the
+    /// whole surface — and from macOS 26 onwards AppKit no longer starts a
+    /// drag from that, so a borderless dialog could not be moved at all. The
+    /// flag is the only thing that stopped working; the policy it encoded is
+    /// intact, so it is still the policy used here. A control that refuses to
+    /// participate (`Buttons`, `ChoiceCard`, the note editor) refuses this the
+    /// same way, and a control that tracks the mouse itself drains the drag
+    /// through `nextEvent` before it ever reaches this method.
+    ///
+    /// The drag only starts once the pointer has actually travelled, so a
+    /// press and release on the same spot is still delivered as a click.
     override func sendEvent(_ event: NSEvent) {
-        if event.type == .leftMouseDown && !isKeyWindow {
-            makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
+        switch event.type {
+        case .leftMouseDown:
+            if !isKeyWindow {
+                makeKeyAndOrderFront(nil)
+                NSApp.activate(ignoringOtherApps: true)
+            }
+            dragAnchor = canMoveWindow(from: contentView?.hitTest(event.locationInWindow))
+                ? event.locationInWindow
+                : nil
+        case .leftMouseDragged:
+            if let anchor = dragAnchor,
+               hypot(event.locationInWindow.x - anchor.x, event.locationInWindow.y - anchor.y) > 3 {
+                dragAnchor = nil
+                performDrag(with: event)
+                return
+            }
+        case .leftMouseUp:
+            dragAnchor = nil
+        default:
+            break
         }
         super.sendEvent(event)
+    }
+
+    /// Text being edited is never a drag handle: the field editor is an
+    /// `NSTextView` that does not override the flag, and selecting a value by
+    /// dragging through it has to keep working.
+    private func canMoveWindow(from view: NSView?) -> Bool {
+        guard let view else { return false }
+        if view is NSTextField || view is NSTextView { return false }
+        return view.mouseDownCanMoveWindow
     }
 
     override func keyDown(with event: NSEvent) {

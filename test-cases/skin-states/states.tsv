@@ -109,3 +109,4 @@ confirm-long-body-images	confirm	wall-of-text	1.6	-	-	-	3
 form-long-question-field	questions	long-question-field	2.0	-	-
 form-note-long-body	questions	long-body-note	4.8	-	d2.4;c:f;p30;t:wrong environment
 form-long-question-click	questions	long-question-field	3.8	-	d2.4;m:200,115;d0.4;m:200,183
+form-long-question-pick	questions	long-question-pick	2.0	-	-

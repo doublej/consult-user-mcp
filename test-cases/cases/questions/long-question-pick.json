@@ -1,0 +1,26 @@
+{
+  "title": "dashboard-spec",
+  "body": "A few decisions about the dashboard.",
+  "mode": "wizard",
+  "questions": [
+    {
+      "id": "example_data",
+      "question": "Q5. Example data ('preview' / the Trial version of the dashboard): what is it for?",
+      "type": "choice",
+      "multiSelect": false,
+      "options": [
+        { "label": "A labelled tour: an 'Example PC' banner everywhere, plus a 'Connect my PC' button" },
+        { "label": "Developer-only: users never see example data; no PC means 'Waiting for PC'" },
+        { "label": "Only as a fallback when the PC can't be reached, always labelled" }
+      ]
+    },
+    {
+      "id": "next",
+      "question": "Next question?",
+      "type": "text",
+      "options": [],
+      "multiSelect": false,
+      "hidden": false
+    }
+  ]
+}

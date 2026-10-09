@@ -67,15 +67,17 @@ enum CaretProse {
             }()
             piece.font = Font(face)
             if tracking != 0 { piece.kern = face.pointSize * tracking }
+            let ink = run.link != nil ? linkColour : (run.traits.contains(.code) ? codeColour : colour)
+            piece.foregroundColor = ink
             if let url = run.link {
                 piece.link = url
-                piece.foregroundColor = linkColour
                 piece.underlineStyle = .single
-            } else if run.traits.contains(.code) {
-                piece.foregroundColor = codeColour
-            } else {
-                piece.foregroundColor = colour
+                piece.appKit.underlineStyle = .single
             }
+            // The same string set by AppKit, for `CaretSelectableText`.
+            piece.appKit.font = face
+            piece.appKit.foregroundColor = NSColor(ink)
+            if tracking != 0 { piece.appKit.kern = face.pointSize * tracking }
             out.append(piece)
         }
         return out
@@ -166,11 +168,8 @@ struct CaretBody: View {
 
     var body: some View {
         let passage = forcePassage || CaretProse.isPassage(raw)
-        Text(text(passage: passage))
-            .textSelection(.enabled)
-            .tint(palette.caret)
-            .lineSpacing(passage ? CaretStyle.u(4) : CaretStyle.u(2))
-            .fixedSize(horizontal: false, vertical: true)
+        CaretSelectableText(text: text(passage: passage),
+                            lineSpacing: passage ? CaretStyle.u(4) : CaretStyle.u(2))
             // `idealWidth` as well as `maxWidth`, or the measure is a lie.
             // A cap alone clamps the box and leaves the ideal resolved against
             // the Text's own unbounded single-line width: the view reports one
@@ -196,10 +195,60 @@ struct CaretBody: View {
     }
 }
 
-extension View {
-    @ViewBuilder
-    func caretSelectable(_ on: Bool) -> some View {
-        if on { textSelection(.enabled) } else { textSelection(.disabled) }
+/// Selectable prose, set by AppKit.
+///
+/// SwiftUI's `.textSelection` hands a clicked `Text` to a selection layer that
+/// lays the string out again on its own terms: a two-line question was re-set
+/// at one line inside the box measured for two, so clicking the question cut
+/// it in half. Here one TextKit 1 stack measures and the same typesetter draws
+/// and selects, so the box and the lines in it cannot disagree.
+struct CaretSelectableText: NSViewRepresentable {
+    let text: AttributedString
+    let lineSpacing: CGFloat
+    @Environment(\.caretPalette) private var palette
+
+    private var string: NSAttributedString {
+        let out = NSMutableAttributedString(attributedString: (try? NSAttributedString(text, including: \.appKit)) ?? NSAttributedString())
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineSpacing = lineSpacing
+        out.addAttribute(.paragraphStyle, value: paragraph, range: NSRange(location: 0, length: out.length))
+        return out
+    }
+
+    func makeNSView(context: Context) -> NSTextView {
+        let view = NSTextView(usingTextLayoutManager: false)
+        view.isEditable = false
+        view.isSelectable = true
+        view.drawsBackground = false
+        view.textContainerInset = .zero
+        view.textContainer?.lineFragmentPadding = 0
+        view.textContainer?.widthTracksTextView = true
+        return view
+    }
+
+    func updateNSView(_ view: NSTextView, context: Context) {
+        view.textStorage?.setAttributedString(string)
+        view.linkTextAttributes = [
+            .foregroundColor: NSColor(palette.caret),
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .cursor: NSCursor.pointingHand,
+        ]
+        view.selectedTextAttributes = [.backgroundColor: NSColor(palette.caret).withAlphaComponent(0.3)]
+    }
+
+    /// Measured on a scratch stack, not the view's own: sizing the view's
+    /// container for an ideal-width query would leave it drawing at that width.
+    func sizeThatFits(_ proposal: ProposedViewSize, nsView: NSTextView, context: Context) -> CGSize? {
+        let container = NSTextContainer(size: NSSize(width: proposal.width ?? .greatestFiniteMagnitude,
+                                                     height: .greatestFiniteMagnitude))
+        container.lineFragmentPadding = 0
+        let layout = NSLayoutManager()
+        layout.addTextContainer(container)
+        let storage = NSTextStorage(attributedString: string)
+        storage.addLayoutManager(layout)
+        layout.ensureLayout(for: container)
+        let used = layout.usedRect(for: container)
+        return CGSize(width: proposal.width ?? ceil(used.width), height: ceil(used.height))
     }
 }
 
@@ -215,19 +264,27 @@ struct CaretProseText: View {
     @Environment(\.caretPalette) private var palette
 
     var body: some View {
-        Text(CaretProse.attributed(
+        prose
+            // See `CaretBody`: the cap has to be declared as the ideal too.
+            .frame(idealWidth: measure, maxWidth: measure, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private var prose: some View {
+        let text = CaretProse.attributed(
             raw,
             font: font,
             emphasis: emphasis,
             colour: colour,
             codeColour: palette.caret,
             linkColour: palette.caret
-        ))
-        .caretSelectable(selectable)
-        .tint(palette.caret)
-        .lineSpacing(CaretStyle.u(3))
-        .fixedSize(horizontal: false, vertical: true)
-        // See `CaretBody`: the cap has to be declared as the ideal too.
-        .frame(idealWidth: measure, maxWidth: measure, alignment: .leading)
+        )
+        if selectable {
+            CaretSelectableText(text: text, lineSpacing: CaretStyle.u(3))
+        } else {
+            Text(text)
+                .lineSpacing(CaretStyle.u(3))
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }

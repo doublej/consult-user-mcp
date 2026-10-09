@@ -32,7 +32,8 @@ enum KeyboardContext {
         guard let window = editingWindow else { return false }
         var current: NSResponder? = window.firstResponder
         while let responder = current {
-            if responder is NSTextView { return true }
+            // Editable only: a clicked read-only prose view must not mute the hotkeys.
+            if let tv = responder as? NSTextView, tv.isEditable { return true }
             if let tf = responder as? NSTextField, tf.isEditable { return true }
             if responder is FocusableTextFieldView { return true }
             current = responder.nextResponder

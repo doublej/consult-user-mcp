@@ -3,6 +3,28 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.10",
+      "platform": "macos",
+      "date": "2026-10-14",
+      "highlight": "Leave a field empty to take the default",
+      "changes": [
+        {
+          "text": "When an agent says \"leave empty for the default\", you can now do exactly that. Press Enter on an empty text field in a form and it answers with the default shown in the field, instead of refusing to continue.",
+          "type": "fixed",
+          "scope": "cli",
+          "featured": true,
+          "starred": true,
+          "pane": "form"
+        },
+        {
+          "text": "A long question no longer squeezes onto one line when you click it to select its text. It keeps its full height, and you can still select and copy it.",
+          "type": "fixed",
+          "scope": "cli",
+          "pane": "general"
+        }
+      ]
+    },
+    {
       "version": "2.6.9",
       "platform": "macos",
       "date": "2026-10-08",

@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.10] (macOS) - 2026-10-14
+
+### Fixed
+- When an agent says "leave empty for the default", you can now do exactly that. Press Enter on an empty text field in a form and it answers with the default shown in the field, instead of refusing to continue.
+- A long question no longer squeezes onto one line when you click it to select its text. It keeps its full height, and you can still select and copy it.
+
 ## [2.6.9] (macOS) - 2026-10-08
 
 ### Added

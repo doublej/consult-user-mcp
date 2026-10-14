@@ -3,6 +3,20 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.12",
+      "platform": "macos",
+      "date": "2026-10-14",
+      "highlight": "An app icon that fits in",
+      "changes": [
+        {
+          "text": "The app icon is now the same size and shape as every other Mac app in the Dock and Finder, instead of looking oversized next to them.",
+          "type": "fixed",
+          "scope": "app",
+          "featured": true
+        }
+      ]
+    },
+    {
       "version": "2.6.11",
       "platform": "macos",
       "date": "2026-10-14",

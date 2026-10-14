@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.12] (macOS) - 2026-10-14
+
+### Fixed
+- The app icon is now the same size and shape as every other Mac app in the Dock and Finder, instead of looking oversized next to them.
+
 ## [2.6.11] (macOS) - 2026-10-14
 
 ### Fixed

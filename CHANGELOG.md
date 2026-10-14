@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.6.11] (macOS) - 2026-10-14
+
+### Fixed
+- An empty grey "Consult User MCP Settings" window no longer appears when the app starts, or when you press ⌘, with Settings open. ⌘, now always brings up the real Settings window.
+
 ## [2.6.10] (macOS) - 2026-10-14
 
 ### Fixed

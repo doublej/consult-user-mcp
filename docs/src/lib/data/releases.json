@@ -3,6 +3,21 @@
   "_comment": "Single source of truth for app releases. Write changes as user-facing features/benefits, not commit messages. Never include docs-only changes.",
   "releases": [
     {
+      "version": "2.6.11",
+      "platform": "macos",
+      "date": "2026-10-14",
+      "highlight": "No more empty Settings window",
+      "changes": [
+        {
+          "text": "An empty grey \"Consult User MCP Settings\" window no longer appears when the app starts, or when you press ⌘, with Settings open. ⌘, now always brings up the real Settings window.",
+          "type": "fixed",
+          "scope": "app",
+          "featured": true,
+          "pane": "general"
+        }
+      ]
+    },
+    {
       "version": "2.6.10",
       "platform": "macos",
       "date": "2026-10-14",

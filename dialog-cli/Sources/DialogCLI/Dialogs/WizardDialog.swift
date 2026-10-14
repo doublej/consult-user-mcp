@@ -177,7 +177,7 @@ struct SwiftUIWizardDialog: View {
     private var isLast: Bool { currentIndex == questions.count - 1 }
 
     private var currentHasValidAnswer: Bool {
-        formState.isAnswered(currentQuestion.id)
+        formState.isAnswered(currentQuestion)
     }
 
     private func globalDraft() -> String? {

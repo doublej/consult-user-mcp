@@ -56,6 +56,15 @@ extension DialogManager {
             var completedCount = 0
 
             for question in request.questions {
+                // An empty text question takes its placeholder: that is where agents put the default.
+                if question.type == .text {
+                    var typed = ""
+                    if case .text(let str) = answers[question.id] { typed = str }
+                    responseAnswers[question.id] = .single(typed.isEmpty ? (question.placeholder ?? "") : typed)
+                    completedCount += 1
+                    continue
+                }
+
                 let otherText = otherTexts[question.id] ?? ""
                 let otherSelected = otherSelections[question.id] ?? false
                 let hasValidOther = otherSelected && !otherText.isEmpty

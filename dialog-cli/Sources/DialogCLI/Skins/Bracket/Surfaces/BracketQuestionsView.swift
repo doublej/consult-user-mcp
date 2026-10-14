@@ -228,7 +228,7 @@ struct BracketQuestionsView: View {
     private func isValid(_ item: QuestionItem) -> Bool {
         switch item.type {
         case .text:
-            return !(texts[item.id] ?? "").isEmpty
+            return true  // left empty, it submits its placeholder
         case .choice:
             let picked = !(choices[item.id] ?? []).isEmpty
             let other = (otherSelected[item.id] ?? false) && !(otherTexts[item.id] ?? "").isEmpty

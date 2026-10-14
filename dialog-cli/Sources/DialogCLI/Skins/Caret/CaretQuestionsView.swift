@@ -62,7 +62,7 @@ struct CaretQuestionsView: View {
     private var total: Int { max(1, spec.questions.count) }
     private var question: QuestionItem { spec.questions[min(step, spec.questions.count - 1)] }
     private var isLast: Bool { step == spec.questions.count - 1 }
-    private var answered: Bool { form.isAnswered(question.id) }
+    private var answered: Bool { form.isAnswered(question) }
 
     var body: some View {
         CaretFrame(

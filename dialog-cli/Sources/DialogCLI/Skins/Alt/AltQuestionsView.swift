@@ -10,7 +10,7 @@ struct AltQuestionsView: View {
     private var currentQuestion: QuestionItem { spec.questions[currentIndex] }
     private var isFirst: Bool { currentIndex == 0 }
     private var isLast: Bool { currentIndex == spec.questions.count - 1 }
-    private var canAdvance: Bool { formState.isAnswered(currentQuestion.id) }
+    private var canAdvance: Bool { formState.isAnswered(currentQuestion) }
 
     var body: some View {
         DialogContainer(

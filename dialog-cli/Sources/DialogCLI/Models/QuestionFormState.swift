@@ -51,11 +51,12 @@ final class QuestionFormState: ObservableObject {
         )
     }
 
-    func isAnswered(_ questionId: String) -> Bool {
-        QuestionAnswer.isAnswered(
-            answer: answers[questionId],
-            otherSelected: otherSelections[questionId] ?? false,
-            otherText: otherTexts[questionId] ?? ""
+    /// A text question is always answerable: left empty, it submits its placeholder.
+    func isAnswered(_ question: QuestionItem) -> Bool {
+        question.type == .text || QuestionAnswer.isAnswered(
+            answer: answers[question.id],
+            otherSelected: otherSelections[question.id] ?? false,
+            otherText: otherTexts[question.id] ?? ""
         )
     }
 }

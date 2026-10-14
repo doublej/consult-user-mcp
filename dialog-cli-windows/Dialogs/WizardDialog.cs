@@ -569,11 +569,10 @@ public class WizardDialog : DialogBase
         {
             if (q.Type == QuestionType.Text)
             {
-                if (_textAnswers.TryGetValue(q.Id, out var text) && !string.IsNullOrEmpty(text))
-                {
-                    completed++;
-                    response.Answers[q.Id] = new StringOrStrings(text);
-                }
+                // An empty text question takes its placeholder: that is where agents put the default.
+                var text = _textAnswers.GetValueOrDefault(q.Id, "");
+                completed++;
+                response.Answers[q.Id] = new StringOrStrings(string.IsNullOrEmpty(text) ? q.Placeholder ?? "" : text);
             }
             else
             {

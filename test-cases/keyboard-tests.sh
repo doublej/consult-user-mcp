@@ -261,6 +261,17 @@ resp="$(run_dialog confirm "$CASES/confirm/basic.json" \
 assert "classic: expired dialog returns no answer" "$resp" \
     '(.confirmed // false) == false and (.answer // null) == null'
 
+# ── 11. An empty text question submits its placeholder ─────────────────
+# Agents offer "leave empty for the default" and put the default in the
+# placeholder. Every skin used to refuse Return on an empty form field.
+echo "== empty text question takes the placeholder =="
+for skin in caret alt bracket classic; do
+    resp="$(run_dialog questions "$CASES/questions/wizard-single-text.json" \
+        "d2.6;return" DIALOG_SKIN="$skin")"
+    assert "$skin: empty text question submits its placeholder" "$resp" \
+        '.answer.note == "Type here..."'
+done
+
 echo ""
 echo "==> $PASS passed, $FAIL failed"
 if [ "$FAIL" -gt 0 ]; then

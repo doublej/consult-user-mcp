@@ -134,7 +134,7 @@ const questionSchema = z.object({
   other: z.boolean().default(true)
     .describe("Include an 'Other' option so the user can type a custom answer (returned as the answer value, never the literal 'Other'). Set false only for closed-ended lists."),
   placeholder: z.string().max(200).optional()
-    .describe("Placeholder text for text questions."),
+    .describe("Placeholder text for text questions. A field left empty submits the placeholder as its answer, so put the default here."),
   hidden: z.boolean().default(false)
     .describe("Mask input like a password field (text only)."),
 }).superRefine((data, ctx) => {

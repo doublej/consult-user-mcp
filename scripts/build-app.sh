@@ -59,13 +59,13 @@ echo "  Installing node dependencies..."
 cd "$APP_PATH/Contents/Resources/mcp-server"
 bun install --production
 
-# 8. Generate AppIcon.icns from appiconset PNGs if missing
+# 8. Generate AppIcon.icns from appiconset PNGs if missing or older than them
 ICNS_PATH="$ROOT/macos-app/Sources/Resources/AppIcon.icns"
-if [ ! -f "$ICNS_PATH" ]; then
+APPICONSET="$ROOT/macos-app/Sources/Resources/Assets.xcassets/AppIcon.appiconset"
+if [ ! -f "$ICNS_PATH" ] || [ -n "$(find "$APPICONSET" -newer "$ICNS_PATH")" ]; then
     echo "  Generating AppIcon.icns..."
     ICONSET_DIR=$(mktemp -d)/AppIcon.iconset
     mkdir -p "$ICONSET_DIR"
-    APPICONSET="$ROOT/macos-app/Sources/Resources/Assets.xcassets/AppIcon.appiconset"
     cp "$APPICONSET/icon_16x16.png" "$ICONSET_DIR/icon_16x16.png"
     cp "$APPICONSET/icon_32x32.png" "$ICONSET_DIR/icon_16x16@2x.png"
     cp "$APPICONSET/icon_32x32.png" "$ICONSET_DIR/icon_32x32.png"
